@@ -11,8 +11,8 @@ int main() {
 		for (int y = 0; y <= 255; y++) {
 			int index = test.GetIndex(x, y);
 
-			test.SetData(index + 0, (uint8_t)x);
-			test.SetData(index + 1, (uint8_t)y);
+			test.SetData(index + 0, (float)x);
+			test.SetData(index + 1, (float)y);
 		}
 	}
 

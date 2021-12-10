@@ -28,7 +28,21 @@ public:
 	Vector3D& operator-(const Vector3D& copyVector);
 	Vector3D& operator-=(const Vector3D& copyVector);
 
+	// Length
+	float Magnitude();
+	float SqrMagnitude();
+
+	// Other
+	const float DotProduct(const Vector3D& copyVector);
+	void CrossProduct(const Vector3D& copyVector);
+	void UnitVector();
+
 	~Vector3D();
+
+public: // getters
+	float GetX() { return m_x; };
+	float GetY() { return m_y; };
+	float GetZ() { return m_z; };
 
 private:
 	float m_x;

@@ -1,4 +1,7 @@
+#include <cmath>
+
 #include "Vector3D.h"
+
 Vector3D::Vector3D() {
 	m_x = 0.0f;
 	m_y = 0.0f;
@@ -143,6 +146,36 @@ Vector3D& Vector3D::operator-=(const Vector3D& copyVector) {
 
 	return *this;
 }
+/// <summary>
+/// Magnitude of vector
+/// </summary>
+/// <returns></returns>
+float Vector3D::Magnitude() {
+	return sqrt(SqrMagnitude());
+}
+
+/// <summary>
+/// Get (length of vector) squared
+/// </summary>
+/// <returns></returns>
+float Vector3D::SqrMagnitude() {
+	return m_x * m_x + m_y * m_y + m_z * m_z;
+}
+
+const float Vector3D::DotProduct(const Vector3D& copyVector) {
+	return m_x * copyVector.m_x + m_y * copyVector.m_y + m_z * copyVector.m_z;
+}
+
+void Vector3D::CrossProduct(const Vector3D& copyVector) {
+	m_x = m_y * copyVector.m_z - m_z * copyVector.m_y;
+	m_y = m_z * copyVector.m_x - m_x * copyVector.m_z;
+	m_z = m_x * copyVector.m_y - m_y * copyVector.m_x;
+}
+
+void Vector3D::UnitVector() {
+	*this /= Magnitude();
+}
+
 
 Vector3D::~Vector3D() {
 }
