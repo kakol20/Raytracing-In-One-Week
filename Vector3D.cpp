@@ -40,7 +40,7 @@ Vector3D& Vector3D::operator=(const Vector3D& copyVector) {
 /// </summary>
 /// <param name="copyVector3d"></param>
 /// <returns></returns>
-Vector3D& Vector3D::operator/(const Vector3D& copyVector) {
+const Vector3D& Vector3D::operator/(const Vector3D& copyVector) const {
 	return Vector3D(*this) /= copyVector;
 }
 
@@ -62,7 +62,7 @@ Vector3D& Vector3D::operator/=(const Vector3D& copyVector) {
 /// </summary>
 /// <param name="scalar"></param>
 /// <returns></returns>
-Vector3D& Vector3D::operator/(const float scalar) {
+const Vector3D& Vector3D::operator/(const float scalar) const {
 	return Vector3D(*this) /= scalar;
 }
 
@@ -84,7 +84,7 @@ Vector3D& Vector3D::operator/=(const float scalar) {
 /// </summary>
 /// <param name="copyVector3d"></param>
 /// <returns></returns>
-Vector3D& Vector3D::operator*(const Vector3D& copyVector) {
+const Vector3D& Vector3D::operator*(const Vector3D& copyVector) const {
 	return Vector3D(*this) *= copyVector;
 }
 
@@ -106,7 +106,7 @@ Vector3D& Vector3D::operator*=(const Vector3D& copyVector) {
 /// </summary>
 /// <param name="scalar"></param>
 /// <returns></returns>
-Vector3D& Vector3D::operator*(const float scalar) {
+const Vector3D& Vector3D::operator*(const float scalar) const {
 	return Vector3D(*this) *= scalar;
 }
 
@@ -123,7 +123,7 @@ Vector3D& Vector3D::operator*=(const float scalar) {
 	return *this;
 }
 
-Vector3D& Vector3D::operator+(const Vector3D& copyVector) {
+const Vector3D& Vector3D::operator+(const Vector3D& copyVector) const {
 	return Vector3D(*this) += copyVector;
 }
 
@@ -135,7 +135,7 @@ Vector3D& Vector3D::operator+=(const Vector3D& copyVector) {
 	return *this;
 }
 
-Vector3D& Vector3D::operator-(const Vector3D& copyVector) {
+const Vector3D& Vector3D::operator-(const Vector3D& copyVector) const {
 	return Vector3D(*this) -= copyVector;
 }
 

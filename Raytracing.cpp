@@ -22,7 +22,11 @@ bool Raytracing::Run() {
 	Vector3D origin(0.0f, 0.0f, 0.0f);
 	Vector3D horizontal(viewport_width, 0.0f, 0.0f);
 	Vector3D vertical(0.0f, viewport_height, 0.0f);
-	Vector3D lowerLeftCorner = origin - (horizontal / 2.0f) - (vertical / 2.0f) - Vector3D(0.0f, 0.0f, focal_length);
+
+	Vector3D lowerLeftCorner = origin;
+	lowerLeftCorner -= (horizontal / 2.0f);
+	lowerLeftCorner -= (vertical / 2.0f);
+	lowerLeftCorner -= Vector3D(0.0f, 0.0f, focal_length);
 
 	// Render
 	for (int x = 0; x < image_width; x++) {
@@ -41,7 +45,18 @@ bool Raytracing::Run() {
 			float u = (float)x / (float)(image_width - 1);
 			float v = (float)y / (float)(image_height - 1);
 
-			Ray ray(origin, lowerLeftCorner + (horizontal * u) + (vertical * v) - origin);
+			Vector3D dir = lowerLeftCorner;
+			Vector3D hU = horizontal;
+			hU *= u;
+			dir += hU;
+
+			Vector3D vV = vertical;
+			vV *= v;
+			dir += vV;
+
+			dir -= origin;
+
+			Ray ray(origin, dir);
 			Vector3D pixel_color = RayColor(ray);
 
 			int index = image.GetIndex(x, flippedY);
@@ -66,5 +81,14 @@ const Vector3D Raytracing::RayColor(Ray& ray) {
 	unit_direction.UnitVector();
 
 	float t = 0.5f * (unit_direction.GetY() + 1.0f);
-	return ((Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t)) + (Vector3D(0.5f, 0.7f, 1.0f) * t)) * 255.0f;
+
+	Vector3D out1(1.0f, 1.0f, 1.0f);
+	out1 *= (1.0f - t);
+
+	Vector3D out2(0.5f, 0.7f, 1.0f);
+	out2 *= t;
+	
+	out1 += out2;
+	out1 *= 255.0f;
+	return out1;
 }

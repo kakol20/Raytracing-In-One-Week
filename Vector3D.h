@@ -9,23 +9,23 @@ public:
 	Vector3D& operator=(const Vector3D& copyVector);
 
 	// Division
-	Vector3D& operator/(const Vector3D& copyVector);
+	const Vector3D& operator/(const Vector3D& copyVector) const;
 	Vector3D& operator/=(const Vector3D& copyVector);
-	Vector3D& operator/(const float scalar);
+	const Vector3D& operator/(const float scalar) const;
 	Vector3D& operator/=(const float scalar);
 
 	// Multiplication
-	Vector3D& operator*(const Vector3D& copyVector);
+	const Vector3D& operator*(const Vector3D& copyVector) const;
 	Vector3D& operator*=(const Vector3D& copyVector);
-	Vector3D& operator*(const float scalar);
+	const Vector3D& operator*(const float scalar) const;
 	Vector3D& operator*=(const float scalar);
 
 	// Addition
-	Vector3D& operator+(const Vector3D& copyVector);
+	const Vector3D& operator+(const Vector3D& copyVector) const;
 	Vector3D& operator+=(const Vector3D& copyVector);
 
 	// Subtraction
-	Vector3D& operator-(const Vector3D& copyVector);
+	const Vector3D& operator-(const Vector3D& copyVector) const;
 	Vector3D& operator-=(const Vector3D& copyVector);
 
 	// Length
