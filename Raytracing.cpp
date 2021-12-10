@@ -9,7 +9,7 @@ Raytracing::Raytracing() {
 bool Raytracing::Run() {
 	// Image
 	const float aspect_ratio = 16.0f / 9.0f;
-	const int image_width = 400;
+	const int image_width = 1280;
 	const int image_height = (int)(image_width / aspect_ratio);
 
 	Image image(image_width, image_height, 3);
@@ -67,7 +67,7 @@ bool Raytracing::Run() {
 		}
 	}
 	
-	OrderedDithering(image, DitherFilter::FULLCOLOR, Threshold::BLUENOISE_16, 255);
+	OrderedDithering(image, DitherFilter::FULLCOLOR, Threshold::ORDERED_8, 255);
 	image.Write("images/render.png");
 
 	return true;
