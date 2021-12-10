@@ -29,8 +29,8 @@ public:
 	Vector3D& operator-=(const Vector3D& copyVector);
 
 	// Length
-	float Magnitude();
-	float SqrMagnitude();
+	const float Magnitude();
+	const float SqrMagnitude();
 
 	// Other
 	const float DotProduct(const Vector3D& copyVector);
@@ -40,9 +40,9 @@ public:
 	~Vector3D();
 
 public: // getters
-	float GetX() { return m_x; };
-	float GetY() { return m_y; };
-	float GetZ() { return m_z; };
+	const float GetX() { return m_x; };
+	const float GetY() { return m_y; };
+	const float GetZ() { return m_z; };
 
 private:
 	float m_x;

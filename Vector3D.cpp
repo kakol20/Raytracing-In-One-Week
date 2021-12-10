@@ -150,14 +150,15 @@ Vector3D& Vector3D::operator-=(const Vector3D& copyVector) {
 /// Magnitude of vector
 /// </summary>
 /// <returns></returns>
-float Vector3D::Magnitude() {
+const float Vector3D::Magnitude() {
 	return sqrt(SqrMagnitude());
 }
 
 /// <summary>
-/// Get (length of vector) squared
+/// Get length of vector squared
 /// </summary>
 /// <returns></returns>
+const 
 float Vector3D::SqrMagnitude() {
 	return m_x * m_x + m_y * m_y + m_z * m_z;
 }
