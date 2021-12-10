@@ -25,7 +25,7 @@ Image::Image(int w, int h, int channels) {
 	m_h = h;
 	m_channels = channels;
 
-	m_size = m_w * m_h * m_channels;
+	m_size = ((size_t)m_w * m_h * m_channels);
 	m_data = new uint8_t[m_size];
 	m_dataF = new float[m_size];
 
@@ -43,7 +43,7 @@ Image::Image(const Image& copyImage) {
 	m_h = copyImage.m_h;
 	m_channels = copyImage.m_channels;
 
-	m_size = m_w * m_h * m_channels;
+	m_size = ((size_t)m_w * m_h * m_channels);
 	m_data = new uint8_t[m_size];
 	m_dataF = new float[m_size];
 
@@ -60,7 +60,7 @@ Image Image::operator=(const Image& copyImage) {
 	m_h = copyImage.m_h;
 	m_channels = copyImage.m_channels;
 
-	m_size = m_w * m_h * m_channels;
+	m_size = ((size_t)m_w * m_h * m_channels);
 	m_data = new uint8_t[m_size];
 	m_dataF = new float[m_size];
 
@@ -78,7 +78,7 @@ Image Image::operator=(const Image& copyImage) {
 bool Image::Read(const char* fileName) {
 	m_data = stbi_load(fileName, &m_w, &m_h, &m_channels, 0);
 
-	m_size = m_w * m_h * m_channels;
+	m_size = ((size_t)m_w * m_h * m_channels);
 
 	m_dataF = new float[m_size];
 
@@ -103,7 +103,7 @@ bool Image::Write(const char* fileName) {
 		m_dataF[i] = m_dataF[i] > 255.0f ? 255.0f : m_dataF[i];
 		m_dataF[i] = m_dataF[i] < 0.0f ? 0.0f : m_dataF[i];
 
-		m_data[i] = (uint8_t)round(m_dataF[i]);
+		m_data[i] = (uint8_t)roundf(m_dataF[i]);
 	}
 
 	switch (type) {
@@ -187,7 +187,7 @@ void Image::BackgroundColor(const float r, float g = 0.0f, float b = 0.0f, float
 	}
 	else {
 		for (size_t i = 0; i < m_size; i++) {
-			SetData(i, r);
+			SetData((int)i, r);
 		}
 	}
 }

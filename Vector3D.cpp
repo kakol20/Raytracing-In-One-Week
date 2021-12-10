@@ -174,7 +174,10 @@ void Vector3D::CrossProduct(const Vector3D& copyVector) {
 }
 
 void Vector3D::UnitVector() {
-	*this /= Magnitude();
+	float mag = Magnitude();
+	m_x /= mag;
+	m_y /= mag;
+	m_z /= mag;
 }
 
 
