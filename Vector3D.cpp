@@ -40,8 +40,10 @@ Vector3D& Vector3D::operator=(const Vector3D& copyVector) {
 /// </summary>
 /// <param name="copyVector3d"></param>
 /// <returns></returns>
-const Vector3D& Vector3D::operator/(const Vector3D& copyVector) const {
-	return Vector3D(*this) /= copyVector;
+const Vector3D Vector3D::operator/(const Vector3D& copyVector) const {
+	Vector3D temp(*this);
+	temp /= copyVector;
+	return temp;
 }
 
 /// <summary>
@@ -62,8 +64,10 @@ Vector3D& Vector3D::operator/=(const Vector3D& copyVector) {
 /// </summary>
 /// <param name="scalar"></param>
 /// <returns></returns>
-const Vector3D& Vector3D::operator/(const float scalar) const {
-	return Vector3D(*this) /= scalar;
+const Vector3D Vector3D::operator/(const float scalar) const {
+	Vector3D temp(*this);
+	temp /= scalar;
+	return temp;
 }
 
 /// <summary>
@@ -84,8 +88,10 @@ Vector3D& Vector3D::operator/=(const float scalar) {
 /// </summary>
 /// <param name="copyVector3d"></param>
 /// <returns></returns>
-const Vector3D& Vector3D::operator*(const Vector3D& copyVector) const {
-	return Vector3D(*this) *= copyVector;
+const Vector3D Vector3D::operator*(const Vector3D& copyVector) const {
+	Vector3D temp(*this);
+	temp *= copyVector;
+	return temp;
 }
 
 /// <summary>
@@ -106,8 +112,10 @@ Vector3D& Vector3D::operator*=(const Vector3D& copyVector) {
 /// </summary>
 /// <param name="scalar"></param>
 /// <returns></returns>
-const Vector3D& Vector3D::operator*(const float scalar) const {
-	return Vector3D(*this) *= scalar;
+const Vector3D Vector3D::operator*(const float scalar) const {
+	Vector3D temp(*this);
+	temp *= scalar;
+	return temp;
 }
 
 /// <summary>
@@ -123,8 +131,10 @@ Vector3D& Vector3D::operator*=(const float scalar) {
 	return *this;
 }
 
-const Vector3D& Vector3D::operator+(const Vector3D& copyVector) const {
-	return Vector3D(*this) += copyVector;
+const Vector3D Vector3D::operator+(const Vector3D& copyVector) const {
+	Vector3D temp(*this);
+	temp += copyVector;
+	return temp;
 }
 
 Vector3D& Vector3D::operator+=(const Vector3D& copyVector) {
@@ -135,8 +145,10 @@ Vector3D& Vector3D::operator+=(const Vector3D& copyVector) {
 	return *this;
 }
 
-const Vector3D& Vector3D::operator-(const Vector3D& copyVector) const {
-	return Vector3D(*this) -= copyVector;
+const Vector3D Vector3D::operator-(const Vector3D& copyVector) const {
+	Vector3D temp(*this);
+	temp -= copyVector;
+	return temp;
 }
 
 Vector3D& Vector3D::operator-=(const Vector3D& copyVector) {
@@ -158,7 +170,7 @@ const float Vector3D::Magnitude() {
 /// Get length of vector squared
 /// </summary>
 /// <returns></returns>
-const 
+const
 float Vector3D::SqrMagnitude() {
 	return m_x * m_x + m_y * m_y + m_z * m_z;
 }
@@ -179,7 +191,6 @@ void Vector3D::UnitVector() {
 	m_y /= mag;
 	m_z /= mag;
 }
-
 
 Vector3D::~Vector3D() {
 }

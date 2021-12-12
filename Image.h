@@ -6,14 +6,11 @@
 #include <string.h>
 #include <iostream>
 
-enum class ImageType
-{
+enum class ImageType {
 	PNG, JPG, BMP, TGA
 };
 
-
-class Image
-{
+class Image {
 public:
 	Image(const char* fileName);
 	Image(int w, int h, int channels);

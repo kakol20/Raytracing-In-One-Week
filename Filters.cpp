@@ -30,22 +30,18 @@ const unsigned int BlueNoise16[] = {
 	252, 167, 212,  68, 107, 135,  59,  44, 153,   6,  63, 143, 163,  46, 133, 183,
 };
 
-float ClampF(float val, float low, float high)
-{
+float ClampF(float val, float low, float high) {
 	if (val > high) return high;
 	if (val < low) return low;
 	return val;
 }
 
-void Grayscale(Image & image)
-{
+void Grayscale(Image& image) {
 	int w = image.GetWidth();
 	int h = image.GetHeight();
 
-	for (int x = 0; x < w; x++)
-	{
-		for (int y = 0; y < h; y++)
-		{
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
 			int index = image.GetIndex(x, y);
 
 			/*uint8_t r = image->GetData(index + 0);
@@ -65,13 +61,11 @@ void Grayscale(Image & image)
 	}
 }
 
-void OrderedDithering(Image & image, DitherFilter filter, Threshold thresholdMap, int factor)
-{
+void OrderedDithering(Image& image, DitherFilter filter, Threshold thresholdMap, int factor) {
 	int w = image.GetWidth();
 	int h = image.GetHeight();
 
-	for (int x = 0; x < w; x++)
-	{
+	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
 			int index = image.GetIndex(x, y);
 			int channels = image.GetChannels();
@@ -80,8 +74,7 @@ void OrderedDithering(Image & image, DitherFilter filter, Threshold thresholdMap
 
 			float threshold = 0;
 
-			switch (thresholdMap)
-			{
+			switch (thresholdMap) {
 			case Threshold::ORDERED_8:
 				thresholdIndex = (x % 8) + (y % 8) * 8;
 				threshold = (float)Threshold8[thresholdIndex] / 64.0f;
@@ -97,18 +90,16 @@ void OrderedDithering(Image & image, DitherFilter filter, Threshold thresholdMap
 
 			float octet = 1.0f / (float)factor;
 
-			if (channels >= 3)
-			{
+			if (channels >= 3) {
 				// convert 0-255 to 0-1
 				float r = image.GetDataF(index + 0) / 255.0f;
 				float g = image.GetDataF(index + 1) / 255.0f;
-				float b = image.GetDataF(index + 2) / 255.0f;				
+				float b = image.GetDataF(index + 2) / 255.0f;
 
 				//uint8_t convertedGray;
 				float gray;
 
-				switch (filter)
-				{
+				switch (filter) {
 				case DitherFilter::GRAYSCALE:
 					gray = (r * 0.299f) + (g * 0.587f) + (b * 0.114f);
 					gray = gray + octet * (threshold - 0.5f);
@@ -145,14 +136,11 @@ void OrderedDithering(Image & image, DitherFilter filter, Threshold thresholdMap
 					break;
 				}
 			}
-			else
-			{
-				if (filter == DitherFilter::GRAYSCALE)
-				{
+			else {
+				if (filter == DitherFilter::GRAYSCALE) {
 					float total = 0;
 
-					for (int i = 0; i < channels; i++)
-					{
+					for (int i = 0; i < channels; i++) {
 						total += image.GetDataF(index + i);
 					}
 
@@ -166,15 +154,12 @@ void OrderedDithering(Image & image, DitherFilter filter, Threshold thresholdMap
 
 					total = ClampF(total, 0.0f, 1.0f);
 
-					for (int i = 0; i < channels; i++)
-					{
+					for (int i = 0; i < channels; i++) {
 						image.SetData(index + i, total * 255.0f);
 					}
 				}
-				else if (filter == DitherFilter::FULLCOLOR)
-				{
-					for (int i = 0; i < channels; i++)
-					{
+				else if (filter == DitherFilter::FULLCOLOR) {
+					for (int i = 0; i < channels; i++) {
 						float c = image.GetDataF(index + i) / 255.0f;
 
 						c = c * octet * (threshold - 0.5f);

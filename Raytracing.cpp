@@ -66,7 +66,7 @@ bool Raytracing::Run() {
 			image.SetData(index + 2, pixel_color.GetZ());
 		}
 	}
-	
+
 	OrderedDithering(image, DitherFilter::FULLCOLOR, Threshold::ORDERED_8, 255);
 	image.Write("images/render.png");
 
@@ -82,13 +82,5 @@ const Vector3D Raytracing::RayColor(Ray& ray) {
 
 	float t = 0.5f * (unit_direction.GetY() + 1.0f);
 
-	Vector3D out1(1.0f, 1.0f, 1.0f);
-	out1 *= (1.0f - t);
-
-	Vector3D out2(0.5f, 0.7f, 1.0f);
-	out2 *= t;
-	
-	out1 += out2;
-	out1 *= 255.0f;
-	return out1;
+	return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t) * 255.0f;
 }

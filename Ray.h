@@ -19,4 +19,3 @@ private:
 	Vector3D m_orig;
 	Vector3D m_dir;
 };
-
