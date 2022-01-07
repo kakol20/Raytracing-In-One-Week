@@ -12,8 +12,8 @@ public:
 	~Ray();
 
 public: // getters
-	const Vector3D GetDirection() { return m_dir; }
-	const Vector3D GetOrigin() { return m_orig; }
+	Vector3D GetDirection() { return m_dir; }
+	Vector3D GetOrigin() { return m_orig; }
 
 private:
 	Vector3D m_orig;

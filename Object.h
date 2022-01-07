@@ -6,7 +6,7 @@ class Object {
 public:
 	Object();
 
-	virtual bool Hit(const Ray& Hit) = 0;
+	virtual bool Hit(Ray& Hit) = 0;
 
 	const Vector3D GetPos();
 

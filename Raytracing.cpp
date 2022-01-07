@@ -1,5 +1,6 @@
 #include "Raytracing.h"
 #include "Filters.h"
+#include "Sphere.h"
 
 bool Image::PrintToConsole = false;
 
@@ -7,6 +8,9 @@ Raytracing::Raytracing() {
 }
 
 bool Raytracing::Run() {
+	// Create Objects
+	Sphere sphere1(Vector3D(0, 0, -1), 0.5);
+
 	// Image
 	const float aspect_ratio = 16.0f / 9.0f;
 	const int image_width = 1280;
@@ -57,7 +61,15 @@ bool Raytracing::Run() {
 			dir -= origin;
 
 			Ray ray(origin, dir);
-			Vector3D pixel_color = RayColor(ray);
+			//Vector3D pixel_color = RayColor(ray);
+			Vector3D pixel_color;
+
+			if (sphere1.Hit(ray)) {
+				pixel_color = Vector3D(255.0f, 0.0f, 0.0f);
+			}
+			else {
+				pixel_color = RayColor(ray);
+			}
 
 			int index = image.GetIndex(x, flippedY);
 
@@ -68,6 +80,7 @@ bool Raytracing::Run() {
 	}
 
 	OrderedDithering(image, DitherFilter::FULLCOLOR, Threshold::ORDERED_8, 255);
+	
 	image.Write("images/render.png");
 
 	return true;
