@@ -9,7 +9,9 @@ Raytracing::Raytracing() {
 
 bool Raytracing::Run() {
 	// Create Objects
-	Sphere sphere1(Vector3D(0, 0, -1), 0.5);
+	//Sphere sphere1(Vector3D(0, 0, -1), 0.5);
+	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, -100.5f, -1.0f), 100.0f));
 
 	// Image
 	const float aspect_ratio = 16.0f / 9.0f;
@@ -61,15 +63,7 @@ bool Raytracing::Run() {
 			dir -= origin;
 
 			Ray ray(origin, dir);
-			//Vector3D pixel_color = RayColor(ray);
-			Vector3D pixel_color;
-
-			if (sphere1.Hit(ray) > 0.0) {
-				pixel_color = sphere1.RayColor(ray);
-			}
-			else {
-				pixel_color = RayColor(ray);
-			}
+			Vector3D pixel_color = RayColor(ray);
 
 			int index = image.GetIndex(x, flippedY);
 
@@ -83,6 +77,13 @@ bool Raytracing::Run() {
 	
 	image.Write("images/render.png");
 
+	// Destroy Pointers
+	for (size_t i = 0; i < m_objects.size(); i++) {
+		delete m_objects[i];
+		m_objects[i] = nullptr;
+	}
+	m_objects.clear();
+
 	return true;
 }
 
@@ -90,10 +91,35 @@ Raytracing::~Raytracing() {
 }
 
 const Vector3D Raytracing::RayColor(Ray& ray) {
+	// draw objects
+	HitRec rec;
+	if (HitObject(ray, 0.0f, INFINITY, rec)) {
+		Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
+		col *= 0.5f * 255.0f;
+
+		return col;
+	}
+
+	// draw backround
 	Vector3D unit_direction = ray.GetDirection();
 	unit_direction.UnitVector();
-
 	float t = 0.5f * (unit_direction.GetY() + 1.0f);
 
 	return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t) * 255.0f;
+}
+
+const bool Raytracing::HitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
+	HitRec temp_rec;
+	bool hit = false;
+	float closest = t_max;
+
+	for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
+		if ((*it)->Hit(ray, t_min, t_max, temp_rec)) {
+			hit = true;
+			closest = temp_rec.t;
+			rec = temp_rec;
+		}
+	}
+	
+	return hit;
 }
