@@ -4,13 +4,14 @@
 
 class Object {
 public:
-	Object();
+	Object() {};
 
-	virtual bool Hit(Ray& Hit) = 0;
+	virtual float Hit(Ray& ray) = 0;
+	virtual Vector3D RayColor(Ray& ray) = 0;
 
-	const Vector3D GetPos();
+	const Vector3D GetPos() { return m_pos; };
 
-	~Object();
+	~Object() {};
 
 private:
 

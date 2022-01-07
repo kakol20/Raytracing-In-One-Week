@@ -146,7 +146,6 @@
     <ClCompile Include="Filters.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Raytracing.cpp" />
     <ClCompile Include="Sphere.cpp" />

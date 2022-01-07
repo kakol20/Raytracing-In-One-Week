@@ -64,8 +64,8 @@ bool Raytracing::Run() {
 			//Vector3D pixel_color = RayColor(ray);
 			Vector3D pixel_color;
 
-			if (sphere1.Hit(ray)) {
-				pixel_color = Vector3D(255.0f, 0.0f, 0.0f);
+			if (sphere1.Hit(ray) > 0.0) {
+				pixel_color = sphere1.RayColor(ray);
 			}
 			else {
 				pixel_color = RayColor(ray);
