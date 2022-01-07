@@ -114,7 +114,7 @@ const bool Raytracing::HitObject(Ray& ray, const float t_min, const float t_max,
 	float closest = t_max;
 
 	for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
-		if ((*it)->Hit(ray, t_min, t_max, temp_rec)) {
+		if ((*it)->Hit(ray, t_min, closest, temp_rec)) {
 			hit = true;
 			closest = temp_rec.t;
 			rec = temp_rec;
