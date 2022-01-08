@@ -11,7 +11,7 @@ bool Raytracing::Run() {
 	// Create Objects
 	//Sphere sphere1(Vector3D(0, 0, -1), 0.5);
 	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f));
-	m_objects.push_back(new Sphere(Vector3D(0.0f, -100.5f, -1.0f), 100.0f));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, -600000.5f, -1.0f), 600000.0f));
 
 	// Image
 	const float aspect_ratio = 16.0f / 9.0f;

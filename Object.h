@@ -19,6 +19,8 @@ struct HitRec {
 	inline void SetFaceNormal(Ray& ray, Vector3D& outwardNormal) {
 		frontFace = ray.GetDirection().DotProduct(outwardNormal) < 0;
 		normal = frontFace ? outwardNormal : outwardNormal * -1;
+
+		normal.UnitVector();
 	}
 };
 
