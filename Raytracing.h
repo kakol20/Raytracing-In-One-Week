@@ -5,6 +5,7 @@
 #include "Ray.h"
 #include "Vector3D.h"
 #include "Object.h"
+#include "Camera.h"
 
 class Raytracing {
 public:
@@ -21,6 +22,8 @@ private:
 
 private:
 	const bool HitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
+
+	Camera m_camera;
 
 private: // member variables
 };

@@ -57,6 +57,12 @@
     <ClCompile Include="Sphere.cpp">
       <Filter>Source Files\Object</Filter>
     </ClCompile>
+    <ClCompile Include="LinearFeedbackShift.cpp">
+      <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Raytracing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -85,6 +91,12 @@
     </ClInclude>
     <ClInclude Include="Sphere.h">
       <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="LinearFeedbackShift.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Raytracing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -143,8 +143,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Filters.cpp" />
     <ClCompile Include="Image.cpp" />
+    <ClCompile Include="LinearFeedbackShift.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Raytracing.cpp" />
@@ -152,8 +154,10 @@
     <ClCompile Include="Vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Filters.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="LinearFeedbackShift.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Raytracing.h" />

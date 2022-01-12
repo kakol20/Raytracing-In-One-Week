@@ -1,8 +1,12 @@
+#include <algorithm>
+
 #include "Raytracing.h"
 #include "Filters.h"
 #include "Sphere.h"
+#include "LinearFeedbackShift.h"
 
 bool Image::PrintToConsole = false;
+unsigned int LinearFeedbackShift::Seed = 64;
 
 Raytracing::Raytracing() {
 }
@@ -15,8 +19,9 @@ bool Raytracing::Run() {
 
 	// Image
 	const float aspect_ratio = 16.0f / 9.0f;
-	const int image_width = 1280;
+	const int image_width = 400;
 	const int image_height = (int)(image_width / aspect_ratio);
+	const int samples_per_pixel = 100;
 
 	Image image(image_width, image_height, 3);
 
@@ -24,6 +29,8 @@ bool Raytracing::Run() {
 	float viewport_height = 2.0f;
 	float viewport_width = aspect_ratio * viewport_height;
 	float focal_length = 1.0f;
+
+	m_camera = Camera(aspect_ratio, viewport_height, viewport_width, focal_length);
 
 	Vector3D origin(0.0f, 0.0f, 0.0f);
 	Vector3D horizontal(viewport_width, 0.0f, 0.0f);
@@ -48,23 +55,25 @@ bool Raytracing::Run() {
 			}
 			//int flippedY = y;
 
-			float u = (float)x / (float)(image_width - 1);
-			float v = (float)y / (float)(image_height - 1);
+			//Ray ray(origin, dir);
+			//Vector3D pixel_color = RayColor(ray);
+			
+			// ----- SET COLOR -----
+			Vector3D pixel_color = Vector3D(0.0f, 0.0f, 0.0f);
+			for (int s = 0; s < samples_per_pixel; s++) {
+				float u = (x + LinearFeedbackShift::RandFloat(8)) / (float)(image_width - 1);
+				float v = (y + LinearFeedbackShift::RandFloat(8)) / (float)(image_height - 1);
 
-			Vector3D dir = lowerLeftCorner;
-			Vector3D hU = horizontal;
-			hU *= u;
-			dir += hU;
+				Ray r = m_camera.GetRay(u, v);
 
-			Vector3D vV = vertical;
-			vV *= v;
-			dir += vV;
+				pixel_color += RayColor(r);
+			}
 
-			dir -= origin;
+			pixel_color *= (1.0f / samples_per_pixel);
+			pixel_color = Vector3D(std::clamp(pixel_color.GetX(), 0.0f, 1.0f), std::clamp(pixel_color.GetY(), 0.0f, 1.0f), std::clamp(pixel_color.GetZ(), 0.0f, 1.0f));
+			pixel_color *= 255.0f;
 
-			Ray ray(origin, dir);
-			Vector3D pixel_color = RayColor(ray);
-
+			// ----- WRITE COLOR -----
 			int index = image.GetIndex(x, flippedY);
 
 			image.SetData(index + 0, pixel_color.GetX());
@@ -95,7 +104,7 @@ const Vector3D Raytracing::RayColor(Ray& ray) {
 	HitRec rec;
 	if (HitObject(ray, 0.0f, INFINITY, rec)) {
 		Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
-		col *= 0.5f * 255.0f;
+		col *= 0.5f/* * 255.0f*/;
 
 		return col;
 	}
@@ -105,7 +114,7 @@ const Vector3D Raytracing::RayColor(Ray& ray) {
 	unit_direction.UnitVector();
 	float t = 0.5f * (unit_direction.GetY() + 1.0f);
 
-	return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t) * 255.0f;
+	return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t)/* * 255.0f*/;
 }
 
 const bool Raytracing::HitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
