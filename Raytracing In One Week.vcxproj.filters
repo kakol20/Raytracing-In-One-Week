@@ -34,12 +34,6 @@
     <Filter Include="Source Files\Object">
       <UniqueIdentifier>{63cbeb77-200a-43e8-8b0e-f87df2560f36}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Objects\Material">
-      <UniqueIdentifier>{75355def-1c02-406a-8537-798c666ab046}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Object\Material">
-      <UniqueIdentifier>{998936e8-710e-4c88-abf3-12775e5d253e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -68,12 +62,6 @@
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\Raytracing</Filter>
-    </ClCompile>
-    <ClCompile Include="Lambertian.cpp">
-      <Filter>Source Files\Object\Material</Filter>
-    </ClCompile>
-    <ClCompile Include="Metal.cpp">
-      <Filter>Source Files\Object\Material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,15 +97,6 @@
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Header Files\Raytracing</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Header Files\Objects\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="Lambertian.h">
-      <Filter>Header Files\Objects\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="Metal.h">
-      <Filter>Header Files\Objects\Material</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

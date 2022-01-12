@@ -1,10 +1,9 @@
 #include "Sphere.h"
 #include <math.h>
 
-Sphere::Sphere(const Vector3D center, const float radius, Material* mat) {
+Sphere::Sphere(const Vector3D center, const float radius) {
 	m_pos = center;
 	m_radius = radius;
-	m_mat = mat;
 }
 
 bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
