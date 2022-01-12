@@ -34,6 +34,12 @@
     <Filter Include="Source Files\Object">
       <UniqueIdentifier>{63cbeb77-200a-43e8-8b0e-f87df2560f36}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Objects\Material">
+      <UniqueIdentifier>{5f1f814d-5b8e-44b4-9c2d-3078ff96b874}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Object\Material">
+      <UniqueIdentifier>{d1493082-8a80-4cbb-8274-96772b64f0a8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -62,6 +68,9 @@
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\Raytracing</Filter>
+    </ClCompile>
+    <ClCompile Include="HitRec.cpp">
+      <Filter>Source Files\Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -99,6 +108,9 @@
       <Filter>Header Files\Raytracing</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
+      <Filter>Header Files\Objects\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="HitRec.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
   </ItemGroup>

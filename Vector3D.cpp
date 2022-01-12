@@ -181,13 +181,11 @@ const float Vector3D::DotProduct(const Vector3D& copyVector) {
 }
 
 const Vector3D Vector3D::CrossProduct(const Vector3D& copyVector) {
-	// TODO: insert return statement here
 	Vector3D temp = Vector3D(m_y * copyVector.m_z - m_z * copyVector.m_y, m_z * copyVector.m_x - m_x * copyVector.m_z, m_x * copyVector.m_y - m_y * copyVector.m_x);
 	return temp;
 }
 
 const Vector3D Vector3D::UnitVector() {
-	// TODO: insert return statement here
 	float mag = Magnitude();
 	Vector3D temp = Vector3D(m_x / mag, m_y / mag, m_z / mag);
 	return temp;

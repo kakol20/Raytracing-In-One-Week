@@ -13,8 +13,8 @@ Raytracing::Raytracing() {
 
 	// Create Objects
 	//Sphere sphere1(Vector3D(0, 0, -1), 0.5);
-	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f));
-	m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f, nullptr));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f, nullptr));
 	//m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
 
 	// Image
@@ -104,9 +104,9 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		//Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
 		//col *= 0.5f/* * 255.0f*/;
 
-		Vector3D target = rec.point + Vector3D::RandomUnitVector() + rec.normal;
+		Vector3D target = rec.GetPoint() + Vector3D::RandomUnitVector() + rec.GetNormal();
 		//Vector3D target = rec.point + RandomInHemisphere(rec.normal);
-		Ray tempRay = Ray(rec.point, target - rec.point);
+		Ray tempRay = Ray(rec.GetPoint(), target - rec.GetPoint());
 
 		return RayColor(tempRay, depth - 1) * 0.5f;
 	}
@@ -127,7 +127,7 @@ const bool Raytracing::HitObject(Ray& ray, const float t_min, const float t_max,
 	for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
 		if ((*it)->Hit(ray, t_min, closest, temp_rec)) {
 			hit = true;
-			closest = temp_rec.t;
+			closest = temp_rec.GetT();
 			rec = temp_rec;
 		}
 	}
