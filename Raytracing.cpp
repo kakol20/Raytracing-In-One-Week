@@ -15,11 +15,11 @@ Raytracing::Raytracing() {
 	//Sphere sphere1(Vector3D(0, 0, -1), 0.5);
 	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f));
 	m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
+	//m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
 
 	// Image
 	m_imageWidth = 1280;
 	m_imageHeight = 720;
-	m_samplesPerPixel = 32;
 
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 
@@ -32,6 +32,7 @@ Raytracing::Raytracing() {
 	m_camera = Camera(aspect_ratio, viewport_height, viewport_width, focal_length);
 
 	// Other
+	m_samplesPerPixel = 128;
 	m_maxDepth = 8;
 	m_tileSize = 32;
 }
@@ -93,6 +94,20 @@ Raytracing::~Raytracing() {
 	m_objects.clear();
 }
 
+const Vector3D Raytracing::RandomInHemisphere(const Vector3D & normal) {
+	Vector3D inUnitSphere = RandomInUnitSphere();
+	//inUnitSphere.UnitVector();
+	if (inUnitSphere.DotProduct(normal) > 0.0f) {
+		return inUnitSphere;
+	}
+	else {
+		inUnitSphere *= 1.0f;
+		return inUnitSphere;
+	}
+
+	return inUnitSphere;
+}
+
 const Vector3D Raytracing::RandomInUnitSphere() {
 	while (true) {
 		Vector3D p = Vector3D::Random(-1.0f, 1.0f);
@@ -105,6 +120,12 @@ const Vector3D Raytracing::RandomInUnitSphere() {
 	return Vector3D();
 }
 
+const Vector3D Raytracing::RandomUnitVector() {
+	Vector3D temp = RandomInUnitSphere();
+	temp.UnitVector();
+	return temp;
+}
+
 const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	// If we've exceeded the ray bounce limit, no more light is gathered.
 	if (depth <= 0) return Vector3D(0.0f, 0.0f, 0.0f);
@@ -115,7 +136,8 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		//Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
 		//col *= 0.5f/* * 255.0f*/;
 
-		Vector3D target = rec.point + rec.normal + RandomInUnitSphere();
+		Vector3D target = rec.point + RandomUnitVector() + rec.normal;
+		//Vector3D target = rec.point + RandomInHemisphere(rec.normal);
 		Ray tempRay = Ray(rec.point, target - rec.point);
 
 		return RayColor(tempRay, depth - 1) * 0.5f;
