@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <thread>
 
 #include "Image.h"
 #include "Ray.h"
@@ -17,13 +18,16 @@ public:
 
 private:
 	const Vector3D RayColor(Ray& ray);
-
-	std::vector<Object*> m_objects;
-
-private:
 	const bool HitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
-	Camera m_camera;
+	void Render(const int minX, const int minY, const int maxX, const int maxY);
 
 private: // member variables
+	std::vector<Object*> m_objects;
+	std::vector<std::thread> m_threads;
+
+	Camera m_camera;
+	Image m_render;
+
+	int m_imageWidth, m_imageHeight, m_samplesPerPixel;
 };

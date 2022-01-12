@@ -6,6 +6,10 @@
 #include "stb_image.h"
 #include "stb_image_write.h"
 
+Image::Image() : Image(1, 1, 1) {
+	
+}
+
 Image::Image(const char* fileName) {
 	if (!Read(fileName)) {
 		//printf_s("Read Failed %s\n", fileName);

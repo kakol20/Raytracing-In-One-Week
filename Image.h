@@ -12,6 +12,7 @@ enum class ImageType {
 
 class Image {
 public:
+	Image();
 	Image(const char* fileName);
 	Image(int w, int h, int channels);
 

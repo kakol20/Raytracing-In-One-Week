@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <ctime>
+#include <iostream>
 
 #include "Raytracing.h"
 #include "Filters.h"
@@ -12,94 +13,84 @@ unsigned int LinearFeedbackShift::Seed = 64;
 Raytracing::Raytracing() {
 	std::time_t current_time = time(0);
 	LinearFeedbackShift::Seed = static_cast<unsigned int>(current_time);
-}
 
-bool Raytracing::Run() {
 	// Create Objects
 	//Sphere sphere1(Vector3D(0, 0, -1), 0.5);
 	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f));
-	m_objects.push_back(new Sphere(Vector3D(0.0f, -600000.5f, -1.0f), 600000.0f));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
 
 	// Image
-	const float aspect_ratio = 16.0f / 9.0f;
-	const int image_width = 400;
-	const int image_height = (int)(image_width / aspect_ratio);
-	const int samples_per_pixel = 100;
+	m_imageWidth = 1280;
+	m_imageHeight = 720;
+	m_samplesPerPixel = 128;
 
-	Image image(image_width, image_height, 3);
+	m_render = Image(m_imageWidth, m_imageHeight, 3);
 
 	// Camera
+	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 	float viewport_height = 2.0f;
 	float viewport_width = aspect_ratio * viewport_height;
 	float focal_length = 1.0f;
 
 	m_camera = Camera(aspect_ratio, viewport_height, viewport_width, focal_length);
+}
 
-	Vector3D origin(0.0f, 0.0f, 0.0f);
-	Vector3D horizontal(viewport_width, 0.0f, 0.0f);
-	Vector3D vertical(0.0f, viewport_height, 0.0f);
-
-	Vector3D lowerLeftCorner = origin;
-	lowerLeftCorner -= (horizontal / 2.0f);
-	lowerLeftCorner -= (vertical / 2.0f);
-	lowerLeftCorner -= Vector3D(0.0f, 0.0f, focal_length);
-
+bool Raytracing::Run() {
 	// Render
-	for (int x = 0; x < image_width; x++) {
-		for (int y = 0; y < image_height; y++) {
-			int flippedY = (image_height - y) - 1;
+	const int tileSize = 32;
+	const size_t maxThreads = std::thread::hardware_concurrency();
+	
+	std::cout << "Max Threads: " << maxThreads << '\n';
 
-			if (y == image_height - 10) {
-				bool breakpoint = false;
+	bool threaded = true;
+
+	for (int x = 0; x < m_imageWidth; x += tileSize) {
+		bool outOfBoundsX = x + tileSize <= m_imageWidth;
+
+		for (int y = 0; y < m_imageHeight; y += tileSize) {
+			bool outOfBoundsY = y + tileSize <= m_imageHeight;
+
+			int maxX = outOfBoundsX ? x + tileSize : m_imageWidth;
+			int maxY = outOfBoundsY ? y + tileSize : m_imageHeight;
+
+			if (threaded) {
+				m_threads.push_back(std::thread(&Raytracing::Render, this, x, y, maxX, maxY));
+
+				if (m_threads.size() == maxThreads) {
+					for (size_t i = 0; i < m_threads.size(); i++) {
+						m_threads[i].join();
+					}
+					m_threads.clear();
+				}
 			}
-
-			if (x == image_width - 10) {
-				bool breakpoint = false;
+			else {
+				Render(x, y, x + tileSize, y + tileSize);
 			}
-			//int flippedY = y;
-
-			//Ray ray(origin, dir);
-			//Vector3D pixel_color = RayColor(ray);
-			
-			// ----- SET COLOR -----
-			Vector3D pixel_color = Vector3D(0.0f, 0.0f, 0.0f);
-			for (int s = 0; s < samples_per_pixel; s++) {
-				float u = (x + LinearFeedbackShift::RandFloat(8)) / (float)(image_width - 1);
-				float v = (y + LinearFeedbackShift::RandFloat(8)) / (float)(image_height - 1);
-
-				Ray r = m_camera.GetRay(u, v);
-
-				pixel_color += RayColor(r);
-			}
-
-			pixel_color *= (1.0f / samples_per_pixel);
-			pixel_color = Vector3D(std::clamp(pixel_color.GetX(), 0.0f, 1.0f), std::clamp(pixel_color.GetY(), 0.0f, 1.0f), std::clamp(pixel_color.GetZ(), 0.0f, 1.0f));
-			pixel_color *= 255.0f;
-
-			// ----- WRITE COLOR -----
-			int index = image.GetIndex(x, flippedY);
-
-			image.SetData(index + 0, pixel_color.GetX());
-			image.SetData(index + 1, pixel_color.GetY());
-			image.SetData(index + 2, pixel_color.GetZ());
 		}
 	}
 
-	OrderedDithering(image, DitherFilter::FULLCOLOR, Threshold::ORDERED_8, 255);
-	
-	image.Write("images/render.png");
+	if (threaded) {
+		for (size_t i = 0; i < m_threads.size(); i++) {
+			m_threads[i].join();
+		}
+	}
 
+	OrderedDithering(m_render, DitherFilter::FULLCOLOR, Threshold::ORDERED_8, 255);
+
+	m_render.Write("images/render.png");
+
+	if (Image::PrintToConsole) system("pause");
+
+	return true;
+}
+
+Raytracing::~Raytracing() {
 	// Destroy Pointers
 	for (size_t i = 0; i < m_objects.size(); i++) {
 		delete m_objects[i];
 		m_objects[i] = nullptr;
 	}
 	m_objects.clear();
-
-	return true;
-}
-
-Raytracing::~Raytracing() {
 }
 
 const Vector3D Raytracing::RayColor(Ray& ray) {
@@ -132,6 +123,36 @@ const bool Raytracing::HitObject(Ray& ray, const float t_min, const float t_max,
 			rec = temp_rec;
 		}
 	}
-	
+
 	return hit;
+}
+
+void Raytracing::Render(const int minX, const int minY, const int maxX, const int maxY) {
+	for (int x = minX; x < maxX; x++) {
+		for (int y = minY; y < maxY; y++) {
+			int flippedY = (m_imageHeight - y) - 1;
+
+			// ----- SET COLOR -----
+			Vector3D pixel_color = Vector3D(0.0f, 0.0f, 0.0f);
+			for (int s = 0; s < m_samplesPerPixel; s++) {
+				float u = (x + LinearFeedbackShift::RandFloat(8)) / (float)(m_imageWidth - 1);
+				float v = (y + LinearFeedbackShift::RandFloat(8)) / (float)(m_imageHeight - 1);
+
+				Ray r = m_camera.GetRay(u, v);
+
+				pixel_color += RayColor(r);
+			}
+
+			pixel_color *= (1.0f / (float)m_samplesPerPixel);
+			pixel_color = Vector3D(std::clamp(pixel_color.GetX(), 0.0f, 1.0f), std::clamp(pixel_color.GetY(), 0.0f, 1.0f), std::clamp(pixel_color.GetZ(), 0.0f, 1.0f));
+			pixel_color *= 255.0f;
+
+			// ----- WRITE COLOR -----
+			int index = m_render.GetIndex(x, flippedY);
+
+			m_render.SetData(index + 0, pixel_color.GetX());
+			m_render.SetData(index + 1, pixel_color.GetY());
+			m_render.SetData(index + 2, pixel_color.GetZ());
+		}
+	}
 }
