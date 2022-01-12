@@ -94,38 +94,6 @@ Raytracing::~Raytracing() {
 	m_objects.clear();
 }
 
-const Vector3D Raytracing::RandomInHemisphere(const Vector3D & normal) {
-	Vector3D inUnitSphere = RandomInUnitSphere();
-	//inUnitSphere.UnitVector();
-	if (inUnitSphere.DotProduct(normal) > 0.0f) {
-		return inUnitSphere;
-	}
-	else {
-		inUnitSphere *= 1.0f;
-		return inUnitSphere;
-	}
-
-	return inUnitSphere;
-}
-
-const Vector3D Raytracing::RandomInUnitSphere() {
-	while (true) {
-		Vector3D p = Vector3D::Random(-1.0f, 1.0f);
-
-		if (p.SqrMagnitude() >= 1) continue;
-
-		return p;
-	}
-
-	return Vector3D();
-}
-
-const Vector3D Raytracing::RandomUnitVector() {
-	Vector3D temp = RandomInUnitSphere();
-	temp.UnitVector();
-	return temp;
-}
-
 const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	// If we've exceeded the ray bounce limit, no more light is gathered.
 	if (depth <= 0) return Vector3D(0.0f, 0.0f, 0.0f);
@@ -136,7 +104,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		//Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
 		//col *= 0.5f/* * 255.0f*/;
 
-		Vector3D target = rec.point + RandomUnitVector() + rec.normal;
+		Vector3D target = rec.point + Vector3D::RandomUnitVector() + rec.normal;
 		//Vector3D target = rec.point + RandomInHemisphere(rec.normal);
 		Ray tempRay = Ray(rec.point, target - rec.point);
 

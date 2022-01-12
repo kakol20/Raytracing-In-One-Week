@@ -40,6 +40,9 @@ public:
 	// Random
 	static Vector3D Random();
 	static Vector3D Random(const float min, const float max);
+	static Vector3D RandomInHemisphere(const Vector3D& normal);
+	static Vector3D RandomInUnitSphere();
+	static Vector3D RandomUnitVector();
 
 	~Vector3D();
 

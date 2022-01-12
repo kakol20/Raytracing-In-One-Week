@@ -201,5 +201,37 @@ Vector3D Vector3D::Random(const float min, const float max) {
 	return Vector3D(LinearFeedbackShift::RandFloatRange(min, max, 16), LinearFeedbackShift::RandFloatRange(min, max, 16), LinearFeedbackShift::RandFloatRange(min, max, 32));
 }
 
+Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
+	Vector3D inUnitSphere = RandomInUnitSphere();
+	//inUnitSphere.UnitVector();
+	if (inUnitSphere.DotProduct(normal) > 0.0f) {
+		return inUnitSphere;
+	}
+	else {
+		inUnitSphere *= 1.0f;
+		return inUnitSphere;
+	}
+
+	return inUnitSphere;
+}
+
+Vector3D Vector3D::RandomInUnitSphere() {
+	while (true) {
+		Vector3D p = Vector3D::Random(-1.0f, 1.0f);
+
+		if (p.SqrMagnitude() >= 1) continue;
+
+		return p;
+	}
+
+	return Vector3D();
+}
+
+Vector3D Vector3D::RandomUnitVector() {
+	Vector3D temp = RandomInUnitSphere();
+	temp.UnitVector();
+	return temp;
+}
+
 Vector3D::~Vector3D() {
 }
