@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "Vector3D.h"
+#include "LinearFeedbackShift.h"
 
 Vector3D::Vector3D() {
 	m_x = 0.0f;
@@ -190,6 +191,14 @@ void Vector3D::UnitVector() {
 	m_x /= mag;
 	m_y /= mag;
 	m_z /= mag;
+}
+
+Vector3D Vector3D::Random() {
+	return Vector3D(LinearFeedbackShift::RandFloat(16), LinearFeedbackShift::RandFloat(16), LinearFeedbackShift::RandFloat(32));
+}
+
+Vector3D Vector3D::Random(const float min, const float max) {
+	return Vector3D(LinearFeedbackShift::RandFloatRange(min, max, 16), LinearFeedbackShift::RandFloatRange(min, max, 16), LinearFeedbackShift::RandFloatRange(min, max, 32));
 }
 
 Vector3D::~Vector3D() {

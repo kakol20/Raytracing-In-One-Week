@@ -17,7 +17,9 @@ public:
 	~Raytracing();
 
 private:
-	const Vector3D RayColor(Ray& ray);
+	const Vector3D RandomInUnitSphere();
+	const Vector3D RayColor(Ray& ray, const int depth);
+
 	const bool HitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
 	void Render(const int minX, const int minY, const int maxX, const int maxY);
@@ -29,5 +31,5 @@ private: // member variables
 	Camera m_camera;
 	Image m_render;
 
-	int m_imageWidth, m_imageHeight, m_samplesPerPixel;
+	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_maxDepth;
 };

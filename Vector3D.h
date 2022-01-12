@@ -37,6 +37,10 @@ public:
 	void CrossProduct(const Vector3D& copyVector);
 	void UnitVector();
 
+	// Random
+	static Vector3D Random();
+	static Vector3D Random(const float min, const float max);
+
 	~Vector3D();
 
 public: // getters

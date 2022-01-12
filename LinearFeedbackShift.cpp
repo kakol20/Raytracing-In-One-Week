@@ -77,6 +77,9 @@ unsigned int LinearFeedbackShift::RandUInt(const unsigned int bitCount) {
 	unsigned int count = bitCount > 32 ? 32 : bitCount;
 	unsigned int out = 0;
 
+	std::mutex mtx;
+
+	mtx.lock();
 	for (int i = bitCount - 1; i >= 0; i--) {
 		out = out | ((LinearFeedbackShift::Seed & 0b1) << i);
 
@@ -85,6 +88,7 @@ unsigned int LinearFeedbackShift::RandUInt(const unsigned int bitCount) {
 
 		LinearFeedbackShift::Seed = (LinearFeedbackShift::Seed >> 1) | (newBit << 31);
 	}
+	mtx.unlock();
 	return out;
 }
 

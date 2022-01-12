@@ -1,5 +1,6 @@
 #ifndef LINEARFEEDBACKSHIFT_H
 #define LINEARFEEDBACKSHIFT_H
+#include <mutex>
 
 class LinearFeedbackShift {
 public:
@@ -12,6 +13,8 @@ public:
 	static unsigned int RandUInt(const unsigned int bitCount);
 
 	static unsigned int Seed;
+
+	
 
 	~LinearFeedbackShift();
 

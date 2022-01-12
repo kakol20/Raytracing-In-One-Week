@@ -1,10 +1,16 @@
 #include "Raytracing.h"
+#include "LinearFeedbackShift.h"
 #include <chrono>
 #include <fstream>
 
 Raytracing raytracing;
 
+unsigned int LinearFeedbackShift::Seed = 64;
+
 int main() {
+	std::time_t current_time = time(0);
+	LinearFeedbackShift::Seed = static_cast<unsigned int>(current_time);
+
 	auto begin = std::chrono::high_resolution_clock::now();
 
 	if (!raytracing.Run()) return -1;

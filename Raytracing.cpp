@@ -8,11 +8,8 @@
 #include "LinearFeedbackShift.h"
 
 bool Image::PrintToConsole = false;
-unsigned int LinearFeedbackShift::Seed = 64;
 
 Raytracing::Raytracing() {
-	std::time_t current_time = time(0);
-	LinearFeedbackShift::Seed = static_cast<unsigned int>(current_time);
 
 	// Create Objects
 	//Sphere sphere1(Vector3D(0, 0, -1), 0.5);
@@ -22,7 +19,7 @@ Raytracing::Raytracing() {
 	// Image
 	m_imageWidth = 1280;
 	m_imageHeight = 720;
-	m_samplesPerPixel = 128;
+	m_samplesPerPixel = 100;
 
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 
@@ -33,11 +30,14 @@ Raytracing::Raytracing() {
 	float focal_length = 1.0f;
 
 	m_camera = Camera(aspect_ratio, viewport_height, viewport_width, focal_length);
+
+	// Other
+	m_maxDepth = 50;
 }
 
 bool Raytracing::Run() {
 	// Render
-	const int tileSize = 32;
+	const int tileSize = 256;
 	const size_t maxThreads = std::thread::hardware_concurrency();
 	
 	std::cout << "Max Threads: " << maxThreads << '\n';
@@ -93,14 +93,32 @@ Raytracing::~Raytracing() {
 	m_objects.clear();
 }
 
-const Vector3D Raytracing::RayColor(Ray& ray) {
+const Vector3D Raytracing::RandomInUnitSphere() {
+	while (true) {
+		Vector3D p = Vector3D::Random(-1.0f, 1.0f);
+
+		if (p.SqrMagnitude() >= 1) continue;
+
+		return p;
+	}
+
+	return Vector3D();
+}
+
+const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
+	// If we've exceeded the ray bounce limit, no more light is gathered.
+	if (depth <= 0) return Vector3D(0.0f, 0.0f, 0.0f);
+
 	// draw objects
 	HitRec rec;
-	if (HitObject(ray, 0.0f, INFINITY, rec)) {
-		Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
-		col *= 0.5f/* * 255.0f*/;
+	if (HitObject(ray, 0.001f, INFINITY, rec)) {
+		//Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
+		//col *= 0.5f/* * 255.0f*/;
 
-		return col;
+		Vector3D target = rec.point + rec.normal + RandomInUnitSphere();
+		Ray tempRay = Ray(rec.point, target - rec.point);
+
+		return RayColor(tempRay, depth - 1) * 0.5f;
 	}
 
 	// draw backround
@@ -135,12 +153,12 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			// ----- SET COLOR -----
 			Vector3D pixel_color = Vector3D(0.0f, 0.0f, 0.0f);
 			for (int s = 0; s < m_samplesPerPixel; s++) {
-				float u = (x + LinearFeedbackShift::RandFloat(8)) / (float)(m_imageWidth - 1);
-				float v = (y + LinearFeedbackShift::RandFloat(8)) / (float)(m_imageHeight - 1);
+				float u = (x + LinearFeedbackShift::RandFloat(32)) / (float)(m_imageWidth - 1);
+				float v = (y + LinearFeedbackShift::RandFloat(32)) / (float)(m_imageHeight - 1);
 
 				Ray r = m_camera.GetRay(u, v);
 
-				pixel_color += RayColor(r);
+				pixel_color += RayColor(r, m_maxDepth);
 			}
 
 			pixel_color *= (1.0f / (float)m_samplesPerPixel);
