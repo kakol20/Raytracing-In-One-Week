@@ -74,7 +74,7 @@ unsigned int LinearFeedbackShift::RandUInt() {
 /// <param name="bitCount"></param>
 /// <returns></returns>
 unsigned int LinearFeedbackShift::RandUInt(const unsigned int bitCount) {
-	unsigned count = bitCount > 32 ? 32 : bitCount;
+	unsigned int count = bitCount > 32 ? 32 : bitCount;
 	unsigned int out = 0;
 
 	for (int i = bitCount - 1; i >= 0; i--) {
