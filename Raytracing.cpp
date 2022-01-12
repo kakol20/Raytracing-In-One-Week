@@ -19,7 +19,7 @@ Raytracing::Raytracing() {
 	// Image
 	m_imageWidth = 1280;
 	m_imageHeight = 720;
-	m_samplesPerPixel = 100;
+	m_samplesPerPixel = 32;
 
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 
@@ -32,26 +32,26 @@ Raytracing::Raytracing() {
 	m_camera = Camera(aspect_ratio, viewport_height, viewport_width, focal_length);
 
 	// Other
-	m_maxDepth = 50;
+	m_maxDepth = 8;
+	m_tileSize = 32;
 }
 
 bool Raytracing::Run() {
 	// Render
-	const int tileSize = 256;
 	const size_t maxThreads = std::thread::hardware_concurrency();
 	
 	std::cout << "Max Threads: " << maxThreads << '\n';
 
 	bool threaded = true;
 
-	for (int x = 0; x < m_imageWidth; x += tileSize) {
-		bool outOfBoundsX = x + tileSize <= m_imageWidth;
+	for (int x = 0; x < m_imageWidth; x += m_tileSize) {
+		bool outOfBoundsX = x + m_tileSize <= m_imageWidth;
 
-		for (int y = 0; y < m_imageHeight; y += tileSize) {
-			bool outOfBoundsY = y + tileSize <= m_imageHeight;
+		for (int y = 0; y < m_imageHeight; y += m_tileSize) {
+			bool outOfBoundsY = y + m_tileSize <= m_imageHeight;
 
-			int maxX = outOfBoundsX ? x + tileSize : m_imageWidth;
-			int maxY = outOfBoundsY ? y + tileSize : m_imageHeight;
+			int maxX = outOfBoundsX ? x + m_tileSize : m_imageWidth;
+			int maxY = outOfBoundsY ? y + m_tileSize : m_imageHeight;
 
 			if (threaded) {
 				m_threads.push_back(std::thread(&Raytracing::Render, this, x, y, maxX, maxY));
@@ -64,7 +64,7 @@ bool Raytracing::Run() {
 				}
 			}
 			else {
-				Render(x, y, x + tileSize, y + tileSize);
+				Render(x, y, x + m_tileSize, y + m_tileSize);
 			}
 		}
 	}
@@ -161,7 +161,10 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				pixel_color += RayColor(r, m_maxDepth);
 			}
 
-			pixel_color *= (1.0f / (float)m_samplesPerPixel);
+			float scale = 1.0f / m_samplesPerPixel;
+
+			pixel_color = Vector3D(sqrtf(pixel_color.GetX() * scale), sqrtf(pixel_color.GetY() * scale), sqrtf(pixel_color.GetZ() * scale)); // gamma correction
+
 			pixel_color = Vector3D(std::clamp(pixel_color.GetX(), 0.0f, 1.0f), std::clamp(pixel_color.GetY(), 0.0f, 1.0f), std::clamp(pixel_color.GetZ(), 0.0f, 1.0f));
 			pixel_color *= 255.0f;
 

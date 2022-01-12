@@ -23,8 +23,7 @@ int main() {
 	runTime.open("images/runTime.txt", std::ios_base::out);
 
 	if (runTime.is_open()) {
-		runTime << "Elapsed Time: \n";
-		runTime << "    " << elapsed;
+		runTime << "Elapsed Time: " << elapsed << '\n';
 	}
 
 	return 0;

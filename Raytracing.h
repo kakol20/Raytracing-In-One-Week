@@ -31,5 +31,5 @@ private: // member variables
 	Camera m_camera;
 	Image m_render;
 
-	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_maxDepth;
+	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_maxDepth, m_tileSize;
 };
