@@ -17,14 +17,11 @@ public:
 	~Raytracing();
 
 private:
-	const Vector3D RandomInHemisphere(const Vector3D & normal);
-	const Vector3D RandomInUnitSphere();
-	const Vector3D RandomUnitVector();
-	const Vector3D RayColor(Ray& ray, const int depth);
-
 	const bool HitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
 	void Render(const int minX, const int minY, const int maxX, const int maxY);
+
+	Vector3D RayColor(Ray& ray, const int depth);
 
 private: // member variables
 	std::vector<Object*> m_objects;

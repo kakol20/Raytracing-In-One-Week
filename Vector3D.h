@@ -1,4 +1,5 @@
 #pragma once
+#include "Ray.h"
 
 class Vector3D {
 public:
@@ -35,11 +36,15 @@ public:
 	// Other
 	const float DotProduct(const Vector3D& copyVector);
 	void CrossProduct(const Vector3D& copyVector);
-	void UnitVector();
+	Vector3D UnitVector();
+	bool NearZero();
 
 	// Random
 	static Vector3D Random();
 	static Vector3D Random(const float min, const float max);
+	static Vector3D RandomInHemisphere(const Vector3D& normal);
+	static Vector3D RandomInUnitSphere();
+	static Vector3D RandomUnitVector();
 
 	~Vector3D();
 

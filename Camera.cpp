@@ -18,5 +18,6 @@ Camera::~Camera() {
 }
 
 Ray Camera::GetRay(const float u, const float v) {
-	return Ray(m_origin, m_lowerLeftCorner + (m_horizontal * u) + (m_vertical * v) - m_origin);
+	Ray tempRay(m_origin, m_lowerLeftCorner + (m_horizontal * u) + (m_vertical * v) - m_origin);
+	return tempRay;
 }
