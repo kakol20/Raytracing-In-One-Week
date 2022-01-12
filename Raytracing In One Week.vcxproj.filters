@@ -98,5 +98,8 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files\Raytracing</Filter>
     </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

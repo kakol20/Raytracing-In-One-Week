@@ -112,8 +112,8 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	}
 
 	// draw backround
-	Vector3D unit_direction = ray.GetDirection();
-	unit_direction.UnitVector();
+	Vector3D unit_direction = ray.GetDirection().UnitVector();
+	//unit_direction.UnitVector();
 	float t = 0.5f * (unit_direction.GetY() + 1.0f);
 
 	return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t)/* * 255.0f*/;

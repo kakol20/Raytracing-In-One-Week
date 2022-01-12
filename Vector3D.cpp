@@ -180,18 +180,31 @@ const float Vector3D::DotProduct(const Vector3D& copyVector) {
 	return m_x * copyVector.m_x + m_y * copyVector.m_y + m_z * copyVector.m_z;
 }
 
-void Vector3D::CrossProduct(const Vector3D& copyVector) {
-	m_x = m_y * copyVector.m_z - m_z * copyVector.m_y;
-	m_y = m_z * copyVector.m_x - m_x * copyVector.m_z;
-	m_z = m_x * copyVector.m_y - m_y * copyVector.m_x;
+const Vector3D Vector3D::CrossProduct(const Vector3D& copyVector) {
+	// TODO: insert return statement here
+	Vector3D temp = Vector3D(m_y * copyVector.m_z - m_z * copyVector.m_y, m_z * copyVector.m_x - m_x * copyVector.m_z, m_x * copyVector.m_y - m_y * copyVector.m_x);
+	return temp;
 }
 
-void Vector3D::UnitVector() {
+const Vector3D Vector3D::UnitVector() {
+	// TODO: insert return statement here
 	float mag = Magnitude();
-	m_x /= mag;
-	m_y /= mag;
-	m_z /= mag;
+	Vector3D temp = Vector3D(m_x / mag, m_y / mag, m_z / mag);
+	return temp;
 }
+
+//void Vector3D::CrossProduct(const Vector3D& copyVector) {
+//	m_x = m_y * copyVector.m_z - m_z * copyVector.m_y;
+//	m_y = m_z * copyVector.m_x - m_x * copyVector.m_z;
+//	m_z = m_x * copyVector.m_y - m_y * copyVector.m_x;
+//}
+//
+//void Vector3D::UnitVector() {
+//	float mag = Magnitude();
+//	m_x /= mag;
+//	m_y /= mag;
+//	m_z /= mag;
+//}
 
 Vector3D Vector3D::Random() {
 	return Vector3D(LinearFeedbackShift::RandFloat(16), LinearFeedbackShift::RandFloat(16), LinearFeedbackShift::RandFloat(32));
@@ -228,8 +241,8 @@ Vector3D Vector3D::RandomInUnitSphere() {
 }
 
 Vector3D Vector3D::RandomUnitVector() {
-	Vector3D temp = RandomInUnitSphere();
-	temp.UnitVector();
+	Vector3D temp = RandomInUnitSphere().UnitVector();
+	//temp.UnitVector();
 	return temp;
 }
 

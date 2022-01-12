@@ -34,8 +34,8 @@ public:
 
 	// Other
 	const float DotProduct(const Vector3D& copyVector);
-	void CrossProduct(const Vector3D& copyVector);
-	void UnitVector();
+	const Vector3D CrossProduct(const Vector3D& copyVector);
+	const Vector3D UnitVector();
 
 	// Random
 	static Vector3D Random();

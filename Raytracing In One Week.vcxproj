@@ -158,6 +158,7 @@
     <ClInclude Include="Filters.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="LinearFeedbackShift.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Raytracing.h" />
