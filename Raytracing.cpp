@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <ctime>
 
 #include "Raytracing.h"
 #include "Filters.h"
@@ -9,6 +10,8 @@ bool Image::PrintToConsole = false;
 unsigned int LinearFeedbackShift::Seed = 64;
 
 Raytracing::Raytracing() {
+	std::time_t current_time = time(0);
+	LinearFeedbackShift::Seed = static_cast<unsigned int>(current_time);
 }
 
 bool Raytracing::Run() {
