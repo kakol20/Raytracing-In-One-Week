@@ -5,10 +5,13 @@
 class Camera {
 public:
 	Camera();
-	Camera(const float aspectRatio, const float vHeight, const float vWidth, const float focalLength);
+	Camera(const float aspectRatio, const float vfov);
 	~Camera();
 
 	Ray GetRay(const float u, const float v);
+
+private:
+	const float Degrees2Radians(const float deg);
 
 private:
 	Vector3D m_horizontal;

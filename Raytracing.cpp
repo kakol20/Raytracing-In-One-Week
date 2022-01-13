@@ -13,20 +13,7 @@
 bool Image::PrintToConsole = false;
 
 Raytracing::Raytracing() {
-	// Create Materials
-	m_materials["ground"] = new Lambertian(Vector3D(0.8f, 0.8f, 0.0f));
-	m_materials["centre"] = new Lambertian(Vector3D(0.7f, 0.3f, 0.3f));
-	m_materials["left"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.5f);
-	m_materials["right"] = new Metal(Vector3D(0.8f, 0.6f, 0.2f), 1.0f);
-
-	// Create Objects
-	m_objects.push_back(new Sphere(Vector3D( 0.0f, -600.5f, -1.0f), 600.0f, m_materials["ground"])); // ground sphere
-	m_objects.push_back(new Sphere(Vector3D( 0.0f, 0.0f, -1.0f), 0.5f, m_materials["centre"]));
-	m_objects.push_back(new Sphere(Vector3D(-1.0f, 0.0f, -1.0f), -0.4f, m_materials["left"]));
-	m_objects.push_back(new Sphere(Vector3D(-1.0f, 0.0f, -1.0f), 0.5f, m_materials["left"]));
-
-	m_objects.push_back(new Sphere(Vector3D( 1.0f, 0.0f, -1.0f), 0.5f, m_materials["right"]));
-	//m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
+	float PI = 3.14159265f;
 
 	// Image
 	m_imageWidth = 1280;
@@ -36,11 +23,20 @@ Raytracing::Raytracing() {
 
 	// Camera
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
-	float viewport_height = 2.0f;
-	float viewport_width = aspect_ratio * viewport_height;
-	float focal_length = 1.0f;
+	m_camera = Camera(aspect_ratio, 90.0f); // 39.6 deg fov for 50mm focal length
 
-	m_camera = Camera(aspect_ratio, viewport_height, viewport_width, focal_length);
+	float R = cosf(PI / 4.0f);
+
+	// Create Materials
+	//m_materials["ground"] = new Lambertian(Vector3D(0.8f, 0.8f, 0.0f));
+	m_materials["left"] = new Lambertian(Vector3D(0.0f, 0.0f, 1.0f));
+	m_materials["right"] = new Lambertian(Vector3D(1.0f, 0.0f, 0.0f));
+
+	// Create Objects
+	//m_objects.push_back(new Sphere(Vector3D( 0.0f, -600.5f, -1.0f), 600.0f, m_materials["ground"])); // ground sphere
+	m_objects.push_back(new Sphere(Vector3D(-R, 0.0f, -1.0f), R, m_materials["left"]));
+	m_objects.push_back(new Sphere(Vector3D(R, 0.0f, -1.0f), R, m_materials["right"]));
+
 
 	// Other
 	m_samplesPerPixel = 128;
