@@ -14,12 +14,15 @@ bool Image::PrintToConsole = false;
 Raytracing::Raytracing() {
 	// Create Materials
 	m_materials["ground"] = new Lambertian(Vector3D(0.8f, 0.8f, 0.0f));
-	m_materials["metal"] = new Metal(Vector3D(0.8f, 0.8f, 0.8f));
+	m_materials["centre"] = new Lambertian(Vector3D(0.7f, 0.3f, 0.3f));
+	m_materials["left"] = new Metal(Vector3D(0.8f, 0.8f, 0.8f));
+	m_materials["right"] = new Metal(Vector3D(0.8f, 0.6f, 0.2f));
 
 	// Create Objects
-	//Sphere sphere1(Vector3D(0, 0, -1), 0.5);
-	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f, m_materials["metal"])); // centre sphere
-	m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f, m_materials["ground"])); // ground sphere
+	m_objects.push_back(new Sphere(Vector3D( 0.0f, -600.5f, -1.0f), 600.0f, m_materials["ground"])); // ground sphere
+	m_objects.push_back(new Sphere(Vector3D( 0.0f, 0.0f, -1.0f), 0.5f, m_materials["centre"]));
+	m_objects.push_back(new Sphere(Vector3D(-1.0f, 0.0f, -1.0f), 0.5f, m_materials["left"]));
+	m_objects.push_back(new Sphere(Vector3D( 1.0f, 0.0f, -1.0f), 0.5f, m_materials["right"]));
 	//m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
 
 	// Image
