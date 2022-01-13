@@ -25,6 +25,16 @@ private:
 
 	void Render(const int minX, const int minY, const int maxX, const int maxY);
 
+private:
+	struct Tile {
+		int minX, minY, maxX, maxY;
+	};
+
+	std::vector<Tile> m_tiles;
+	size_t m_nextAvailable;
+
+	void RenderTile(const size_t startIndex);
+
 private: // member variables
 	std::vector<Object*> m_objects;
 	std::vector<std::thread> m_threads;

@@ -20,6 +20,8 @@ Raytracing::Raytracing() {
 	m_samplesPerPixel = 64;
 	m_maxDepth = 12;
 	m_tileSize = 256;
+
+	m_nextAvailable = 0;
 }
 
 void Raytracing::Init() {
@@ -94,6 +96,7 @@ bool Raytracing::Run() {
 
 	bool threaded = true;
 
+	/*
 	for (int x = 0; x < m_imageWidth; x += m_tileSize) {
 		bool outOfBoundsX = x + m_tileSize <= m_imageWidth;
 
@@ -127,6 +130,33 @@ bool Raytracing::Run() {
 			m_threads[i].join();
 		}
 	}
+	*/
+
+	/*std::vector<Tile> tiles;*/
+	size_t nextAvailable = 0;
+
+	for (int x = 0; x < m_imageWidth; x += m_tileSize) {
+		bool outOfBoundsX = x + m_tileSize <= m_imageWidth;
+
+		for (int y = 0; y < m_imageHeight; y += m_tileSize) {
+			bool outOfBoundsY = y + m_tileSize <= m_imageHeight;
+
+			int maxX = outOfBoundsX ? x + m_tileSize : m_imageWidth;
+			int maxY = outOfBoundsY ? y + m_tileSize : m_imageHeight;
+
+			m_tiles.push_back({ x, y, maxX, maxY });
+		}
+	}
+
+	int max = maxThreads < m_tiles.size() ? maxThreads : m_tiles.size();
+	for (int i = 0; i < max; i++) {
+		m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
+		m_nextAvailable++;
+	}
+
+	for (size_t i = 0; i < m_threads.size(); i++) {
+		m_threads[i].join();
+	}
 
 	OrderedDithering(m_render, DitherFilter::FULLCOLOR, Threshold::ORDERED_8, 255);
 
@@ -135,6 +165,22 @@ bool Raytracing::Run() {
 	if (Image::PrintToConsole) system("pause");
 
 	return true;
+}
+
+void Raytracing::RenderTile(const size_t startIndex) {
+	Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
+
+	std::mutex mtx;
+	mtx.lock();
+	size_t nextAvailable = m_nextAvailable;
+	m_nextAvailable++;
+
+	mtx.unlock();
+
+	if (nextAvailable < m_tiles.size()) {
+		RenderTile(nextAvailable);
+	}
+	
 }
 
 Raytracing::~Raytracing() {
