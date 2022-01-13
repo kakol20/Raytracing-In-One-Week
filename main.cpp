@@ -5,11 +5,11 @@
 
 Raytracing raytracing;
 
-unsigned int LinearFeedbackShift::Seed = 64;
+unsigned int LinearFeedbackShift::Seed = 13012022;
 
 int main() {
 	std::time_t current_time = time(0);
-	LinearFeedbackShift::Seed = static_cast<unsigned int>(current_time);
+	//LinearFeedbackShift::Seed = static_cast<unsigned int>(current_time);
 
 	raytracing.Init();
 

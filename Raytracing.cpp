@@ -19,7 +19,7 @@ Raytracing::Raytracing() {
 	// Other
 	m_samplesPerPixel = 64;
 	m_maxDepth = 12;
-	m_tileSize = 256;
+	m_tileSize = 32;
 
 	m_nextAvailable = 0;
 }
@@ -89,7 +89,7 @@ void Raytracing::Init() {
 
 bool Raytracing::Run() {
 	// Render
-	const size_t maxThreads = std::thread::hardware_concurrency();
+	const size_t maxThreads = std::thread::hardware_concurrency() - 1;
 	//const size_t maxThreads = 0;
 
 	std::cout << "Max Threads: " << maxThreads << '\n';
@@ -150,6 +150,7 @@ bool Raytracing::Run() {
 
 	int max = maxThreads < m_tiles.size() ? maxThreads : m_tiles.size();
 	for (int i = 0; i < max; i++) {
+		std::cout << "Rendering tile #" << m_nextAvailable << '\n';
 		m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
 		m_nextAvailable++;
 	}
@@ -172,6 +173,9 @@ void Raytracing::RenderTile(const size_t startIndex) {
 
 	std::mutex mtx;
 	mtx.lock();
+	if (m_nextAvailable < m_tiles.size()) 		{
+		std::cout << "Rendering tile #" << m_nextAvailable << '\n';
+	}
 	size_t nextAvailable = m_nextAvailable;
 	m_nextAvailable++;
 
