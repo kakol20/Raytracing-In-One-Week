@@ -1,7 +1,7 @@
 #pragma once
+#include "Material.h"
 #include "Ray.h"
 #include "Vector3D.h"
-#include "Material.h"
 
 class HitRec {
 public:

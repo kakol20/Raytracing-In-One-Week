@@ -8,5 +8,8 @@ public:
 	Material() {};
 	~Material() {};
 
-	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) = 0;
+	virtual bool Scatter(Ray& rayIn, HitRec&rec, Vector3D& attentuation, Ray& scattered) = 0;
+
+protected:
+	Vector3D m_albedo;
 };
