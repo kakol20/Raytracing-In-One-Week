@@ -45,7 +45,7 @@ Raytracing::Raytracing() {
 bool Raytracing::Run() {
 	// Render
 	const size_t maxThreads = std::thread::hardware_concurrency();
-	
+
 	std::cout << "Max Threads: " << maxThreads << '\n';
 
 	bool threaded = true;
@@ -103,7 +103,6 @@ Raytracing::~Raytracing() {
 		(*it).second = nullptr;
 	}
 	m_materials.clear();
-	
 }
 
 const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
@@ -112,12 +111,14 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 	// draw objects
 	HitRec rec;
+	//rec.SetMaterial(m_materials["ground"]);
 	if (HitObject(ray, 0.001f, INFINITY, rec)) {
 		//Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
 		//col *= 0.5f/* * 255.0f*/;
 
 		//Vector3D target = rec.GetPoint() + Vector3D::RandomUnitVector() + rec.GetNormal();
 		//Vector3D target = rec.point + RandomInHemisphere(rec.normal);
+
 		//Ray tempRay = Ray(rec.GetPoint(), target - rec.GetPoint());
 
 		//return RayColor(tempRay, depth - 1) * 0.5f;
@@ -125,11 +126,11 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		Ray scattered;
 		Vector3D attentuation;
 
-		if (rec.GetMaterial()->Scatter(ray, rec, attentuation, scattered)) {
+		if (rec.GetMaterial() == nullptr || rec.GetMaterial()->Scatter(ray, rec, attentuation, scattered)) {
 			return attentuation * RayColor(scattered, depth - 1);
 		}
 
-		return Vector3D();
+		return Vector3D(0.0f, 0.0f, 0.0f);
 	}
 
 	// draw backround

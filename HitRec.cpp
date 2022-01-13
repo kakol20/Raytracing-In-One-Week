@@ -10,6 +10,7 @@ HitRec::HitRec() {
 
 HitRec::HitRec(const HitRec& copyHitRec) {
 	m_frontFace = copyHitRec.m_frontFace;
+	m_mat = copyHitRec.m_mat;
 	m_normal = copyHitRec.m_normal;
 	m_point = copyHitRec.m_point;
 	m_t = copyHitRec.m_t;
@@ -23,6 +24,7 @@ HitRec& HitRec::operator=(const HitRec& copyHitRec) {
 	if (&copyHitRec == this) return *this;
 
 	m_frontFace = copyHitRec.m_frontFace;
+	m_mat = copyHitRec.m_mat;
 	m_normal = copyHitRec.m_normal;
 	m_point = copyHitRec.m_point;
 	m_t = copyHitRec.m_t;
