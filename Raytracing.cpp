@@ -13,8 +13,8 @@ Raytracing::Raytracing() {
 
 	// Create Objects
 	//Sphere sphere1(Vector3D(0, 0, -1), 0.5);
-	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f));
-	m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f, nullptr));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f, nullptr));
 	//m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
 
 	// Image
@@ -94,38 +94,6 @@ Raytracing::~Raytracing() {
 	m_objects.clear();
 }
 
-const Vector3D Raytracing::RandomInHemisphere(const Vector3D & normal) {
-	Vector3D inUnitSphere = RandomInUnitSphere();
-	//inUnitSphere.UnitVector();
-	if (inUnitSphere.DotProduct(normal) > 0.0f) {
-		return inUnitSphere;
-	}
-	else {
-		inUnitSphere *= 1.0f;
-		return inUnitSphere;
-	}
-
-	return inUnitSphere;
-}
-
-const Vector3D Raytracing::RandomInUnitSphere() {
-	while (true) {
-		Vector3D p = Vector3D::Random(-1.0f, 1.0f);
-
-		if (p.SqrMagnitude() >= 1) continue;
-
-		return p;
-	}
-
-	return Vector3D();
-}
-
-const Vector3D Raytracing::RandomUnitVector() {
-	Vector3D temp = RandomInUnitSphere();
-	temp.UnitVector();
-	return temp;
-}
-
 const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	// If we've exceeded the ray bounce limit, no more light is gathered.
 	if (depth <= 0) return Vector3D(0.0f, 0.0f, 0.0f);
@@ -136,16 +104,16 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		//Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
 		//col *= 0.5f/* * 255.0f*/;
 
-		Vector3D target = rec.point + RandomUnitVector() + rec.normal;
+		Vector3D target = rec.GetPoint() + Vector3D::RandomUnitVector() + rec.GetNormal();
 		//Vector3D target = rec.point + RandomInHemisphere(rec.normal);
-		Ray tempRay = Ray(rec.point, target - rec.point);
+		Ray tempRay = Ray(rec.GetPoint(), target - rec.GetPoint());
 
 		return RayColor(tempRay, depth - 1) * 0.5f;
 	}
 
 	// draw backround
-	Vector3D unit_direction = ray.GetDirection();
-	unit_direction.UnitVector();
+	Vector3D unit_direction = ray.GetDirection().UnitVector();
+	//unit_direction.UnitVector();
 	float t = 0.5f * (unit_direction.GetY() + 1.0f);
 
 	return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t)/* * 255.0f*/;
@@ -159,7 +127,7 @@ const bool Raytracing::HitObject(Ray& ray, const float t_min, const float t_max,
 	for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
 		if ((*it)->Hit(ray, t_min, closest, temp_rec)) {
 			hit = true;
-			closest = temp_rec.t;
+			closest = temp_rec.GetT();
 			rec = temp_rec;
 		}
 	}

@@ -1,9 +1,11 @@
-#include "Sphere.h"
 #include <math.h>
 
-Sphere::Sphere(const Vector3D center, const float radius) {
+#include "Sphere.h"
+
+Sphere::Sphere(const Vector3D center, const float radius, Material* mat) {
 	m_pos = center;
 	m_radius = radius;
+	m_mat = mat;
 }
 
 bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
@@ -34,10 +36,14 @@ bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 		if (root < t_min || t_max < root) return false;
 	}
 
-	rec.t = root;
+	/*rec.t = root;
 	rec.point = ray.At(rec.t);
-	/*rec.normal = (rec.point - m_pos) / m_radius;*/
-	Vector3D outwardNormal = (rec.point - m_pos) / m_radius;
+	Vector3D outwardNormal = (rec.point - m_pos) / m_radius;*/
+	rec.SetT(root);
+	rec.SetPoint(ray.At(rec.GetT()));
+	rec.SetMaterial(m_mat);
+
+	Vector3D outwardNormal = (rec.GetPoint() - m_pos) / m_radius;
 	rec.SetFaceNormal(ray, outwardNormal);
 
 	return true;

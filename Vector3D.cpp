@@ -180,18 +180,29 @@ const float Vector3D::DotProduct(const Vector3D& copyVector) {
 	return m_x * copyVector.m_x + m_y * copyVector.m_y + m_z * copyVector.m_z;
 }
 
-void Vector3D::CrossProduct(const Vector3D& copyVector) {
-	m_x = m_y * copyVector.m_z - m_z * copyVector.m_y;
-	m_y = m_z * copyVector.m_x - m_x * copyVector.m_z;
-	m_z = m_x * copyVector.m_y - m_y * copyVector.m_x;
+const Vector3D Vector3D::CrossProduct(const Vector3D& copyVector) {
+	Vector3D temp = Vector3D(m_y * copyVector.m_z - m_z * copyVector.m_y, m_z * copyVector.m_x - m_x * copyVector.m_z, m_x * copyVector.m_y - m_y * copyVector.m_x);
+	return temp;
 }
 
-void Vector3D::UnitVector() {
+const Vector3D Vector3D::UnitVector() {
 	float mag = Magnitude();
-	m_x /= mag;
-	m_y /= mag;
-	m_z /= mag;
+	Vector3D temp = Vector3D(m_x / mag, m_y / mag, m_z / mag);
+	return temp;
 }
+
+//void Vector3D::CrossProduct(const Vector3D& copyVector) {
+//	m_x = m_y * copyVector.m_z - m_z * copyVector.m_y;
+//	m_y = m_z * copyVector.m_x - m_x * copyVector.m_z;
+//	m_z = m_x * copyVector.m_y - m_y * copyVector.m_x;
+//}
+//
+//void Vector3D::UnitVector() {
+//	float mag = Magnitude();
+//	m_x /= mag;
+//	m_y /= mag;
+//	m_z /= mag;
+//}
 
 Vector3D Vector3D::Random() {
 	return Vector3D(LinearFeedbackShift::RandFloat(16), LinearFeedbackShift::RandFloat(16), LinearFeedbackShift::RandFloat(32));
@@ -199,6 +210,38 @@ Vector3D Vector3D::Random() {
 
 Vector3D Vector3D::Random(const float min, const float max) {
 	return Vector3D(LinearFeedbackShift::RandFloatRange(min, max, 16), LinearFeedbackShift::RandFloatRange(min, max, 16), LinearFeedbackShift::RandFloatRange(min, max, 32));
+}
+
+Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
+	Vector3D inUnitSphere = RandomInUnitSphere();
+	//inUnitSphere.UnitVector();
+	if (inUnitSphere.DotProduct(normal) > 0.0f) {
+		return inUnitSphere;
+	}
+	else {
+		inUnitSphere *= 1.0f;
+		return inUnitSphere;
+	}
+
+	return inUnitSphere;
+}
+
+Vector3D Vector3D::RandomInUnitSphere() {
+	while (true) {
+		Vector3D p = Vector3D::Random(-1.0f, 1.0f);
+
+		if (p.SqrMagnitude() >= 1) continue;
+
+		return p;
+	}
+
+	return Vector3D();
+}
+
+Vector3D Vector3D::RandomUnitVector() {
+	Vector3D temp = RandomInUnitSphere().UnitVector();
+	//temp.UnitVector();
+	return temp;
 }
 
 Vector3D::~Vector3D() {
