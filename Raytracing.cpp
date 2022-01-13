@@ -15,8 +15,8 @@ Raytracing::Raytracing() {
 	// Create Materials
 	m_materials["ground"] = new Lambertian(Vector3D(0.8f, 0.8f, 0.0f));
 	m_materials["centre"] = new Lambertian(Vector3D(0.7f, 0.3f, 0.3f));
-	m_materials["left"] = new Metal(Vector3D(0.8f, 0.8f, 0.8f));
-	m_materials["right"] = new Metal(Vector3D(0.8f, 0.6f, 0.2f));
+	m_materials["left"] = new Metal(Vector3D(0.8f, 0.8f, 0.8f), 0.3f);
+	m_materials["right"] = new Metal(Vector3D(0.8f, 0.6f, 0.2f), 1.0f);
 
 	// Create Objects
 	m_objects.push_back(new Sphere(Vector3D( 0.0f, -600.5f, -1.0f), 600.0f, m_materials["ground"])); // ground sphere
@@ -41,7 +41,7 @@ Raytracing::Raytracing() {
 
 	// Other
 	m_samplesPerPixel = 128;
-	m_maxDepth = 8;
+	m_maxDepth = 12;
 	m_tileSize = 32;
 }
 
