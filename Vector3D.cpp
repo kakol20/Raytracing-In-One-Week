@@ -66,7 +66,7 @@ Vector3D& Vector3D::operator/=(const Vector3D& copyVector) {
 /// <param name="scalar"></param>
 /// <returns></returns>
 const Vector3D Vector3D::operator/(const float scalar) const {
-	Vector3D temp(*this);
+	Vector3D temp(m_x, m_y, m_z);
 	temp /= scalar;
 	return temp;
 }
@@ -90,7 +90,7 @@ Vector3D& Vector3D::operator/=(const float scalar) {
 /// <param name="copyVector3d"></param>
 /// <returns></returns>
 const Vector3D Vector3D::operator*(const Vector3D& copyVector) const {
-	Vector3D temp(*this);
+	Vector3D temp(m_x, m_y, m_z);
 	temp *= copyVector;
 	return temp;
 }
@@ -114,7 +114,7 @@ Vector3D& Vector3D::operator*=(const Vector3D& copyVector) {
 /// <param name="scalar"></param>
 /// <returns></returns>
 const Vector3D Vector3D::operator*(const float scalar) const {
-	Vector3D temp(*this);
+	Vector3D temp(m_x, m_y, m_z);
 	temp *= scalar;
 	return temp;
 }
@@ -133,7 +133,7 @@ Vector3D& Vector3D::operator*=(const float scalar) {
 }
 
 const Vector3D Vector3D::operator+(const Vector3D& copyVector) const {
-	Vector3D temp(*this);
+	Vector3D temp(m_x, m_y, m_z);
 	temp += copyVector;
 	return temp;
 }
@@ -147,7 +147,7 @@ Vector3D& Vector3D::operator+=(const Vector3D& copyVector) {
 }
 
 const Vector3D Vector3D::operator-(const Vector3D& copyVector) const {
-	Vector3D temp(*this);
+	Vector3D temp(m_x, m_y, m_z);
 	temp -= copyVector;
 	return temp;
 }
@@ -171,8 +171,7 @@ const float Vector3D::Magnitude() {
 /// Get length of vector squared
 /// </summary>
 /// <returns></returns>
-const
-float Vector3D::SqrMagnitude() {
+const float Vector3D::SqrMagnitude() {
 	return m_x * m_x + m_y * m_y + m_z * m_z;
 }
 
@@ -193,8 +192,8 @@ Vector3D Vector3D::CrossProduct(const Vector3D& copyVector) {
 }
 
 Vector3D Vector3D::UnitVector() {
-	float mag = Magnitude();
-	Vector3D temp = Vector3D(m_x / mag, m_y / mag, m_z / mag);
+	float mag = this->Magnitude();
+	Vector3D temp(m_x / mag, m_y / mag, m_z / mag);
 	return temp;
 }
 
@@ -213,7 +212,7 @@ Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
 		return inUnitSphere;
 	}
 	else {
-		inUnitSphere *= 1.0f;
+		inUnitSphere *= -1.0f;
 		return inUnitSphere;
 	}
 

@@ -8,25 +8,32 @@ Camera::Camera() {
 	m_lowerLeftCorner = m_origin - (m_horizontal / 2.0f) - (m_vertical / 2.0f) - Vector3D(0.0f, 0.0f, 16.0f / 9.0f);
 }
 
-Camera::Camera(const float aspectRatio, const float vfov, const Vector3D lookFrom, const Vector3D lookAt, Vector3D up) {
+Camera::Camera(const float aspectRatio, const float vfov, Vector3D lookFrom, Vector3D lookAt, Vector3D vUp) {
 	// calculate from fov
-	float theta = Degrees2Radians(vfov);
-	float h = tanf(theta / 2.0f);
-	float vHeight = 2.0f * h;
-	float vWidth = aspectRatio * vHeight;
+	const float theta = Degrees2Radians(vfov);
+	const float h = tanf(theta / 2.0f);
+	const float vHeight = 2.0f * h;
+	const float vWidth = aspectRatio * vHeight;
 	//float focalLength = 1.0f;
 
 	// calculate position
-	Vector3D w = lookFrom - lookAt;
+	Vector3D w = lookFrom;
+	w -= lookAt;
 	w = w.UnitVector();
-	Vector3D u = up.CrossProduct(w);
+	Vector3D u = vUp.CrossProduct(w);
 	u = u.UnitVector();
 	Vector3D v = w.CrossProduct(u);
+	//v = v.UnitVector();
 
 	m_origin = lookFrom;
-	m_horizontal = u * vWidth;
-	m_vertical = v * vHeight;
-	m_lowerLeftCorner = m_origin - (m_horizontal / 2.0f) - (m_horizontal / 2.0f) - w;
+
+	m_horizontal = u;
+	m_horizontal *= vWidth;
+
+	m_vertical = v;
+	m_vertical *= vHeight;
+
+	m_lowerLeftCorner = m_origin - (m_horizontal / 2.0f) - (m_vertical / 2.0f) - w;
 }
 
 Camera::~Camera() {

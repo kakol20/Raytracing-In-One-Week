@@ -52,7 +52,7 @@ int LinearFeedbackShift::RandInt(const unsigned int bitCount) {
 	unsigned int negative = RandUInt(1);
 
 	for (int i = bitCount - 2; i >= 0; i--) {
-		out = out | (LinearFeedbackShift::RandUInt(1) << i);
+		out = out + (LinearFeedbackShift::RandUInt(1) << i);
 	}
 
 	if (negative == 0b1) out = -out;

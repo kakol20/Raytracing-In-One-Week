@@ -5,7 +5,7 @@
 class Camera {
 public:
 	Camera();
-	Camera(const float aspectRatio, const float vfov, const Vector3D lookFrom, const Vector3D lookAt, Vector3D up);
+	Camera(const float aspectRatio, const float vfov, Vector3D lookFrom, Vector3D lookAt, Vector3D vUp);
 	~Camera();
 
 	Ray GetRay(const float s, const float t);

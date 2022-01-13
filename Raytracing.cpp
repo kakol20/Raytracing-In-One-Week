@@ -23,10 +23,10 @@ Raytracing::Raytracing() {
 
 	// Camera
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
-	Vector3D lookFrom(-2.0f, 2.0f, 1.0f);
-	Vector3D lookAt(0.0f, 0.0f, -1.0f);
-	Vector3D up(0.0f, 1.0f, 0.0f);
-	m_camera = Camera(aspect_ratio, 90.0f, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
+	Vector3D lookFrom(-2.0f, 2.0f,  1.0f);
+	Vector3D lookAt(   0.0f, 0.0f, -1.0f);
+	Vector3D up(       0.0f, 1.0f,  0.0f);
+	m_camera = Camera(aspect_ratio, 39.6f, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 	float R = cosf(PI / 4.0f);
 
@@ -40,7 +40,7 @@ Raytracing::Raytracing() {
 	m_objects.push_back(new Sphere(Vector3D( 0.0f, -100.5f, -1.0f), 100.00f, m_materials["ground"]));
 	m_objects.push_back(new Sphere(Vector3D( 0.0f,    0.0f, -1.0f),   0.50f, m_materials["center"]));
 	m_objects.push_back(new Sphere(Vector3D(-1.0f,    0.0f, -1.0f),   0.50f, m_materials["left"]));
-	m_objects.push_back(new Sphere(Vector3D(-1.0f,    0.0f, -1.0f),   0.45f, m_materials["left"]));
+	m_objects.push_back(new Sphere(Vector3D(-1.0f,    0.0f, -1.0f),  -0.45f, m_materials["left"]));
 	m_objects.push_back(new Sphere(Vector3D( 1.0f,    0.0f, -1.0f),   0.50f, m_materials["right"]));
 		
 	// Other
@@ -120,16 +120,6 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	HitRec rec;
 	//rec.SetMaterial(m_materials["ground"]);
 	if (HitObject(ray, 0.001f, INFINITY, rec)) {
-		//Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
-		//col *= 0.5f/* * 255.0f*/;
-
-		//Vector3D target = rec.GetPoint() + Vector3D::RandomUnitVector() + rec.GetNormal();
-		//Vector3D target = rec.point + RandomInHemisphere(rec.normal);
-
-		//Ray tempRay = Ray(rec.GetPoint(), target - rec.GetPoint());
-
-		//return RayColor(tempRay, depth - 1) * 0.5f;
-
 		Ray scattered;
 		Vector3D attentuation;
 
@@ -180,7 +170,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				pixel_color += RayColor(r, m_maxDepth);
 			}
 
-			float scale = 1.0f / m_samplesPerPixel;
+			float scale = 1.0f / (float)m_samplesPerPixel;
 
 			pixel_color = Vector3D(sqrtf(pixel_color.GetX() * scale), sqrtf(pixel_color.GetY() * scale), sqrtf(pixel_color.GetZ() * scale)); // gamma correction
 
