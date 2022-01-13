@@ -3,6 +3,7 @@
 #include <map>
 #include <thread>
 #include <string>
+#include <fstream>
 
 #include "Camera.h"
 #include "Image.h"
@@ -34,6 +35,8 @@ private:
 	size_t m_nextAvailable;
 
 	void RenderTile(const size_t startIndex);
+
+	std::fstream m_log;
 
 private: // member variables
 	std::vector<Object*> m_objects;

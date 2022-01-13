@@ -35,7 +35,7 @@ void Raytracing::Init() {
 	Vector3D lookFrom(13.0f, 2.0f, 3.0f);
 	Vector3D lookAt(0.0f, 0.0f, 0.0f);
 	Vector3D up(0.0f, 1.0f, 0.0f);
-	Vector3D dist = lookAt - lookFrom;
+	Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
 	m_camera = Camera(aspect_ratio, 0.1f, dist.Magnitude(), 20.0f, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 	m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f));
@@ -92,11 +92,15 @@ bool Raytracing::Run() {
 	const size_t maxThreads = std::thread::hardware_concurrency() - 1;
 	//const size_t maxThreads = 0;
 
-	std::cout << "Max Threads: " << maxThreads << '\n';
+	//runTime.open("images/runTime.txt", std::ios_base::out);
 
-	bool threaded = true;
+	m_log.open("images/log.txt", std::ios_base::out);
+
+	std::cout << "Max Threads: " << maxThreads << '\n';
+	m_log << "Max Threads: " << maxThreads << '\n';
 
 	/*
+	* 	bool threaded = true;
 	for (int x = 0; x < m_imageWidth; x += m_tileSize) {
 		bool outOfBoundsX = x + m_tileSize <= m_imageWidth;
 
@@ -149,10 +153,13 @@ bool Raytracing::Run() {
 	}
 
 	std::cout << "Total tiles: " << m_tiles.size() << '\n';
+	m_log << "Total tiles: " << m_tiles.size() << '\n';
 
-	int max = maxThreads < m_tiles.size() ? maxThreads : m_tiles.size();
-	for (int i = 0; i < max; i++) {
-		std::cout << "Rendering tile #" << m_nextAvailable << '\n';
+	size_t max = maxThreads < m_tiles.size() ? maxThreads : m_tiles.size();
+	for (size_t i = 0; i < max; i++) {
+		/*std::cout << "Rendering tile #" << m_nextAvailable << '\n';
+		m_log << "Rendering tile #" << m_nextAvailable << '\n';*/
+
 		m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
 		m_nextAvailable++;
 	}
@@ -173,11 +180,14 @@ bool Raytracing::Run() {
 void Raytracing::RenderTile(const size_t startIndex) {
 	Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
 
+	std::thread::id thisId = std::this_thread::get_id();
+
 	std::mutex mtx;
 	mtx.lock();
-	if (m_nextAvailable < m_tiles.size()) 		{
-		std::cout << "Rendering tile #" << m_nextAvailable << '\n';
-	}
+
+	std::cout << "Rendered tile #" << std::dec << startIndex << " in thread 0x" << std::hex << thisId << '\n';
+	m_log << "Rendered tile #" << std::dec << startIndex << " in thread 0x" << std::hex << thisId << '\n';
+
 	size_t nextAvailable = m_nextAvailable;
 	m_nextAvailable++;
 
@@ -186,7 +196,6 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	if (nextAvailable < m_tiles.size()) {
 		RenderTile(nextAvailable);
 	}
-	
 }
 
 Raytracing::~Raytracing() {
