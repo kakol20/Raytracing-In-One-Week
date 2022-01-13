@@ -152,6 +152,7 @@
     <ClCompile Include="Filters.cpp" />
     <ClCompile Include="HitRec.cpp" />
     <ClCompile Include="Image.cpp" />
+    <ClCompile Include="Lambertian.cpp" />
     <ClCompile Include="LinearFeedbackShift.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Ray.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="Filters.h" />
     <ClInclude Include="HitRec.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="Lambertian.h" />
     <ClInclude Include="LinearFeedbackShift.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Object.h" />

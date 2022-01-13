@@ -72,6 +72,9 @@
     <ClCompile Include="HitRec.cpp">
       <Filter>Source Files\Object</Filter>
     </ClCompile>
+    <ClCompile Include="Lambertian.cpp">
+      <Filter>Source Files\Object\Material</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="HitRec.h">
       <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Lambertian.h">
+      <Filter>Header Files\Objects\Material</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,9 +1,7 @@
 #pragma once
 #include "Ray.h"
-#include "Vector3D.h"
-#include "Object.h"
-#include "Material.h"
 #include "HitRec.h"
+#include "Lambertian.h"
 
 class Object {
 public:

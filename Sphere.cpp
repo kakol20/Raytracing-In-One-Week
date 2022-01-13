@@ -1,5 +1,6 @@
-#include "Sphere.h"
 #include <math.h>
+
+#include "Sphere.h"
 
 Sphere::Sphere(const Vector3D center, const float radius, Material* mat) {
 	m_pos = center;

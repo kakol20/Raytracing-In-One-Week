@@ -1,4 +1,5 @@
 #include "HitRec.h"
+
 HitRec::HitRec() {
 	m_frontFace = false;
 	m_mat = nullptr;

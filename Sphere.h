@@ -1,6 +1,5 @@
 #pragma once
 #include "Object.h"
-#include "Ray.h"
 
 class Sphere : public Object {
 public:

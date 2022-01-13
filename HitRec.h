@@ -1,7 +1,8 @@
 #pragma once
-#include "Material.h"
-#include "Ray.h"
 #include "Vector3D.h"
+#include "Ray.h"
+
+class Material;
 
 class HitRec {
 public:
@@ -13,12 +14,7 @@ public:
 
 	void SetFaceNormal(Ray& ray, Vector3D& outwardNormal);
 
-public: // Setters & Getters
-	/*m_frontFace = false;
-	m_mat = nullptr;
-	m_normal = Vector3D();
-	m_point = Vector3D();
-	m_t = 0;*/
+//public:
 
 	const bool GetFrontFace();
 	void SetFrontFace(const bool frontFace);
