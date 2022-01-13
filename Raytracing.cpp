@@ -23,21 +23,26 @@ Raytracing::Raytracing() {
 
 	// Camera
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
-	m_camera = Camera(aspect_ratio, 90.0f); // 39.6 deg fov for 50mm focal length
+	Vector3D lookFrom(-2.0f, 2.0f, 1.0f);
+	Vector3D lookAt(0.0f, 0.0f, -1.0f);
+	Vector3D up(0.0f, 1.0f, 0.0f);
+	m_camera = Camera(aspect_ratio, 90.0f, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 	float R = cosf(PI / 4.0f);
 
 	// Create Materials
-	//m_materials["ground"] = new Lambertian(Vector3D(0.8f, 0.8f, 0.0f));
-	m_materials["left"] = new Lambertian(Vector3D(0.0f, 0.0f, 1.0f));
-	m_materials["right"] = new Lambertian(Vector3D(1.0f, 0.0f, 0.0f));
+	m_materials["ground"] = new Lambertian(Vector3D(0.8f, 0.8f, 0.0f));
+	m_materials["center"] = new Lambertian(Vector3D(0.1f, 0.2f, 0.5f));
+	m_materials["left"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.33f);
+	m_materials["right"] = new Metal(Vector3D(0.8f, 0.6f, 0.2f), 0.0f);
 
 	// Create Objects
-	//m_objects.push_back(new Sphere(Vector3D( 0.0f, -600.5f, -1.0f), 600.0f, m_materials["ground"])); // ground sphere
-	m_objects.push_back(new Sphere(Vector3D(-R, 0.0f, -1.0f), R, m_materials["left"]));
-	m_objects.push_back(new Sphere(Vector3D(R, 0.0f, -1.0f), R, m_materials["right"]));
-
-
+	m_objects.push_back(new Sphere(Vector3D( 0.0f, -100.5f, -1.0f), 100.00f, m_materials["ground"]));
+	m_objects.push_back(new Sphere(Vector3D( 0.0f,    0.0f, -1.0f),   0.50f, m_materials["center"]));
+	m_objects.push_back(new Sphere(Vector3D(-1.0f,    0.0f, -1.0f),   0.50f, m_materials["left"]));
+	m_objects.push_back(new Sphere(Vector3D(-1.0f,    0.0f, -1.0f),   0.45f, m_materials["left"]));
+	m_objects.push_back(new Sphere(Vector3D( 1.0f,    0.0f, -1.0f),   0.50f, m_materials["right"]));
+		
 	// Other
 	m_samplesPerPixel = 128;
 	m_maxDepth = 32;

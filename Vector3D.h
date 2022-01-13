@@ -33,10 +33,10 @@ public:
 	const float SqrMagnitude();
 
 	// Other
-	const bool NearZero();
-	const float DotProduct(const Vector3D& copyVector);
-	const Vector3D CrossProduct(const Vector3D& copyVector);
-	const Vector3D UnitVector();
+	bool NearZero();
+	float DotProduct(const Vector3D& copyVector);
+	Vector3D CrossProduct(const Vector3D& copyVector);
+	Vector3D UnitVector();
 
 	// Random
 	static Vector3D Random();
