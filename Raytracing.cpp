@@ -17,7 +17,7 @@ Raytracing::Raytracing() {
 	m_imageHeight = 720;
 
 	// Other
-	m_samplesPerPixel = 64;
+	m_samplesPerPixel = 128;
 	m_maxDepth = 12;
 	m_tileSize = 32;
 
@@ -147,6 +147,8 @@ bool Raytracing::Run() {
 			m_tiles.push_back({ x, y, maxX, maxY });
 		}
 	}
+
+	std::cout << "Total tiles: " << m_tiles.size() << '\n';
 
 	int max = maxThreads < m_tiles.size() ? maxThreads : m_tiles.size();
 	for (int i = 0; i < max; i++) {
