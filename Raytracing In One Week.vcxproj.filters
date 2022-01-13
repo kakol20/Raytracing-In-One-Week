@@ -75,6 +75,9 @@
     <ClCompile Include="Lambertian.cpp">
       <Filter>Source Files\Object\Material</Filter>
     </ClCompile>
+    <ClCompile Include="Metal.cpp">
+      <Filter>Source Files\Object\Material</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -117,6 +120,9 @@
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Lambertian.h">
+      <Filter>Header Files\Objects\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Metal.h">
       <Filter>Header Files\Objects\Material</Filter>
     </ClInclude>
   </ItemGroup>

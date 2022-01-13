@@ -5,7 +5,6 @@
 class Material {
 public:
 	Material() {};
-	Material(const Vector3D& a) {};
 	~Material() {};
 
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) = 0;

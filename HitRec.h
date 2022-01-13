@@ -14,7 +14,7 @@ public:
 
 	void SetFaceNormal(Ray& ray, Vector3D& outwardNormal);
 
-//public:
+public:
 
 	const bool GetFrontFace();
 	void SetFrontFace(const bool frontFace);

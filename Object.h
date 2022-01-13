@@ -16,6 +16,6 @@ public:
 
 protected:
 	Vector3D m_pos;
-	Material* m_mat;
+	Material* m_mat = nullptr;
 
 };

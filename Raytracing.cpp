@@ -2,19 +2,24 @@
 #include <ctime>
 #include <iostream>
 
-#include "Raytracing.h"
 #include "Filters.h"
-#include "Sphere.h"
+#include "Lambertian.h"
 #include "LinearFeedbackShift.h"
+#include "Metal.h"
+#include "Raytracing.h"
+#include "Sphere.h"
 
 bool Image::PrintToConsole = false;
 
 Raytracing::Raytracing() {
+	// Create Materials
+	m_materials["ground"] = new Lambertian(Vector3D(0.8f, 0.8f, 0.0f));
+	m_materials["metal"] = new Metal(Vector3D(0.8f, 0.8f, 0.8f));
 
 	// Create Objects
 	//Sphere sphere1(Vector3D(0, 0, -1), 0.5);
-	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f, nullptr));
-	m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f, nullptr));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f, m_materials["metal"])); // centre sphere
+	m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f, m_materials["ground"])); // ground sphere
 	//m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
 
 	// Image
@@ -92,6 +97,13 @@ Raytracing::~Raytracing() {
 		m_objects[i] = nullptr;
 	}
 	m_objects.clear();
+
+	for (auto it = m_materials.begin(); it != m_materials.end(); it++) {
+		delete (*it).second;
+		(*it).second = nullptr;
+	}
+	m_materials.clear();
+	
 }
 
 const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
@@ -104,11 +116,20 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		//Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
 		//col *= 0.5f/* * 255.0f*/;
 
-		Vector3D target = rec.GetPoint() + Vector3D::RandomUnitVector() + rec.GetNormal();
+		//Vector3D target = rec.GetPoint() + Vector3D::RandomUnitVector() + rec.GetNormal();
 		//Vector3D target = rec.point + RandomInHemisphere(rec.normal);
-		Ray tempRay = Ray(rec.GetPoint(), target - rec.GetPoint());
+		//Ray tempRay = Ray(rec.GetPoint(), target - rec.GetPoint());
 
-		return RayColor(tempRay, depth - 1) * 0.5f;
+		//return RayColor(tempRay, depth - 1) * 0.5f;
+
+		Ray scattered;
+		Vector3D attentuation;
+
+		if (rec.GetMaterial()->Scatter(ray, rec, attentuation, scattered)) {
+			return attentuation * RayColor(scattered, depth - 1);
+		}
+
+		return Vector3D();
 	}
 
 	// draw backround
