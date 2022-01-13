@@ -176,6 +176,11 @@ float Vector3D::SqrMagnitude() {
 	return m_x * m_x + m_y * m_y + m_z * m_z;
 }
 
+const bool Vector3D::NearZero() {
+	const float s = 1e-8f;
+	return fabs(m_x) < s && fabs(m_y) < s && fabs(m_z) < s;
+}
+
 const float Vector3D::DotProduct(const Vector3D& copyVector) {
 	return m_x * copyVector.m_x + m_y * copyVector.m_y + m_z * copyVector.m_z;
 }
@@ -190,19 +195,6 @@ const Vector3D Vector3D::UnitVector() {
 	Vector3D temp = Vector3D(m_x / mag, m_y / mag, m_z / mag);
 	return temp;
 }
-
-//void Vector3D::CrossProduct(const Vector3D& copyVector) {
-//	m_x = m_y * copyVector.m_z - m_z * copyVector.m_y;
-//	m_y = m_z * copyVector.m_x - m_x * copyVector.m_z;
-//	m_z = m_x * copyVector.m_y - m_y * copyVector.m_x;
-//}
-//
-//void Vector3D::UnitVector() {
-//	float mag = Magnitude();
-//	m_x /= mag;
-//	m_y /= mag;
-//	m_z /= mag;
-//}
 
 Vector3D Vector3D::Random() {
 	return Vector3D(LinearFeedbackShift::RandFloat(16), LinearFeedbackShift::RandFloat(16), LinearFeedbackShift::RandFloat(32));

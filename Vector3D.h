@@ -33,6 +33,7 @@ public:
 	const float SqrMagnitude();
 
 	// Other
+	const bool NearZero();
 	const float DotProduct(const Vector3D& copyVector);
 	const Vector3D CrossProduct(const Vector3D& copyVector);
 	const Vector3D UnitVector();

@@ -13,6 +13,10 @@ Lambertian::~Lambertian() {
 
 bool Lambertian::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
 	Vector3D scatterDir = rec.GetNormal() + Vector3D::RandomUnitVector();
+
+	// Catch degenerate scatter direction
+	if (scatterDir.NearZero()) scatterDir = rec.GetNormal();
+
 	scattered = Ray(rec.GetPoint(), scatterDir);
 	attentuation = m_albedo;
 	return true;

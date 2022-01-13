@@ -8,6 +8,10 @@ Sphere::Sphere(const Vector3D center, const float radius, Material* mat) {
 	m_mat = mat;
 }
 
+Sphere::~Sphere() {
+	m_mat = nullptr;
+}
+
 bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	Vector3D oc = ray.GetOrigin() - m_pos;
 

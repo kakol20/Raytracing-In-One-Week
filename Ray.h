@@ -7,6 +7,9 @@ public:
 	Ray();
 	Ray(const Vector3D& orig, const Vector3D& dir);
 
+	//Vector3D& operator=(const Vector3D& copyVector);
+	Ray& operator=(const Ray& copyRay);
+
 	const Vector3D At(const float t);
 
 	~Ray();

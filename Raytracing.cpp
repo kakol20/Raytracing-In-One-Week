@@ -2,19 +2,30 @@
 #include <ctime>
 #include <iostream>
 
-#include "Raytracing.h"
 #include "Filters.h"
-#include "Sphere.h"
+#include "Glass.h"
+#include "Lambertian.h"
 #include "LinearFeedbackShift.h"
+#include "Metal.h"
+#include "Raytracing.h"
+#include "Sphere.h"
 
 bool Image::PrintToConsole = false;
 
 Raytracing::Raytracing() {
+	// Create Materials
+	m_materials["ground"] = new Lambertian(Vector3D(0.8f, 0.8f, 0.0f));
+	m_materials["centre"] = new Lambertian(Vector3D(0.7f, 0.3f, 0.3f));
+	m_materials["left"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.5f);
+	m_materials["right"] = new Metal(Vector3D(0.8f, 0.6f, 0.2f), 1.0f);
 
 	// Create Objects
-	//Sphere sphere1(Vector3D(0, 0, -1), 0.5);
-	m_objects.push_back(new Sphere(Vector3D(0.0f, 0.0f, -1.0f), 0.5f, nullptr));
-	m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f, nullptr));
+	m_objects.push_back(new Sphere(Vector3D( 0.0f, -600.5f, -1.0f), 600.0f, m_materials["ground"])); // ground sphere
+	m_objects.push_back(new Sphere(Vector3D( 0.0f, 0.0f, -1.0f), 0.5f, m_materials["centre"]));
+	m_objects.push_back(new Sphere(Vector3D(-1.0f, 0.0f, -1.0f), -0.4f, m_materials["left"]));
+	m_objects.push_back(new Sphere(Vector3D(-1.0f, 0.0f, -1.0f), 0.5f, m_materials["left"]));
+
+	m_objects.push_back(new Sphere(Vector3D( 1.0f, 0.0f, -1.0f), 0.5f, m_materials["right"]));
 	//m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
 
 	// Image
@@ -33,14 +44,14 @@ Raytracing::Raytracing() {
 
 	// Other
 	m_samplesPerPixel = 128;
-	m_maxDepth = 8;
+	m_maxDepth = 32;
 	m_tileSize = 32;
 }
 
 bool Raytracing::Run() {
 	// Render
 	const size_t maxThreads = std::thread::hardware_concurrency();
-	
+
 	std::cout << "Max Threads: " << maxThreads << '\n';
 
 	bool threaded = true;
@@ -92,6 +103,12 @@ Raytracing::~Raytracing() {
 		m_objects[i] = nullptr;
 	}
 	m_objects.clear();
+
+	for (auto it = m_materials.begin(); it != m_materials.end(); it++) {
+		delete (*it).second;
+		(*it).second = nullptr;
+	}
+	m_materials.clear();
 }
 
 const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
@@ -100,15 +117,26 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 	// draw objects
 	HitRec rec;
+	//rec.SetMaterial(m_materials["ground"]);
 	if (HitObject(ray, 0.001f, INFINITY, rec)) {
 		//Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
 		//col *= 0.5f/* * 255.0f*/;
 
-		Vector3D target = rec.GetPoint() + Vector3D::RandomUnitVector() + rec.GetNormal();
+		//Vector3D target = rec.GetPoint() + Vector3D::RandomUnitVector() + rec.GetNormal();
 		//Vector3D target = rec.point + RandomInHemisphere(rec.normal);
-		Ray tempRay = Ray(rec.GetPoint(), target - rec.GetPoint());
 
-		return RayColor(tempRay, depth - 1) * 0.5f;
+		//Ray tempRay = Ray(rec.GetPoint(), target - rec.GetPoint());
+
+		//return RayColor(tempRay, depth - 1) * 0.5f;
+
+		Ray scattered;
+		Vector3D attentuation;
+
+		if (rec.GetMaterial() == nullptr || rec.GetMaterial()->Scatter(ray, rec, attentuation, scattered)) {
+			return attentuation * RayColor(scattered, depth - 1);
+		}
+
+		return Vector3D(0.0f, 0.0f, 0.0f);
 	}
 
 	// draw backround

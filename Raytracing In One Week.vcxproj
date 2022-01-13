@@ -150,11 +150,13 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Filters.cpp" />
+    <ClCompile Include="Glass.cpp" />
     <ClCompile Include="HitRec.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Lambertian.cpp" />
     <ClCompile Include="LinearFeedbackShift.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Metal.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Raytracing.cpp" />
     <ClCompile Include="Sphere.cpp" />
@@ -163,11 +165,13 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Filters.h" />
+    <ClInclude Include="Glass.h" />
     <ClInclude Include="HitRec.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Lambertian.h" />
     <ClInclude Include="LinearFeedbackShift.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="Metal.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Raytracing.h" />

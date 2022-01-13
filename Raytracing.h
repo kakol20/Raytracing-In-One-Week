@@ -1,12 +1,12 @@
 #pragma once
 #include <vector>
+#include <map>
 #include <thread>
+#include <string>
 
-#include "Image.h"
-#include "Ray.h"
-#include "Vector3D.h"
-#include "Object.h"
 #include "Camera.h"
+#include "Image.h"
+#include "Object.h"
 
 class Raytracing {
 public:
@@ -26,6 +26,7 @@ private:
 private: // member variables
 	std::vector<Object*> m_objects;
 	std::vector<std::thread> m_threads;
+	std::map<std::string, Material*> m_materials;
 
 	Camera m_camera;
 	Image m_render;
