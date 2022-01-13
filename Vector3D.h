@@ -44,6 +44,7 @@ public:
 	static Vector3D RandomInHemisphere(const Vector3D& normal);
 	static Vector3D RandomInUnitSphere();
 	static Vector3D RandomUnitVector();
+	static Vector3D RandomInUnitDisk();
 
 	~Vector3D();
 

@@ -237,5 +237,15 @@ Vector3D Vector3D::RandomUnitVector() {
 	return temp;
 }
 
+Vector3D Vector3D::RandomInUnitDisk() {
+	while (true) {
+		Vector3D p = Vector3D(LinearFeedbackShift::RandFloatRange(-1.0f, 1.0f, 32), LinearFeedbackShift::RandFloatRange(-1.0f, 1.0f, 32), 0.0f);
+
+		if (p.Magnitude() >= 1.0f) continue;
+
+		return p;
+	}
+}
+
 Vector3D::~Vector3D() {
 }
