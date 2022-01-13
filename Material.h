@@ -13,4 +13,10 @@ private:
 
 protected:
 	Vector3D m_albedo;
+
+	Vector3D Reflected(Vector3D v, Vector3D n) {
+		Vector3D temp = n * v.DotProduct(n);
+		temp *= 2.0f;
+		return v - temp;
+	}
 };

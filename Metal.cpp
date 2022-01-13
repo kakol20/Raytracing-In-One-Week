@@ -20,9 +20,3 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	return scattered.GetDirection().DotProduct(rec.GetNormal()) > 0.0f;
 }
-
-Vector3D Metal::Reflected(Vector3D v, Vector3D n) {
-	Vector3D temp = n * v.DotProduct(n);
-	temp *= 2.0f;
-	return v - temp;
-}

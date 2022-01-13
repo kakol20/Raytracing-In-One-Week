@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Filters.h"
+#include "Glass.h"
 #include "Lambertian.h"
 #include "LinearFeedbackShift.h"
 #include "Metal.h"
@@ -15,13 +16,15 @@ Raytracing::Raytracing() {
 	// Create Materials
 	m_materials["ground"] = new Lambertian(Vector3D(0.8f, 0.8f, 0.0f));
 	m_materials["centre"] = new Lambertian(Vector3D(0.7f, 0.3f, 0.3f));
-	m_materials["left"] = new Metal(Vector3D(0.8f, 0.8f, 0.8f), 0.3f);
+	m_materials["left"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.5f);
 	m_materials["right"] = new Metal(Vector3D(0.8f, 0.6f, 0.2f), 1.0f);
 
 	// Create Objects
 	m_objects.push_back(new Sphere(Vector3D( 0.0f, -600.5f, -1.0f), 600.0f, m_materials["ground"])); // ground sphere
 	m_objects.push_back(new Sphere(Vector3D( 0.0f, 0.0f, -1.0f), 0.5f, m_materials["centre"]));
+	m_objects.push_back(new Sphere(Vector3D(-1.0f, 0.0f, -1.0f), -0.4f, m_materials["left"]));
 	m_objects.push_back(new Sphere(Vector3D(-1.0f, 0.0f, -1.0f), 0.5f, m_materials["left"]));
+
 	m_objects.push_back(new Sphere(Vector3D( 1.0f, 0.0f, -1.0f), 0.5f, m_materials["right"]));
 	//m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
 
@@ -41,7 +44,7 @@ Raytracing::Raytracing() {
 
 	// Other
 	m_samplesPerPixel = 128;
-	m_maxDepth = 12;
+	m_maxDepth = 32;
 	m_tileSize = 32;
 }
 
