@@ -66,7 +66,7 @@ Vector3D& Vector3D::operator/=(const Vector3D& copyVector) {
 /// <param name="scalar"></param>
 /// <returns></returns>
 const Vector3D Vector3D::operator/(const float scalar) const {
-	Vector3D temp(*this);
+	Vector3D temp(m_x, m_y, m_z);
 	temp /= scalar;
 	return temp;
 }
@@ -90,7 +90,7 @@ Vector3D& Vector3D::operator/=(const float scalar) {
 /// <param name="copyVector3d"></param>
 /// <returns></returns>
 const Vector3D Vector3D::operator*(const Vector3D& copyVector) const {
-	Vector3D temp(*this);
+	Vector3D temp(m_x, m_y, m_z);
 	temp *= copyVector;
 	return temp;
 }
@@ -114,7 +114,7 @@ Vector3D& Vector3D::operator*=(const Vector3D& copyVector) {
 /// <param name="scalar"></param>
 /// <returns></returns>
 const Vector3D Vector3D::operator*(const float scalar) const {
-	Vector3D temp(*this);
+	Vector3D temp(m_x, m_y, m_z);
 	temp *= scalar;
 	return temp;
 }
@@ -133,7 +133,7 @@ Vector3D& Vector3D::operator*=(const float scalar) {
 }
 
 const Vector3D Vector3D::operator+(const Vector3D& copyVector) const {
-	Vector3D temp(*this);
+	Vector3D temp(m_x, m_y, m_z);
 	temp += copyVector;
 	return temp;
 }
@@ -147,7 +147,7 @@ Vector3D& Vector3D::operator+=(const Vector3D& copyVector) {
 }
 
 const Vector3D Vector3D::operator-(const Vector3D& copyVector) const {
-	Vector3D temp(*this);
+	Vector3D temp(m_x, m_y, m_z);
 	temp -= copyVector;
 	return temp;
 }
@@ -164,44 +164,45 @@ Vector3D& Vector3D::operator-=(const Vector3D& copyVector) {
 /// </summary>
 /// <returns></returns>
 const float Vector3D::Magnitude() {
-	return sqrt(SqrMagnitude());
+	return sqrtf(SqrMagnitude());
 }
 
 /// <summary>
 /// Get length of vector squared
 /// </summary>
 /// <returns></returns>
-const
-float Vector3D::SqrMagnitude() {
+const float Vector3D::SqrMagnitude() {
 	return m_x * m_x + m_y * m_y + m_z * m_z;
 }
 
-const bool Vector3D::NearZero() {
+bool Vector3D::NearZero() {
 	const float s = 1e-8f;
 	return fabs(m_x) < s && fabs(m_y) < s && fabs(m_z) < s;
 }
 
-const float Vector3D::DotProduct(const Vector3D& copyVector) {
+float Vector3D::DotProduct(const Vector3D& copyVector) {
 	return m_x * copyVector.m_x + m_y * copyVector.m_y + m_z * copyVector.m_z;
 }
 
-const Vector3D Vector3D::CrossProduct(const Vector3D& copyVector) {
-	Vector3D temp = Vector3D(m_y * copyVector.m_z - m_z * copyVector.m_y, m_z * copyVector.m_x - m_x * copyVector.m_z, m_x * copyVector.m_y - m_y * copyVector.m_x);
+Vector3D Vector3D::CrossProduct(const Vector3D& copyVector) {
+	Vector3D temp = Vector3D(m_y * copyVector.m_z - m_z * copyVector.m_y, 
+							 m_z * copyVector.m_x - m_x * copyVector.m_z, 
+							 m_x * copyVector.m_y - m_y * copyVector.m_x);
 	return temp;
 }
 
-const Vector3D Vector3D::UnitVector() {
-	float mag = Magnitude();
-	Vector3D temp = Vector3D(m_x / mag, m_y / mag, m_z / mag);
+Vector3D Vector3D::UnitVector() {
+	float mag = this->Magnitude();
+	Vector3D temp(m_x / mag, m_y / mag, m_z / mag);
 	return temp;
 }
 
 Vector3D Vector3D::Random() {
-	return Vector3D(LinearFeedbackShift::RandFloat(16), LinearFeedbackShift::RandFloat(16), LinearFeedbackShift::RandFloat(32));
+	return Vector3D(LinearFeedbackShift::RandFloat(32), LinearFeedbackShift::RandFloat(32), LinearFeedbackShift::RandFloat(32));
 }
 
 Vector3D Vector3D::Random(const float min, const float max) {
-	return Vector3D(LinearFeedbackShift::RandFloatRange(min, max, 16), LinearFeedbackShift::RandFloatRange(min, max, 16), LinearFeedbackShift::RandFloatRange(min, max, 32));
+	return Vector3D(LinearFeedbackShift::RandFloatRange(min, max, 32), LinearFeedbackShift::RandFloatRange(min, max, 32), LinearFeedbackShift::RandFloatRange(min, max, 32));
 }
 
 Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
@@ -211,7 +212,7 @@ Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
 		return inUnitSphere;
 	}
 	else {
-		inUnitSphere *= 1.0f;
+		inUnitSphere *= -1.0f;
 		return inUnitSphere;
 	}
 
@@ -234,6 +235,16 @@ Vector3D Vector3D::RandomUnitVector() {
 	Vector3D temp = RandomInUnitSphere().UnitVector();
 	//temp.UnitVector();
 	return temp;
+}
+
+Vector3D Vector3D::RandomInUnitDisk() {
+	while (true) {
+		Vector3D p = Vector3D(LinearFeedbackShift::RandFloatRange(-1.0f, 1.0f, 32), LinearFeedbackShift::RandFloatRange(-1.0f, 1.0f, 32), 0.0f);
+
+		if (p.Magnitude() >= 1.0f) continue;
+
+		return p;
+	}
 }
 
 Vector3D::~Vector3D() {

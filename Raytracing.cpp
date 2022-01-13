@@ -13,44 +13,82 @@
 bool Image::PrintToConsole = false;
 
 Raytracing::Raytracing() {
-	// Create Materials
-	m_materials["ground"] = new Lambertian(Vector3D(0.8f, 0.8f, 0.0f));
-	m_materials["centre"] = new Lambertian(Vector3D(0.7f, 0.3f, 0.3f));
-	m_materials["left"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.5f);
-	m_materials["right"] = new Metal(Vector3D(0.8f, 0.6f, 0.2f), 1.0f);
-
-	// Create Objects
-	m_objects.push_back(new Sphere(Vector3D( 0.0f, -600.5f, -1.0f), 600.0f, m_materials["ground"])); // ground sphere
-	m_objects.push_back(new Sphere(Vector3D( 0.0f, 0.0f, -1.0f), 0.5f, m_materials["centre"]));
-	m_objects.push_back(new Sphere(Vector3D(-1.0f, 0.0f, -1.0f), -0.4f, m_materials["left"]));
-	m_objects.push_back(new Sphere(Vector3D(-1.0f, 0.0f, -1.0f), 0.5f, m_materials["left"]));
-
-	m_objects.push_back(new Sphere(Vector3D( 1.0f, 0.0f, -1.0f), 0.5f, m_materials["right"]));
-	//m_objects.push_back(new Sphere(Vector3D(0.0f, -600.5f, -1.0f), 600.0f));
-
-	// Image
 	m_imageWidth = 1280;
 	m_imageHeight = 720;
 
+	// Other
+	m_samplesPerPixel = 64;
+	m_maxDepth = 12;
+	m_tileSize = 64;
+}
+
+void Raytracing::Init() {
+	float PI = 3.14159265f;
+
+	// Image
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 
 	// Camera
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
-	float viewport_height = 2.0f;
-	float viewport_width = aspect_ratio * viewport_height;
-	float focal_length = 1.0f;
+	Vector3D lookFrom(13.0f, 2.0f, 3.0f);
+	Vector3D lookAt(0.0f, 0.0f, 0.0f);
+	Vector3D up(0.0f, 1.0f, 0.0f);
+	Vector3D dist = lookAt - lookFrom;
+	m_camera = Camera(aspect_ratio, 0.1f, 10.0f, 20.0f, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
-	m_camera = Camera(aspect_ratio, viewport_height, viewport_width, focal_length);
+	m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
 
-	// Other
-	m_samplesPerPixel = 128;
-	m_maxDepth = 32;
-	m_tileSize = 32;
+	// Procedural Objects
+	int index = 0;
+	for (int a = -11; a < 11; a++) {
+		for (int b = -11; b < 11; b++) {
+			float chooseMat = LinearFeedbackShift::RandFloat(32);
+			Vector3D center((float)a + 0.9f * LinearFeedbackShift::RandFloat(32), 0.2f, (float)b + 0.9f * LinearFeedbackShift::RandFloat(32));
+
+			Vector3D dist2 = center - Vector3D(4.0f, 2.0f, 0.0f);
+
+			if (dist2.Magnitude() > 0.9f) {
+				if (chooseMat < 0.8f) {
+					// diffuse
+					Vector3D albedo = Vector3D::Random() * Vector3D::Random();
+					//albedo = albedo.UnitVector() * LinearFeedbackShift::RandFloatRange(0.5f, 0.75f, 32);
+					m_proceduralMats.push_back(new Lambertian(albedo));
+
+					m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
+				}
+				else if (chooseMat < 0.95f) {
+					// metal
+					Vector3D albedo = Vector3D::Random(0.5f, 1.0f);
+					float roughness = LinearFeedbackShift::RandFloat(32);
+					m_proceduralMats.push_back(new Metal(albedo, roughness));
+
+					m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
+				}
+				else {
+					m_proceduralMats.push_back(new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.33f));
+					m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
+				}
+				index++;
+			}
+		}
+	}
+
+	// Create Materials
+	m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.33f);
+	m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f));
+	m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f);
+
+	// Create Objects
+	m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
+	m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
+	m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
 }
 
 bool Raytracing::Run() {
 	// Render
-	const size_t maxThreads = std::thread::hardware_concurrency();
+	const size_t maxThreads = std::thread::hardware_concurrency() - 1;
+	//const size_t maxThreads = 0;
 
 	std::cout << "Max Threads: " << maxThreads << '\n';
 
@@ -68,7 +106,7 @@ bool Raytracing::Run() {
 			if (threaded) {
 				m_threads.push_back(std::thread(&Raytracing::Render, this, x, y, maxX, maxY));
 
-				if (m_threads.size() == maxThreads) {
+				if (maxThreads > 0 && m_threads.size() == maxThreads) {
 					for (size_t i = 0; i < m_threads.size(); i++) {
 						m_threads[i].join();
 					}
@@ -109,6 +147,12 @@ Raytracing::~Raytracing() {
 		(*it).second = nullptr;
 	}
 	m_materials.clear();
+
+	for (auto it = m_proceduralMats.begin(); it != m_proceduralMats.end(); it++) {
+		delete (*it);
+		*it = nullptr;
+	}
+	m_proceduralMats.clear();
 }
 
 const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
@@ -119,16 +163,6 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	HitRec rec;
 	//rec.SetMaterial(m_materials["ground"]);
 	if (HitObject(ray, 0.001f, INFINITY, rec)) {
-		//Vector3D col = rec.normal + Vector3D(1.0f, 1.0f, 1.0f);
-		//col *= 0.5f/* * 255.0f*/;
-
-		//Vector3D target = rec.GetPoint() + Vector3D::RandomUnitVector() + rec.GetNormal();
-		//Vector3D target = rec.point + RandomInHemisphere(rec.normal);
-
-		//Ray tempRay = Ray(rec.GetPoint(), target - rec.GetPoint());
-
-		//return RayColor(tempRay, depth - 1) * 0.5f;
-
 		Ray scattered;
 		Vector3D attentuation;
 
@@ -179,7 +213,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				pixel_color += RayColor(r, m_maxDepth);
 			}
 
-			float scale = 1.0f / m_samplesPerPixel;
+			float scale = 1.0f / (float)m_samplesPerPixel;
 
 			pixel_color = Vector3D(sqrtf(pixel_color.GetX() * scale), sqrtf(pixel_color.GetY() * scale), sqrtf(pixel_color.GetZ() * scale)); // gamma correction
 

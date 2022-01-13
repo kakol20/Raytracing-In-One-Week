@@ -12,6 +12,8 @@ class Raytracing {
 public:
 	Raytracing();
 
+	void Init();
+
 	bool Run();
 
 	~Raytracing();
@@ -27,6 +29,7 @@ private: // member variables
 	std::vector<Object*> m_objects;
 	std::vector<std::thread> m_threads;
 	std::map<std::string, Material*> m_materials;
+	std::vector<Material*> m_proceduralMats;
 
 	Camera m_camera;
 	Image m_render;
