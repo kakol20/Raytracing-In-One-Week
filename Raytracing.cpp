@@ -19,7 +19,7 @@ Raytracing::Raytracing() {
 	// Other
 	m_samplesPerPixel = 64;
 	m_maxDepth = 12;
-	m_tileSize = 64;
+	m_tileSize = 256;
 }
 
 void Raytracing::Init() {
@@ -34,7 +34,7 @@ void Raytracing::Init() {
 	Vector3D lookAt(0.0f, 0.0f, 0.0f);
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	Vector3D dist = lookAt - lookFrom;
-	m_camera = Camera(aspect_ratio, 0.1f, 10.0f, 20.0f, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
+	m_camera = Camera(aspect_ratio, 0.1f, dist.Magnitude(), 20.0f, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 	m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f));
 	m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
@@ -87,7 +87,7 @@ void Raytracing::Init() {
 
 bool Raytracing::Run() {
 	// Render
-	const size_t maxThreads = std::thread::hardware_concurrency() - 1;
+	const size_t maxThreads = std::thread::hardware_concurrency();
 	//const size_t maxThreads = 0;
 
 	std::cout << "Max Threads: " << maxThreads << '\n';
@@ -107,6 +107,8 @@ bool Raytracing::Run() {
 				m_threads.push_back(std::thread(&Raytracing::Render, this, x, y, maxX, maxY));
 
 				if (maxThreads > 0 && m_threads.size() == maxThreads) {
+					std::cout << m_threads.size() << " threads used\n";
+
 					for (size_t i = 0; i < m_threads.size(); i++) {
 						m_threads[i].join();
 					}
@@ -120,6 +122,7 @@ bool Raytracing::Run() {
 	}
 
 	if (threaded) {
+		std::cout << m_threads.size() << " threads used\n";
 		for (size_t i = 0; i < m_threads.size(); i++) {
 			m_threads[i].join();
 		}
