@@ -13,6 +13,7 @@
 bool Image::PrintToConsole = false;
 
 Raytracing::Raytracing() {
+	// default settings
 	m_imageWidth = 1280;
 	m_imageHeight = 720;
 
@@ -21,11 +22,90 @@ Raytracing::Raytracing() {
 	m_maxDepth = 12;
 	m_tileSize = 32;
 
+	m_aperture = 0.1f;
+	m_verticalFOV = 20.0f;
+
 	m_nextAvailable = 0;
 }
 
 void Raytracing::Init() {
-	float PI = 3.14159265f;
+	// settings
+	// get settings.cfg
+	std::fstream settings;
+
+	settings.open("settings.cfg", std::ios_base::in);
+
+	if (settings.is_open()) {
+		// settings.cfg found
+		while (!settings.eof()) {
+			String line;
+			settings >> line;
+
+			std::cout << line;
+			std::cout << '\n';
+
+			//std::cout << line.GetFirst("=") << " = " << String::ToInt(line.GetSecond("=")) << "\n\n";
+			String first = line.GetFirst("=");
+
+			if (first == "aperture") {
+				// float
+				m_aperture = String::ToFloat(line.GetSecond("="));
+			}
+			else if (first == "imageHeight") {
+				m_imageHeight = String::ToInt(line.GetSecond("="));
+			}
+			else if (first == "imageWidth") {
+				m_imageWidth = String::ToInt(line.GetSecond("="));
+			}
+			else if (first == "maxDepth") {
+				m_maxDepth = String::ToInt(line.GetSecond("="));
+			}
+			else if (first == "randomSeed") {
+				LinearFeedbackShift::Seed = (unsigned int)String::ToInt(line.GetSecond("="));
+			}
+			else if (first == "samplesPerPixel") {
+				m_samplesPerPixel = String::ToInt(line.GetSecond("="));
+			}
+			else if (first == "tileSize") {
+				m_tileSize = String::ToInt(line.GetSecond("="));
+			}
+			else if (first == "verticalFOV") {
+				// float
+				m_verticalFOV = String::ToFloat(line.GetSecond("="));
+			}
+		}
+
+		system("pause");
+
+		std::cout << '\n';
+
+		settings.close();
+		//
+	}
+	else {
+		// create settings.cfg
+		settings.close();
+
+		settings.open("settings.cfg", std::ios_base::out);
+		settings << "#Image Settings\n";
+		settings << "imageHeight=" << m_imageHeight << '\n';
+		settings << "imageWidth=" << m_imageWidth << '\n';
+
+		settings << "#Render Settings\n";
+		settings << "maxDepth=" << m_maxDepth << '\n';
+		settings << "samplesPerPixel=" << m_samplesPerPixel << '\n';
+		settings << "tileSize=" << m_tileSize << '\n';
+
+		settings << "#Camera Settings\n";
+		settings << "aperture=" << m_aperture << '\n';
+		settings << "##In degrees\n";
+		settings << "verticalFOV=" << m_verticalFOV << '\n';
+
+		settings << "#Max Seed Value " << std::numeric_limits<unsigned int>::max() << "\n";
+		settings << "randomSeed=" << LinearFeedbackShift::Seed;
+
+		settings.close();
+	}
 
 	// Image
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
@@ -36,7 +116,7 @@ void Raytracing::Init() {
 	Vector3D lookAt(0.0f, 0.0f, 0.0f);
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
-	m_camera = Camera(aspect_ratio, 0.1f, dist.Magnitude(), 20.0f, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
+	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 	m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f));
 	m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
@@ -94,47 +174,10 @@ bool Raytracing::Run() {
 
 	//runTime.open("images/runTime.txt", std::ios_base::out);
 
-	m_log.open("images/log.txt", std::ios_base::out);
+	m_log.open("log.txt", std::ios_base::out);
 
 	std::cout << "Max Threads: " << maxThreads << '\n';
 	m_log << "Max Threads: " << maxThreads << '\n';
-
-	/*
-	* 	bool threaded = true;
-	for (int x = 0; x < m_imageWidth; x += m_tileSize) {
-		bool outOfBoundsX = x + m_tileSize <= m_imageWidth;
-
-		for (int y = 0; y < m_imageHeight; y += m_tileSize) {
-			bool outOfBoundsY = y + m_tileSize <= m_imageHeight;
-
-			int maxX = outOfBoundsX ? x + m_tileSize : m_imageWidth;
-			int maxY = outOfBoundsY ? y + m_tileSize : m_imageHeight;
-
-			if (threaded) {
-				m_threads.push_back(std::thread(&Raytracing::Render, this, x, y, maxX, maxY));
-
-				if (maxThreads > 0 && m_threads.size() == maxThreads) {
-					std::cout << m_threads.size() << " threads used\n";
-
-					for (size_t i = 0; i < m_threads.size(); i++) {
-						m_threads[i].join();
-					}
-					m_threads.clear();
-				}
-			}
-			else {
-				Render(x, y, x + m_tileSize, y + m_tileSize);
-			}
-		}
-	}
-
-	if (threaded) {
-		std::cout << m_threads.size() << " threads used\n";
-		for (size_t i = 0; i < m_threads.size(); i++) {
-			m_threads[i].join();
-		}
-	}
-	*/
 
 	/*std::vector<Tile> tiles;*/
 	size_t nextAvailable = 0;
@@ -170,7 +213,7 @@ bool Raytracing::Run() {
 
 	OrderedDithering(m_render, DitherFilter::FULLCOLOR, Threshold::ORDERED_8, 255);
 
-	m_render.Write("images/render.png");
+	m_render.Write("render.png");
 
 	if (Image::PrintToConsole) system("pause");
 

@@ -3,14 +3,11 @@
 #include <chrono>
 #include <fstream>
 
+unsigned int LinearFeedbackShift::Seed = 42069;
+
 Raytracing raytracing;
 
-unsigned int LinearFeedbackShift::Seed = 13012022;
-
 int main() {
-	std::time_t current_time = time(0);
-	//LinearFeedbackShift::Seed = static_cast<unsigned int>(current_time);
-
 	raytracing.Init();
 
 	auto begin = std::chrono::high_resolution_clock::now();
@@ -22,7 +19,7 @@ int main() {
 	//float elapsedF = std::static_
 
 	std::fstream runTime;
-	runTime.open("images/runTime.txt", std::ios_base::out);
+	runTime.open("runTime.txt", std::ios_base::out);
 
 	if (runTime.is_open()) {
 		runTime << "Elapsed Time: " << elapsed << '\n';

@@ -2,12 +2,12 @@
 #include <vector>
 #include <map>
 #include <thread>
-#include <string>
 #include <fstream>
 
 #include "Camera.h"
 #include "Image.h"
 #include "Object.h"
+#include "String.h"
 
 class Raytracing {
 public:
@@ -41,11 +41,12 @@ private:
 private: // member variables
 	std::vector<Object*> m_objects;
 	std::vector<std::thread> m_threads;
-	std::map<std::string, Material*> m_materials;
+	std::map<String, Material*> m_materials;
 	std::vector<Material*> m_proceduralMats;
 
 	Camera m_camera;
 	Image m_render;
 
 	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_maxDepth, m_tileSize;
+	float m_aperture, m_verticalFOV;
 };

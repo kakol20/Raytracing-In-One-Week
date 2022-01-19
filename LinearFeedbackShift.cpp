@@ -79,11 +79,16 @@ unsigned int LinearFeedbackShift::RandUInt(const unsigned int bitCount) {
 
 	std::mutex mtx;
 
+	if (LinearFeedbackShift::Seed == 0) {
+		std::time_t current_time = time(0);
+		LinearFeedbackShift::Seed = static_cast<unsigned int>(current_time);
+	}
+
 	mtx.lock();
 	for (int i = bitCount - 1; i >= 0; i--) {
 		out = out | ((LinearFeedbackShift::Seed & 0b1) << i);
 
-		unsigned int newBit = LinearFeedbackShift::Seed & (LinearFeedbackShift::Seed >> 1) ^ (LinearFeedbackShift::Seed >> 2) ^ (LinearFeedbackShift::Seed >> 22);
+		unsigned int newBit = LinearFeedbackShift::Seed ^ (LinearFeedbackShift::Seed >> 1) ^ (LinearFeedbackShift::Seed >> 2) ^ (LinearFeedbackShift::Seed >> 22);
 		newBit = newBit & 1;
 
 		LinearFeedbackShift::Seed = (LinearFeedbackShift::Seed >> 1) | (newBit << 31);
