@@ -75,7 +75,7 @@ void Raytracing::Init() {
 			}
 		}
 
-		system("pause");
+		//system("pause");
 
 		std::cout << '\n';
 
@@ -163,13 +163,14 @@ void Raytracing::Init() {
 
 	// Create Objects
 	m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
 	m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
 	m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
 }
 
 bool Raytracing::Run() {
 	// Render
-	const size_t maxThreads = std::thread::hardware_concurrency() - 1;
+	const size_t maxThreads = std::thread::hardware_concurrency();
 	//const size_t maxThreads = 0;
 
 	//runTime.open("images/runTime.txt", std::ios_base::out);
@@ -182,21 +183,50 @@ bool Raytracing::Run() {
 	/*std::vector<Tile> tiles;*/
 	size_t nextAvailable = 0;
 
-	for (int x = 0; x < m_imageWidth; x += m_tileSize) {
-		bool outOfBoundsX = x + m_tileSize <= m_imageWidth;
+	int maxXTiles = m_imageWidth / m_tileSize;
+	int maxYTiles = m_imageHeight / m_tileSize;
+	int maxTiles = maxXTiles * maxYTiles;
 
-		for (int y = 0; y < m_imageHeight; y += m_tileSize) {
-			bool outOfBoundsY = y + m_tileSize <= m_imageHeight;
+	int xTileSize = (int)roundf(m_imageWidth / (float)maxXTiles);
+	int yTileSize = (int)roundf(m_imageHeight / (float)maxYTiles);
 
-			int maxX = outOfBoundsX ? x + m_tileSize : m_imageWidth;
-			int maxY = outOfBoundsY ? y + m_tileSize : m_imageHeight;
+	int widthModulo = m_imageWidth % maxXTiles;
+	int heightModulo = m_imageHeight % maxYTiles;
+
+	int x = 0;
+	while (x < m_imageWidth) {
+		int addX = widthModulo > 0 ? xTileSize + 1 : xTileSize;
+
+		int maxX = x + addX;
+		maxX = maxX > m_imageWidth ? m_imageWidth : maxX;
+
+		int l_heightModulo = heightModulo;
+
+		int y = 0;
+		while (y < m_imageHeight) {
+			int addY = l_heightModulo > 0 ? yTileSize + 1 : yTileSize;
+
+			int maxY = y + addY;
+			maxY = maxY > m_imageHeight ? m_imageHeight : maxY;
+
+			if (maxX > m_imageWidth || maxY > m_imageHeight) {
+				y = y + 0;
+			}
 
 			m_tiles.push_back({ x, y, maxX, maxY });
+
+			y = maxY;
+			l_heightModulo--;
 		}
+
+		x = maxX;
+		widthModulo--;
 	}
 
 	std::cout << "Total tiles: " << m_tiles.size() << '\n';
 	m_log << "Total tiles: " << m_tiles.size() << '\n';
+
+	system("pause");
 
 	size_t max = maxThreads < m_tiles.size() ? maxThreads : m_tiles.size();
 	for (size_t i = 0; i < max; i++) {
