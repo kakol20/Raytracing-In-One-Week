@@ -49,4 +49,8 @@ private: // member variables
 
 	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_maxDepth, m_tileSize;
 	float m_aperture, m_verticalFOV;
+
+	bool m_renderNormals;
+	bool m_renderAlbedo;
+	String m_renderMode;
 };

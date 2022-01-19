@@ -22,10 +22,10 @@ public:
 	Material* GetMaterial();
 	void SetMaterial(Material* mat);
 
-	const Vector3D GetNormal();
+	Vector3D GetNormal();
 	void SetNormal(const Vector3D normal);
 
-	const Vector3D GetPoint();
+	Vector3D GetPoint();
 	void SetPoint(const Vector3D point);
 
 	const float GetT();

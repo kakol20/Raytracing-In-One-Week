@@ -26,6 +26,25 @@ Raytracing::Raytracing() {
 	m_verticalFOV = 20.0f;
 
 	m_nextAvailable = 0;
+
+	m_renderMode = "albedo";
+
+	if (m_renderMode == "normal") {
+		m_renderNormals = true;
+		m_renderAlbedo = false;
+	}
+	else if (m_renderMode == "albedo") {
+		m_renderNormals = false;
+		m_renderAlbedo = true;
+	}
+	else if (m_renderMode == "diffuse") {
+		m_renderNormals = false;
+		m_renderAlbedo = false;
+	}
+	else {
+		m_renderNormals = false;
+		m_renderAlbedo = false;
+	}
 }
 
 void Raytracing::Init() {
@@ -60,6 +79,26 @@ void Raytracing::Init() {
 			else if (first == "maxDepth") {
 				m_maxDepth = String::ToInt(line.GetSecond("="));
 			}
+			else if (first == "renderMode") {
+				m_renderMode = line.GetSecond("=");
+
+				if (m_renderMode == "normal") {
+					m_renderNormals = true;
+					m_renderAlbedo = false;
+				}
+				else if (m_renderMode == "albedo") {
+					m_renderNormals = false;
+					m_renderAlbedo = true;
+				}
+				else if (m_renderMode == "diffuse") {
+					m_renderNormals = false;
+					m_renderAlbedo = false;
+				}
+				else {
+					m_renderNormals = false;
+					m_renderAlbedo = false;
+				}
+			}
 			else if (first == "randomSeed") {
 				LinearFeedbackShift::Seed = (unsigned int)String::ToInt(line.GetSecond("="));
 			}
@@ -93,6 +132,8 @@ void Raytracing::Init() {
 
 		settings << "#Render Settings\n";
 		settings << "maxDepth=" << m_maxDepth << '\n';
+		settings << "##diffuse, normal, albedo\n";
+		settings << "renderMode=" << m_renderMode << '\n';
 		settings << "samplesPerPixel=" << m_samplesPerPixel << '\n';
 		settings << "tileSize=" << m_tileSize << '\n';
 
@@ -243,7 +284,15 @@ bool Raytracing::Run() {
 
 	OrderedDithering(m_render, DitherFilter::FULLCOLOR, Threshold::ORDERED_8, 255);
 
-	m_render.Write("render.png");
+	if (m_renderNormals) {
+		m_render.Write("render_normal.png");
+	}
+	else if (m_renderAlbedo) {
+		m_render.Write("render_albedo.png");
+	}
+	else {
+		m_render.Write("render_diffuse.png");
+	}
 
 	if (Image::PrintToConsole) system("pause");
 
@@ -304,18 +353,31 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		Vector3D attentuation;
 
 		if (rec.GetMaterial() == nullptr || rec.GetMaterial()->Scatter(ray, rec, attentuation, scattered)) {
-			return attentuation * RayColor(scattered, depth - 1);
+			if (m_renderNormals) {
+				return rec.GetNormal();
+			}
+			else if (m_renderAlbedo) {
+				return attentuation;
+			}
+			else {
+				return attentuation * RayColor(scattered, depth - 1);
+			}
 		}
 
 		return Vector3D(0.0f, 0.0f, 0.0f);
 	}
 
 	// draw backround
-	Vector3D unit_direction = ray.GetDirection().UnitVector();
-	//unit_direction.UnitVector();
-	float t = 0.5f * (unit_direction.GetY() + 1.0f);
+	if (m_renderNormals) {
+		return Vector3D(0.0f, 0.0f, 0.0f);
+	}
+	else {
+		Vector3D unit_direction = ray.GetDirection().UnitVector();
+		//unit_direction.UnitVector();
+		float t = 0.5f * (unit_direction.GetY() + 1.0f);
 
-	return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t)/* * 255.0f*/;
+		return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t)/* * 255.0f*/;
+	}
 }
 
 const bool Raytracing::HitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
@@ -352,7 +414,14 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 			float scale = 1.0f / (float)m_samplesPerPixel;
 
-			pixel_color = Vector3D(sqrtf(pixel_color.GetX() * scale), sqrtf(pixel_color.GetY() * scale), sqrtf(pixel_color.GetZ() * scale)); // gamma correction
+			if (m_renderNormals || m_renderAlbedo) {
+				// without gamma correction
+				pixel_color *= scale;
+			}
+			else {
+				// gamma correction
+				pixel_color = Vector3D(sqrtf(pixel_color.GetX() * scale), sqrtf(pixel_color.GetY() * scale), sqrtf(pixel_color.GetZ() * scale));
+			}
 
 			pixel_color = Vector3D(std::clamp(pixel_color.GetX(), 0.0f, 1.0f), std::clamp(pixel_color.GetY(), 0.0f, 1.0f), std::clamp(pixel_color.GetZ(), 0.0f, 1.0f));
 			pixel_color *= 255.0f;

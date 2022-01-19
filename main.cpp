@@ -3,7 +3,7 @@
 #include <chrono>
 #include <fstream>
 
-unsigned int LinearFeedbackShift::Seed = 42069;
+unsigned int LinearFeedbackShift::Seed = 18012022;
 
 Raytracing raytracing;
 

@@ -55,7 +55,7 @@ void HitRec::SetMaterial(Material* mat) {
 	m_mat = mat;
 }
 
-const Vector3D HitRec::GetNormal() {
+Vector3D HitRec::GetNormal() {
 	return m_normal;
 }
 
@@ -63,7 +63,7 @@ void HitRec::SetNormal(const Vector3D normal) {
 	m_normal = normal;
 }
 
-const Vector3D HitRec::GetPoint() {
+Vector3D HitRec::GetPoint() {
 	return m_point;
 }
 
