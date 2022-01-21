@@ -276,7 +276,8 @@ bool Raytracing::Run() {
 		m_log << "Rendering tile #" << m_nextAvailable << '\n';*/
 
 		m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
-		m_nextAvailable++;
+		m_threadId[m_threads[i].get_id()] = i + 1;
+;		m_nextAvailable++;
 	}
 
 	for (size_t i = 0; i < m_threads.size(); i++) {
@@ -312,8 +313,8 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	std::mutex mtx;
 	mtx.lock();
 
-	std::cout << "Rendered tile #" << std::dec << startIndex << " in thread 0x" << std::hex << thisId << std::dec << " for " << dur << '\n';
-	m_log << "Rendered tile #" << std::dec << startIndex << " in thread 0x" << std::hex << thisId << std::dec << " for " << dur << '\n';
+	std::cout << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
+	m_log << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
 
 	size_t nextAvailable = m_nextAvailable;
 	m_nextAvailable++;

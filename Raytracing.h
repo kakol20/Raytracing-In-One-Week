@@ -42,6 +42,7 @@ private: // member variables
 	std::vector<Object*> m_objects;
 	std::vector<std::thread> m_threads;
 	std::map<String, Material*> m_materials;
+	std::map<std::thread::id, size_t> m_threadId;
 	std::vector<Material*> m_proceduralMats;
 
 	Camera m_camera;
