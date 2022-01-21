@@ -197,16 +197,20 @@ Vector3D Vector3D::UnitVector() {
 	return temp;
 }
 
-Vector3D Vector3D::Random() {
-	return Vector3D(LinearFeedbackShift::RandFloat(32), LinearFeedbackShift::RandFloat(32), LinearFeedbackShift::RandFloat(32));
+Vector3D Vector3D::Random(const unsigned int bitCount) {
+	return Vector3D(LinearFeedbackShift::RandFloat(bitCount), 
+		LinearFeedbackShift::RandFloat(bitCount), 
+		LinearFeedbackShift::RandFloat(bitCount));
 }
 
-Vector3D Vector3D::Random(const float min, const float max) {
-	return Vector3D(LinearFeedbackShift::RandFloatRange(min, max, 32), LinearFeedbackShift::RandFloatRange(min, max, 32), LinearFeedbackShift::RandFloatRange(min, max, 32));
+Vector3D Vector3D::Random(const float min, const float max, const unsigned int bitCount) {
+	return Vector3D(LinearFeedbackShift::RandFloatRange(min, max, bitCount), 
+		LinearFeedbackShift::RandFloatRange(min, max, bitCount), 
+		LinearFeedbackShift::RandFloatRange(min, max, bitCount));
 }
 
-Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
-	Vector3D inUnitSphere = RandomInUnitSphere();
+Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal, const unsigned int bitCount) {
+	Vector3D inUnitSphere = RandomInUnitSphere(bitCount);
 	//inUnitSphere.UnitVector();
 	if (inUnitSphere.DotProduct(normal) > 0.0f) {
 		return inUnitSphere;
@@ -219,9 +223,9 @@ Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
 	return inUnitSphere;
 }
 
-Vector3D Vector3D::RandomInUnitSphere() {
+Vector3D Vector3D::RandomInUnitSphere(const unsigned int bitCount) {
 	while (true) {
-		Vector3D p = Vector3D::Random(-1.0f, 1.0f);
+		Vector3D p = Vector3D::Random(-1.0f, 1.0f, bitCount);
 
 		if (p.SqrMagnitude() >= 1) continue;
 
@@ -231,15 +235,15 @@ Vector3D Vector3D::RandomInUnitSphere() {
 	return Vector3D();
 }
 
-Vector3D Vector3D::RandomUnitVector() {
-	Vector3D temp = RandomInUnitSphere().UnitVector();
+Vector3D Vector3D::RandomUnitVector(const unsigned int bitCount) {
+	Vector3D temp = RandomInUnitSphere(bitCount).UnitVector();
 	//temp.UnitVector();
 	return temp;
 }
 
-Vector3D Vector3D::RandomInUnitDisk() {
+Vector3D Vector3D::RandomInUnitDisk(const unsigned int bitCount) {
 	while (true) {
-		Vector3D p = Vector3D(LinearFeedbackShift::RandFloatRange(-1.0f, 1.0f, 32), LinearFeedbackShift::RandFloatRange(-1.0f, 1.0f, 32), 0.0f);
+		Vector3D p = Vector3D(LinearFeedbackShift::RandFloatRange(-1.0f, 1.0f, bitCount), LinearFeedbackShift::RandFloatRange(-1.0f, 1.0f, bitCount), 0.0f);
 
 		if (p.Magnitude() >= 1.0f) continue;
 

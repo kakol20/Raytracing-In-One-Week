@@ -23,7 +23,7 @@ Raytracing::Raytracing() {
 	m_tileSize = 32;
 
 	m_aperture = 0.1f;
-	m_verticalFOV = 20.0f;
+	m_verticalFOV = 19.8f;
 
 	m_nextAvailable = 0;
 
@@ -173,7 +173,7 @@ void Raytracing::Init() {
 			if (dist2.Magnitude() > 0.9f) {
 				if (chooseMat < 0.8f) {
 					// diffuse
-					Vector3D albedo = Vector3D::Random() * Vector3D::Random();
+					Vector3D albedo = Vector3D::Random(32) * Vector3D::Random(32);
 					//albedo = albedo.UnitVector() * LinearFeedbackShift::RandFloatRange(0.5f, 0.75f, 32);
 					m_proceduralMats.push_back(new Lambertian(albedo));
 
@@ -181,7 +181,7 @@ void Raytracing::Init() {
 				}
 				else if (chooseMat < 0.95f) {
 					// metal
-					Vector3D albedo = Vector3D::Random(0.5f, 1.0f);
+					Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
 					float roughness = LinearFeedbackShift::RandFloat(32);
 					m_proceduralMats.push_back(new Metal(albedo, roughness));
 
@@ -203,7 +203,7 @@ void Raytracing::Init() {
 
 	// Create Objects
 	m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
-	m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
+	//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
 	m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
 	m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
 }
