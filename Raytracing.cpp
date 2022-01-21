@@ -27,7 +27,7 @@ Raytracing::Raytracing() {
 
 	m_nextAvailable = 0;
 
-	m_renderMode = "albedo";
+	m_renderMode = "color";
 
 	if (m_renderMode == "normal") {
 		m_renderNormals = true;
@@ -37,7 +37,7 @@ Raytracing::Raytracing() {
 		m_renderNormals = false;
 		m_renderAlbedo = true;
 	}
-	else if (m_renderMode == "diffuse") {
+	else if (m_renderMode == "color" || m_renderMode == "colour") {
 		m_renderNormals = false;
 		m_renderAlbedo = false;
 	}
@@ -128,19 +128,18 @@ void Raytracing::Init() {
 		settings.open("settings.cfg", std::ios_base::out);
 		settings << "#Image Settings\n";
 		settings << "imageHeight=" << m_imageHeight << '\n';
-		settings << "imageWidth=" << m_imageWidth << '\n';
+		settings << "imageWidth=" << m_imageWidth << "\n#\n";
 
 		settings << "#Render Settings\n";
-		settings << "maxDepth=" << m_maxDepth << '\n';
-		settings << "##diffuse, normal, albedo\n";
+		settings << "#color, normal, albedo\n";
 		settings << "renderMode=" << m_renderMode << '\n';
 		settings << "samplesPerPixel=" << m_samplesPerPixel << '\n';
-		settings << "tileSize=" << m_tileSize << '\n';
+		settings << "tileSize=" << m_tileSize << "\n#\n";
 
 		settings << "#Camera Settings\n";
 		settings << "aperture=" << m_aperture << '\n';
 		settings << "##In degrees\n";
-		settings << "verticalFOV=" << m_verticalFOV << '\n';
+		settings << "verticalFOV=" << m_verticalFOV << "\n#\n";
 
 		settings << "#Max Seed Value " << std::numeric_limits<unsigned int>::max() << "\n";
 		settings << "randomSeed=" << LinearFeedbackShift::Seed;
@@ -211,15 +210,17 @@ void Raytracing::Init() {
 
 bool Raytracing::Run() {
 	// Render
-	const size_t maxThreads = std::thread::hardware_concurrency();
+	size_t reserveThreads = (size_t)roundf(std::thread::hardware_concurrency() / 8.0f);
+	reserveThreads = reserveThreads > 0 ? reserveThreads : 1;
+	const size_t maxThreads = std::thread::hardware_concurrency() - reserveThreads;
 	//const size_t maxThreads = 0;
 
 	//runTime.open("images/runTime.txt", std::ios_base::out);
 
 	m_log.open("log.txt", std::ios_base::out);
 
-	std::cout << "Max Threads: " << maxThreads << '\n';
-	m_log << "Max Threads: " << maxThreads << '\n';
+	std::cout << "Threads Used: " << maxThreads << '\n';
+	m_log << "Threads Used: " << maxThreads << '\n';
 
 	/*std::vector<Tile> tiles;*/
 	size_t nextAvailable = 0;
@@ -291,7 +292,7 @@ bool Raytracing::Run() {
 		m_render.Write("render_albedo.png");
 	}
 	else {
-		m_render.Write("render_diffuse.png");
+		m_render.Write("render_color.png");
 	}
 
 	if (Image::PrintToConsole) system("pause");
@@ -300,15 +301,19 @@ bool Raytracing::Run() {
 }
 
 void Raytracing::RenderTile(const size_t startIndex) {
+
+	auto start = std::chrono::high_resolution_clock::now();
 	Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
+	auto end = std::chrono::high_resolution_clock::now();
+	auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
 	std::thread::id thisId = std::this_thread::get_id();
 
 	std::mutex mtx;
 	mtx.lock();
 
-	std::cout << "Rendered tile #" << std::dec << startIndex << " in thread 0x" << std::hex << thisId << '\n';
-	m_log << "Rendered tile #" << std::dec << startIndex << " in thread 0x" << std::hex << thisId << '\n';
+	std::cout << "Rendered tile #" << std::dec << startIndex << " in thread 0x" << std::hex << thisId << std::dec << " for " << dur << '\n';
+	m_log << "Rendered tile #" << std::dec << startIndex << " in thread 0x" << std::hex << thisId << std::dec << " for " << dur << '\n';
 
 	size_t nextAvailable = m_nextAvailable;
 	m_nextAvailable++;
