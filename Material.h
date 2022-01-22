@@ -22,23 +22,20 @@ protected:
 	float m_roughness;
 
 	Vector3D Reflected(Vector3D v, Vector3D n) {
-		/*Vector3D temp = n * v.DotProduct(n);
+		Vector3D temp = n * v.DotProduct(n);
 		temp *= 2.0f;
-		return v - temp;*/
-		return v - (n * (v.DotProduct(n) * 2));
+		return v - temp;
+		//return v - (n * v.DotProduct(n) * 2);
 	}
 
-	bool Refract(Vector3D v, Vector3D n, float n1OverN2, Vector3D& refract) {
-		Vector3D uv = v.UnitVector();
-		float dt = uv.DotProduct(n);
-		float discriminant = 1.0f - n1OverN2 * n1OverN2 * (1.0f - dt * dt);
+	Vector3D Refract(Vector3D v, Vector3D n, float n1OverN2) {
+		Vector3D vInv = v * -1.0f;
 
-		if (discriminant > 0) {
-			refract = ((uv - (n * dt)) * n1OverN2) - (n * sqrtf(discriminant));
-			return true;
-		}
+		float cosTheta = fminf(vInv.DotProduct(n), 1.0f);
+		Vector3D rOutPerp = (v + (n * cosTheta)) * n1OverN2;
+		Vector3D rOutPara = n * -sqrtf(fabsf(1.0f - rOutPerp.SqrMagnitude()));
 
-		return false;
+		return rOutPerp + rOutPara;
 	}
 	
 	const float Schlick(float cosine, float refIndex) {

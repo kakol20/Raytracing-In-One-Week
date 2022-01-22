@@ -163,9 +163,9 @@ void Raytracing::Init() {
 
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
-		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f));
+		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
 		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f, 1.5f);
-		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f));
+		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);
 
 		// Create Objects
 		//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
@@ -187,7 +187,7 @@ void Raytracing::Init() {
 					if (chooseMat < 0.8f) {
 						// diffuse
 						Vector3D albedo = Vector3D::Random(32) * Vector3D::Random(32);
-						m_proceduralMats.push_back(new Lambertian(albedo));
+						m_proceduralMats.push_back(new Lambertian(albedo, 1.5f));
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
@@ -216,10 +216,10 @@ void Raytracing::Init() {
 		m_camera = Camera(aspect_ratio, m_aperture, distV.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
 
 		// Create Materials
-		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.33f);
-		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f));
-		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f, 1.45f);
-		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f));
+		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
+		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
+		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.5f, 1.5f);
+		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);
 
 		// Create Objects
 		m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));

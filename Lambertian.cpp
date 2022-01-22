@@ -4,8 +4,9 @@ Lambertian::Lambertian() {
 	m_albedo = Vector3D();
 }
 
-Lambertian::Lambertian(const Vector3D& a) {
+Lambertian::Lambertian(const Vector3D& a, const float ior) {
 	m_albedo = a;
+	m_ior = ior;
 }
 
 Lambertian::~Lambertian() {
