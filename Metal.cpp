@@ -15,7 +15,7 @@ Metal::~Metal() {
 
 bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
 	Vector3D reflected = Reflected(rayIn.GetDirection().UnitVector(), rec.GetNormal());
-	scattered = Ray(rec.GetPoint(), reflected + (Vector3D::RandomInUnitSphere(8) * m_roughness));
+	scattered = Ray(rec.GetPoint(), reflected + (Vector3D::RandomInUnitSphere(16) * m_roughness));
 	attentuation = m_albedo;
 
 	return scattered.GetDirection().DotProduct(rec.GetNormal()) > 0.0f;

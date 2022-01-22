@@ -41,7 +41,7 @@ Camera::~Camera() {
 
 Ray Camera::GetRay(const float s, const float t) {
 	//return Ray(m_origin, m_lowerLeftCorner + (m_horizontal * s) + (m_vertical * t) - m_origin);
-	Vector3D rd = Vector3D::RandomInUnitDisk(8) * m_lensRadius;
+	Vector3D rd = Vector3D::RandomInUnitDisk(16) * m_lensRadius;
 	Vector3D offset = (m_u * rd.GetX()) + (m_v * rd.GetY());
 
 	return Ray(m_origin + offset,

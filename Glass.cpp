@@ -6,11 +6,13 @@
 Glass::Glass() {
 	m_albedo = Vector3D(1.0f, 1.0f, 1.0f);
 	m_ior = 1.45f;
+	m_roughness = 0.0f;
 }
 
-Glass::Glass(const Vector3D albedo, const float ior) {
+Glass::Glass(const Vector3D albedo, const float ior, const float roughness) {
 	m_albedo = albedo;
 	m_ior = ior;
+	m_roughness = roughness;
 }
 
 bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
@@ -36,7 +38,7 @@ bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 		dir = Refract(unitDir, rec.GetNormal(), refractionRatio);
 	}
 
-	scattered = Ray(rec.GetPoint(), dir);
+	scattered = Ray(rec.GetPoint(), dir + (Vector3D::RandomInUnitSphere(16) * m_roughness));
 	return true;
 }
 

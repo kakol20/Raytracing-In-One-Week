@@ -127,8 +127,8 @@ void Raytracing::Init() {
 
 		settings.open("settings.cfg", std::ios_base::out);
 		settings << "#Image Settings\n";
-		settings << "imageHeight=" << m_imageHeight << '\n';
-		settings << "imageWidth=" << m_imageWidth << "\n#\n";
+		settings << "imageWidth=" << m_imageWidth << '\n';
+		settings << "imageHeight=" << m_imageHeight << "\n#\n";
 
 		settings << "#Render Settings\n";
 		settings << "maxDepth=" << m_maxDepth << '\n';
@@ -162,6 +162,17 @@ void Raytracing::Init() {
 	m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f));
 	m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
 
+	// Create Materials
+	m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.33f, 0.01f);
+	m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f));
+	m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f);
+
+	// Create Objects
+	m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
+	//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
+	m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
+	m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
+
 	// Procedural Objects
 	int index = 0;
 	for (int a = -11; a < 11; a++) {
@@ -189,24 +200,13 @@ void Raytracing::Init() {
 					m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 				}
 				else {
-					m_proceduralMats.push_back(new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.33f));
+					m_proceduralMats.push_back(new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.33f, LinearFeedbackShift::RandFloatRange(0.0, 0.5, 32)));
 					m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 				}
 				index++;
 			}
 		}
 	}
-
-	// Create Materials
-	m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.33f);
-	m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f));
-	m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f);
-
-	// Create Objects
-	m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
-	//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
-	m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
-	m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
 }
 
 bool Raytracing::Run() {
