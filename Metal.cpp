@@ -3,10 +3,12 @@
 Metal::Metal() {
 	m_albedo = Vector3D(0.8f, 0.8f, 0.8f);
 	m_roughness = 0.5f;
+	m_ior = 1.5f;
 }
 
-Metal::Metal(const Vector3D& a, const float roughness) {
+Metal::Metal(const Vector3D& a, const float roughness, const float ior) {
 	m_albedo = a;
+	m_ior = ior;
 	m_roughness = roughness;
 }
 

@@ -159,19 +159,19 @@ void Raytracing::Init() {
 	Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
 	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
-	m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f));
-	m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
-
 	// Create Materials
-	m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.33f, 0.01f);
+	m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
 	m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f));
-	m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f);
+	m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f, 1.5f);
+	m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f));
+
 
 	// Create Objects
-	m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
 	//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
 	m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
 	m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
+	m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
 
 	// Procedural Objects
 	int index = 0;
@@ -186,7 +186,6 @@ void Raytracing::Init() {
 				if (chooseMat < 0.8f) {
 					// diffuse
 					Vector3D albedo = Vector3D::Random(32) * Vector3D::Random(32);
-					//albedo = albedo.UnitVector() * LinearFeedbackShift::RandFloatRange(0.5f, 0.75f, 32);
 					m_proceduralMats.push_back(new Lambertian(albedo));
 
 					m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
@@ -195,7 +194,7 @@ void Raytracing::Init() {
 					// metal
 					Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
 					float roughness = LinearFeedbackShift::RandFloat(32);
-					m_proceduralMats.push_back(new Metal(albedo, roughness));
+					m_proceduralMats.push_back(new Metal(albedo, roughness, 1.5f));
 
 					m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 				}

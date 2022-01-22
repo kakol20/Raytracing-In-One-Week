@@ -1,6 +1,5 @@
 #include "Glass.h"
 #include "LinearFeedbackShift.h"
-#include <cmath>
 #include <mutex>
 
 Glass::Glass() {
@@ -9,51 +8,51 @@ Glass::Glass() {
 	m_roughness = 0.0f;
 }
 
-Glass::Glass(const Vector3D albedo, const float ior, const float roughness) {
+Glass::Glass(const Vector3D albedo, const float roughness, const float ior) {
 	m_albedo = albedo;
 	m_ior = ior;
 	m_roughness = roughness;
 }
 
 bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
+	// http://viclw17.github.io/2018/08/05/raytracing-dielectric-materials/
+
 	attentuation = m_albedo;
 
-	float refractionRatio = rec.GetFrontFace() ? (1.0f / m_ior) : m_ior;
+	Vector3D outwardNormal;
+	Vector3D reflected = Reflected(rayIn.GetDirection(), rec.GetNormal());
+	Vector3D refracted;
 
-	Vector3D unitDir = rayIn.GetDirection().UnitVector();
-	Vector3D unitDirInv = unitDir * -1.0f;
-	float cosTheta = fmin(unitDirInv.DotProduct(rec.GetNormal()), 1.0f);
-	float sinTheta = sqrtf(1.0f - cosTheta * cosTheta);
+	float n1OverN2, reflectProb, cosine;
 
-	bool cannotRefract = refractionRatio * sinTheta > 1.0f;
-
-	cannotRefract = cannotRefract || Reflectance(cosTheta, refractionRatio) > LinearFeedbackShift::RandFloat(32);
-
-	Vector3D dir;
-
-	if (cannotRefract) {
-		dir = Reflected(unitDir, rec.GetNormal());
+	// Dealing with Ray Enter/Exit Object
+	if (rayIn.GetDirection().DotProduct(rec.GetNormal()) > 0.0f) {
+		// ray shoot through object into vacuum
+		outwardNormal = rec.GetNormal() * -1.0f;
+		n1OverN2 = m_ior;
+		cosine = rayIn.GetDirection().UnitVector().DotProduct(rec.GetNormal());
 	}
 	else {
-		dir = Refract(unitDir, rec.GetNormal(), refractionRatio);
+		// ray shoots into object
+		outwardNormal = rec.GetNormal();
+		n1OverN2 = 1.0f / m_ior;
+		cosine = rayIn.GetDirection().UnitVector().DotProduct(rec.GetNormal()) * -1.0f;
 	}
 
-	scattered = Ray(rec.GetPoint(), dir + (Vector3D::RandomInUnitSphere(16) * m_roughness));
+	// Dealing with Ray Reflection/Refraction (Fresnel)
+	if (Refract(rayIn.GetDirection(), outwardNormal, n1OverN2, refracted)) {
+		reflectProb = Schlick(cosine, m_ior);
+	}
+	else {
+		reflectProb = 1.0f;
+	}
+
+	if (LinearFeedbackShift::RandFloat(32) < reflectProb) {
+		scattered = Ray(rec.GetPoint(), reflected + (Vector3D::RandomInUnitSphere(32) * m_roughness));
+	}
+	else {
+		scattered = Ray(rec.GetPoint(), refracted + (Vector3D::RandomInUnitSphere(32) * m_roughness));
+	}
+
 	return true;
-}
-
-const float Glass::Reflectance(float cosine, float refIndex) {
-	// Use Schlick's approximation for reflectance.
-	float r0 = (1.0f - refIndex) / (1.0f + refIndex);
-	r0 *= r0;
-	return r0 + (1.0f - r0) * powf(1.0f - cosine, 5.0f);
-}
-
-Vector3D Glass::Refract(const Vector3D uv, const Vector3D n, const float eoe) {
-	Vector3D uvInv = uv * -1.0f;
-	float cosTheta = fmin(uvInv.DotProduct(n), 1.0f);
-
-	Vector3D rOutPerp = (uv + (n * cosTheta)) * eoe;
-	Vector3D rOutPara = n * -sqrtf(fabs(1.0f - rOutPerp.SqrMagnitude()));
-	return rOutPerp + rOutPara;
 }
