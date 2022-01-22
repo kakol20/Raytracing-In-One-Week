@@ -131,6 +131,7 @@ void Raytracing::Init() {
 		settings << "imageWidth=" << m_imageWidth << "\n#\n";
 
 		settings << "#Render Settings\n";
+		settings << "maxDepth=" << m_maxDepth << '\n';
 		settings << "#color, normal, albedo\n";
 		settings << "renderMode=" << m_renderMode << '\n';
 		settings << "samplesPerPixel=" << m_samplesPerPixel << '\n';
