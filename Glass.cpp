@@ -36,11 +36,14 @@ bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 		direction = Refract(unitDir, rec.GetNormal(), refracRatio);
 	}
 
-	Vector3D roughness = Vector3D::RandomInUnitSphere(32) * (m_roughness);
+	Vector3D scatterDir = Vector3D::RandomInUnitSphere(32) * m_roughness;
+	scatterDir = direction + scatterDir;
+	// Catch degenerate scatter direction
 
-	scattered = Ray(rec.GetPoint(), direction + roughness);
+	if (scatterDir.NearZero()) scatterDir = rec.GetNormal();
 
-	attentuation = m_albedo + (Vector3D(1.0f, 1.0f, 1.0f) * schlick);
+	scattered = Ray(rec.GetPoint(), Vector3D::Lerp(direction, scatterDir, schlick));
+	attentuation = m_albedo;
 
 	return true;
 }

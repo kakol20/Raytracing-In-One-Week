@@ -227,7 +227,6 @@ void Raytracing::Init() {
 		m_objects.push_back(new Sphere(Vector3D(1.5f, 1.0f, -3.0f), 1.0f, m_materials["diffuse"]));
 		m_objects.push_back(new Sphere(Vector3D(-1.5f, 1.0f, -3.0f), 1.0f, m_materials["metal"]));
 	}
-	
 }
 
 bool Raytracing::Run() {

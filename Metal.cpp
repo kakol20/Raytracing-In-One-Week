@@ -18,7 +18,19 @@ Metal::~Metal() {
 bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
 	Vector3D reflected = Reflected(rayIn.GetDirection().UnitVector(), rec.GetNormal());
 
-	scattered = Ray(rec.GetPoint(), reflected + (Vector3D::RandomInUnitSphere(16) * m_roughness));
+	Vector3D unitDir = rayIn.GetDirection().UnitVector();
+	Vector3D unitDirInv = unitDir * -1.0f;
+
+	float cosTheta = fminf(unitDirInv.DotProduct(rec.GetNormal()), 1.0f);
+	float refracRatio = rec.GetFrontFace() ? (1.0f / m_ior) : m_ior;
+	float fresnel = Schlick(cosTheta, refracRatio);
+
+	Vector3D scatterDir = Vector3D::RandomInUnitSphere(32) * m_roughness;
+	scatterDir = reflected + scatterDir;
+	// Catch degenerate scatter direction
+	if (scatterDir.NearZero()) scatterDir = rec.GetNormal();
+
+	scattered = Ray(rec.GetPoint(), Vector3D::Lerp(reflected, scatterDir, 1.0f - fresnel));
 	attentuation = m_albedo;
 
 	return scattered.GetDirection().DotProduct(rec.GetNormal()) > 0.0f;

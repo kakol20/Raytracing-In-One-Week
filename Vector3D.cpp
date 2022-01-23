@@ -251,5 +251,11 @@ Vector3D Vector3D::RandomInUnitDisk(const unsigned int bitCount) {
 	}
 }
 
+Vector3D Vector3D::Lerp(const Vector3D& from, const Vector3D& to, const float factor) {
+	Vector3D out = to - from;
+	out *= factor;
+	return from + out;
+}
+
 Vector3D::~Vector3D() {
 }
