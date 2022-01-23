@@ -6,12 +6,14 @@ Glass::Glass() {
 	m_albedo = Vector3D(1.0f, 1.0f, 1.0f);
 	m_ior = 1.45f;
 	m_roughness = 0.0f;
+	m_transparent = true;
 }
 
 Glass::Glass(const Vector3D albedo, const float roughness, const float ior) {
 	m_albedo = albedo;
 	m_ior = ior;
 	m_roughness = roughness;
+	m_transparent = true;
 }
 
 bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {

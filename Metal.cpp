@@ -10,6 +10,7 @@ Metal::Metal(const Vector3D& a, const float roughness, const float ior) {
 	m_albedo = a;
 	m_ior = ior;
 	m_roughness = roughness;
+	m_transparent = false;
 }
 
 Metal::~Metal() {

@@ -6,6 +6,7 @@
 
 #include "Camera.h"
 #include "Image.h"
+#include "Light.h"
 #include "Object.h"
 #include "String.h"
 
@@ -47,6 +48,8 @@ private: // member variables
 
 	Camera m_camera;
 	Image m_render;
+
+	Light m_mainLight;
 
 	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_maxDepth, m_tileSize;
 	float m_aperture, m_verticalFOV;

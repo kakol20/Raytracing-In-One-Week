@@ -46,6 +46,8 @@ Raytracing::Raytracing() {
 		m_renderNormals = false;
 		m_renderAlbedo = false;
 	}
+
+	m_mainLight = Light();
 }
 
 void Raytracing::Init() {
@@ -162,6 +164,9 @@ void Raytracing::Init() {
 		Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
 		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
+		// Lights
+		m_mainLight = Light(Vector3D(10.0f, 10.0f, 10.0f), Vector3D(1.0f, 1.0f, 1.0f));
+
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
 		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
@@ -217,6 +222,9 @@ void Raytracing::Init() {
 		Vector3D lookAt(0.0f, 1.0f, 0.0f);
 		Vector3D distV = lookAt - lookFrom;
 		m_camera = Camera(aspect_ratio, m_aperture, distV.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
+
+		// Lights
+		m_mainLight = Light(Vector3D(10.0f, 10.0f, 10.0f), Vector3D(1.0f, 1.0f, 1.0f));
 
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
@@ -390,7 +398,25 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				return attentuation;
 			}
 			else {
-				return attentuation * RayColor(scattered, depth - 1);
+				// Shadow Ray
+				Vector3D shadowToLight = m_mainLight.GetPosition() - rec.GetPoint();
+				shadowToLight = shadowToLight.UnitVector();
+
+				Ray shadowRay = Ray(rec.GetPoint(), shadowToLight);
+				HitRec tempRec;
+
+				if (HitObject(shadowRay, 0.001f, shadowToLight.Magnitude(), tempRec)) {
+					if (tempRec.GetMaterial()->IsTransparent()) {
+						return attentuation * m_mainLight.GetColor() * RayColor(scattered, depth - 1);
+					}
+					else {
+						return attentuation * Vector3D(0.001f, 0.001f, 0.001f) * RayColor(scattered, depth - 1);
+					}
+				}
+				else {
+					return attentuation * m_mainLight.GetColor() * RayColor(scattered, depth - 1);
+
+				}
 			}
 		}
 

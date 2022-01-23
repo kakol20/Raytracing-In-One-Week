@@ -3,16 +3,22 @@
 
 #include "Ray.h"
 #include "HitRec.h"
+#include "Light.h"
+
+class Object;
 
 class Material {
 public:
 	Material() {
 		m_ior = 1.5f;
 		m_roughness = 0.5f;
+		m_transparent = false;
 	};
 	~Material() {};
 
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) = 0;
+
+	const bool IsTransparent() { return m_transparent; };
 
 private:
 
@@ -20,6 +26,7 @@ protected:
 	Vector3D m_albedo;
 	float m_ior;
 	float m_roughness;
+	bool m_transparent;
 
 	Vector3D Reflected(Vector3D v, Vector3D n) {
 		Vector3D temp = n * v.DotProduct(n);

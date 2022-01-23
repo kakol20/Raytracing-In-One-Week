@@ -88,7 +88,7 @@
       <Filter>Source Files\Object</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Raytracing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
