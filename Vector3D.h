@@ -46,6 +46,8 @@ public:
 	static Vector3D RandomUnitVector(const unsigned int bitCount);
 	static Vector3D RandomInUnitDisk(const unsigned int bitCount);
 
+	static Vector3D Lerp(const Vector3D& from, const Vector3D& to, const float factor);
+
 	~Vector3D();
 
 public: // getters
