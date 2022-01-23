@@ -206,9 +206,10 @@ void Raytracing::Init() {
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
 					else {
+						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
 						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
 						float ior = 1.5f;
-						m_proceduralMats.push_back(new Glass(Vector3D(1.0f, 1.0f, 1.0f), roughness, ior));
+						m_proceduralMats.push_back(new Glass(albedo, roughness, ior));
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
 					index++;
@@ -406,11 +407,14 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				HitRec tempRec;
 
 				if (HitObject(shadowRay, 0.001f, shadowToLight.Magnitude(), tempRec)) {
+					Vector3D shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
 					if (tempRec.GetMaterial()->IsTransparent()) {
-						return attentuation * m_mainLight.GetColor() * RayColor(scattered, depth - 1);
+						shadowColor = tempRec.GetMaterial()->GetAlbedo() * (1.0f - tempRec.GetMaterial()->GetRoughness());
+
+						return attentuation * m_mainLight.GetColor() * shadowColor * RayColor(scattered, depth - 1);
 					}
 					else {
-						return attentuation * Vector3D(0.001f, 0.001f, 0.001f) * RayColor(scattered, depth - 1);
+						return attentuation * shadowColor * RayColor(scattered, depth - 1);
 					}
 				}
 				else {

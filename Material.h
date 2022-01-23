@@ -19,6 +19,8 @@ public:
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) = 0;
 
 	const bool IsTransparent() { return m_transparent; };
+	const Vector3D GetAlbedo() { return m_albedo; };
+	const float GetRoughness() { return m_roughness; };
 
 private:
 
