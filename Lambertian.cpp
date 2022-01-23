@@ -8,6 +8,7 @@ Lambertian::Lambertian(const Vector3D& a, const float ior) {
 	m_albedo = a;
 	m_ior = ior;
 	m_roughness = 1.0f;
+	m_transparent = false;
 }
 
 Lambertian::~Lambertian() {

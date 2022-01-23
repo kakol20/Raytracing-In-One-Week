@@ -4,6 +4,7 @@
 
 #include "Filters.h"
 #include "Glass.h"
+#include "Ground.h"
 #include "Lambertian.h"
 #include "LinearFeedbackShift.h"
 #include "Metal.h"
@@ -45,6 +46,10 @@ Raytracing::Raytracing() {
 		m_renderNormals = false;
 		m_renderAlbedo = false;
 	}
+
+	m_mainLight = Light();
+
+	m_hdri.Read("images/cloud_layers_4k.png");
 }
 
 void Raytracing::Init() {
@@ -151,7 +156,7 @@ void Raytracing::Init() {
 	// Image
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
-	
+
 	bool debugMode = false;
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	if (!debugMode) {
@@ -160,6 +165,9 @@ void Raytracing::Init() {
 		Vector3D lookAt(0.0f, 0.0f, 0.0f);
 		Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
 		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
+
+		// Lights
+		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
 
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
@@ -172,7 +180,8 @@ void Raytracing::Init() {
 		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
 		m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
 		m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
+		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
+		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 
 		// Procedural Objects
 		int index = 0;
@@ -200,9 +209,10 @@ void Raytracing::Init() {
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
 					else {
+						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
 						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
 						float ior = 1.5f;
-						m_proceduralMats.push_back(new Glass(Vector3D(1.0f, 1.0f, 1.0f), roughness, ior));
+						m_proceduralMats.push_back(new Glass(albedo, roughness, ior));
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
 					index++;
@@ -212,22 +222,27 @@ void Raytracing::Init() {
 	}
 	else {
 		// Camera
-		Vector3D lookFrom(0.0f, 2.0f, 11.0f);
-		Vector3D lookAt(0.0f, 1.0f, 0.0f);
-		Vector3D distV = lookAt - lookFrom;
-		m_camera = Camera(aspect_ratio, m_aperture, distV.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
+		Vector3D lookFrom(13.0f, 2.0f, 3.0f);
+		Vector3D lookAt(0.0f, 0.0f, 0.0f);
+		Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
+		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
+
+		// Lights
+		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
 
 		// Create Materials
-		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.5f, 1.5f);
+		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
 		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
-		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.5f, 1.5f);
+		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f, 1.5f);
 		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);
 
 		// Create Objects
-		m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
+		//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
 		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
-		m_objects.push_back(new Sphere(Vector3D(1.5f, 1.0f, -3.0f), 1.0f, m_materials["diffuse"]));
-		m_objects.push_back(new Sphere(Vector3D(-1.5f, 1.0f, -3.0f), 1.0f, m_materials["metal"]));
+		m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
+		m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
+		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
+		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 	}
 }
 
@@ -300,7 +315,7 @@ bool Raytracing::Run() {
 
 		m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
 		m_threadId[m_threads[i].get_id()] = i + 1;
-;		m_nextAvailable++;
+		;		m_nextAvailable++;
 	}
 
 	for (size_t i = 0; i < m_threads.size(); i++) {
@@ -325,7 +340,6 @@ bool Raytracing::Run() {
 }
 
 void Raytracing::RenderTile(const size_t startIndex) {
-
 	auto start = std::chrono::high_resolution_clock::now();
 	Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
 	auto end = std::chrono::high_resolution_clock::now();
@@ -389,7 +403,31 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				return attentuation;
 			}
 			else {
-				return attentuation * RayColor(scattered, depth - 1);
+				// Shadow Ray
+				Vector3D shadowToLight = m_mainLight.GetPosition() - rec.GetPoint();
+				shadowToLight = shadowToLight.UnitVector();
+
+				Ray shadowRay = Ray(rec.GetPoint(), shadowToLight);
+				HitRec tempRec;
+
+				Vector3D lightColor = m_mainLight.GetColor();
+
+				if (HitObject(shadowRay, 0.001f, INFINITY, tempRec)) {
+					float distToLight = shadowToLight.Magnitude();
+					Vector3D shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
+
+					if (tempRec.GetMaterial()->IsTransparent()) {
+						shadowColor = tempRec.GetMaterial()->GetAlbedo() * (1.0f - tempRec.GetMaterial()->GetRoughness());
+
+						return attentuation * lightColor * shadowColor * RayColor(scattered, depth - 1);
+					}
+					else {
+						return attentuation * lightColor * shadowColor * RayColor(scattered, depth - 1);
+					}
+				}
+				else {
+					return attentuation * lightColor * RayColor(scattered, depth - 1);
+				}
 			}
 		}
 
@@ -402,10 +440,23 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	}
 	else {
 		Vector3D unit_direction = ray.GetDirection().UnitVector();
-		//unit_direction.UnitVector();
-		float t = 0.5f * (unit_direction.GetY() + 1.0f);
+		////unit_direction.UnitVector();
+		//float t = 0.5f * (unit_direction.GetY() + 1.0f);
+		float pi = 3.14159265f;
 
-		return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t)/* * 255.0f*/;
+		//return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t);
+		float u = 0.5f + (atan2f(unit_direction.GetX(), unit_direction.GetZ()) / (2.0f * pi));
+		float v = 0.5f - (asinf(unit_direction.GetY()) / pi);
+
+		int x = (int)floorf(m_hdri.GetWidth() * u);
+		int y = (int)floorf(m_hdri.GetHeight() * v);
+		int index = m_hdri.GetIndex(x, y);
+
+		float r = m_hdri.GetDataF(index + 0) / 255.0f;
+		float g = m_hdri.GetDataF(index + 1) / 255.0f;
+		float b = m_hdri.GetDataF(index + 2) / 255.0f;
+
+		return Vector3D(r, g, b);
 	}
 }
 
