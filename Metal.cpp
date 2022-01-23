@@ -19,6 +19,7 @@ Metal::~Metal() {
 bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
 	Vector3D reflected = Reflected(rayIn.GetDirection().UnitVector(), rec.GetNormal());
 
+	// fresnel
 	Vector3D unitDir = rayIn.GetDirection().UnitVector();
 	Vector3D unitDirInv = unitDir * -1.0f;
 
@@ -26,13 +27,19 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	float refracRatio = rec.GetFrontFace() ? (1.0f / m_ior) : m_ior;
 	float fresnel = Schlick(cosTheta, refracRatio);
 
-	Vector3D scatterDir = Vector3D::RandomInUnitSphere(32) * m_roughness;
-	scatterDir = reflected + scatterDir;
+	float fresnelRoughness = std::lerp(fresnel, 1.0f, m_roughness);
+	fresnelRoughness = std::lerp(0.0f, 0.9f, fresnelRoughness);
+
+	Vector3D scatterDir = reflected + (Vector3D::RandomUnitVector(32) * m_roughness);
+
+	scatterDir = Vector3D::Lerp(reflected, scatterDir, fresnelRoughness);
+	scatterDir = scatterDir.UnitVector();
+
 	// Catch degenerate scatter direction
 	if (scatterDir.NearZero()) scatterDir = reflected;
 
-	scattered = Ray(rec.GetPoint(), Vector3D::Lerp(reflected, scatterDir, 1.0f - fresnel));
+	scattered = Ray(rec.GetPoint(), scatterDir);
 	attentuation = m_albedo;
 
-	return scattered.GetDirection().DotProduct(rec.GetNormal()) > 0.0f;
+	return true;
 }

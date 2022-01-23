@@ -27,24 +27,29 @@ bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	float sinTheta = sqrtf(1.0f - cosTheta * cosTheta);
 
 	bool cannotRefract = refracRatio * sinTheta > 1.0f;
-	float schlick = Schlick(cosTheta, refracRatio);
+	float fresnel = Schlick(cosTheta, refracRatio);
 
 	Vector3D direction;
 
-	if (cannotRefract || schlick > LinearFeedbackShift::RandFloat(32)) {
+	if (cannotRefract || fresnel > LinearFeedbackShift::RandFloat(32)) {
 		direction = Reflected(unitDir, rec.GetNormal());
 	}
 	else {
 		direction = Refract(unitDir, rec.GetNormal(), refracRatio);
 	}
 
-	Vector3D scatterDir = Vector3D::RandomInUnitSphere(32) * m_roughness;
-	scatterDir = direction + scatterDir;
-	// Catch degenerate scatter direction
+	float fresnelRoughness = std::lerp(fresnel, 1.0f, m_roughness);
+	fresnelRoughness = std::lerp(0.0f, 0.9f, fresnelRoughness);
 
+	Vector3D scatterDir = direction + (Vector3D::RandomInUnitSphere(32) * m_roughness);
+
+	scatterDir = Vector3D::Lerp(direction, scatterDir, fresnelRoughness);
+	scatterDir = scatterDir.UnitVector();
+
+	// Catch degenerate scatter direction
 	if (scatterDir.NearZero()) scatterDir = direction;
 
-	scattered = Ray(rec.GetPoint(), Vector3D::Lerp(direction, scatterDir, 1.0f - schlick));
+	scattered = Ray(rec.GetPoint(), scatterDir);
 	attentuation = m_albedo;
 
 	return true;

@@ -222,8 +222,8 @@ void Raytracing::Init() {
 	}
 	else {
 		// Camera
-		Vector3D lookFrom(13.0f, 2.0f, 3.0f);
-		Vector3D lookAt(0.0f, 0.0f, 0.0f);
+		Vector3D lookFrom(13.0f, 2.0f, 0.0f);
+		Vector3D lookAt(0.0f, 1.0f, 0.0f);
 		Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
 		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
@@ -239,8 +239,8 @@ void Raytracing::Init() {
 		// Create Objects
 		//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
 		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
-		m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
-		m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 3.0f), 1.0f, m_materials["diffuse"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, -3.0f), 1.0f, m_materials["metal"]));
 		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
 		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 	}
@@ -417,7 +417,9 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 					Vector3D shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
 
 					if (tempRec.GetMaterial()->IsTransparent()) {
-						shadowColor = tempRec.GetMaterial()->GetAlbedo() * (1.0f - tempRec.GetMaterial()->GetRoughness());
+						/*float roughness = (1.0f - tempRec.GetMaterial()->GetRoughness());
+						roughness = ClampF(roughness, 0.1f, 1.0f);*/
+						shadowColor = tempRec.GetMaterial()->GetAlbedo() /** roughness*/;
 
 						return attentuation * lightColor * shadowColor * RayColor(scattered, depth - 1);
 					}
@@ -431,6 +433,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			}
 		}
 
+		//return rec.GetMaterial()->GetAlbedo();
 		return Vector3D(0.0f, 0.0f, 0.0f);
 	}
 
