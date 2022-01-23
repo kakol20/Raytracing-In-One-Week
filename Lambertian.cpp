@@ -14,7 +14,6 @@ Lambertian::~Lambertian() {
 }
 
 bool Lambertian::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
-
 	Vector3D unitDir = rayIn.GetDirection().UnitVector();
 	Vector3D unitDirInv = unitDir * -1.0f;
 	float cosTheta = fminf(unitDirInv.DotProduct(rec.GetNormal()), 1.0f);

@@ -152,7 +152,7 @@ void Raytracing::Init() {
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 	
-	bool debugMode = true;
+	bool debugMode = false;
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	if (!debugMode) {
 		// Camera
@@ -187,7 +187,7 @@ void Raytracing::Init() {
 					if (chooseMat < 0.8f) {
 						// diffuse
 						Vector3D albedo = Vector3D::Random(32) * Vector3D::Random(32);
-						m_proceduralMats.push_back(new Lambertian(albedo, 1.5f));
+						m_proceduralMats.push_back(new Lambertian(albedo, 1.45f));
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
@@ -195,12 +195,14 @@ void Raytracing::Init() {
 						// metal
 						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
 						float roughness = LinearFeedbackShift::RandFloat(32);
-						m_proceduralMats.push_back(new Metal(albedo, roughness, 1.5f));
+						m_proceduralMats.push_back(new Metal(albedo, roughness, 1.45f));
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
 					else {
-						m_proceduralMats.push_back(new Glass(Vector3D(1.0f, 1.0f, 1.0f), 1.33f, LinearFeedbackShift::RandFloatRange(0.0, 0.5, 32)));
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
+						float ior = 1.5f;
+						m_proceduralMats.push_back(new Glass(Vector3D(1.0f, 1.0f, 1.0f), roughness, ior));
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
 					index++;
@@ -216,7 +218,7 @@ void Raytracing::Init() {
 		m_camera = Camera(aspect_ratio, m_aperture, distV.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
 
 		// Create Materials
-		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
+		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.5f, 1.5f);
 		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
 		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.5f, 1.5f);
 		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);

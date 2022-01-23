@@ -40,9 +40,9 @@ bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	scatterDir = direction + scatterDir;
 	// Catch degenerate scatter direction
 
-	if (scatterDir.NearZero()) scatterDir = rec.GetNormal();
+	if (scatterDir.NearZero()) scatterDir = direction;
 
-	scattered = Ray(rec.GetPoint(), Vector3D::Lerp(direction, scatterDir, schlick));
+	scattered = Ray(rec.GetPoint(), Vector3D::Lerp(direction, scatterDir, 1.0f - schlick));
 	attentuation = m_albedo;
 
 	return true;
