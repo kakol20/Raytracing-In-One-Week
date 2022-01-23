@@ -151,9 +151,11 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Filters.cpp" />
     <ClCompile Include="Glass.cpp" />
+    <ClCompile Include="Ground.cpp" />
     <ClCompile Include="HitRec.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Lambertian.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="LinearFeedbackShift.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Metal.cpp" />
@@ -167,9 +169,11 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Filters.h" />
     <ClInclude Include="Glass.h" />
+    <ClInclude Include="Ground.h" />
     <ClInclude Include="HitRec.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Lambertian.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="LinearFeedbackShift.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Metal.h" />

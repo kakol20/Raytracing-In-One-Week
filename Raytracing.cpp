@@ -4,6 +4,7 @@
 
 #include "Filters.h"
 #include "Glass.h"
+#include "Ground.h"
 #include "Lambertian.h"
 #include "LinearFeedbackShift.h"
 #include "Metal.h"
@@ -218,13 +219,13 @@ void Raytracing::Init() {
 		m_camera = Camera(aspect_ratio, m_aperture, distV.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
 
 		// Create Materials
-		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.5f, 1.5f);
+		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
 		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
 		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.5f, 1.5f);
 		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);
 
 		// Create Objects
-		m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
+		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
 		m_objects.push_back(new Sphere(Vector3D(1.5f, 1.0f, -3.0f), 1.0f, m_materials["diffuse"]));
 		m_objects.push_back(new Sphere(Vector3D(-1.5f, 1.0f, -3.0f), 1.0f, m_materials["metal"]));
@@ -405,7 +406,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		//unit_direction.UnitVector();
 		float t = 0.5f * (unit_direction.GetY() + 1.0f);
 
-		return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t)/* * 255.0f*/;
+		return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t);
 	}
 }
 
