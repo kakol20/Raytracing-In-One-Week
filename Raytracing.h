@@ -48,6 +48,7 @@ private: // member variables
 
 	Camera m_camera;
 	Image m_render;
+	Image m_hdri;
 
 	Light m_mainLight;
 

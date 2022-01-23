@@ -48,6 +48,8 @@ Raytracing::Raytracing() {
 	}
 
 	m_mainLight = Light();
+
+	m_hdri.Read("images/cloud_layers_4k.png");
 }
 
 void Raytracing::Init() {
@@ -154,7 +156,7 @@ void Raytracing::Init() {
 	// Image
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
-	
+
 	bool debugMode = false;
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	if (!debugMode) {
@@ -313,7 +315,7 @@ bool Raytracing::Run() {
 
 		m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
 		m_threadId[m_threads[i].get_id()] = i + 1;
-;		m_nextAvailable++;
+		;		m_nextAvailable++;
 	}
 
 	for (size_t i = 0; i < m_threads.size(); i++) {
@@ -338,7 +340,6 @@ bool Raytracing::Run() {
 }
 
 void Raytracing::RenderTile(const size_t startIndex) {
-
 	auto start = std::chrono::high_resolution_clock::now();
 	Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
 	auto end = std::chrono::high_resolution_clock::now();
@@ -408,23 +409,24 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 				Ray shadowRay = Ray(rec.GetPoint(), shadowToLight);
 				HitRec tempRec;
-				
+
 				Vector3D lightColor = m_mainLight.GetColor();
 
 				if (HitObject(shadowRay, 0.001f, INFINITY, tempRec)) {
+					float distToLight = shadowToLight.Magnitude();
 					Vector3D shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
+
 					if (tempRec.GetMaterial()->IsTransparent()) {
 						shadowColor = tempRec.GetMaterial()->GetAlbedo() * (1.0f - tempRec.GetMaterial()->GetRoughness());
 
 						return attentuation * lightColor * shadowColor * RayColor(scattered, depth - 1);
 					}
 					else {
-						return attentuation * shadowColor * RayColor(scattered, depth - 1);
+						return attentuation * lightColor * shadowColor * RayColor(scattered, depth - 1);
 					}
 				}
 				else {
 					return attentuation * lightColor * RayColor(scattered, depth - 1);
-
 				}
 			}
 		}
@@ -438,10 +440,23 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	}
 	else {
 		Vector3D unit_direction = ray.GetDirection().UnitVector();
-		//unit_direction.UnitVector();
-		float t = 0.5f * (unit_direction.GetY() + 1.0f);
+		////unit_direction.UnitVector();
+		//float t = 0.5f * (unit_direction.GetY() + 1.0f);
+		float pi = 3.14159265f;
 
-		return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t);
+		//return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t);
+		float u = 0.5f + (atan2f(unit_direction.GetX(), unit_direction.GetZ()) / (2.0f * pi));
+		float v = 0.5f - (asinf(unit_direction.GetY()) / pi);
+
+		int x = (int)floorf(m_hdri.GetWidth() * u);
+		int y = (int)floorf(m_hdri.GetHeight() * v);
+		int index = m_hdri.GetIndex(x, y);
+
+		float r = m_hdri.GetDataF(index + 0) / 255.0f;
+		float g = m_hdri.GetDataF(index + 1) / 255.0f;
+		float b = m_hdri.GetDataF(index + 2) / 255.0f;
+
+		return Vector3D(r, g, b);
 	}
 }
 
