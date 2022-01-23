@@ -165,7 +165,7 @@ void Raytracing::Init() {
 		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 		// Lights
-		m_mainLight = Light(Vector3D(10.0f, 10.0f, 10.0f), Vector3D(1.0f, 1.0f, 1.0f));
+		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
 
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
@@ -178,7 +178,8 @@ void Raytracing::Init() {
 		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
 		m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
 		m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
+		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
+		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 
 		// Procedural Objects
 		int index = 0;
@@ -219,25 +220,27 @@ void Raytracing::Init() {
 	}
 	else {
 		// Camera
-		Vector3D lookFrom(0.0f, 2.0f, 11.0f);
-		Vector3D lookAt(0.0f, 1.0f, 0.0f);
-		Vector3D distV = lookAt - lookFrom;
-		m_camera = Camera(aspect_ratio, m_aperture, distV.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
+		Vector3D lookFrom(13.0f, 2.0f, 3.0f);
+		Vector3D lookAt(0.0f, 0.0f, 0.0f);
+		Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
+		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 		// Lights
-		m_mainLight = Light(Vector3D(10.0f, 10.0f, 10.0f), Vector3D(1.0f, 1.0f, 1.0f));
+		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
 
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
 		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
-		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.5f, 1.5f);
+		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f, 1.5f);
 		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);
 
 		// Create Objects
-		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
+		//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
 		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
-		m_objects.push_back(new Sphere(Vector3D(1.5f, 1.0f, -3.0f), 1.0f, m_materials["diffuse"]));
-		m_objects.push_back(new Sphere(Vector3D(-1.5f, 1.0f, -3.0f), 1.0f, m_materials["metal"]));
+		m_objects.push_back(new Sphere(Vector3D(-4.0f, 1.0f, 0.0f), 1.0f, m_materials["diffuse"]));
+		m_objects.push_back(new Sphere(Vector3D(4.0f, 1.0f, 0.0f), 1.0f, m_materials["metal"]));
+		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
+		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 	}
 }
 
@@ -405,20 +408,22 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 				Ray shadowRay = Ray(rec.GetPoint(), shadowToLight);
 				HitRec tempRec;
+				
+				Vector3D lightColor = m_mainLight.GetColor();
 
-				if (HitObject(shadowRay, 0.001f, shadowToLight.Magnitude(), tempRec)) {
+				if (HitObject(shadowRay, 0.001f, INFINITY, tempRec)) {
 					Vector3D shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
 					if (tempRec.GetMaterial()->IsTransparent()) {
 						shadowColor = tempRec.GetMaterial()->GetAlbedo() * (1.0f - tempRec.GetMaterial()->GetRoughness());
 
-						return attentuation * m_mainLight.GetColor() * shadowColor * RayColor(scattered, depth - 1);
+						return attentuation * lightColor * shadowColor * RayColor(scattered, depth - 1);
 					}
 					else {
 						return attentuation * shadowColor * RayColor(scattered, depth - 1);
 					}
 				}
 				else {
-					return attentuation * m_mainLight.GetColor() * RayColor(scattered, depth - 1);
+					return attentuation * lightColor * RayColor(scattered, depth - 1);
 
 				}
 			}
