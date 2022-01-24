@@ -164,7 +164,7 @@ void Raytracing::Init() {
 		Vector3D lookFrom(13.0f, 2.0f, 3.0f);
 		Vector3D lookAt(0.0f, 0.0f, 0.0f);
 		Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
-		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
+		m_camera = Camera(aspect_ratio, m_aperture, 10.0f, m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 		// Lights
 		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
@@ -405,6 +405,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			else {
 				// Shadow Ray
 				Vector3D shadowToLight = m_mainLight.GetPosition() - rec.GetPoint();
+				shadowToLight = shadowToLight + Vector3D::RandomInUnitSphere(32);
 				shadowToLight = shadowToLight.UnitVector();
 
 				Ray shadowRay = Ray(rec.GetPoint(), shadowToLight);
