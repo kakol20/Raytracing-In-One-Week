@@ -29,7 +29,7 @@ bool Lambertian::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	fresnelRoughness = std::lerp(0.0f, 0.9f, fresnelRoughness);
 
 	//Vector3D scatterDir = Vector3D::Lerp(reflect, refract, fresnelRoughness);
-	Vector3D scatterDir = rec.GetNormal() + (Vector3D::RandomInUnitSphere(32) * m_roughness);
+	Vector3D scatterDir = rec.GetNormal() + (Vector3D::RandomInHemisphere(rec.GetNormal(), 32)/* * m_roughness*/);
 
 	scatterDir = Vector3D::Lerp(rec.GetNormal(), scatterDir, fresnelRoughness);
 	scatterDir = scatterDir.UnitVector();

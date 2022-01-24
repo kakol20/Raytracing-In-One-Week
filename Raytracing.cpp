@@ -411,24 +411,25 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				HitRec tempRec;
 
 				Vector3D lightColor = m_mainLight.GetColor();
+				Vector3D outColor = attentuation * lightColor;
 
 				if (HitObject(shadowRay, 0.001f, INFINITY, tempRec)) {
 					float distToLight = shadowToLight.Magnitude();
 					Vector3D shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
 
 					if (tempRec.GetMaterial()->IsTransparent()) {
-						/*float roughness = (1.0f - tempRec.GetMaterial()->GetRoughness());
-						roughness = ClampF(roughness, 0.1f, 1.0f);*/
-						shadowColor = tempRec.GetMaterial()->GetAlbedo() /** roughness*/;
+						shadowColor = tempRec.GetMaterial()->GetAlbedo();
+						shadowColor = Vector3D::Lerp(shadowColor, Vector3D(0.1f, 0.1f, 0.1f), 
+							LinearFeedbackShift::RandFloat(32) * tempRec.GetMaterial()->GetRoughness());
 
-						return attentuation * lightColor * shadowColor * RayColor(scattered, depth - 1);
+						return outColor * shadowColor * RayColor(scattered, depth - 1);
 					}
 					else {
-						return attentuation * lightColor * shadowColor * RayColor(scattered, depth - 1);
+						return outColor * shadowColor * RayColor(scattered, depth - 1);
 					}
 				}
 				else {
-					return attentuation * lightColor * RayColor(scattered, depth - 1);
+					return outColor * RayColor(scattered, depth - 1);
 				}
 			}
 		}

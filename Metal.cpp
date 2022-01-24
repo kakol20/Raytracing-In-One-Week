@@ -30,7 +30,7 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	float fresnelRoughness = std::lerp(fresnel, 1.0f, m_roughness);
 	fresnelRoughness = std::lerp(0.0f, 0.9f, fresnelRoughness);
 
-	Vector3D scatterDir = reflected + (Vector3D::RandomUnitVector(32) * m_roughness);
+	Vector3D scatterDir = reflected + (Vector3D::RandomInUnitSphere(32) * m_roughness);
 
 	scatterDir = Vector3D::Lerp(reflected, scatterDir, fresnelRoughness);
 	scatterDir = scatterDir.UnitVector();
