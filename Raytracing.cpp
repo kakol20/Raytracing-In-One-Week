@@ -388,10 +388,13 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	// If we've exceeded the ray bounce limit, no more light is gathered.
 	if (depth <= 0) return Vector3D(0.0f, 0.0f, 0.0f);
 
+	float clipStart = 0.0001f;
+	float clipEnd = 1000.0f;
+
 	// draw objects
 	HitRec rec;
 	//rec.SetMaterial(m_materials["ground"]);
-	if (HitObject(ray, 0.001f, INFINITY, rec)) {
+	if (HitObject(ray, clipStart, clipEnd, rec)) {
 		Ray scattered;
 		Vector3D attentuation;
 
@@ -414,7 +417,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				Vector3D lightColor = m_mainLight.GetColor();
 				Vector3D outColor = attentuation * lightColor;
 
-				if (HitObject(shadowRay, 0.001f, INFINITY, tempRec)) {
+				if (HitObject(shadowRay, clipStart, INFINITY, tempRec)) {
 					float distToLight = shadowToLight.Magnitude();
 					Vector3D shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
 
@@ -436,7 +439,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		}
 
 		//return rec.GetMaterial()->GetAlbedo();
-		return Vector3D(0.0f, 0.0f, 0.0f);
+		//return Vector3D(0.0f, 0.0f, 0.0f);
 	}
 
 	// draw backround

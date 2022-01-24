@@ -33,10 +33,11 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	Vector3D scatterDir = reflected + (Vector3D::RandomInUnitSphere(32) * m_roughness);
 
 	scatterDir = Vector3D::Lerp(reflected, scatterDir, fresnelRoughness);
-	scatterDir = scatterDir.UnitVector();
 
 	// Catch degenerate scatter direction
 	if (scatterDir.NearZero()) scatterDir = reflected;
+
+	//scatterDir = scatterDir.UnitVector();
 
 	scattered = Ray(rec.GetPoint(), scatterDir);
 	attentuation = m_albedo;
