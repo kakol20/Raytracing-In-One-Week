@@ -400,7 +400,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 		if (rec.GetMaterial() == nullptr || rec.GetMaterial()->Scatter(ray, rec, attentuation, scattered)) {
 			if (m_renderNormals) {
-				return rec.GetNormal();
+				return (rec.GetNormal() + Vector3D(1.0f, 1.0f, 1.0f)) / 2.0f;
 			}
 			else if (m_renderAlbedo) {
 				return attentuation;
@@ -442,12 +442,13 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		//return Vector3D(0.0f, 0.0f, 0.0f);
 	}
 
+	Vector3D unit_direction = ray.GetDirection().UnitVector();
+
 	// draw backround
 	if (m_renderNormals) {
-		return Vector3D(0.0f, 0.0f, 0.0f);
+		return (unit_direction + Vector3D(1.0f, 1.0f, 1.0f)) / 2.0f;
 	}
 	else {
-		Vector3D unit_direction = ray.GetDirection().UnitVector();
 		////unit_direction.UnitVector();
 		//float t = 0.5f * (unit_direction.GetY() + 1.0f);
 		float pi = 3.14159265f;

@@ -39,7 +39,6 @@ bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	}
 
 	float fresnelRoughness = std::lerp(fresnel, 1.0f, m_roughness);
-	fresnelRoughness = std::lerp(0.0f, 0.9f, fresnelRoughness);
 
 	Vector3D scatterDir = direction + (Vector3D::RandomInUnitSphere(32) * m_roughness);
 
@@ -47,8 +46,6 @@ bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	// Catch degenerate scatter direction
 	if (scatterDir.NearZero()) scatterDir = direction;
-
-	//scatterDir = scatterDir.UnitVector();
 
 	scattered = Ray(rec.GetPoint(), scatterDir);
 	attentuation = m_albedo;
