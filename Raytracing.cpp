@@ -474,15 +474,38 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		float u = 0.5f + (atan2f(unit_direction.GetX(), unit_direction.GetZ()) / (2.0f * pi));
 		float v = 0.5f - (asinf(unit_direction.GetY()) / pi);
 
-		int x = (int)roundf((m_hdri.GetWidth() - 1) * u);
-		int y = (int)roundf((m_hdri.GetHeight() - 1) * v);
-		int index = m_hdri.GetIndex(x, y);
+		//int x = (int)roundf((m_hdri.GetWidth() - 1) * u);
+		//int y = (int)roundf((m_hdri.GetHeight() - 1) * v);
+		//int index = m_hdri.GetIndex(x, y);
 
-		float r = m_hdri.GetDataF(index + 0) / 255.0f;
-		float g = m_hdri.GetDataF(index + 1) / 255.0f;
-		float b = m_hdri.GetDataF(index + 2) / 255.0f;
+		//float r = m_hdri.GetDataF(index + 0) / 255.0f;
+		//float g = m_hdri.GetDataF(index + 1) / 255.0f;
+		//float b = m_hdri.GetDataF(index + 2) / 255.0f;
 
-		return Vector3D(r, g, b);
+		// bilinear texture interpolation
+		float x = (m_hdri.GetWidth() - 1) * u;
+		float y = (m_hdri.GetHeight() - 1) * v;
+
+		int index = 0;
+
+		index = m_hdri.GetIndex((int)floorf(x), (int)floorf(y));
+		Vector3D Q11(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
+
+		index = m_hdri.GetIndex((int)floorf(x), (int)ceilf(y));
+		Vector3D Q12(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
+
+		index = m_hdri.GetIndex((int)ceil(x), (int)floorf(y));
+		Vector3D Q21(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
+
+		index = m_hdri.GetIndex((int)ceilf(x), (int)ceilf(y));
+		Vector3D Q22(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
+
+		Vector3D R1 = Vector3D::Lerp(Q11, Q21, x - floorf(x));
+		Vector3D R2 = Vector3D::Lerp(Q12, Q22, x - floorf(x));
+
+		Vector3D p = Vector3D::Lerp(R1, R2, y - floorf(y));
+
+		return p;
 	}
 }
 
