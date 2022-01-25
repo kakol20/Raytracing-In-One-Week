@@ -195,28 +195,104 @@ void Raytracing::Init() {
 				Vector3D dist2 = center - Vector3D(4.0f, 2.0f, 0.0f);
 
 				if (dist2.Magnitude() > 0.9f) {
-					if (chooseMat < 0.4f) {
+					if (chooseMat < 0.2f) {
 						// lambertian
-						Vector3D albedo = Vector3D::Random(32) * Vector3D::Random(32);
-						m_proceduralMats.push_back(new Lambertian(albedo, 1.45f));
+						// generate colour based on hue
+						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, 32);
+						float s = 1.0f;
+						float v = 220.0f / 255.0f;
+
+						float c = v * s;
+						float x = c * (1.0f - fabsf(fmodf(h / 60.0f, 2) - 1.0f));
+						float m = v - c;
+
+						float r = 0.0f, g = 0.0f, b = 0.0f;
+						if (h < 60.0f) {
+							r = c;
+							g = x;
+						}
+						else if (h < 120.0f) {
+							r = x;
+							g = c;
+						}
+						else if (h < 180.0f) {
+							g = c;
+							b = x;
+						}
+						else if (h < 240.0f) {
+							g = x;
+							b = c;
+						}
+						else if (h < 300.0f) {
+							r = x;
+							b = c;
+						}
+						else {
+							r = c;
+							b = x;
+						}
+
+						r += m;
+						g += m;
+						b += m;
+
+						m_proceduralMats.push_back(new Lambertian(Vector3D(r, g, b), 1.45f));
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
 					else  if (chooseMat < 0.8f) {
 						// dielectric
-						Vector3D albedo = Vector3D::Random(32) * Vector3D::Random(32);
-						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
+						// generate colour based on hue
+						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, 32);
+						float s = 1.0f;
+						float v = 220.0f / 255.0f;
+
+						float c = v * s;
+						float x = c * (1.0f - fabsf(fmodf(h / 60.0f, 2) - 1.0f));
+						float m = v - c;
+
+						float r = 0.0f, g = 0.0f, b = 0.0f;
+						if (h < 60.0f) {
+							r = c;
+							g = x;
+						}
+						else if (h < 120.0f) {
+							r = x;
+							g = c;
+						}
+						else if (h < 180.0f) {
+							g = c;
+							b = x;
+						}
+						else if (h < 240.0f) {
+							g = x;
+							b = c;
+						}
+						else if (h < 300.0f) {
+							r = x;
+							b = c;
+						}
+						else {
+							r = c;
+							b = x;
+						}
+
+						r += m;
+						g += m;
+						b += m;
+						float roughness = LinearFeedbackShift::RandFloatRange(0.137f, 1.0f, 32);
 						float ior = 1.45f;
 
-						m_proceduralMats.push_back(new Dielectric(albedo, roughness, ior));
+						m_proceduralMats.push_back(new Dielectric(Vector3D(r, g, b), roughness, ior));
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
-					else if (chooseMat < 0.95f) {
+					else if (chooseMat < 0.9f) {
 						// metal
-						Vector3D albedo = Vector3D::Random(0.8f, 1.0f, 32);
-						float roughness = LinearFeedbackShift::RandFloat(32);
-						m_proceduralMats.push_back(new Metal(albedo, roughness, 1.45f));
+						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 1.0f, 32);
+						float ior = 1.45f;
+						m_proceduralMats.push_back(new Metal(albedo, roughness, ior));
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
@@ -224,7 +300,7 @@ void Raytracing::Init() {
 						// glass
 						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
 						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
-						float ior = 1.45f;
+						float ior = 1.5f;
 						m_proceduralMats.push_back(new Glass(albedo, roughness, ior));
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
@@ -270,6 +346,50 @@ void Raytracing::Init() {
 		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, -2.5f), 1.0f, m_materials["dielectric3"]));
 		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 	}
+
+	size_t nextAvailable = 0;
+
+	int maxXTiles = m_imageWidth / m_tileSize;
+	int maxYTiles = m_imageHeight / m_tileSize;
+	int maxTiles = maxXTiles * maxYTiles;
+
+	int xTileSize = (int)roundf(m_imageWidth / (float)maxXTiles);
+	int yTileSize = (int)roundf(m_imageHeight / (float)maxYTiles);
+
+	int widthModulo = m_imageWidth % maxXTiles;
+	int heightModulo = m_imageHeight % maxYTiles;
+
+	int x = 0;
+	while (x < m_imageWidth) {
+		int addX = widthModulo > 0 ? xTileSize + 1 : xTileSize;
+
+		int maxX = x + addX;
+		maxX = maxX > m_imageWidth ? m_imageWidth : maxX;
+
+		int l_heightModulo = heightModulo;
+
+		int y = 0;
+		while (y < m_imageHeight) {
+			int addY = l_heightModulo > 0 ? yTileSize + 1 : yTileSize;
+
+			int maxY = y + addY;
+			maxY = maxY > m_imageHeight ? m_imageHeight : maxY;
+
+			if (maxX > m_imageWidth || maxY > m_imageHeight) {
+				y = y + 0;
+			}
+
+			m_tiles.push_back({ x, y, maxX, maxY });
+
+			y = maxY;
+			l_heightModulo--;
+		}
+
+		x = maxX;
+		widthModulo--;
+	}
+
+	std::cout << "Total tiles: " << m_tiles.size() << '\n';
 }
 
 void Raytracing::SetRenderMode(const char* renderMode) {
@@ -317,47 +437,6 @@ bool Raytracing::Run() {
 	m_log << "Threads Used: " << maxThreads << '\n';
 
 	/*std::vector<Tile> tiles;*/
-	size_t nextAvailable = 0;
-
-	int maxXTiles = m_imageWidth / m_tileSize;
-	int maxYTiles = m_imageHeight / m_tileSize;
-	int maxTiles = maxXTiles * maxYTiles;
-
-	int xTileSize = (int)roundf(m_imageWidth / (float)maxXTiles);
-	int yTileSize = (int)roundf(m_imageHeight / (float)maxYTiles);
-
-	int widthModulo = m_imageWidth % maxXTiles;
-	int heightModulo = m_imageHeight % maxYTiles;
-
-	int x = 0;
-	while (x < m_imageWidth) {
-		int addX = widthModulo > 0 ? xTileSize + 1 : xTileSize;
-
-		int maxX = x + addX;
-		maxX = maxX > m_imageWidth ? m_imageWidth : maxX;
-
-		int l_heightModulo = heightModulo;
-
-		int y = 0;
-		while (y < m_imageHeight) {
-			int addY = l_heightModulo > 0 ? yTileSize + 1 : yTileSize;
-
-			int maxY = y + addY;
-			maxY = maxY > m_imageHeight ? m_imageHeight : maxY;
-
-			if (maxX > m_imageWidth || maxY > m_imageHeight) {
-				y = y + 0;
-			}
-
-			m_tiles.push_back({ x, y, maxX, maxY });
-
-			y = maxY;
-			l_heightModulo--;
-		}
-
-		x = maxX;
-		widthModulo--;
-	}
 
 	std::cout << "Total tiles: " << m_tiles.size() << '\n';
 	m_log << "Total tiles: " << m_tiles.size() << '\n';
@@ -395,7 +474,7 @@ bool Raytracing::Run() {
 
 	m_threads.clear();
 	m_log.close();
-	m_tiles.clear();
+	//m_tiles.clear();
 
 	return true;
 }
