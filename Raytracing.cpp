@@ -2,6 +2,7 @@
 #include <ctime>
 #include <iostream>
 
+#include "Dielectric.h"
 #include "Filters.h"
 #include "Glass.h"
 #include "Ground.h"
@@ -157,7 +158,8 @@ void Raytracing::Init() {
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 
-	bool debugMode = false;
+	bool debugMode = true;
+
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	if (!debugMode) {
 		// Camera
@@ -219,28 +221,43 @@ void Raytracing::Init() {
 				}
 			}
 		}
+
+		for (auto it = m_materials.begin(); it != m_materials.end(); it++) {
+			(*it).second->CameraPos(lookFrom);
+		}
+		for (auto it = m_proceduralMats.begin(); it != m_proceduralMats.end(); it++) {
+			(*it)->CameraPos(lookFrom);
+		}
 	}
 	else {
 		// Camera
 		Vector3D lookFrom(13.0f, 2.0f, 0.0f);
 		Vector3D lookAt(0.0f, 1.0f, 0.0f);
-		Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
+		Vector3D dist = lookAt - lookFrom;
 		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 		// Lights
 		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
 
 		// Create Materials
-		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
-		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
-		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f, 1.5f);
+		//m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
+		//m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
+		//m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f, 1.5f);
 		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);
+
+		m_materials["dielectric1"] = new Dielectric(Vector3D(0.8f, 0.0f, 0.0f), 0.0f, 1.5f);
+		m_materials["dielectric2"] = new Dielectric(Vector3D(0.0f, 0.8f, 0.0f), 0.5f, 1.5f);
+		m_materials["dielectric3"] = new Dielectric(Vector3D(0.0f, 0.0f, 0.8f), 1.0f, 1.5f);
+
+		for (auto it = m_materials.begin(); it != m_materials.end(); it++) {
+			(*it).second->CameraPos(lookFrom);
+		}
 
 		// Create Objects
 		//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 3.0f), 1.0f, m_materials["diffuse"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, -3.0f), 1.0f, m_materials["metal"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["dielectric2"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 2.5f), 1.0f, m_materials["dielectric1"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, -2.5f), 1.0f, m_materials["dielectric3"]));
 		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
 		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 	}
@@ -423,7 +440,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 					if (tempRec.GetMaterial()->IsTransparent()) {
 						shadowColor = tempRec.GetMaterial()->GetAlbedo();
-						shadowColor = Vector3D::Lerp(shadowColor, Vector3D(0.1f, 0.1f, 0.1f), 
+						shadowColor = Vector3D::Lerp(shadowColor, Vector3D(0.1f, 0.1f, 0.1f),
 							LinearFeedbackShift::RandFloat(32) * tempRec.GetMaterial()->GetRoughness());
 
 						return outColor * shadowColor * RayColor(scattered, depth - 1);
@@ -457,8 +474,8 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		float u = 0.5f + (atan2f(unit_direction.GetX(), unit_direction.GetZ()) / (2.0f * pi));
 		float v = 0.5f - (asinf(unit_direction.GetY()) / pi);
 
-		int x = (int)floorf(m_hdri.GetWidth() * u);
-		int y = (int)floorf(m_hdri.GetHeight() * v);
+		int x = (int)roundf((m_hdri.GetWidth() - 1) * u);
+		int y = (int)roundf((m_hdri.GetHeight() - 1) * v);
 		int index = m_hdri.GetIndex(x, y);
 
 		float r = m_hdri.GetDataF(index + 0) / 255.0f;
