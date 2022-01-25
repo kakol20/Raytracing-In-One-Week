@@ -33,7 +33,7 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	Vector3D unitDirInv = unitDir * -1.0f;
 
 	Vector3D normal = rec.GetNormal().UnitVector();
-	Vector3D incoming = m_cameraPos - rec.GetPoint();
+	Vector3D incoming = rayIn.GetOrigin() - rec.GetPoint();
 	incoming = incoming.UnitVector();
 
 	Vector3D fresnelNormal = Vector3D::Lerp(normal, incoming, roughnessModified);
@@ -63,7 +63,7 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 
 	// apply
 	attentuation = albedo;
-	scattered = Ray(rayIn.GetOrigin(), scatterDir);
+	scattered = Ray(rec.GetPoint(), scatterDir);
 
 	return true;
 }
