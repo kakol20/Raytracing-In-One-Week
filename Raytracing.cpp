@@ -158,7 +158,7 @@ void Raytracing::Init() {
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 
-	bool debugMode = true;
+	bool debugMode = false;
 
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	if (!debugMode) {
@@ -302,7 +302,16 @@ bool Raytracing::Run() {
 
 	//runTime.open("images/runTime.txt", std::ios_base::out);
 
-	m_log.open("log.txt", std::ios_base::out);
+	//m_log.open("log.txt", std::ios_base::out);
+	if (m_renderAlbedo) {
+		m_log.open("log_albedo.txt", std::ios_base::out);
+	}
+	else if (m_renderNormals) {
+		m_log.open("log_normal.txt", std::ios_base::out);
+	}
+	else {
+		m_log.open("log_color.txt", std::ios_base::out);
+	}
 
 	std::cout << "Threads Used: " << maxThreads << '\n';
 	m_log << "Threads Used: " << maxThreads << '\n';
@@ -356,13 +365,14 @@ bool Raytracing::Run() {
 	//system("pause");
 
 	size_t max = maxThreads < m_tiles.size() ? maxThreads : m_tiles.size();
+	m_nextAvailable = 0;
 	for (size_t i = 0; i < max; i++) {
 		/*std::cout << "Rendering tile #" << m_nextAvailable << '\n';
 		m_log << "Rendering tile #" << m_nextAvailable << '\n';*/
 
 		m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
 		m_threadId[m_threads[i].get_id()] = i + 1;
-		;		m_nextAvailable++;
+		m_nextAvailable++;
 	}
 
 	for (size_t i = 0; i < m_threads.size(); i++) {
@@ -385,6 +395,7 @@ bool Raytracing::Run() {
 
 	m_threads.clear();
 	m_log.close();
+	m_tiles.clear();
 
 	return true;
 }
