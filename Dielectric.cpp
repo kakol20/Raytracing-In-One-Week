@@ -1,5 +1,7 @@
 #include <algorithm>
 
+#include "LinearFeedbackShift.h"
+
 #include "Dielectric.h"
 
 Dielectric::Dielectric() {
@@ -57,7 +59,7 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 
 	// mix diffuse and glossy
 	Vector3D albedo = Vector3D::Lerp(m_albedo, white, fresnel);
-	Vector3D scatterDir = Vector3D::Lerp(diffuse, glossyRough, fresnel);
+	Vector3D scatterDir = Vector3D::Lerp(glossyRough, diffuse, fresnel);
 
 	// apply
 	attentuation = albedo;
