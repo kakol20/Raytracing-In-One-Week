@@ -29,7 +29,7 @@ Raytracing::Raytracing() {
 
 	m_nextAvailable = 0;
 
-	m_renderMode = "color";
+	m_renderMode = "all";
 
 	if (m_renderMode == "normal") {
 		m_renderNormals = true;
@@ -96,7 +96,7 @@ void Raytracing::Init() {
 					m_renderNormals = false;
 					m_renderAlbedo = true;
 				}
-				else if (m_renderMode == "diffuse") {
+				else if (m_renderMode == "color" || m_renderMode == "colour") {
 					m_renderNormals = false;
 					m_renderAlbedo = false;
 				}
@@ -138,7 +138,7 @@ void Raytracing::Init() {
 
 		settings << "#Render Settings\n";
 		settings << "maxDepth=" << m_maxDepth << '\n';
-		settings << "#color, normal, albedo\n";
+		settings << "#color, normal, albedo or all\n";
 		settings << "renderMode=" << m_renderMode << '\n';
 		settings << "samplesPerPixel=" << m_samplesPerPixel << '\n';
 		settings << "tileSize=" << m_tileSize << "\n#\n";
@@ -195,25 +195,36 @@ void Raytracing::Init() {
 				Vector3D dist2 = center - Vector3D(4.0f, 2.0f, 0.0f);
 
 				if (dist2.Magnitude() > 0.9f) {
-					if (chooseMat < 0.8f) {
-						// diffuse
+					if (chooseMat < 0.4f) {
+						// lambertian
 						Vector3D albedo = Vector3D::Random(32) * Vector3D::Random(32);
 						m_proceduralMats.push_back(new Lambertian(albedo, 1.45f));
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
+					else  if (chooseMat < 0.8f) {
+						// dielectric
+						Vector3D albedo = Vector3D::Random(32) * Vector3D::Random(32);
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
+						float ior = 1.45f;
+
+						m_proceduralMats.push_back(new Dielectric(albedo, roughness, ior));
+
+						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
+					}
 					else if (chooseMat < 0.95f) {
 						// metal
-						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
+						Vector3D albedo = Vector3D::Random(0.8f, 1.0f, 32);
 						float roughness = LinearFeedbackShift::RandFloat(32);
 						m_proceduralMats.push_back(new Metal(albedo, roughness, 1.45f));
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
 					else {
+						// glass
 						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
 						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
-						float ior = 1.5f;
+						float ior = 1.45f;
 						m_proceduralMats.push_back(new Glass(albedo, roughness, ior));
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
@@ -240,30 +251,49 @@ void Raytracing::Init() {
 		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
 
 		// Create Materials
-		//m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
+		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
 		//m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
-		//m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f, 1.5f);
+		m_materials["metal"] = new Metal(Vector3D(0.8f, 0.0f, 0.0f), 0.0f, 1.5f);
 		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);
 
 		m_materials["dielectric1"] = new Dielectric(Vector3D(0.8f, 0.0f, 0.0f), 0.0f, 1.5f);
-		m_materials["dielectric2"] = new Dielectric(Vector3D(0.0f, 0.8f, 0.0f), 0.5f, 1.5f);
-		m_materials["dielectric3"] = new Dielectric(Vector3D(0.0f, 0.0f, 0.8f), 1.0f, 1.5f);
+		m_materials["dielectric2"] = new Dielectric(Vector3D(0.8f, 0.0f, 0.0f), 0.5f, 1.5f);
+		m_materials["dielectric3"] = new Dielectric(Vector3D(0.8f, 0.0f, 0.0f), 1.0f, 1.5f);
 
 		for (auto it = m_materials.begin(); it != m_materials.end(); it++) {
 			(*it).second->CameraPos(lookFrom);
 		}
 
 		// Create Objects
-		//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["dielectric2"]));
 		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 2.5f), 1.0f, m_materials["dielectric1"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["dielectric2"]));
 		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, -2.5f), 1.0f, m_materials["dielectric3"]));
-		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
 		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 	}
 }
 
+void Raytracing::SetRenderMode(const char* renderMode) {
+	m_renderMode = renderMode;
+}
+
 bool Raytracing::Run() {
+	if (m_renderMode == "normal") {
+		m_renderNormals = true;
+		m_renderAlbedo = false;
+	}
+	else if (m_renderMode == "albedo") {
+		m_renderNormals = false;
+		m_renderAlbedo = true;
+	}
+	else if (m_renderMode == "color" || m_renderMode == "colour") {
+		m_renderNormals = false;
+		m_renderAlbedo = false;
+	}
+	else {
+		m_renderNormals = false;
+		m_renderAlbedo = false;
+	}
+
 	// Render
 	size_t reserveThreads = (size_t)roundf(std::thread::hardware_concurrency() / 8.0f);
 	reserveThreads = reserveThreads > 0 ? reserveThreads : 1;
@@ -323,7 +353,7 @@ bool Raytracing::Run() {
 	std::cout << "Total tiles: " << m_tiles.size() << '\n';
 	m_log << "Total tiles: " << m_tiles.size() << '\n';
 
-	system("pause");
+	//system("pause");
 
 	size_t max = maxThreads < m_tiles.size() ? maxThreads : m_tiles.size();
 	for (size_t i = 0; i < max; i++) {
@@ -352,6 +382,9 @@ bool Raytracing::Run() {
 	}
 
 	if (Image::PrintToConsole) system("pause");
+
+	m_threads.clear();
+	m_log.close();
 
 	return true;
 }

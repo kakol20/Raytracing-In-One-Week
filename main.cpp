@@ -1,18 +1,58 @@
-#include "Raytracing.h"
-#include "LinearFeedbackShift.h"
 #include <chrono>
 #include <fstream>
 
+#include "Raytracing.h"
+#include "LinearFeedbackShift.h"
+#include "String.h"
+
 unsigned int LinearFeedbackShift::Seed = 18012022;
+
+bool RenderMode(const char* renderMode);
 
 Raytracing raytracing;
 
 int main() {
 	raytracing.Init();
 
+	String renderMode = "all";
+
+	std::fstream settings;
+
+	settings.open("settings.cfg", std::ios_base::in);
+
+	if (settings.is_open()) {
+		while (!settings.eof()) {
+			String line;
+			settings >> line;
+
+			/*std::cout << line;
+			std::cout << '\n';*/
+
+			String first = line.GetFirst("=");
+
+			if (first == "renderMode") {
+				renderMode = line.GetSecond("=");
+
+				break;
+			}
+		}
+	}
+	settings.close();
+
+	//std::cout << "Render Mode: " << renderMode << '\n';
+	
+	system("pause");
+
 	auto begin = std::chrono::high_resolution_clock::now();
 
-	if (!raytracing.Run()) return -1;
+	if (renderMode == "all") {
+		if (!RenderMode("albedo")) return -1;
+		if (!RenderMode("normal")) return -1;
+		if (!RenderMode("color")) return -1;
+	}
+	else {
+		if (!RenderMode(renderMode.GetChar())) return -1;
+	}
 
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed = end - begin;
@@ -26,4 +66,10 @@ int main() {
 	}
 
 	return 0;
+}
+
+bool RenderMode(const char* renderMode) {
+	raytracing.SetRenderMode(renderMode);
+
+	return raytracing.Run();
 }

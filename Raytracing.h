@@ -16,6 +16,8 @@ public:
 
 	void Init();
 
+	void SetRenderMode(const char* renderMode);
+
 	bool Run();
 
 	~Raytracing();
