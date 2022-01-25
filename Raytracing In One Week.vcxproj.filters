@@ -90,6 +90,9 @@
     <ClCompile Include="Light.cpp">
       <Filter>Source Files\Raytracing</Filter>
     </ClCompile>
+    <ClCompile Include="Dielectric.cpp">
+      <Filter>Source Files\Object\Material</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -148,6 +151,9 @@
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Header Files\Raytracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Dielectric.h">
+      <Filter>Header Files\Objects\Material</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

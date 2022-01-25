@@ -10,7 +10,4 @@ public:
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered);
 
 private:
-
-	float m_roughness;
-
 };

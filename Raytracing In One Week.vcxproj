@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Dielectric.cpp" />
     <ClCompile Include="Filters.cpp" />
     <ClCompile Include="Glass.cpp" />
     <ClCompile Include="Ground.cpp" />
@@ -167,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Dielectric.h" />
     <ClInclude Include="Filters.h" />
     <ClInclude Include="Glass.h" />
     <ClInclude Include="Ground.h" />

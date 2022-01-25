@@ -2,6 +2,7 @@
 #include <ctime>
 #include <iostream>
 
+#include "Dielectric.h"
 #include "Filters.h"
 #include "Glass.h"
 #include "Ground.h"
@@ -28,7 +29,7 @@ Raytracing::Raytracing() {
 
 	m_nextAvailable = 0;
 
-	m_renderMode = "color";
+	m_renderMode = "all";
 
 	if (m_renderMode == "normal") {
 		m_renderNormals = true;
@@ -95,7 +96,7 @@ void Raytracing::Init() {
 					m_renderNormals = false;
 					m_renderAlbedo = true;
 				}
-				else if (m_renderMode == "diffuse") {
+				else if (m_renderMode == "color" || m_renderMode == "colour") {
 					m_renderNormals = false;
 					m_renderAlbedo = false;
 				}
@@ -137,7 +138,7 @@ void Raytracing::Init() {
 
 		settings << "#Render Settings\n";
 		settings << "maxDepth=" << m_maxDepth << '\n';
-		settings << "#color, normal, albedo\n";
+		settings << "#color, normal, albedo or all\n";
 		settings << "renderMode=" << m_renderMode << '\n';
 		settings << "samplesPerPixel=" << m_samplesPerPixel << '\n';
 		settings << "tileSize=" << m_tileSize << "\n#\n";
@@ -158,6 +159,7 @@ void Raytracing::Init() {
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 
 	bool debugMode = false;
+
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	if (!debugMode) {
 		// Camera
@@ -193,25 +195,36 @@ void Raytracing::Init() {
 				Vector3D dist2 = center - Vector3D(4.0f, 2.0f, 0.0f);
 
 				if (dist2.Magnitude() > 0.9f) {
-					if (chooseMat < 0.8f) {
-						// diffuse
+					if (chooseMat < 0.4f) {
+						// lambertian
 						Vector3D albedo = Vector3D::Random(32) * Vector3D::Random(32);
 						m_proceduralMats.push_back(new Lambertian(albedo, 1.45f));
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
+					else  if (chooseMat < 0.8f) {
+						// dielectric
+						Vector3D albedo = Vector3D::Random(32) * Vector3D::Random(32);
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
+						float ior = 1.45f;
+
+						m_proceduralMats.push_back(new Dielectric(albedo, roughness, ior));
+
+						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
+					}
 					else if (chooseMat < 0.95f) {
 						// metal
-						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
+						Vector3D albedo = Vector3D::Random(0.8f, 1.0f, 32);
 						float roughness = LinearFeedbackShift::RandFloat(32);
 						m_proceduralMats.push_back(new Metal(albedo, roughness, 1.45f));
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
 					else {
+						// glass
 						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
 						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
-						float ior = 1.5f;
+						float ior = 1.45f;
 						m_proceduralMats.push_back(new Glass(albedo, roughness, ior));
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
@@ -219,12 +232,19 @@ void Raytracing::Init() {
 				}
 			}
 		}
+
+		for (auto it = m_materials.begin(); it != m_materials.end(); it++) {
+			(*it).second->CameraPos(lookFrom);
+		}
+		for (auto it = m_proceduralMats.begin(); it != m_proceduralMats.end(); it++) {
+			(*it)->CameraPos(lookFrom);
+		}
 	}
 	else {
 		// Camera
 		Vector3D lookFrom(13.0f, 2.0f, 0.0f);
 		Vector3D lookAt(0.0f, 1.0f, 0.0f);
-		Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
+		Vector3D dist = lookAt - lookFrom;
 		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 		// Lights
@@ -232,21 +252,48 @@ void Raytracing::Init() {
 
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
-		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
-		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f, 1.5f);
+		//m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
+		m_materials["metal"] = new Metal(Vector3D(0.8f, 0.0f, 0.0f), 0.0f, 1.5f);
 		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);
 
+		m_materials["dielectric1"] = new Dielectric(Vector3D(0.8f, 0.0f, 0.0f), 0.0f, 1.5f);
+		m_materials["dielectric2"] = new Dielectric(Vector3D(0.8f, 0.0f, 0.0f), 0.5f, 1.5f);
+		m_materials["dielectric3"] = new Dielectric(Vector3D(0.8f, 0.0f, 0.0f), 1.0f, 1.5f);
+
+		for (auto it = m_materials.begin(); it != m_materials.end(); it++) {
+			(*it).second->CameraPos(lookFrom);
+		}
+
 		// Create Objects
-		//m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), -0.95f, m_materials["glass"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 3.0f), 1.0f, m_materials["diffuse"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, -3.0f), 1.0f, m_materials["metal"]));
-		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 2.5f), 1.0f, m_materials["dielectric1"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["dielectric2"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, -2.5f), 1.0f, m_materials["dielectric3"]));
 		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 	}
 }
 
+void Raytracing::SetRenderMode(const char* renderMode) {
+	m_renderMode = renderMode;
+}
+
 bool Raytracing::Run() {
+	if (m_renderMode == "normal") {
+		m_renderNormals = true;
+		m_renderAlbedo = false;
+	}
+	else if (m_renderMode == "albedo") {
+		m_renderNormals = false;
+		m_renderAlbedo = true;
+	}
+	else if (m_renderMode == "color" || m_renderMode == "colour") {
+		m_renderNormals = false;
+		m_renderAlbedo = false;
+	}
+	else {
+		m_renderNormals = false;
+		m_renderAlbedo = false;
+	}
+
 	// Render
 	size_t reserveThreads = (size_t)roundf(std::thread::hardware_concurrency() / 8.0f);
 	reserveThreads = reserveThreads > 0 ? reserveThreads : 1;
@@ -255,7 +302,16 @@ bool Raytracing::Run() {
 
 	//runTime.open("images/runTime.txt", std::ios_base::out);
 
-	m_log.open("log.txt", std::ios_base::out);
+	//m_log.open("log.txt", std::ios_base::out);
+	if (m_renderAlbedo) {
+		m_log.open("log_albedo.txt", std::ios_base::out);
+	}
+	else if (m_renderNormals) {
+		m_log.open("log_normal.txt", std::ios_base::out);
+	}
+	else {
+		m_log.open("log_color.txt", std::ios_base::out);
+	}
 
 	std::cout << "Threads Used: " << maxThreads << '\n';
 	m_log << "Threads Used: " << maxThreads << '\n';
@@ -306,16 +362,17 @@ bool Raytracing::Run() {
 	std::cout << "Total tiles: " << m_tiles.size() << '\n';
 	m_log << "Total tiles: " << m_tiles.size() << '\n';
 
-	system("pause");
+	//system("pause");
 
 	size_t max = maxThreads < m_tiles.size() ? maxThreads : m_tiles.size();
+	m_nextAvailable = 0;
 	for (size_t i = 0; i < max; i++) {
 		/*std::cout << "Rendering tile #" << m_nextAvailable << '\n';
 		m_log << "Rendering tile #" << m_nextAvailable << '\n';*/
 
 		m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
 		m_threadId[m_threads[i].get_id()] = i + 1;
-		;		m_nextAvailable++;
+		m_nextAvailable++;
 	}
 
 	for (size_t i = 0; i < m_threads.size(); i++) {
@@ -335,6 +392,10 @@ bool Raytracing::Run() {
 	}
 
 	if (Image::PrintToConsole) system("pause");
+
+	m_threads.clear();
+	m_log.close();
+	m_tiles.clear();
 
 	return true;
 }
@@ -423,7 +484,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 					if (tempRec.GetMaterial()->IsTransparent()) {
 						shadowColor = tempRec.GetMaterial()->GetAlbedo();
-						shadowColor = Vector3D::Lerp(shadowColor, Vector3D(0.1f, 0.1f, 0.1f), 
+						shadowColor = Vector3D::Lerp(shadowColor, Vector3D(0.1f, 0.1f, 0.1f),
 							LinearFeedbackShift::RandFloat(32) * tempRec.GetMaterial()->GetRoughness());
 
 						return outColor * shadowColor * RayColor(scattered, depth - 1);
@@ -457,15 +518,38 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		float u = 0.5f + (atan2f(unit_direction.GetX(), unit_direction.GetZ()) / (2.0f * pi));
 		float v = 0.5f - (asinf(unit_direction.GetY()) / pi);
 
-		int x = (int)floorf(m_hdri.GetWidth() * u);
-		int y = (int)floorf(m_hdri.GetHeight() * v);
-		int index = m_hdri.GetIndex(x, y);
+		//int x = (int)roundf((m_hdri.GetWidth() - 1) * u);
+		//int y = (int)roundf((m_hdri.GetHeight() - 1) * v);
+		//int index = m_hdri.GetIndex(x, y);
 
-		float r = m_hdri.GetDataF(index + 0) / 255.0f;
-		float g = m_hdri.GetDataF(index + 1) / 255.0f;
-		float b = m_hdri.GetDataF(index + 2) / 255.0f;
+		//float r = m_hdri.GetDataF(index + 0) / 255.0f;
+		//float g = m_hdri.GetDataF(index + 1) / 255.0f;
+		//float b = m_hdri.GetDataF(index + 2) / 255.0f;
 
-		return Vector3D(r, g, b);
+		// bilinear texture interpolation
+		float x = (m_hdri.GetWidth() - 1) * u;
+		float y = (m_hdri.GetHeight() - 1) * v;
+
+		int index = 0;
+
+		index = m_hdri.GetIndex((int)floorf(x), (int)floorf(y));
+		Vector3D Q11(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
+
+		index = m_hdri.GetIndex((int)floorf(x), (int)ceilf(y));
+		Vector3D Q12(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
+
+		index = m_hdri.GetIndex((int)ceil(x), (int)floorf(y));
+		Vector3D Q21(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
+
+		index = m_hdri.GetIndex((int)ceilf(x), (int)ceilf(y));
+		Vector3D Q22(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
+
+		Vector3D R1 = Vector3D::Lerp(Q11, Q21, x - floorf(x));
+		Vector3D R2 = Vector3D::Lerp(Q12, Q22, x - floorf(x));
+
+		Vector3D p = Vector3D::Lerp(R1, R2, y - floorf(y));
+
+		return p;
 	}
 }
 

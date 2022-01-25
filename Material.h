@@ -22,6 +22,8 @@ public:
 	const Vector3D GetAlbedo() { return m_albedo; };
 	const float GetRoughness() { return m_roughness; };
 
+	void CameraPos(const Vector3D camPos) { m_cameraPos = camPos; };
+
 private:
 
 protected:
@@ -29,6 +31,7 @@ protected:
 	float m_ior;
 	float m_roughness;
 	bool m_transparent;
+	Vector3D m_cameraPos;
 
 	Vector3D Reflected(Vector3D v, Vector3D n) {
 		Vector3D temp = n * v.DotProduct(n);
