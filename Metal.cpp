@@ -1,4 +1,5 @@
 #include "Metal.h"
+#include "LinearFeedbackShift.h"
 
 Metal::Metal() {
 	m_albedo = Vector3D(0.8f, 0.8f, 0.8f);
@@ -17,21 +18,38 @@ Metal::~Metal() {
 }
 
 bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
+	float roughnessModified = m_roughness * m_roughness;
+
 	Vector3D reflected = Reflected(rayIn.GetDirection().UnitVector(), rec.GetNormal());
 
 	// fresnel
 	Vector3D unitDir = rayIn.GetDirection().UnitVector();
 	Vector3D unitDirInv = unitDir * -1.0f;
 
-	float cosTheta = fminf(unitDirInv.DotProduct(rec.GetNormal()), 1.0f);
+	Vector3D normal = rec.GetNormal().UnitVector();
+	Vector3D incoming = rayIn.GetOrigin() - rec.GetPoint();
+	incoming = incoming.UnitVector();
+
+	Vector3D fresnelNormal = Vector3D::Lerp(normal, incoming, roughnessModified);
+	fresnelNormal = fresnelNormal.UnitVector();
+
+	float cosTheta = fminf(unitDirInv.DotProduct(fresnelNormal), 1.0f);
 	float refracRatio = rec.GetFrontFace() ? (1.0f / m_ior) : m_ior;
 	float fresnel = Schlick(cosTheta, refracRatio);
 
-	float fresnelRoughness = std::lerp(fresnel, 1.0f, m_roughness);
+	//float fresnelRoughness = std::lerp(fresnel, 1.0f, m_roughness);
 
-	Vector3D scatterDir = reflected + (Vector3D::RandomInUnitSphere(32) * m_roughness);
+	Vector3D scatterDir;
 
-	scatterDir = Vector3D::Lerp(reflected, scatterDir, fresnelRoughness);
+	/*scatterDir = Vector3D::Lerp(reflected, scatterDir, fresnelRoughness);*/
+	bool fresnelRand = LinearFeedbackShift::RandFloat(32) < fresnel;
+
+	if (fresnelRand) {
+		scatterDir = reflected;
+	}
+	else {
+		scatterDir = reflected + (Vector3D::RandomInUnitSphere(32) * roughnessModified);
+	}
 
 	// Catch degenerate scatter direction
 	if (scatterDir.NearZero()) scatterDir = reflected;

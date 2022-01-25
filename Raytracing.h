@@ -59,5 +59,7 @@ private: // member variables
 
 	bool m_renderNormals;
 	bool m_renderAlbedo;
+
 	String m_renderMode;
+	bool m_debugMode;
 };

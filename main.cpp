@@ -46,12 +46,13 @@ int main() {
 	auto begin = std::chrono::high_resolution_clock::now();
 
 	if (renderMode == "all") {
+		std::cout << "\nRendering Albedo\n";
 		if (!RenderMode("albedo")) return -1;
-		std::cout << '\n';
 
+		std::cout << "\nRendering Normal\n";
 		if (!RenderMode("normal")) return -1;
-		std::cout << '\n';
 
+		std::cout << "\nRendering Color\n";
 		if (!RenderMode("color")) return -1;
 		std::cout << '\n';
 	}

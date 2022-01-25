@@ -51,6 +51,8 @@ Raytracing::Raytracing() {
 	m_mainLight = Light();
 
 	m_hdri.Read("images/cloud_layers_4k.png");
+
+	m_debugMode = false;
 }
 
 void Raytracing::Init() {
@@ -158,10 +160,8 @@ void Raytracing::Init() {
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 
-	bool debugMode = false;
-
 	Vector3D up(0.0f, 1.0f, 0.0f);
-	if (!debugMode) {
+	if (!m_debugMode) {
 		// Camera
 		Vector3D lookFrom(13.0f, 2.0f, 3.0f);
 		Vector3D lookAt(0.0f, 0.0f, 0.0f);
@@ -173,8 +173,8 @@ void Raytracing::Init() {
 
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
-		m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
-		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.0f, 1.5f);
+		m_materials["diffuse"] = new Dielectric(Vector3D(0.4f, 0.2f, 0.1f), 0.1f, 1.5f);
+		m_materials["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.25f, 1.5f);
 		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);
 
 		// Create Objects
@@ -280,7 +280,7 @@ void Raytracing::Init() {
 						r += m;
 						g += m;
 						b += m;
-						float roughness = LinearFeedbackShift::RandFloatRange(0.137f, 1.0f, 32);
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
 						float ior = 1.45f;
 
 						m_proceduralMats.push_back(new Dielectric(Vector3D(r, g, b), roughness, ior));
@@ -327,14 +327,16 @@ void Raytracing::Init() {
 		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
 
 		// Create Materials
-		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
+		float collectiveRoughness = 0.0f;
+		m_materials["glass"] = new Glass(Vector3D(0.863f, 0.0f, 0.0f), collectiveRoughness, 1.45f);
 		//m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
-		m_materials["metal"] = new Metal(Vector3D(0.8f, 0.0f, 0.0f), 0.0f, 1.5f);
-		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.5f);
+		m_materials["metal"] = new Metal(Vector3D(0.863f, 0.0f, 0.0f), collectiveRoughness, 1.45f);
 
-		m_materials["dielectric1"] = new Dielectric(Vector3D(0.8f, 0.0f, 0.0f), 0.0f, 1.5f);
-		m_materials["dielectric2"] = new Dielectric(Vector3D(0.8f, 0.0f, 0.0f), 0.5f, 1.5f);
-		m_materials["dielectric3"] = new Dielectric(Vector3D(0.8f, 0.0f, 0.0f), 1.0f, 1.5f);
+		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.45f);
+
+		m_materials["dielectric1"] = new Dielectric(Vector3D(0.863f, 0.0f, 0.0f), collectiveRoughness, 1.45f);
+		//m_materials["dielectric2"] = new Dielectric(Vector3D(0.863f, 0.0f, 0.0f), 0.5f, 1.45f);
+		//m_materials["dielectric3"] = new Dielectric(Vector3D(0.863f, 0.0f, 0.0f), 1.0f, 1.45f);
 
 		for (auto it = m_materials.begin(); it != m_materials.end(); it++) {
 			(*it).second->CameraPos(lookFrom);
@@ -342,8 +344,8 @@ void Raytracing::Init() {
 
 		// Create Objects
 		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 2.5f), 1.0f, m_materials["dielectric1"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["dielectric2"]));
-		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, -2.5f), 1.0f, m_materials["dielectric3"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, 0.0f), 1.0f, m_materials["glass"]));
+		m_objects.push_back(new Sphere(Vector3D(0.0f, 1.0f, -2.5f), 1.0f, m_materials["metal"]));
 		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 	}
 

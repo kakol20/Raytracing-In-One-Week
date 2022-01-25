@@ -49,7 +49,7 @@ protected:
 
 		return rOutPerp + rOutPara;
 	}
-	
+
 	const float Schlick(float cosine, float refIndex) {
 		// Use Schlick's approximation for reflectance.
 		float r0 = (1.0f - refIndex) / (1.0f + refIndex);

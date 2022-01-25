@@ -45,21 +45,32 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	fresnel = std::clamp(fresnel, 0.0f, 1.0f);
 
 	// diffuse
-	Vector3D diffuse = Vector3D::RandomInHemisphere(rec.GetNormal(), 32);
+	//Vector3D diffuse = Vector3D::RandomInHemisphere(rec.GetNormal(), 32);
 
 	// glossy
 	Vector3D white(0.8f, 0.8f, 0.8f);
 	Vector3D glossy = Reflected(unitDir, rec.GetNormal());
-	Vector3D glossyRough = glossy + (Vector3D::RandomUnitVector(32) * roughnessModified);
-
-	if (glossyRough.NearZero()) glossyRough = glossy;
-
-	glossyRough = glossyRough.UnitVector();
-	diffuse = diffuse.UnitVector();
 
 	// mix diffuse and glossy
-	Vector3D albedo = Vector3D::Lerp(m_albedo, white, fresnel);
-	Vector3D scatterDir = Vector3D::Lerp(glossyRough, diffuse, fresnel);
+	//Vector3D albedo = Vector3D::Lerp(m_albedo, white, fresnel);
+	//Vector3D scatterDir = Vector3D::Lerp(glossyRough, diffuse, fresnel);
+	bool randFresnel = LinearFeedbackShift::RandFloat(32) < fresnel;
+
+	Vector3D albedo;
+	if (randFresnel) {
+		albedo = white;
+	}
+	else {
+		albedo = m_albedo;
+	}
+
+	Vector3D scatterDir;
+	if (randFresnel) {
+		scatterDir = glossy + (Vector3D::RandomUnitVector(32) * roughnessModified);
+	}
+	else {
+		scatterDir = Vector3D::RandomInHemisphere(rec.GetNormal(), 32);
+	}
 
 	// apply
 	attentuation = albedo;
