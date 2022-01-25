@@ -84,7 +84,7 @@ unsigned int LinearFeedbackShift::RandUInt(const unsigned int bitCount) {
 		LinearFeedbackShift::Seed = static_cast<unsigned int>(current_time);
 	}
 
-	mtx.lock();
+	while (!mtx.try_lock());
 	for (int i = bitCount - 1; i >= 0; i--) {
 		out = out | ((LinearFeedbackShift::Seed & 0b1) << i);
 

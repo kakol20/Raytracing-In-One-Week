@@ -492,7 +492,8 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	std::thread::id thisId = std::this_thread::get_id();
 
 	std::mutex mtx;
-	mtx.lock();
+	//mtx.wa
+	while (!mtx.try_lock());
 
 	m_tilesRendered++;
 
