@@ -445,6 +445,8 @@ bool Raytracing::Run() {
 
 	//system("pause");
 
+	m_tilesRendered = 0;
+
 	size_t max = maxThreads < m_tiles.size() ? maxThreads : m_tiles.size();
 	m_nextAvailable = 0;
 	for (size_t i = 0; i < max; i++) {
@@ -492,7 +494,17 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	std::mutex mtx;
 	mtx.lock();
 
-	std::cout << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
+	m_tilesRendered++;
+
+	system("CLS");
+	std::cout << "Render Mode: " << m_renderMode << '\n';
+	std::cout << "Threads Used: " << m_threads.size() << '\n';
+	std::cout << "Total Tiles: " << m_tiles.size() << '\n';
+
+	float progress = (m_tilesRendered / (float)m_tiles.size()) * 100.0f;
+	std::cout << "Progress: " << progress << "%\n";
+
+	//std::cout << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
 	m_log << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
 
 	size_t nextAvailable = m_nextAvailable;

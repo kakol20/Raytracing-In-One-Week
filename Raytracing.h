@@ -55,6 +55,7 @@ private: // member variables
 	Light m_mainLight;
 
 	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_maxDepth, m_tileSize;
+	int m_tilesRendered;
 	float m_aperture, m_verticalFOV;
 
 	bool m_renderNormals;
