@@ -155,5 +155,8 @@
     <ClInclude Include="Dielectric.h">
       <Filter>Header Files\Objects\Material</Filter>
     </ClInclude>
+    <ClInclude Include="StaticMutex.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

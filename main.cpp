@@ -1,11 +1,14 @@
 #include <chrono>
 #include <fstream>
+#include <mutex>
 
 #include "Raytracing.h"
 #include "LinearFeedbackShift.h"
 #include "String.h"
+#include "StaticMutex.h"
 
 unsigned int LinearFeedbackShift::Seed = 3808;
+std::mutex StaticMutex::s_mtx = std::mutex();
 
 bool RenderMode(const char* renderMode);
 

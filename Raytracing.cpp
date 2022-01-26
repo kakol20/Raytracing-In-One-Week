@@ -11,7 +11,7 @@
 #include "Metal.h"
 #include "Raytracing.h"
 #include "Sphere.h"
-
+#include "StaticMutex.h"
 
 bool Image::PrintToConsole = false;
 
@@ -519,9 +519,8 @@ void Raytracing::RenderTile(const size_t startIndex) {
 
 	std::thread::id thisId = std::this_thread::get_id();
 
-	std::mutex mtx;
 	//mtx.wa
-	while (!mtx.try_lock());
+	StaticMutex::s_mtx.lock();
 
 	m_tilesRendered++;
 
@@ -538,7 +537,7 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	size_t nextAvailable = m_nextAvailable;
 	m_nextAvailable++;
 
-	mtx.unlock();
+	StaticMutex::s_mtx.unlock();
 
 	if (nextAvailable < m_tiles.size()) {
 		RenderTile(nextAvailable);
