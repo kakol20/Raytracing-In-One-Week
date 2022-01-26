@@ -175,6 +175,17 @@ const float Vector3D::SqrMagnitude() {
 	return m_x * m_x + m_y * m_y + m_z * m_z;
 }
 
+/// <summary>
+/// Convert into Unit Vector
+/// </summary>
+void Vector3D::Normalize() {
+	float l = this->Magnitude();
+
+	m_x /= l;
+	m_y /= l;
+	m_z /= l;
+}
+
 bool Vector3D::NearZero() {
 	const float s = 1e-8f;
 	return fabs(m_x) < s && fabs(m_y) < s && fabs(m_z) < s;
@@ -236,7 +247,8 @@ Vector3D Vector3D::RandomInUnitSphere(const unsigned int bitCount) {
 }
 
 Vector3D Vector3D::RandomUnitVector(const unsigned int bitCount) {
-	Vector3D temp = RandomInUnitSphere(bitCount).UnitVector();
+	Vector3D temp = RandomInUnitSphere(bitCount);
+	temp.Normalize();
 	//temp.UnitVector();
 	return temp;
 }
@@ -245,7 +257,7 @@ Vector3D Vector3D::RandomInUnitDisk(const unsigned int bitCount) {
 	while (true) {
 		Vector3D p = Vector3D(LinearFeedbackShift::RandFloatRange(-1.0f, 1.0f, bitCount), LinearFeedbackShift::RandFloatRange(-1.0f, 1.0f, bitCount), 0.0f);
 
-		if (p.Magnitude() >= 1.0f) continue;
+		if (p.SqrMagnitude() >= 1.0f) continue;
 
 		return p;
 	}

@@ -1,4 +1,5 @@
 #include "LinearFeedbackShift.h"
+#include "StaticMutex.h"
 
 #include <limits>
 
@@ -77,14 +78,13 @@ unsigned int LinearFeedbackShift::RandUInt(const unsigned int bitCount) {
 	unsigned int count = bitCount > 32 ? 32 : bitCount;
 	unsigned int out = 0;
 
-	std::mutex mtx;
+	StaticMutex::s_mtx.lock();
 
 	if (LinearFeedbackShift::Seed == 0) {
 		std::time_t current_time = time(0);
 		LinearFeedbackShift::Seed = static_cast<unsigned int>(current_time);
 	}
 
-	while (!mtx.try_lock());
 	for (int i = bitCount - 1; i >= 0; i--) {
 		out = out | ((LinearFeedbackShift::Seed & 0b1) << i);
 
@@ -93,7 +93,7 @@ unsigned int LinearFeedbackShift::RandUInt(const unsigned int bitCount) {
 
 		LinearFeedbackShift::Seed = (LinearFeedbackShift::Seed >> 1) | (newBit << 31);
 	}
-	mtx.unlock();
+	StaticMutex::s_mtx.unlock();
 	return out;
 }
 

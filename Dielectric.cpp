@@ -29,15 +29,15 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	float roughnessModified = m_roughness * m_roughness;
 
 	// fresnel
-	Vector3D unitDir = rayIn.GetDirection().UnitVector();
+	Vector3D unitDir = rayIn.GetDirection();
 	Vector3D unitDirInv = unitDir * -1.0f;
 
-	Vector3D normal = rec.GetNormal().UnitVector();
+	Vector3D normal = rec.GetNormal();
 	Vector3D incoming = rayIn.GetOrigin() - rec.GetPoint();
-	incoming = incoming.UnitVector();
+	incoming.Normalize();
 
 	Vector3D fresnelNormal = Vector3D::Lerp(normal, incoming, roughnessModified);
-	fresnelNormal = fresnelNormal.UnitVector();
+	fresnelNormal.Normalize();
 
 	float cosTheta = fminf(unitDirInv.DotProduct(fresnelNormal), 1.0f);
 	float refracRatio = rec.GetFrontFace() ? (1.0f / m_ior) : m_ior;
@@ -54,23 +54,20 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	// mix diffuse and glossy
 	//Vector3D albedo = Vector3D::Lerp(m_albedo, white, fresnel);
 	//Vector3D scatterDir = Vector3D::Lerp(glossyRough, diffuse, fresnel);
-	bool randFresnel = LinearFeedbackShift::RandFloat(32) < fresnel;
+	unsigned int bitCount = 32;
+	bool randFresnel = LinearFeedbackShift::RandFloat(bitCount) < fresnel;
 
 	Vector3D albedo;
+	Vector3D scatterDir;
 	if (randFresnel) {
 		albedo = white;
+		scatterDir = glossy + (Vector3D::RandomUnitVector(bitCount) * roughnessModified);
 	}
 	else {
 		albedo = m_albedo;
+		scatterDir = Vector3D::RandomInHemisphere(rec.GetNormal(), bitCount);
 	}
-
-	Vector3D scatterDir;
-	if (randFresnel) {
-		scatterDir = glossy + (Vector3D::RandomUnitVector(32) * roughnessModified);
-	}
-	else {
-		scatterDir = Vector3D::RandomInHemisphere(rec.GetNormal(), 32);
-	}
+	scatterDir.Normalize();
 
 	// apply
 	attentuation = albedo;

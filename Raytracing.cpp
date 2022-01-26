@@ -11,7 +11,7 @@
 #include "Metal.h"
 #include "Raytracing.h"
 #include "Sphere.h"
-
+#include "StaticMutex.h"
 
 bool Image::PrintToConsole = false;
 
@@ -49,9 +49,11 @@ Raytracing::Raytracing() {
 		m_renderAlbedo = false;
 	}
 
-	m_mainLight = Light();
+	//m_mainLight = Light();
 
 	m_hdri.Read("images/cloud_layers_4k.png");
+
+	m_hdriResolution = 0.5f;
 
 	m_debugMode = false;
 }
@@ -72,24 +74,28 @@ void Raytracing::Init() {
 			std::cout << line;
 			std::cout << '\n';
 
-			//std::cout << line.GetFirst("=") << " = " << String::ToInt(line.GetSecond("=")) << "\n\n";
+			//std::cout << line.GetFirst("=") << " = " << String::ToInt(second.GetChar()) << "\n\n";
 			String first = line.GetFirst("=");
+			String second = line.GetSecond("=");
 
 			if (first == "aperture") {
 				// float
-				m_aperture = String::ToFloat(line.GetSecond("="));
+				m_aperture = String::ToFloat(second.GetChar());
 			}
 			else if (first == "imageHeight") {
-				m_imageHeight = String::ToInt(line.GetSecond("="));
+				m_imageHeight = String::ToInt(second.GetChar());
 			}
 			else if (first == "imageWidth") {
-				m_imageWidth = String::ToInt(line.GetSecond("="));
+				m_imageWidth = String::ToInt(second.GetChar());
 			}
+			/*else if (first == "hdriResolution") {
+				m_hdriResolution = String::ToFloat(second.GetChar());
+			}*/
 			else if (first == "maxDepth") {
-				m_maxDepth = String::ToInt(line.GetSecond("="));
+				m_maxDepth = String::ToInt(second.GetChar());
 			}
 			else if (first == "renderMode") {
-				m_renderMode = line.GetSecond("=");
+				m_renderMode = second.GetChar();
 
 				if (m_renderMode == "normal") {
 					m_renderNormals = true;
@@ -109,17 +115,17 @@ void Raytracing::Init() {
 				}
 			}
 			else if (first == "randomSeed") {
-				LinearFeedbackShift::Seed = (unsigned int)String::ToInt(line.GetSecond("="));
+				LinearFeedbackShift::Seed = (unsigned int)String::ToInt(second.GetChar());
 			}
 			else if (first == "samplesPerPixel") {
-				m_samplesPerPixel = String::ToInt(line.GetSecond("="));
+				m_samplesPerPixel = String::ToInt(second.GetChar());
 			}
 			else if (first == "tileSize") {
-				m_tileSize = String::ToInt(line.GetSecond("="));
+				m_tileSize = String::ToInt(second.GetChar());
 			}
 			else if (first == "verticalFOV") {
 				// float
-				m_verticalFOV = String::ToFloat(line.GetSecond("="));
+				m_verticalFOV = String::ToFloat(second.GetChar());
 			}
 		}
 
@@ -140,8 +146,10 @@ void Raytracing::Init() {
 		settings << "imageHeight=" << m_imageHeight << "\n#\n";
 
 		settings << "#Render Settings\n";
+		settings << "##0 to 1\n";
+		//settings << "hdriResolution=" << m_hdriResolution << '\n';
 		settings << "maxDepth=" << m_maxDepth << '\n';
-		settings << "#color, normal, albedo or all\n";
+		settings << "##color, normal, albedo or all\n";
 		settings << "renderMode=" << m_renderMode << '\n';
 		settings << "samplesPerPixel=" << m_samplesPerPixel << '\n';
 		settings << "tileSize=" << m_tileSize << "\n#\n";
@@ -161,6 +169,36 @@ void Raytracing::Init() {
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 
+	// Lights
+	bool oneOther = true;
+	if (oneOther) {
+		// light #1
+		Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
+		lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
+		//Vector3D lightPos = Vector3D(0.5f, 1.0f, 0.5f);
+		lightPos.Normalize();
+
+		float u, v;
+		UVSphere(lightPos, u, v);
+		lightPos *= 1000.0f;
+
+		Vector3D lightColor = BiLerp(u, v, m_hdri);
+		m_lights.push_back(Light(lightPos, lightColor, 500.0f));
+
+		// Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
+
+		// light #2
+		lightPos = Vector3D(20.0f, 15.0f, 0.0f);
+		//lightPos = lightPos.UnitVector();
+
+		UVSphere(lightPos.UnitVector(), u, v);
+		//lightPos *= 25.0f;
+
+		lightColor = BiLerp(u, v, m_hdri);
+		m_lights.push_back(Light(lightPos, lightColor, 1.0f));
+
+	}
+
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	if (!m_debugMode) {
 		// Camera
@@ -170,21 +208,7 @@ void Raytracing::Init() {
 
 		m_camera = Camera(aspect_ratio, m_aperture, 10.0f, m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
-		// Lights
-		Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
-		lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
-		lightPos = lightPos.UnitVector();
-
-		float u, v;
-		UVSphere(lightPos, u, v);
-		lightPos *= 25.0f;
-
-		Vector3D lightColor = BiLerp(u, v, m_hdri);
-		float max = fmaxf(fmaxf(lightColor.GetX(), lightColor.GetY()), lightColor.GetY());
-		lightColor *= (1.0f / max);
-		lightPos *= 25.0f;
-
-		m_mainLight = Light(lightPos, lightColor);
+		//m_mainLight = Light(lightPos, lightColor);
 
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
@@ -200,12 +224,18 @@ void Raytracing::Init() {
 		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
 		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 
+		unsigned int bitCount = 32;
+
 		// Procedural Objects
 		int index = 0;
-		for (int a = -11; a < 11; a++) {
-			for (int b = -11; b < 11; b++) {
-				float chooseMat = LinearFeedbackShift::RandFloat(32);
-				Vector3D center((float)a + 0.9f * LinearFeedbackShift::RandFloat(32), 0.2f, (float)b + 0.9f * LinearFeedbackShift::RandFloat(32));
+		for (int a = -10; a <= 10; a++) {
+			for (int b = -10; b <= 10; b++) {
+				float chooseMat = LinearFeedbackShift::RandFloat(bitCount);
+				//Vector3D center((float)a + 0.9f * LinearFeedbackShift::RandFloat(bitCount), 0.2f, (float)b + 0.9f * LinearFeedbackShift::RandFloat(bitCount));
+				Vector3D center((float)a, 0.2f, (float)b);
+				Vector3D rand = Vector3D(0.9f, 0.9f, 0.9f) * Vector3D::Random(0.0f, 1.0f, bitCount) * Vector3D(1.0f, 0.0f, 1.0f);
+
+				center = center + rand;
 
 				Vector3D dist2 = center - Vector3D(4.0f, 2.0f, 0.0f);
 
@@ -213,7 +243,7 @@ void Raytracing::Init() {
 					if (chooseMat < 0.2f) {
 						// lambertian
 						// generate colour based on hue
-						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, 32);
+						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, bitCount);
 						float s = 1.0f;
 						float v = 220.0f / 255.0f;
 
@@ -258,7 +288,7 @@ void Raytracing::Init() {
 					else  if (chooseMat < 0.8f) {
 						// dielectric
 						// generate colour based on hue
-						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, 32);
+						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, bitCount);
 						float s = 1.0f;
 						float v = 220.0f / 255.0f;
 
@@ -295,7 +325,7 @@ void Raytracing::Init() {
 						r += m;
 						g += m;
 						b += m;
-						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, bitCount);
 						float ior = 1.45f;
 
 						m_proceduralMats.push_back(new Dielectric(Vector3D(r, g, b), roughness, ior));
@@ -304,8 +334,8 @@ void Raytracing::Init() {
 					}
 					else if (chooseMat < 0.9f) {
 						// metal
-						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
-						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 1.0f, 32);
+						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, bitCount);
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 1.0f, bitCount);
 						float ior = 1.45f;
 						m_proceduralMats.push_back(new Metal(albedo, roughness, ior));
 
@@ -313,8 +343,8 @@ void Raytracing::Init() {
 					}
 					else {
 						// glass
-						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
-						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
+						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, bitCount);
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, bitCount);
 						float ior = 1.5f;
 						m_proceduralMats.push_back(new Glass(albedo, roughness, ior));
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
@@ -338,14 +368,11 @@ void Raytracing::Init() {
 		Vector3D dist = lookAt - lookFrom;
 		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
-		// Lights
-		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
-
 		// Create Materials
 		float collectiveRoughness = 0.0f;
-		m_materials["glass"] = new Glass(Vector3D(0.863f, 0.0f, 0.0f), collectiveRoughness, 1.45f);
+		m_materials["glass"] = new Glass(Vector3D(0.0f, 0.863f, 0.0f), collectiveRoughness, 1.45f);
 		//m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
-		m_materials["metal"] = new Metal(Vector3D(0.863f, 0.0f, 0.0f), collectiveRoughness, 1.45f);
+		m_materials["metal"] = new Metal(Vector3D(0.0f, 0.0f, 0.863f), collectiveRoughness, 1.45f);
 
 		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.45f);
 
@@ -432,9 +459,9 @@ bool Raytracing::Run() {
 	}
 
 	// Render
-	size_t reserveThreads = (size_t)roundf(std::thread::hardware_concurrency() / 8.0f);
-	reserveThreads = reserveThreads > 0 ? reserveThreads : 1;
-	const size_t maxThreads = std::thread::hardware_concurrency() - reserveThreads;
+	//size_t reserveThreads = (size_t)roundf(std::thread::hardware_concurrency() / 8.0f);
+	//reserveThreads = reserveThreads > 0 ? reserveThreads : 1;
+	const size_t maxThreads = std::thread::hardware_concurrency() /*- reserveThreads*/;
 	//const size_t maxThreads = 0;
 
 	//runTime.open("images/runTime.txt", std::ios_base::out);
@@ -506,18 +533,17 @@ void Raytracing::RenderTile(const size_t startIndex) {
 
 	std::thread::id thisId = std::this_thread::get_id();
 
-	std::mutex mtx;
 	//mtx.wa
-	while (!mtx.try_lock());
+	StaticMutex::s_mtx.lock();
 
 	m_tilesRendered++;
 
 	system("CLS");
-	float progress = (m_tilesRendered / (float)m_tiles.size()) * 100.0f;
-	std::cout << "Render Mode: " << m_renderMode << '\n' 
-		<< "Threads Used: " << m_threads.size() << '\n' 
-		<< "Total Tiles: " << m_tiles.size() << '\n' 
-		<< "Progress: " << progress << "%\n";
+	//float progress = (m_tilesRendered / (float)m_tiles.size()) * 100.0f;
+	std::cout << "Render Mode: " << m_renderMode << '\n'
+		<< "Threads Used: " << m_threads.size() << '\n'
+		<< "Total Tiles: " << m_tiles.size() << '\n'
+		<< "Progress: " << m_tilesRendered << "/" << m_tiles.size() << '\n';
 
 	//std::cout << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
 	m_log << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
@@ -525,7 +551,7 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	size_t nextAvailable = m_nextAvailable;
 	m_nextAvailable++;
 
-	mtx.unlock();
+	StaticMutex::s_mtx.unlock();
 
 	if (nextAvailable < m_tiles.size()) {
 		RenderTile(nextAvailable);
@@ -587,6 +613,8 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	float clipStart = 0.0001f;
 	float clipEnd = 1000.0f;
 
+	unsigned int bitCount = 32;
+
 	// draw objects
 	HitRec rec;
 	//rec.SetMaterial(m_materials["ground"]);
@@ -602,42 +630,49 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				return attentuation;
 			}
 			else {
-				// Shadow Ray
-				Vector3D shadowToLight = m_mainLight.GetPosition() - rec.GetPoint();
-				shadowToLight = shadowToLight + Vector3D::RandomUnitVector(32);
-				shadowToLight = shadowToLight.UnitVector();
+				Vector3D outColor;
 
-				Ray shadowRay = Ray(rec.GetPoint(), shadowToLight);
-				HitRec tempRec;
+				for (auto it = m_lights.begin(); it != m_lights.end(); it++) {
+					// Shadow ray
+					Vector3D shadowDir = ((*it).GetPosition() + (Vector3D::RandomInUnitSphere(bitCount) * (*it).GetIntensity())) - rec.GetPoint();
+					//float distSq = shadowDir.SqrMagnitude();
+					//shadowDir = shadowDir + Vector3D::RandomUnitVector(bitCount);
+					shadowDir.Normalize();
 
-				Vector3D lightColor = m_mainLight.GetColor();
-				Vector3D outColor = attentuation * lightColor;
+					Ray shadowRay = Ray(rec.GetPoint(), shadowDir);
+					HitRec shadowRec;
 
-				if (HitObject(shadowRay, clipStart, INFINITY, tempRec)) {
-					float distToLight = shadowToLight.Magnitude();
-					Vector3D shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
+					// Color
+					Vector3D lightColor = (*it).GetColor();
 
-					if (tempRec.GetMaterial()->IsTransparent()) {
-						//shadowColor = tempRec.GetMaterial()->GetAlbedo();
-						/*shadowColor = Vector3D::Lerp(shadowColor, Vector3D(0.1f, 0.1f, 0.1f),
-							LinearFeedbackShift::RandFloat(32) * tempRec.GetMaterial()->GetRoughness());*/
+					if (HitObject(shadowRay, clipStart, clipEnd, shadowRec)) {
+						Vector3D shadowColor;
 
-						if (LinearFeedbackShift::RandFloat(32) < tempRec.GetMaterial()->GetRoughness()) {
-							shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
+						if (shadowRec.GetMaterial()->IsTransparent()) {
+							if (LinearFeedbackShift::RandFloat(bitCount) < shadowRec.GetMaterial()->GetRoughness()) {
+								shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
+							}
+							else {
+								shadowColor = shadowRec.GetMaterial()->GetAlbedo();
+							}
 						}
 						else {
-							shadowColor = tempRec.GetMaterial()->GetAlbedo();
+							shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
 						}
 
-						return outColor * shadowColor * RayColor(scattered, depth - 1);
+						lightColor *= shadowColor;
 					}
-					else {
-						return outColor * shadowColor * RayColor(scattered, depth - 1);
-					}
+
+					outColor += (lightColor /** (*it).GetIntensity()*/) /*/ (4 * 3.14159265 * distSq)*/;
 				}
-				else {
-					return outColor * RayColor(scattered, depth - 1);
-				}
+
+				//outColor /= (float)m_lights.size();
+
+				outColor = Vector3D(std::clamp(outColor.GetX(), 0.0f, 1.0f),
+					std::clamp(outColor.GetY(), 0.0f, 1.0f),
+					std::clamp(outColor.GetZ(), 0.0f, 1.0f));
+
+				return attentuation * outColor * RayColor(scattered, depth - 1);
 			}
 		}
 
@@ -645,7 +680,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		//return Vector3D(0.0f, 0.0f, 0.0f);
 	}
 
-	Vector3D unit_direction = ray.GetDirection().UnitVector();
+	Vector3D unit_direction = ray.GetDirection();
 
 	// draw backround
 	if (m_renderNormals) {
@@ -695,6 +730,8 @@ const bool Raytracing::HitObject(Ray& ray, const float t_min, const float t_max,
 }
 
 void Raytracing::Render(const int minX, const int minY, const int maxX, const int maxY) {
+	unsigned int bitCount = 32;
+
 	for (int x = minX; x < maxX; x++) {
 		for (int y = minY; y < maxY; y++) {
 			int flippedY = (m_imageHeight - y) - 1;
@@ -702,8 +739,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			// ----- SET COLOR -----
 			Vector3D pixel_color = Vector3D(0.0f, 0.0f, 0.0f);
 			for (int s = 0; s < m_samplesPerPixel; s++) {
-				float u = (x + LinearFeedbackShift::RandFloat(32)) / (float)(m_imageWidth - 1);
-				float v = (y + LinearFeedbackShift::RandFloat(32)) / (float)(m_imageHeight - 1);
+				float u = (x + LinearFeedbackShift::RandFloat(bitCount)) / (float)(m_imageWidth - 1);
+				float v = (y + LinearFeedbackShift::RandFloat(bitCount)) / (float)(m_imageHeight - 1);
 
 				Ray r = m_camera.GetRay(u, v);
 

@@ -1,11 +1,14 @@
 #include <chrono>
 #include <fstream>
+#include <mutex>
 
 #include "Raytracing.h"
 #include "LinearFeedbackShift.h"
 #include "String.h"
+#include "StaticMutex.h"
 
-unsigned int LinearFeedbackShift::Seed = 18012022;
+unsigned int LinearFeedbackShift::Seed = 3881995897;
+std::mutex StaticMutex::s_mtx = std::mutex();
 
 bool RenderMode(const char* renderMode);
 
@@ -61,14 +64,16 @@ int main() {
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double> elapsed = end - begin;
+	std::chrono::duration<double> elapsedSec = end - begin;
+	std::chrono::duration<double, std::ratio<60, 1>> elapsedMin = end - begin;
 	//float elapsedF = std::static_
 
 	std::fstream runTime;
 	runTime.open("runTime.txt", std::ios_base::out);
 
 	if (runTime.is_open()) {
-		runTime << "Elapsed Time: " << elapsed << '\n';
+		runTime << "Elapsed time in seconds: " << elapsedSec << '\n'
+			<< "Elapsed time in minutes: " << elapsedMin << '\n';
 	}
 
 	return 0;
