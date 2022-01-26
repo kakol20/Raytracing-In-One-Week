@@ -285,7 +285,7 @@ void Raytracing::Init() {
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
-					else  if (chooseMat < 0.8f) {
+					else  if (chooseMat < 0.70f) {
 						// dielectric
 						// generate colour based on hue
 						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, bitCount);
@@ -332,7 +332,7 @@ void Raytracing::Init() {
 
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
 					}
-					else if (chooseMat < 0.9f) {
+					else if (chooseMat < 0.85f) {
 						// metal
 						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, bitCount);
 						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 1.0f, bitCount);
