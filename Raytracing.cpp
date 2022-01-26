@@ -169,6 +169,28 @@ void Raytracing::Init() {
 	m_render = Image(m_imageWidth, m_imageHeight, 3);
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 
+	// Lights
+	float step = 2.0f * m_hdriResolution;
+	for (float x = -1.0f; x <= 1.0f; x += step) {
+		for (float z = -1.0f; z <= 1.0f; z += step) {
+			Vector3D lightPos = Vector3D(158.0f, 242.0f, 158.0f) / 255.0f;
+			lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
+			//Vector3D lightPos = Vector3D(0.5f, 1.0f, 0.5f);
+
+			lightPos = lightPos * Vector3D(x, 1.0f, z);
+			lightPos = lightPos.UnitVector();
+
+			float u, v;
+			UVSphere(lightPos, u, v);
+			lightPos *= 25.0f;
+
+			Vector3D lightColor = BiLerp(u, v, m_hdri);
+			lightColor = Vector3D(sqrtf(lightColor.GetX()), sqrtf(lightColor.GetY()), sqrtf(lightColor.GetZ()));
+
+			m_lights.push_back(Light(lightPos, lightColor));
+		}
+	}
+
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	if (!m_debugMode) {
 		// Camera
@@ -177,27 +199,6 @@ void Raytracing::Init() {
 		Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
 
 		m_camera = Camera(aspect_ratio, m_aperture, 10.0f, m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
-
-		// Lights
-		float step = 2.0f * m_hdriResolution;
-		for (float x = -1.0f; x <= 1.0f; x += step) {
-			for (float z = -1.0f; z <= 1.0f; z += step) {
-				/*Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
-				lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);*/
-				Vector3D lightPos = Vector3D(1.0f, 1.0f, 1.0f);
-
-				lightPos = lightPos * Vector3D(x, 1.0f, z);
-				lightPos = lightPos.UnitVector();
-
-				float u, v;
-				UVSphere(lightPos, u, v);
-				lightPos *= 25.0f;
-
-				Vector3D lightColor = BiLerp(u, v, m_hdri);
-
-				m_lights.push_back(Light(lightPos, lightColor));
-			}
-		}
 
 		//m_mainLight = Light(lightPos, lightColor);
 
@@ -352,27 +353,6 @@ void Raytracing::Init() {
 		Vector3D lookAt(0.0f, 1.0f, 0.0f);
 		Vector3D dist = lookAt - lookFrom;
 		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
-
-		// Lights
-		float step = 2.0f * m_hdriResolution;
-		for (float x = -1.0f; x <= 1.0f; x += step) {
-			for (float z = -1.0f; z <= 1.0f; z += step) {
-				/*Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
-				lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);*/
-				Vector3D lightPos = Vector3D(1.0f, 1.0f, 1.0f);
-
-				lightPos = lightPos * Vector3D(x, 1.0f, z);
-				lightPos = lightPos.UnitVector();
-
-				float u, v;
-				UVSphere(lightPos, u, v);
-				lightPos *= 25.0f;
-
-				Vector3D lightColor = BiLerp(u, v, m_hdri);
-
-				m_lights.push_back(Light(lightPos, lightColor));
-			}
-		}
 
 		// Create Materials
 		float collectiveRoughness = 0.0f;
