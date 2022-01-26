@@ -49,7 +49,7 @@ Raytracing::Raytracing() {
 		m_renderAlbedo = false;
 	}
 
-	m_mainLight = Light();
+	//m_mainLight = Light();
 
 	m_hdri.Read("images/cloud_layers_4k.png");
 
@@ -171,20 +171,26 @@ void Raytracing::Init() {
 		m_camera = Camera(aspect_ratio, m_aperture, 10.0f, m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 		// Lights
-		Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
-		lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
-		lightPos = lightPos.UnitVector();
+		for (float x = -1.0f; x <= 1.0f; x++) {
+			for (float z = -1.0f; z <= 1.0f; z++) {
+				/*Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
+				lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);*/
+				Vector3D lightPos = Vector3D(1.0f, 1.0f, 1.0f);
 
-		float u, v;
-		UVSphere(lightPos, u, v);
-		lightPos *= 25.0f;
+				lightPos = lightPos * Vector3D(x, 1.0f, z);
+				lightPos = lightPos.UnitVector();
 
-		Vector3D lightColor = BiLerp(u, v, m_hdri);
-		float max = fmaxf(fmaxf(lightColor.GetX(), lightColor.GetY()), lightColor.GetY());
-		lightColor *= (1.0f / max);
-		lightPos *= 25.0f;
+				float u, v;
+				UVSphere(lightPos, u, v);
+				lightPos *= 25.0f;
 
-		m_mainLight = Light(lightPos, lightColor);
+				Vector3D lightColor = BiLerp(u, v, m_hdri);
+
+				m_lights.push_back(Light(lightPos, lightColor));
+			}
+		}
+
+		//m_mainLight = Light(lightPos, lightColor);
 
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
@@ -339,13 +345,30 @@ void Raytracing::Init() {
 		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 		// Lights
-		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
+		for (float x = -1.0f; x <= 1.0f; x++) {
+			for (float z = -1.0f; z <= 1.0f; z++) {
+				/*Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
+				lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);*/
+				Vector3D lightPos = Vector3D(1.0f, 1.0f, 1.0f);
+
+				lightPos = lightPos * Vector3D(x, 1.0f, z);
+				lightPos = lightPos.UnitVector();
+
+				float u, v;
+				UVSphere(lightPos, u, v);
+				lightPos *= 25.0f;
+
+				Vector3D lightColor = BiLerp(u, v, m_hdri);
+
+				m_lights.push_back(Light(lightPos, lightColor));
+			}
+		}
 
 		// Create Materials
 		float collectiveRoughness = 0.0f;
-		m_materials["glass"] = new Glass(Vector3D(0.863f, 0.0f, 0.0f), collectiveRoughness, 1.45f);
+		m_materials["glass"] = new Glass(Vector3D(0.0f, 0.863f, 0.0f), collectiveRoughness, 1.45f);
 		//m_materials["diffuse"] = new Lambertian(Vector3D(0.4f, 0.2f, 0.1f), 1.5f);
-		m_materials["metal"] = new Metal(Vector3D(0.863f, 0.0f, 0.0f), collectiveRoughness, 1.45f);
+		m_materials["metal"] = new Metal(Vector3D(0.0f, 0.0f, 0.863f), collectiveRoughness, 1.45f);
 
 		m_materials["ground"] = new Lambertian(Vector3D(0.5f, 0.5f, 0.5f), 1.45f);
 
@@ -602,42 +625,46 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				return attentuation;
 			}
 			else {
-				// Shadow Ray
-				Vector3D shadowToLight = m_mainLight.GetPosition() - rec.GetPoint();
-				shadowToLight = shadowToLight + Vector3D::RandomUnitVector(32);
-				shadowToLight = shadowToLight.UnitVector();
+				Vector3D outColor;
+				size_t count = 0;
 
-				Ray shadowRay = Ray(rec.GetPoint(), shadowToLight);
-				HitRec tempRec;
+				for (auto it = m_lights.begin(); it != m_lights.end(); it++) {
+					count++;
 
-				Vector3D lightColor = m_mainLight.GetColor();
-				Vector3D outColor = attentuation * lightColor;
+					// Shadow ray
+					Vector3D shadowDir = (*it).GetPosition() - rec.GetPoint();
+					shadowDir = shadowDir + Vector3D::RandomUnitVector(32);
 
-				if (HitObject(shadowRay, clipStart, INFINITY, tempRec)) {
-					float distToLight = shadowToLight.Magnitude();
-					Vector3D shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
+					Ray shadowRay = Ray(rec.GetPoint(), shadowDir);
+					HitRec shadowRec;
 
-					if (tempRec.GetMaterial()->IsTransparent()) {
-						//shadowColor = tempRec.GetMaterial()->GetAlbedo();
-						/*shadowColor = Vector3D::Lerp(shadowColor, Vector3D(0.1f, 0.1f, 0.1f),
-							LinearFeedbackShift::RandFloat(32) * tempRec.GetMaterial()->GetRoughness());*/
+					// Color
+					Vector3D lightColor = (*it).GetColor() * attentuation;
 
-						if (LinearFeedbackShift::RandFloat(32) < tempRec.GetMaterial()->GetRoughness()) {
-							shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
+					if (HitObject(shadowRay, clipStart, INFINITY, shadowRec)) {
+						Vector3D shadowColor;
+
+						if (shadowRec.GetMaterial()->IsTransparent()) {
+							if (LinearFeedbackShift::RandFloat(32) < shadowRec.GetMaterial()->GetRoughness()) {
+								shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
+							}
+							else {
+								shadowColor = shadowRec.GetMaterial()->GetAlbedo();
+							}
 						}
 						else {
-							shadowColor = tempRec.GetMaterial()->GetAlbedo();
+							shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
 						}
 
-						return outColor * shadowColor * RayColor(scattered, depth - 1);
+						lightColor *= shadowColor;
 					}
-					else {
-						return outColor * shadowColor * RayColor(scattered, depth - 1);
-					}
+
+					outColor += lightColor;
 				}
-				else {
-					return outColor * RayColor(scattered, depth - 1);
-				}
+
+				outColor /= (float)count;
+
+				return outColor * RayColor(scattered, depth - 1);
 			}
 		}
 
