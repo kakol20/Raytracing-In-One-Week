@@ -173,7 +173,7 @@ void Raytracing::Init() {
 	float step = 2.0f * m_hdriResolution;
 	for (float x = -1.0f; x <= 1.0f; x += step) {
 		for (float z = -1.0f; z <= 1.0f; z += step) {
-			Vector3D lightPos = Vector3D(158.0f, 242.0f, 158.0f) / 255.0f;
+			Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
 			lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
 			//Vector3D lightPos = Vector3D(0.5f, 1.0f, 0.5f);
 
@@ -216,12 +216,18 @@ void Raytracing::Init() {
 		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
 		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 
+		unsigned int bitCount = 12;
+
 		// Procedural Objects
 		int index = 0;
-		for (int a = -11; a < 11; a++) {
-			for (int b = -11; b < 11; b++) {
-				float chooseMat = LinearFeedbackShift::RandFloat(32);
-				Vector3D center((float)a + 0.9f * LinearFeedbackShift::RandFloat(32), 0.2f, (float)b + 0.9f * LinearFeedbackShift::RandFloat(32));
+		for (int a = -10; a <= 10; a++) {
+			for (int b = -10; b <= 10; b++) {
+				float chooseMat = LinearFeedbackShift::RandFloat(bitCount);
+				//Vector3D center((float)a + 0.9f * LinearFeedbackShift::RandFloat(bitCount), 0.2f, (float)b + 0.9f * LinearFeedbackShift::RandFloat(bitCount));
+				Vector3D center((float)a, 0.2f, (float)b);
+				Vector3D rand = Vector3D(0.9f, 0.9f, 0.9f) * Vector3D::Random(0.0f, 1.0f, bitCount) * Vector3D(1.0f, 0.0f, 1.0f);
+
+				center = center + rand;
 
 				Vector3D dist2 = center - Vector3D(4.0f, 2.0f, 0.0f);
 
@@ -229,7 +235,7 @@ void Raytracing::Init() {
 					if (chooseMat < 0.2f) {
 						// lambertian
 						// generate colour based on hue
-						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, 32);
+						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, bitCount);
 						float s = 1.0f;
 						float v = 220.0f / 255.0f;
 
@@ -274,7 +280,7 @@ void Raytracing::Init() {
 					else  if (chooseMat < 0.8f) {
 						// dielectric
 						// generate colour based on hue
-						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, 32);
+						float h = LinearFeedbackShift::RandFloatRange(0.0f, 360.0f, bitCount);
 						float s = 1.0f;
 						float v = 220.0f / 255.0f;
 
@@ -311,7 +317,7 @@ void Raytracing::Init() {
 						r += m;
 						g += m;
 						b += m;
-						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, bitCount);
 						float ior = 1.45f;
 
 						m_proceduralMats.push_back(new Dielectric(Vector3D(r, g, b), roughness, ior));
@@ -320,8 +326,8 @@ void Raytracing::Init() {
 					}
 					else if (chooseMat < 0.9f) {
 						// metal
-						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
-						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 1.0f, 32);
+						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, bitCount);
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 1.0f, bitCount);
 						float ior = 1.45f;
 						m_proceduralMats.push_back(new Metal(albedo, roughness, ior));
 
@@ -329,8 +335,8 @@ void Raytracing::Init() {
 					}
 					else {
 						// glass
-						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, 32);
-						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, 32);
+						Vector3D albedo = Vector3D::Random(0.5f, 1.0f, bitCount);
+						float roughness = LinearFeedbackShift::RandFloatRange(0.0f, 0.5f, bitCount);
 						float ior = 1.5f;
 						m_proceduralMats.push_back(new Glass(albedo, roughness, ior));
 						m_objects.push_back(new Sphere(center, 0.2f, m_proceduralMats[index]));
@@ -525,11 +531,11 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	m_tilesRendered++;
 
 	system("CLS");
-	float progress = (m_tilesRendered / (float)m_tiles.size()) * 100.0f;
-	std::cout << "Render Mode: " << m_renderMode << '\n' 
-		<< "Threads Used: " << m_threads.size() << '\n' 
-		<< "Total Tiles: " << m_tiles.size() << '\n' 
-		<< "Progress: " << progress << "%\n";
+	//float progress = (m_tilesRendered / (float)m_tiles.size()) * 100.0f;
+	std::cout << "Render Mode: " << m_renderMode << '\n'
+		<< "Threads Used: " << m_threads.size() << '\n'
+		<< "Total Tiles: " << m_tiles.size() << '\n'
+		<< "Progress: " << m_tilesRendered << "/" << m_tiles.size() << '\n';
 
 	//std::cout << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
 	m_log << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
@@ -615,26 +621,24 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			}
 			else {
 				Vector3D outColor;
-				size_t count = 0;
 
 				for (auto it = m_lights.begin(); it != m_lights.end(); it++) {
-					count++;
-
 					// Shadow ray
 					Vector3D shadowDir = (*it).GetPosition() - rec.GetPoint();
-					shadowDir = shadowDir + Vector3D::RandomUnitVector(32);
+					shadowDir = shadowDir + Vector3D::RandomUnitVector(12);
+					shadowDir = shadowDir.UnitVector();
 
 					Ray shadowRay = Ray(rec.GetPoint(), shadowDir);
 					HitRec shadowRec;
 
 					// Color
-					Vector3D lightColor = (*it).GetColor() * attentuation;
+					Vector3D lightColor = (*it).GetColor();
 
-					if (HitObject(shadowRay, clipStart, INFINITY, shadowRec)) {
+					if (HitObject(shadowRay, clipStart, clipEnd, shadowRec)) {
 						Vector3D shadowColor;
 
 						if (shadowRec.GetMaterial()->IsTransparent()) {
-							if (LinearFeedbackShift::RandFloat(32) < shadowRec.GetMaterial()->GetRoughness()) {
+							if (LinearFeedbackShift::RandFloat(12) < shadowRec.GetMaterial()->GetRoughness()) {
 								shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
 							}
 							else {
@@ -651,9 +655,13 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 					outColor += lightColor;
 				}
 
-				outColor /= (float)count;
+				//outColor /= (float)m_lights.size();
 
-				return outColor * RayColor(scattered, depth - 1);
+				outColor = Vector3D(std::clamp(outColor.GetX(), 0.0f, 1.0f),
+					std::clamp(outColor.GetY(), 0.0f, 1.0f),
+					std::clamp(outColor.GetZ(), 0.0f, 1.0f));
+
+				return attentuation * outColor * RayColor(scattered, depth - 1);
 			}
 		}
 
@@ -718,8 +726,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			// ----- SET COLOR -----
 			Vector3D pixel_color = Vector3D(0.0f, 0.0f, 0.0f);
 			for (int s = 0; s < m_samplesPerPixel; s++) {
-				float u = (x + LinearFeedbackShift::RandFloat(32)) / (float)(m_imageWidth - 1);
-				float v = (y + LinearFeedbackShift::RandFloat(32)) / (float)(m_imageHeight - 1);
+				float u = (x + LinearFeedbackShift::RandFloat(12)) / (float)(m_imageWidth - 1);
+				float v = (y + LinearFeedbackShift::RandFloat(12)) / (float)(m_imageHeight - 1);
 
 				Ray r = m_camera.GetRay(u, v);
 

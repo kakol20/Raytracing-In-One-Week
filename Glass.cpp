@@ -42,9 +42,10 @@ bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	// Reflection
 	/*Vector3D reflect = Reflected(unitDir, rec.GetNormal());
 	Vector3D reflectRough = reflect + (Vector3D::RandomInUnitSphere(32) * roughnessModified);*/
+	unsigned int bitCount = 12;
 
 	bool cannotRefract = refracRatio * sinTheta > 1.0f;
-	bool fresnelRand = LinearFeedbackShift::RandFloat(32) < fresnel;
+	bool fresnelRand = LinearFeedbackShift::RandFloat(bitCount) < fresnel;
 	cannotRefract = cannotRefract || fresnelRand;
 
 	Vector3D direction;
@@ -60,7 +61,7 @@ bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 		scatterDir = direction;
 	}
 	else {
-		scatterDir = direction + (Vector3D::RandomInUnitSphere(32) * roughnessModified);
+		scatterDir = direction + (Vector3D::RandomInUnitSphere(bitCount) * roughnessModified);
 	}
 
 

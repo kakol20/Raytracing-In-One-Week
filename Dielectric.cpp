@@ -54,22 +54,18 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	// mix diffuse and glossy
 	//Vector3D albedo = Vector3D::Lerp(m_albedo, white, fresnel);
 	//Vector3D scatterDir = Vector3D::Lerp(glossyRough, diffuse, fresnel);
-	bool randFresnel = LinearFeedbackShift::RandFloat(32) < fresnel;
+	unsigned int bitCount = 12;
+	bool randFresnel = LinearFeedbackShift::RandFloat(bitCount) < fresnel;
 
 	Vector3D albedo;
+	Vector3D scatterDir;
 	if (randFresnel) {
 		albedo = white;
+		scatterDir = glossy + (Vector3D::RandomUnitVector(bitCount) * roughnessModified);
 	}
 	else {
 		albedo = m_albedo;
-	}
-
-	Vector3D scatterDir;
-	if (randFresnel) {
-		scatterDir = glossy + (Vector3D::RandomUnitVector(32) * roughnessModified);
-	}
-	else {
-		scatterDir = Vector3D::RandomInHemisphere(rec.GetNormal(), 32);
+		scatterDir = Vector3D::RandomInHemisphere(rec.GetNormal(), bitCount);
 	}
 
 	// apply

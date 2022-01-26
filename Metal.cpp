@@ -42,13 +42,14 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	Vector3D scatterDir;
 
 	/*scatterDir = Vector3D::Lerp(reflected, scatterDir, fresnelRoughness);*/
-	bool fresnelRand = LinearFeedbackShift::RandFloat(32) < fresnel;
+	unsigned int bitCount = 12;
+	bool fresnelRand = LinearFeedbackShift::RandFloat(bitCount) < fresnel;
 
 	if (fresnelRand) {
 		scatterDir = reflected;
 	}
 	else {
-		scatterDir = reflected + (Vector3D::RandomInUnitSphere(32) * roughnessModified);
+		scatterDir = reflected + (Vector3D::RandomInUnitSphere(bitCount) * roughnessModified);
 	}
 
 	// Catch degenerate scatter direction
