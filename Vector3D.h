@@ -32,6 +32,8 @@ public:
 	const float Magnitude();
 	const float SqrMagnitude();
 
+	void Normalize();
+
 	// Other
 	bool NearZero();
 	float DotProduct(const Vector3D& copyVector);

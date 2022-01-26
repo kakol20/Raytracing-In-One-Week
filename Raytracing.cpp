@@ -176,14 +176,14 @@ void Raytracing::Init() {
 		Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
 		lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
 		//Vector3D lightPos = Vector3D(0.5f, 1.0f, 0.5f);
-		lightPos = lightPos.UnitVector();
+		lightPos.Normalize();
 
 		float u, v;
 		UVSphere(lightPos, u, v);
 		lightPos *= 1000.0f;
 
 		Vector3D lightColor = BiLerp(u, v, m_hdri);
-		m_lights.push_back(Light(lightPos, lightColor, 1000.0f));
+		m_lights.push_back(Light(lightPos, lightColor, 500.0f));
 
 		// Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
 
@@ -195,30 +195,9 @@ void Raytracing::Init() {
 		//lightPos *= 25.0f;
 
 		lightColor = BiLerp(u, v, m_hdri);
-		m_lights.push_back(Light(lightPos, lightColor, 1000.0f));
+		m_lights.push_back(Light(lightPos, lightColor, 1.0f));
 
 	}
-
-	//float step = 2.0f * m_hdriResolution;
-	//for (float x = -1.0f; x <= 1.0f; x += step) {
-	//	for (float z = -1.0f; z <= 1.0f; z += step) {
-	//		Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
-	//		lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
-	//		//Vector3D lightPos = Vector3D(0.5f, 1.0f, 0.5f);
-
-	//		lightPos = lightPos * Vector3D(x, 1.0f, z);
-	//		lightPos = lightPos.UnitVector();
-
-	//		float u, v;
-	//		UVSphere(lightPos, u, v);
-	//		lightPos *= 25.0f;
-
-	//		Vector3D lightColor = BiLerp(u, v, m_hdri);
-	//		//lightColor = Vector3D(sqrtf(lightColor.GetX()), sqrtf(lightColor.GetY()), sqrtf(lightColor.GetZ()));
-
-	//		m_lights.push_back(Light(lightPos, lightColor, 1000.0f));
-	//	}
-	//}
 
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	if (!m_debugMode) {
@@ -655,10 +634,10 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 				for (auto it = m_lights.begin(); it != m_lights.end(); it++) {
 					// Shadow ray
-					Vector3D shadowDir = (*it).GetPosition() - rec.GetPoint();
-					float distSq = shadowDir.SqrMagnitude();
-					shadowDir = shadowDir + Vector3D::RandomUnitVector(bitCount);
-					shadowDir = shadowDir.UnitVector();
+					Vector3D shadowDir = ((*it).GetPosition() + (Vector3D::RandomInUnitSphere(bitCount) * (*it).GetIntensity())) - rec.GetPoint();
+					//float distSq = shadowDir.SqrMagnitude();
+					//shadowDir = shadowDir + Vector3D::RandomUnitVector(bitCount);
+					shadowDir.Normalize();
 
 					Ray shadowRay = Ray(rec.GetPoint(), shadowDir);
 					HitRec shadowRec;
@@ -701,7 +680,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		//return Vector3D(0.0f, 0.0f, 0.0f);
 	}
 
-	Vector3D unit_direction = ray.GetDirection().UnitVector();
+	Vector3D unit_direction = ray.GetDirection();
 
 	// draw backround
 	if (m_renderNormals) {

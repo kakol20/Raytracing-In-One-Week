@@ -9,7 +9,7 @@ bool Ground::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	Vector3D p0 = m_pos;
 	Vector3D n = Vector3D(0.0f, 1.0f, 0.0f);
 	Vector3D l0 = ray.GetOrigin();
-	Vector3D l = ray.GetDirection().UnitVector();
+	Vector3D l = ray.GetDirection();
 
 	float lDotN = l.DotProduct(n);
 

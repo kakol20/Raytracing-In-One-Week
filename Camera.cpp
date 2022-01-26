@@ -18,10 +18,10 @@ Camera::Camera(const float aspectRatio, const float aperture, const float focusD
 
 	// calculate position
 	m_w = lookFrom - lookAt;
-	m_w = m_w.UnitVector();
+	m_w.Normalize();
 
 	m_u = vUp.CrossProduct(m_w);
-	m_u = m_u.UnitVector();
+	m_u.Normalize();
 
 	m_v = m_w.CrossProduct(m_u);
 	//v = v.UnitVector();
@@ -45,8 +45,10 @@ Ray Camera::GetRay(const float s, const float t) {
 	Vector3D rd = Vector3D::RandomInUnitDisk(bitCount) * m_lensRadius;
 	Vector3D offset = (m_u * rd.GetX()) + (m_v * rd.GetY());
 
-	return Ray(m_origin + offset,
-		m_lowerLeftCorner + (m_horizontal * s) + (m_vertical * t) - m_origin - offset);
+	Vector3D dir = m_lowerLeftCorner + (m_horizontal * s) + (m_vertical * t) - m_origin - offset;
+	dir.Normalize();
+
+	return Ray((m_origin + offset), dir);
 }
 
 const float Camera::Degrees2Radians(const float deg) {

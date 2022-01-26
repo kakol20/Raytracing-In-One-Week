@@ -36,7 +36,7 @@ void HitRec::SetFaceNormal(Ray& ray, Vector3D& outwardNormal) {
 	m_frontFace = ray.GetDirection().DotProduct(outwardNormal) < 0.0f;
 	m_normal = m_frontFace ? outwardNormal : outwardNormal * -1.0f;
 
-	m_normal = m_normal.UnitVector();
+	//m_normal = m_normal;
 }
 
 const bool HitRec::GetFrontFace() {
