@@ -12,6 +12,7 @@
 #include "Raytracing.h"
 #include "Sphere.h"
 
+
 bool Image::PrintToConsole = false;
 
 Raytracing::Raytracing() {
@@ -166,10 +167,24 @@ void Raytracing::Init() {
 		Vector3D lookFrom(13.0f, 2.0f, 3.0f);
 		Vector3D lookAt(0.0f, 0.0f, 0.0f);
 		Vector3D dist = Vector3D(4.0f, 1.0f, 0.0f) - lookFrom;
+
 		m_camera = Camera(aspect_ratio, m_aperture, 10.0f, m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 		// Lights
-		m_mainLight = Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
+		Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
+		lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
+		lightPos = lightPos.UnitVector();
+
+		float u, v;
+		UVSphere(lightPos, u, v);
+		lightPos *= 25.0f;
+
+		Vector3D lightColor = BiLerp(u, v, m_hdri);
+		float max = fmaxf(fmaxf(lightColor.GetX(), lightColor.GetY()), lightColor.GetY());
+		lightColor *= (1.0f / max);
+		lightPos *= 25.0f;
+
+		m_mainLight = Light(lightPos, lightColor);
 
 		// Create Materials
 		m_materials["glass"] = new Glass(Vector3D(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
@@ -498,12 +513,11 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	m_tilesRendered++;
 
 	system("CLS");
-	std::cout << "Render Mode: " << m_renderMode << '\n';
-	std::cout << "Threads Used: " << m_threads.size() << '\n';
-	std::cout << "Total Tiles: " << m_tiles.size() << '\n';
-
 	float progress = (m_tilesRendered / (float)m_tiles.size()) * 100.0f;
-	std::cout << "Progress: " << progress << "%\n";
+	std::cout << "Render Mode: " << m_renderMode << '\n' 
+		<< "Threads Used: " << m_threads.size() << '\n' 
+		<< "Total Tiles: " << m_tiles.size() << '\n' 
+		<< "Progress: " << progress << "%\n";
 
 	//std::cout << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
 	m_log << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadId[thisId] << std::dec << " for " << dur << '\n';
@@ -516,6 +530,33 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	if (nextAvailable < m_tiles.size()) {
 		RenderTile(nextAvailable);
 	}
+}
+
+Vector3D Raytracing::BiLerp(const float x, const float y, Image& image) {
+	int index = 0;
+
+	index = image.GetIndex((int)floorf(x), (int)floorf(y));
+	Vector3D Q11(image.GetDataF(index + 0) / 255.0f, image.GetDataF(index + 1) / 255.0f, image.GetDataF(index + 2) / 255.0f);
+
+	index = image.GetIndex((int)floorf(x), (int)ceilf(y));
+	Vector3D Q12(image.GetDataF(index + 0) / 255.0f, image.GetDataF(index + 1) / 255.0f, image.GetDataF(index + 2) / 255.0f);
+
+	index = image.GetIndex((int)ceil(x), (int)floorf(y));
+	Vector3D Q21(image.GetDataF(index + 0) / 255.0f, image.GetDataF(index + 1) / 255.0f, image.GetDataF(index + 2) / 255.0f);
+
+	index = image.GetIndex((int)ceilf(x), (int)ceilf(y));
+	Vector3D Q22(image.GetDataF(index + 0) / 255.0f, image.GetDataF(index + 1) / 255.0f, image.GetDataF(index + 2) / 255.0f);
+
+	Vector3D R1 = Vector3D::Lerp(Q11, Q21, x - floorf(x));
+	Vector3D R2 = Vector3D::Lerp(Q12, Q22, x - floorf(x));
+
+	Vector3D p = Vector3D::Lerp(R1, R2, y - floorf(y));
+	return p;
+}
+
+void Raytracing::UVSphere(Vector3D unitDir, float& u, float& v) {
+	u = 0.5f + (atan2f(unitDir.GetX(), unitDir.GetZ()) / (2.0f * 3.14159265f));
+	v = 0.5f - (asinf(unitDir.GetY()) / 3.14159265f);
 }
 
 Raytracing::~Raytracing() {
@@ -563,7 +604,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			else {
 				// Shadow Ray
 				Vector3D shadowToLight = m_mainLight.GetPosition() - rec.GetPoint();
-				shadowToLight = shadowToLight + Vector3D::RandomInUnitSphere(32);
+				shadowToLight = shadowToLight + Vector3D::RandomUnitVector(32);
 				shadowToLight = shadowToLight.UnitVector();
 
 				Ray shadowRay = Ray(rec.GetPoint(), shadowToLight);
@@ -577,9 +618,16 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 					Vector3D shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
 
 					if (tempRec.GetMaterial()->IsTransparent()) {
-						shadowColor = tempRec.GetMaterial()->GetAlbedo();
-						shadowColor = Vector3D::Lerp(shadowColor, Vector3D(0.1f, 0.1f, 0.1f),
-							LinearFeedbackShift::RandFloat(32) * tempRec.GetMaterial()->GetRoughness());
+						//shadowColor = tempRec.GetMaterial()->GetAlbedo();
+						/*shadowColor = Vector3D::Lerp(shadowColor, Vector3D(0.1f, 0.1f, 0.1f),
+							LinearFeedbackShift::RandFloat(32) * tempRec.GetMaterial()->GetRoughness());*/
+
+						if (LinearFeedbackShift::RandFloat(32) < tempRec.GetMaterial()->GetRoughness()) {
+							shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
+						}
+						else {
+							shadowColor = tempRec.GetMaterial()->GetAlbedo();
+						}
 
 						return outColor * shadowColor * RayColor(scattered, depth - 1);
 					}
@@ -609,8 +657,10 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		float pi = 3.14159265f;
 
 		//return (Vector3D(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vector3D(0.5f, 0.7f, 1.0f) * t);
-		float u = 0.5f + (atan2f(unit_direction.GetX(), unit_direction.GetZ()) / (2.0f * pi));
-		float v = 0.5f - (asinf(unit_direction.GetY()) / pi);
+		float u = 0.0f;
+		float v = 0.0f;
+
+		UVSphere(unit_direction, u, v);
 
 		//int x = (int)roundf((m_hdri.GetWidth() - 1) * u);
 		//int y = (int)roundf((m_hdri.GetHeight() - 1) * v);
@@ -624,26 +674,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		float x = (m_hdri.GetWidth() - 1) * u;
 		float y = (m_hdri.GetHeight() - 1) * v;
 
-		int index = 0;
-
-		index = m_hdri.GetIndex((int)floorf(x), (int)floorf(y));
-		Vector3D Q11(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
-
-		index = m_hdri.GetIndex((int)floorf(x), (int)ceilf(y));
-		Vector3D Q12(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
-
-		index = m_hdri.GetIndex((int)ceil(x), (int)floorf(y));
-		Vector3D Q21(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
-
-		index = m_hdri.GetIndex((int)ceilf(x), (int)ceilf(y));
-		Vector3D Q22(m_hdri.GetDataF(index + 0) / 255.0f, m_hdri.GetDataF(index + 1) / 255.0f, m_hdri.GetDataF(index + 2) / 255.0f);
-
-		Vector3D R1 = Vector3D::Lerp(Q11, Q21, x - floorf(x));
-		Vector3D R2 = Vector3D::Lerp(Q12, Q22, x - floorf(x));
-
-		Vector3D p = Vector3D::Lerp(R1, R2, y - floorf(y));
-
-		return p;
+		return BiLerp(x, y, m_hdri);
 	}
 }
 

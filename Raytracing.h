@@ -34,12 +34,10 @@ private:
 		int minX, minY, maxX, maxY;
 	};
 
-	std::vector<Tile> m_tiles;
-	size_t m_nextAvailable;
-
 	void RenderTile(const size_t startIndex);
 
-	std::fstream m_log;
+	Vector3D BiLerp(const float x, const float y, Image& image);
+	void UVSphere(Vector3D unitDir, float& u, float& v);
 
 private: // member variables
 	std::vector<Object*> m_objects;
@@ -47,6 +45,11 @@ private: // member variables
 	std::map<String, Material*> m_materials;
 	std::map<std::thread::id, size_t> m_threadId;
 	std::vector<Material*> m_proceduralMats;
+	std::vector<Tile> m_tiles;
+
+	size_t m_nextAvailable;
+
+	std::fstream m_log;
 
 	Camera m_camera;
 	Image m_render;
