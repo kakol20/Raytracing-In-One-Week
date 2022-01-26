@@ -42,7 +42,7 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	Vector3D scatterDir;
 
 	/*scatterDir = Vector3D::Lerp(reflected, scatterDir, fresnelRoughness);*/
-	unsigned int bitCount = 12;
+	unsigned int bitCount = 32;
 	bool fresnelRand = LinearFeedbackShift::RandFloat(bitCount) < fresnel;
 
 	if (fresnelRand) {

@@ -7,7 +7,7 @@
 #include "String.h"
 #include "StaticMutex.h"
 
-unsigned int LinearFeedbackShift::Seed = 3881995897;
+unsigned int LinearFeedbackShift::Seed = 1653502760;
 std::mutex StaticMutex::s_mtx = std::mutex();
 
 bool RenderMode(const char* renderMode);
@@ -64,14 +64,16 @@ int main() {
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();
-	auto elapsed = std::chrono::duration_cast<std::chrono::minutes>(end - begin);
+	auto elapsedSec = std::chrono::duration_cast<std::chrono::seconds>(end - begin);
+	auto elapsedMin = std::chrono::duration_cast<std::chrono::minutes>(end - begin);
 	//float elapsedF = std::static_
 
 	std::fstream runTime;
 	runTime.open("runTime.txt", std::ios_base::out);
 
 	if (runTime.is_open()) {
-		runTime << "Elapsed Time: " << elapsed << '\n';
+		runTime << "Elapsed time in seconds: " << elapsedSec << '\n'
+			<< "Elapsed time in minutes: " << elapsedMin << '\n';
 	}
 
 	return 0;

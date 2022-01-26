@@ -18,7 +18,7 @@ Lambertian::~Lambertian() {
 }
 
 bool Lambertian::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
-	unsigned int bitCount = 12;
+	unsigned int bitCount = 32;
 
 	Vector3D unitDir = rayIn.GetDirection().UnitVector();
 

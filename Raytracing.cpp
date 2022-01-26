@@ -88,9 +88,9 @@ void Raytracing::Init() {
 			else if (first == "imageWidth") {
 				m_imageWidth = String::ToInt(second.GetChar());
 			}
-			else if (first == "hdriResolution") {
+			/*else if (first == "hdriResolution") {
 				m_hdriResolution = String::ToFloat(second.GetChar());
-			}
+			}*/
 			else if (first == "maxDepth") {
 				m_maxDepth = String::ToInt(second.GetChar());
 			}
@@ -147,7 +147,7 @@ void Raytracing::Init() {
 
 		settings << "#Render Settings\n";
 		settings << "##0 to 1\n";
-		settings << "hdriResolution=" << m_hdriResolution << '\n';
+		//settings << "hdriResolution=" << m_hdriResolution << '\n';
 		settings << "maxDepth=" << m_maxDepth << '\n';
 		settings << "##color, normal, albedo or all\n";
 		settings << "renderMode=" << m_renderMode << '\n';
@@ -170,26 +170,55 @@ void Raytracing::Init() {
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 
 	// Lights
-	float step = 2.0f * m_hdriResolution;
-	for (float x = -1.0f; x <= 1.0f; x += step) {
-		for (float z = -1.0f; z <= 1.0f; z += step) {
-			Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
-			lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
-			//Vector3D lightPos = Vector3D(0.5f, 1.0f, 0.5f);
+	bool oneOther = true;
+	if (oneOther) {
+		// light #1
+		Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
+		lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
+		//Vector3D lightPos = Vector3D(0.5f, 1.0f, 0.5f);
+		lightPos = lightPos.UnitVector();
 
-			lightPos = lightPos * Vector3D(x, 1.0f, z);
-			lightPos = lightPos.UnitVector();
+		float u, v;
+		UVSphere(lightPos, u, v);
+		lightPos *= 1000.0f;
 
-			float u, v;
-			UVSphere(lightPos, u, v);
-			lightPos *= 25.0f;
+		Vector3D lightColor = BiLerp(u, v, m_hdri);
+		m_lights.push_back(Light(lightPos, lightColor, 1000.0f));
 
-			Vector3D lightColor = BiLerp(u, v, m_hdri);
-			lightColor = Vector3D(sqrtf(lightColor.GetX()), sqrtf(lightColor.GetY()), sqrtf(lightColor.GetZ()));
+		// Light(Vector3D(20.0f, 15.0f, 0.0f), Vector3D(1.0f, 1.0f, 1.0f));
 
-			m_lights.push_back(Light(lightPos, lightColor));
-		}
+		// light #2
+		lightPos = Vector3D(20.0f, 15.0f, 0.0f);
+		//lightPos = lightPos.UnitVector();
+
+		UVSphere(lightPos.UnitVector(), u, v);
+		//lightPos *= 25.0f;
+
+		lightColor = BiLerp(u, v, m_hdri);
+		m_lights.push_back(Light(lightPos, lightColor, 1000.0f));
+
 	}
+
+	//float step = 2.0f * m_hdriResolution;
+	//for (float x = -1.0f; x <= 1.0f; x += step) {
+	//	for (float z = -1.0f; z <= 1.0f; z += step) {
+	//		Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
+	//		lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
+	//		//Vector3D lightPos = Vector3D(0.5f, 1.0f, 0.5f);
+
+	//		lightPos = lightPos * Vector3D(x, 1.0f, z);
+	//		lightPos = lightPos.UnitVector();
+
+	//		float u, v;
+	//		UVSphere(lightPos, u, v);
+	//		lightPos *= 25.0f;
+
+	//		Vector3D lightColor = BiLerp(u, v, m_hdri);
+	//		//lightColor = Vector3D(sqrtf(lightColor.GetX()), sqrtf(lightColor.GetY()), sqrtf(lightColor.GetZ()));
+
+	//		m_lights.push_back(Light(lightPos, lightColor, 1000.0f));
+	//	}
+	//}
 
 	Vector3D up(0.0f, 1.0f, 0.0f);
 	if (!m_debugMode) {
@@ -216,7 +245,7 @@ void Raytracing::Init() {
 		//m_objects.push_back(new Sphere(Vector3D(0.0f, -1000.0f, 0.0f), 1000.0f, m_materials["ground"]));
 		m_objects.push_back(new Ground(0.0f, m_materials["ground"]));
 
-		unsigned int bitCount = 12;
+		unsigned int bitCount = 32;
 
 		// Procedural Objects
 		int index = 0;
@@ -451,9 +480,9 @@ bool Raytracing::Run() {
 	}
 
 	// Render
-	size_t reserveThreads = (size_t)roundf(std::thread::hardware_concurrency() / 8.0f);
-	reserveThreads = reserveThreads > 0 ? reserveThreads : 1;
-	const size_t maxThreads = std::thread::hardware_concurrency() - reserveThreads;
+	//size_t reserveThreads = (size_t)roundf(std::thread::hardware_concurrency() / 8.0f);
+	//reserveThreads = reserveThreads > 0 ? reserveThreads : 1;
+	const size_t maxThreads = std::thread::hardware_concurrency() /*- reserveThreads*/;
 	//const size_t maxThreads = 0;
 
 	//runTime.open("images/runTime.txt", std::ios_base::out);
@@ -605,6 +634,8 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	float clipStart = 0.0001f;
 	float clipEnd = 1000.0f;
 
+	unsigned int bitCount = 32;
+
 	// draw objects
 	HitRec rec;
 	//rec.SetMaterial(m_materials["ground"]);
@@ -625,7 +656,8 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				for (auto it = m_lights.begin(); it != m_lights.end(); it++) {
 					// Shadow ray
 					Vector3D shadowDir = (*it).GetPosition() - rec.GetPoint();
-					shadowDir = shadowDir + Vector3D::RandomUnitVector(12);
+					float distSq = shadowDir.SqrMagnitude();
+					shadowDir = shadowDir + Vector3D::RandomUnitVector(bitCount);
 					shadowDir = shadowDir.UnitVector();
 
 					Ray shadowRay = Ray(rec.GetPoint(), shadowDir);
@@ -638,7 +670,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 						Vector3D shadowColor;
 
 						if (shadowRec.GetMaterial()->IsTransparent()) {
-							if (LinearFeedbackShift::RandFloat(12) < shadowRec.GetMaterial()->GetRoughness()) {
+							if (LinearFeedbackShift::RandFloat(bitCount) < shadowRec.GetMaterial()->GetRoughness()) {
 								shadowColor = Vector3D(0.1f, 0.1f, 0.1f);
 							}
 							else {
@@ -652,7 +684,7 @@ const Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 						lightColor *= shadowColor;
 					}
 
-					outColor += lightColor;
+					outColor += (lightColor /** (*it).GetIntensity()*/) /*/ (4 * 3.14159265 * distSq)*/;
 				}
 
 				//outColor /= (float)m_lights.size();
@@ -719,6 +751,8 @@ const bool Raytracing::HitObject(Ray& ray, const float t_min, const float t_max,
 }
 
 void Raytracing::Render(const int minX, const int minY, const int maxX, const int maxY) {
+	unsigned int bitCount = 32;
+
 	for (int x = minX; x < maxX; x++) {
 		for (int y = minY; y < maxY; y++) {
 			int flippedY = (m_imageHeight - y) - 1;
@@ -726,8 +760,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			// ----- SET COLOR -----
 			Vector3D pixel_color = Vector3D(0.0f, 0.0f, 0.0f);
 			for (int s = 0; s < m_samplesPerPixel; s++) {
-				float u = (x + LinearFeedbackShift::RandFloat(12)) / (float)(m_imageWidth - 1);
-				float v = (y + LinearFeedbackShift::RandFloat(12)) / (float)(m_imageHeight - 1);
+				float u = (x + LinearFeedbackShift::RandFloat(bitCount)) / (float)(m_imageWidth - 1);
+				float v = (y + LinearFeedbackShift::RandFloat(bitCount)) / (float)(m_imageHeight - 1);
 
 				Ray r = m_camera.GetRay(u, v);
 
