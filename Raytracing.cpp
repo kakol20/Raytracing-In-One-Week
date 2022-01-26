@@ -53,6 +53,8 @@ Raytracing::Raytracing() {
 
 	m_hdri.Read("images/cloud_layers_4k.png");
 
+	m_hdriResolution = 0.5f;
+
 	m_debugMode = false;
 }
 
@@ -72,24 +74,28 @@ void Raytracing::Init() {
 			std::cout << line;
 			std::cout << '\n';
 
-			//std::cout << line.GetFirst("=") << " = " << String::ToInt(line.GetSecond("=")) << "\n\n";
+			//std::cout << line.GetFirst("=") << " = " << String::ToInt(second.GetChar()) << "\n\n";
 			String first = line.GetFirst("=");
+			String second = line.GetSecond("=");
 
 			if (first == "aperture") {
 				// float
-				m_aperture = String::ToFloat(line.GetSecond("="));
+				m_aperture = String::ToFloat(second.GetChar());
 			}
 			else if (first == "imageHeight") {
-				m_imageHeight = String::ToInt(line.GetSecond("="));
+				m_imageHeight = String::ToInt(second.GetChar());
 			}
 			else if (first == "imageWidth") {
-				m_imageWidth = String::ToInt(line.GetSecond("="));
+				m_imageWidth = String::ToInt(second.GetChar());
+			}
+			else if (first == "hdriResolution") {
+				m_hdriResolution = String::ToFloat(second.GetChar());
 			}
 			else if (first == "maxDepth") {
-				m_maxDepth = String::ToInt(line.GetSecond("="));
+				m_maxDepth = String::ToInt(second.GetChar());
 			}
 			else if (first == "renderMode") {
-				m_renderMode = line.GetSecond("=");
+				m_renderMode = second.GetChar();
 
 				if (m_renderMode == "normal") {
 					m_renderNormals = true;
@@ -109,17 +115,17 @@ void Raytracing::Init() {
 				}
 			}
 			else if (first == "randomSeed") {
-				LinearFeedbackShift::Seed = (unsigned int)String::ToInt(line.GetSecond("="));
+				LinearFeedbackShift::Seed = (unsigned int)String::ToInt(second.GetChar());
 			}
 			else if (first == "samplesPerPixel") {
-				m_samplesPerPixel = String::ToInt(line.GetSecond("="));
+				m_samplesPerPixel = String::ToInt(second.GetChar());
 			}
 			else if (first == "tileSize") {
-				m_tileSize = String::ToInt(line.GetSecond("="));
+				m_tileSize = String::ToInt(second.GetChar());
 			}
 			else if (first == "verticalFOV") {
 				// float
-				m_verticalFOV = String::ToFloat(line.GetSecond("="));
+				m_verticalFOV = String::ToFloat(second.GetChar());
 			}
 		}
 
@@ -140,8 +146,10 @@ void Raytracing::Init() {
 		settings << "imageHeight=" << m_imageHeight << "\n#\n";
 
 		settings << "#Render Settings\n";
+		settings << "##0 to 1\n";
+		settings << "hdriResolution=" << m_hdriResolution << '\n';
 		settings << "maxDepth=" << m_maxDepth << '\n';
-		settings << "#color, normal, albedo or all\n";
+		settings << "##color, normal, albedo or all\n";
 		settings << "renderMode=" << m_renderMode << '\n';
 		settings << "samplesPerPixel=" << m_samplesPerPixel << '\n';
 		settings << "tileSize=" << m_tileSize << "\n#\n";
@@ -171,8 +179,9 @@ void Raytracing::Init() {
 		m_camera = Camera(aspect_ratio, m_aperture, 10.0f, m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 		// Lights
-		for (float x = -1.0f; x <= 1.0f; x++) {
-			for (float z = -1.0f; z <= 1.0f; z++) {
+		float step = 2.0f * m_hdriResolution;
+		for (float x = -1.0f; x <= 1.0f; x += step) {
+			for (float z = -1.0f; z <= 1.0f; z += step) {
 				/*Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
 				lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);*/
 				Vector3D lightPos = Vector3D(1.0f, 1.0f, 1.0f);
@@ -345,8 +354,9 @@ void Raytracing::Init() {
 		m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up); // 39.6 deg fov for 50mm focal length
 
 		// Lights
-		for (float x = -1.0f; x <= 1.0f; x++) {
-			for (float z = -1.0f; z <= 1.0f; z++) {
+		float step = 2.0f * m_hdriResolution;
+		for (float x = -1.0f; x <= 1.0f; x += step) {
+			for (float z = -1.0f; z <= 1.0f; z += step) {
 				/*Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
 				lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);*/
 				Vector3D lightPos = Vector3D(1.0f, 1.0f, 1.0f);

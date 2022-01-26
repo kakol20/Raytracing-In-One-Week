@@ -5,7 +5,7 @@
 #include "LinearFeedbackShift.h"
 #include "String.h"
 
-unsigned int LinearFeedbackShift::Seed = 18012022;
+unsigned int LinearFeedbackShift::Seed = 3808;
 
 bool RenderMode(const char* renderMode);
 

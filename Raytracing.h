@@ -58,6 +58,7 @@ private: // member variables
 	//Light m_mainLight;
 
 	std::vector<Light> m_lights;
+	float m_hdriResolution;
 
 	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_maxDepth, m_tileSize;
 	int m_tilesRendered;
