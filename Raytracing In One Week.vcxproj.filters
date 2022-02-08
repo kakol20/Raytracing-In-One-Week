@@ -16,82 +16,10 @@
     <Filter Include="Header Files\stb_image">
       <UniqueIdentifier>{83b77f29-7d47-438a-9066-33fde1ea4403}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Utilities">
-      <UniqueIdentifier>{7a73d1bd-b179-4436-9877-8b216b5928fc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Utilities">
-      <UniqueIdentifier>{c82bf8d5-8948-43ff-8894-ef497172be72}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Raytracing">
-      <UniqueIdentifier>{a6bdd37f-cab4-4de7-9314-9a61a3788f89}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Raytracing">
-      <UniqueIdentifier>{a4b406aa-eb2d-40dc-a302-c60df059e448}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Objects">
-      <UniqueIdentifier>{f3c3b410-5470-4657-9662-b0f2780cbc42}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Object">
-      <UniqueIdentifier>{63cbeb77-200a-43e8-8b0e-f87df2560f36}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Objects\Material">
-      <UniqueIdentifier>{5f1f814d-5b8e-44b4-9c2d-3078ff96b874}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Object\Material">
-      <UniqueIdentifier>{d1493082-8a80-4cbb-8274-96772b64f0a8}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Image.cpp">
-      <Filter>Source Files\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="Vector3D.cpp">
-      <Filter>Source Files\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="Ray.cpp">
-      <Filter>Source Files\Raytracing</Filter>
-    </ClCompile>
-    <ClCompile Include="Raytracing.cpp">
-      <Filter>Source Files\Raytracing</Filter>
-    </ClCompile>
-    <ClCompile Include="Filters.cpp">
-      <Filter>Source Files\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="Sphere.cpp">
-      <Filter>Source Files\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="LinearFeedbackShift.cpp">
-      <Filter>Source Files\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files\Raytracing</Filter>
-    </ClCompile>
-    <ClCompile Include="HitRec.cpp">
-      <Filter>Source Files\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Lambertian.cpp">
-      <Filter>Source Files\Object\Material</Filter>
-    </ClCompile>
-    <ClCompile Include="Metal.cpp">
-      <Filter>Source Files\Object\Material</Filter>
-    </ClCompile>
-    <ClCompile Include="Glass.cpp">
-      <Filter>Source Files\Object\Material</Filter>
-    </ClCompile>
-    <ClCompile Include="String.cpp">
-      <Filter>Source Files\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="Ground.cpp">
-      <Filter>Source Files\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Source Files\Raytracing</Filter>
-    </ClCompile>
-    <ClCompile Include="Dielectric.cpp">
-      <Filter>Source Files\Object\Material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,63 +28,6 @@
     </ClInclude>
     <ClInclude Include="stb_image_write.h">
       <Filter>Header Files\stb_image</Filter>
-    </ClInclude>
-    <ClInclude Include="Image.h">
-      <Filter>Header Files\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector3D.h">
-      <Filter>Header Files\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="Ray.h">
-      <Filter>Header Files\Raytracing</Filter>
-    </ClInclude>
-    <ClInclude Include="Raytracing.h">
-      <Filter>Header Files\Raytracing</Filter>
-    </ClInclude>
-    <ClInclude Include="Filters.h">
-      <Filter>Header Files\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Sphere.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="LinearFeedbackShift.h">
-      <Filter>Header Files\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files\Raytracing</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Header Files\Objects\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="HitRec.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Lambertian.h">
-      <Filter>Header Files\Objects\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="Metal.h">
-      <Filter>Header Files\Objects\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="Glass.h">
-      <Filter>Header Files\Objects\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="String.h">
-      <Filter>Header Files\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="Ground.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>Header Files\Raytracing</Filter>
-    </ClInclude>
-    <ClInclude Include="Dielectric.h">
-      <Filter>Header Files\Objects\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="StaticMutex.h">
-      <Filter>Header Files\Utilities</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
