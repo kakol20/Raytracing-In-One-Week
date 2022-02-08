@@ -19,16 +19,19 @@
     <Filter Include="Header Files\Misc">
       <UniqueIdentifier>{cdfac99a-fc9a-4d44-9037-a3a079eb42a6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Misc">
+      <UniqueIdentifier>{cb144689-80d7-46e7-9e85-e8c49200d962}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FastWrite.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Misc</Filter>
     </ClCompile>
     <ClCompile Include="String.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,7 +48,7 @@
       <Filter>Header Files\Misc</Filter>
     </ClInclude>
     <ClInclude Include="String.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Misc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

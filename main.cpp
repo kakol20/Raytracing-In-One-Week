@@ -3,10 +3,23 @@
 #define OOF_IMPL
 #include "oof/oof.h"
 
+#include "FastWrite.h"
+#include "String.h"
+
 auto enable_vt_mode() -> void;
 
 int main() {
 	enable_vt_mode();
+
+	std::cout << oof::cursor_visibility(false);
+
+	String output(oof::reset_formatting());
+	output += oof::clear_screen();
+	output += "Hello World!\n";
+
+	FastWrite::Write(output);
+
+	system("pause");
 
 	return 0;
 }
