@@ -15,7 +15,10 @@ int main() {
 
 	String output(oof::reset_formatting());
 	output += oof::clear_screen();
+	output += '\a';
 	output += "Hello World!\n";
+	output += String::ToString(8022022);
+	output += '\n';
 
 	FastWrite::Write(output);
 

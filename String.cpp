@@ -1,5 +1,12 @@
 #include "String.h"
 
+String::String(const char copyChar) {
+	delete[] m_string;
+	m_string = new char[2];
+	m_string[0] = copyChar;
+	m_string[1] = '\0';
+}
+
 String::String(const char* string) {
 	delete[] m_string;
 
@@ -16,6 +23,16 @@ String::String(const String& copyString) : String(copyString.GetChar()) {
 
 String::~String() {
 	delete[] m_string;
+}
+
+String& String::operator=(const char copyChar) {
+	// TODO: insert return statement here
+	delete[] m_string;
+	m_string = new char[2];
+	m_string[0] = copyChar;
+	m_string[1] = '\0';
+
+	return *this;
 }
 
 String& String::operator=(const char* copyString) {
@@ -36,6 +53,13 @@ String& String::operator=(const String& copyString) {
 	if (this == &copyString) return *this;
 
 	return this->operator=(copyString.GetChar());
+}
+
+String& String::operator+=(const char copyChar) {
+	// TODO: insert return statement here
+	String temp(copyChar);
+
+	return this->operator+=(temp);
 }
 
 String& String::operator+=(const char* copyString) {
@@ -66,4 +90,22 @@ const char* String::GetChar() const {
 
 size_t String::Length() {
 	return strlen(m_string);
+}
+
+String String::ToString(const float number) {
+	return String(std::to_string(number));
+}
+
+String String::ToString(const int number) {
+	return String(std::to_string(number));
+}
+
+float String::ToFloat(const char* number) {
+	char* end;
+	return strtof(number, &end);
+}
+
+int String::ToInt(const char* number) {
+	char* end;
+	return (int)strtol(number, &end, 10);
 }

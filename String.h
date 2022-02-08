@@ -5,6 +5,7 @@
 
 class String {
 public:
+	String(const char copyChar);
 	String(const char* string = "");
 	String(const std::string& copyString);
 	String(const String& copyString);
@@ -12,19 +13,28 @@ public:
 
 	// ----- OPERATOR OVERLOADING -----
 
+	String& operator=(const char copyChar);
 	String& operator=(const char* copyString);
 	String& operator=(const std::string& copyString);
 	String& operator=(const String& copyString);
 
+	String& operator+=(const char copyChar);
 	String& operator+=(const char* copyString);
 	String& operator+=(const std::string& copyString);
 	String& operator+=(const String& copyString);
 
-	const char* GetChar() const;
+	// ----- GETTERS -----
 
+	const char* GetChar() const;
 	size_t Length();
 
-private:
-	char* m_string = new char[512];
-};
+	// ----- CONVERSIONS -----
 
+	static String ToString(const float number);
+	static String ToString(const int number);
+
+	static float ToFloat(const char* number);
+	static int ToInt(const char* number);
+private:
+	char* m_string = new char[256];
+};
