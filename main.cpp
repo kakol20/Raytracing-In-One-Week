@@ -13,8 +13,10 @@ int main() {
 
 	std::cout << oof::cursor_visibility(false);
 
-	String output(oof::reset_formatting());
+	String output("");
+	output = oof::reset_formatting();
 	output += oof::clear_screen();
+	output += oof::bg_color({ 12, 12, 12 });
 	output += '\a';
 	output += "Hello World!\n";
 	output += String::ToString(8022022);

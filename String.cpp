@@ -7,12 +7,12 @@ String::String(const char copyChar) {
 	m_string[1] = '\0';
 }
 
-String::String(const char* string) {
+String::String(const char* copyString) {
 	delete[] m_string;
 
-	const size_t size = strlen(string) + 1;
+	const size_t size = strlen(copyString) + 1;
 	m_string = new char[size];
-	strcpy_s(m_string, size, string);
+	strcpy_s(m_string, size, copyString);
 }
 
 String::String(const std::string& copyString) : String(copyString.c_str()) {
@@ -26,7 +26,6 @@ String::~String() {
 }
 
 String& String::operator=(const char copyChar) {
-	// TODO: insert return statement here
 	delete[] m_string;
 	m_string = new char[2];
 	m_string[0] = copyChar;
@@ -56,10 +55,7 @@ String& String::operator=(const String& copyString) {
 }
 
 String& String::operator+=(const char copyChar) {
-	// TODO: insert return statement here
-	String temp(copyChar);
-
-	return this->operator+=(temp);
+	return this->operator+=(String(copyChar));
 }
 
 String& String::operator+=(const char* copyString) {
@@ -82,6 +78,26 @@ String& String::operator+=(const std::string& copyString) {
 
 String& String::operator+=(const String& copyString) {
 	return this->operator+=(copyString.GetChar());
+}
+
+bool String::operator==(const char* otherString) const {
+	return !strcmp(m_string, otherString);
+}
+
+bool String::operator==(const String& otherString) const {
+	return this->operator==(otherString.GetChar());
+}
+
+bool String::operator!=(const char* otherString) const {
+	return !(this->operator==(otherString));
+}
+
+bool String::operator!=(const String& otherString) const {
+	return !(this->operator==(otherString));
+}
+
+bool String::operator<(const String& otherString) const {
+	return strcmp(m_string, otherString.GetChar()) < 0;
 }
 
 const char* String::GetChar() const {
@@ -108,4 +124,27 @@ float String::ToFloat(const char* number) {
 int String::ToInt(const char* number) {
 	char* end;
 	return (int)strtol(number, &end, 10);
+}
+
+void String::Clear() {
+	delete[] m_string;
+	m_string = new char[1];
+	m_string[0] = '\0';
+}
+
+std::istream& operator>>(std::istream& is, String& string) {
+	string.Clear();
+
+	char* temp = new char[512];
+	is.getline(temp, 512);
+
+	string = temp;
+	delete[] temp;
+
+	return is;
+}
+
+std::ostream& operator<<(std::ostream& os, const String& string) {
+	os << string.GetChar();
+	return os;
 }
