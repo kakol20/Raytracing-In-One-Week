@@ -72,6 +72,9 @@
     <ClCompile Include="Ray.cpp">
       <Filter>Source Files\Raytracing</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb\stb_image.h">
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="HitRec.h">
       <Filter>Header Files\Raytracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
