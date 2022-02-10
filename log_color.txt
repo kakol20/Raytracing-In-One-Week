@@ -1,23 +1,6 @@
-Threads Used: 6
-Total tiles: 880
-Rendered tile #0 in thread #0 for 441ms
-Rendered tile #2 in thread #2 for 437ms
-Rendered tile #4 in thread #4 for 430ms
-Rendered tile #5 in thread #5 for 435ms
-Rendered tile #6 in thread #0 for 438ms
-Rendered tile #7 in thread #2 for 445ms
-Rendered tile #8 in thread #4 for 433ms
-Rendered tile #1 in thread #1 for 432ms
-Rendered tile #10 in thread #0 for 429ms
-Rendered tile #11 in thread #2 for 437ms
-Rendered tile #12 in thread #4 for 436ms
-Rendered tile #9 in thread #5 for 422ms
-Rendered tile #14 in thread #0 for 431ms
-Rendered tile #15 in thread #2 for 433ms
-Rendered tile #16 in thread #4 for 430ms
-Rendered tile #13 in thread #1 for 428ms
-Rendered tile #3 in thread #3 for 433ms
-Rendered tile #19 in thread #2 for 441ms
-Rendered tile #20 in thread #4 for 432ms
-Rendered tile #17 in thread #5 for 422ms
-Rendered tile #18 in thread #0 for 421ms
+Threads Used: 4
+Total tiles: 4
+Rendered tile #1 in thread #1 for 118ms
+Rendered tile #0 in thread #0 for 124ms
+Rendered tile #3 in thread #3 for 130ms
+Rendered tile #2 in thread #2 for 155ms

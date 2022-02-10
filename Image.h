@@ -37,8 +37,9 @@ public: // ----- GETTERS & SETTERS -----
 
 	size_t GetSize() { return m_size; };
 
-	float GetData(const int index) { return m_dataF[index]; };
 	//void SetData(const int index, const float data) { m_dataF[index] = data; };
+	//float GetData(const int index) { return m_dataF[index]; };
+
 	void GetRGB(const int x, const int y, float& r, float& g, float& b);
 	void SetRGB(const int x, const int y, const float r, const float g, const float b);
 

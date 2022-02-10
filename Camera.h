@@ -8,7 +8,7 @@ public:
 	Camera(const float aspectRatio, const float aperture, const float focusDist, const float vFOV, const Vector3D lookFrom, const Vector3D lookAt, const Vector3D up);
 	~Camera();
 
-	//Camera& operator=(const Camera& copyCamera);
+	Camera& operator=(const Camera& copyCamera);
 
 	Ray GetRay(const float s, const float t) const;
 

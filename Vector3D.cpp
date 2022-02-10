@@ -118,15 +118,20 @@ Vector3D& Vector3D::operator=(const Vector3D& copyVector) {
 }
 
 Vector3D Vector3D::operator/(const float scalar) const {
-	return Vector3D(m_x, m_y, m_z).operator/=(scalar);
+	return Vector3D(m_x / scalar, m_y / scalar, m_z / scalar);
 }
 
 Vector3D Vector3D::operator/(const Vector3D& otherVector) const {
-	return Vector3D(m_x, m_y, m_z).operator/=(otherVector);
+	return Vector3D(m_x / otherVector.m_x, m_y / otherVector.m_y, m_z / otherVector.m_z);
 }
 
 Vector3D& Vector3D::operator/=(const float scalar) {
-	return this->operator/=(Vector3D(scalar, scalar, scalar));
+	m_x /= scalar;
+	m_y /= scalar;
+	m_z /= scalar;
+
+	return *this;
+	
 }
 
 Vector3D& Vector3D::operator/=(const Vector3D& otherVector) {
@@ -138,15 +143,19 @@ Vector3D& Vector3D::operator/=(const Vector3D& otherVector) {
 }
 
 Vector3D Vector3D::operator*(const float scalar) const {
-	return Vector3D(m_x, m_y, m_z).operator*=(scalar);
+	return Vector3D(m_x * scalar, m_y * scalar, m_z * scalar);
 }
 
 Vector3D Vector3D::operator*(const Vector3D& otherVector) const {
-	return Vector3D(m_x, m_y, m_z).operator*=(otherVector);
+	return Vector3D(m_x * otherVector.m_x, m_y * otherVector.m_y, m_z * otherVector.m_z);
 }
 
 Vector3D& Vector3D::operator*=(const float scalar) {
-	return this->operator*=(Vector3D(scalar, scalar, scalar));
+	m_x *= scalar;
+	m_y *= scalar;
+	m_z *= scalar;
+
+	return *this;
 }
 
 Vector3D& Vector3D::operator*=(const Vector3D& otherVector) {
@@ -158,11 +167,11 @@ Vector3D& Vector3D::operator*=(const Vector3D& otherVector) {
 }
 
 Vector3D Vector3D::operator+(const Vector3D& otherVector) const {
-	return Vector3D(m_x, m_y, m_z).operator+=(otherVector);
+	return Vector3D(m_x + otherVector.m_x, m_y + otherVector.m_y, m_z + otherVector.m_z);
 }
 
 Vector3D Vector3D::operator++(int i) {
-	return this->operator+(Vector3D((float)i, (float)i, (float)i));
+	return Vector3D(m_x + i, m_y + i, m_z + i);
 }
 
 Vector3D& Vector3D::operator++() {
@@ -182,15 +191,19 @@ Vector3D& Vector3D::operator+=(const Vector3D& otherVector) {
 }
 
 Vector3D Vector3D::operator-(const Vector3D& otherVector) const {
-	return Vector3D();
+	return Vector3D(m_x - otherVector.m_x, m_y - otherVector.m_y, m_z - otherVector.m_z);
 }
 
 Vector3D Vector3D::operator--(int i) {
-	return Vector3D();
+	return Vector3D(m_x - i, m_y - i, m_z - i);
 }
 
 Vector3D& Vector3D::operator--() {
-	return this->operator-=(Vector3D(1.f, 1.f, 1.f));
+	m_x--;
+	m_y--;
+	m_z--;
+
+	return *this;
 }
 
 Vector3D& Vector3D::operator-=(const Vector3D& otherVector) {
@@ -205,7 +218,7 @@ bool Vector3D::operator==(const Vector3D& otherVector) const {
 }
 
 bool Vector3D::operator!=(const Vector3D& otherVector) const {
-	return !(this->operator==(otherVector));
+	return !((m_x == otherVector.m_x) && (m_y == otherVector.m_y) && (m_z == otherVector.m_z));
 }
 
 Vector3D Vector3D::operator-() const {

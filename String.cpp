@@ -45,17 +45,41 @@ String& String::operator=(const char* copyString) {
 }
 
 String& String::operator=(const std::string& copyString) {
-	return this->operator=(copyString.c_str());
+	/*return this->operator=(copyString.c_str());*/
+	delete[] m_string;
+
+	const size_t size = strlen(copyString.c_str()) + 1;
+	m_string = new char[size];
+	strcpy_s(m_string, size, copyString.c_str());
+
+	return *this;
 }
 
 String& String::operator=(const String& copyString) {
 	if (this == &copyString) return *this;
 
-	return this->operator=(copyString.GetChar());
+	delete[] m_string;
+
+	const size_t size = strlen(copyString.GetChar()) + 1;
+	m_string = new char[size];
+	strcpy_s(m_string, size, copyString.GetChar());
+
+	return *this;
 }
 
 String& String::operator+=(const char copyChar) {
-	return this->operator+=(String(copyChar));
+	String copyString = copyChar;
+	size_t size = strlen(m_string) + strlen(copyString.GetChar()) + 1;
+	char* temp = new char[size];
+
+	strcpy_s(temp, size, m_string);
+	strcat_s(temp, size, copyString.GetChar());
+
+	delete[] m_string;
+	m_string = new char[size];
+	strcpy_s(m_string, size, temp);
+
+	return *this;
 }
 
 String& String::operator+=(const char* copyString) {
@@ -73,11 +97,31 @@ String& String::operator+=(const char* copyString) {
 }
 
 String& String::operator+=(const std::string& copyString) {
-	return this->operator+=(copyString.c_str());
+	size_t size = strlen(m_string) + strlen(copyString.c_str()) + 1;
+	char* temp = new char[size];
+
+	strcpy_s(temp, size, m_string);
+	strcat_s(temp, size, copyString.c_str());
+
+	delete[] m_string;
+	m_string = new char[size];
+	strcpy_s(m_string, size, temp);
+
+	return *this;
 }
 
 String& String::operator+=(const String& copyString) {
-	return this->operator+=(copyString.GetChar());
+	size_t size = strlen(m_string) + strlen(copyString.GetChar()) + 1;
+	char* temp = new char[size];
+
+	strcpy_s(temp, size, m_string);
+	strcat_s(temp, size, copyString.GetChar());
+
+	delete[] m_string;
+	m_string = new char[size];
+	strcpy_s(m_string, size, temp);
+
+	return *this;
 }
 
 bool String::operator==(const char* otherString) const {
@@ -85,15 +129,15 @@ bool String::operator==(const char* otherString) const {
 }
 
 bool String::operator==(const String& otherString) const {
-	return this->operator==(otherString.GetChar());
+	return !strcmp(m_string, otherString.GetChar());
 }
 
 bool String::operator!=(const char* otherString) const {
-	return !(this->operator==(otherString));
+	return !(!strcmp(m_string, otherString));
 }
 
 bool String::operator!=(const String& otherString) const {
-	return !(this->operator==(otherString));
+	return !(!strcmp(m_string, otherString.GetChar()));
 }
 
 bool String::operator<(const String& otherString) const {

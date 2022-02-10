@@ -36,6 +36,21 @@ Camera::Camera(const float aspectRatio, const float aperture, const float focusD
 Camera::~Camera() {
 }
 
+Camera& Camera::operator=(const Camera& copyCamera) {
+	if (this == &copyCamera) return *this;
+
+	m_horizontal = copyCamera.m_horizontal;
+	m_lensRadius = copyCamera.m_lensRadius;
+	m_lowerLeftCorner = copyCamera.m_lowerLeftCorner;
+	m_origin = copyCamera.m_origin;
+	m_u = copyCamera.m_u;
+	m_v = copyCamera.m_v;
+	m_vertical = copyCamera.m_vertical;
+	m_w = copyCamera.m_w;
+
+	return *this;
+}
+
 Ray Camera::GetRay(const float s, const float t) const {
 	Vector3D rd = Vector3D::RandomInUnitDisk() * m_lensRadius;
 	Vector3D offset = (m_u * rd.GetX()) + (m_v * rd.GetY());

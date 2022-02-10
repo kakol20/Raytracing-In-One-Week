@@ -77,7 +77,7 @@ bool Raytracing::Init() {
 			else if (first == "scene") {
 				m_renderScene = line.GetSecond("=");
 			}
-			else if (first == "samples") {
+			else if (first == "samplesPerPixel") {
 				m_samplesPerPixel = String::ToInt(line.GetSecond("="));
 			}
 			else if (first == "threads") {
@@ -137,8 +137,8 @@ bool Raytracing::Init() {
 	system("pause");
 
 	// ----- CREATE TILES -----
-	int maxXTiles = m_imageWidth / m_tileSize;
-	int maxYTiles = m_imageHeight / m_tileSize;
+	int maxXTiles = m_imageWidth < m_tileSize ? 1 : m_imageWidth / m_tileSize;
+	int maxYTiles = m_imageHeight < m_tileSize ? 1 : m_imageHeight / m_tileSize;
 	int maxTiles = maxXTiles * maxYTiles;
 
 	int xTileSize = (int)round(m_imageWidth / (float)maxXTiles);
@@ -245,23 +245,29 @@ bool Raytracing::RunMode() {
 	ShowProgress();
 
 	// ----- MULTI THREADING -----
+	if (m_useThreads > 1) {
+		for (size_t i = 0; i < m_useThreads; i++) {
+			m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
+			m_threadID[m_threads[i].get_id()] = i;
 
-	for (size_t i = 0; i < m_useThreads; i++) {
-		m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
-		m_threadID[m_threads[i].get_id()] = i;
-
-		//m_threads[i].sleep
-		m_nextAvailable++;
+			//m_threads[i].sleep
+			m_nextAvailable++;
+		}
+	}
+	else {
+		RenderTile(0);
 	}
 
 	ShowProgress();
 
 	// check for threads finish
-	for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
-		(*it).join();
+	if (m_useThreads > 1) {
+		for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
+			(*it).join();
+		}
 	}
 
-	ShowProgress();
+	//ShowProgress();
 
 	// ----- SAVE RENDER -----
 	String output;
@@ -277,15 +283,24 @@ bool Raytracing::RunMode() {
 	//m_render.TosRGB();
 
 	if (!m_render.Write(output.GetChar())) {
-		std::cout << oof::reset_formatting() << "Error saving " << output.GetChar() << '\n';
+		std::cout << oof::clear_screen() << oof::reset_formatting() << "Error saving " << output.GetChar() << '\n';
 
 		system("pause");
 	}
 
 	// ----- END -----
 	m_log.close();
-	m_threads.clear();
-	m_threadID.clear();
+	if (m_useThreads > 1) {
+		m_threads.clear();
+		m_threadID.clear();
+	}
+
+	output = "";
+	//output += oof::clear_screen();
+	output += oof::reset_formatting();
+	output += "\n";
+
+	FastWrite::Write(output);
 
 	system("pause"); // temporary
 	return true;
@@ -417,8 +432,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 			if (m_renderMode != "normal") {
 				float r = pixelCol.GetX();
-				float b = pixelCol.GetY();
-				float g = pixelCol.GetZ();
+				float g = pixelCol.GetY();
+				float b = pixelCol.GetZ();
 
 				std::vector<float> rgb = { r, g ,b };
 
@@ -558,7 +573,6 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 	HitRec rec;
 	if (RayHitObject(ray, clipStart, clipEnd, rec)) {
-
 	}
 
 	Vector3D unitDir = ray.GetDir();
