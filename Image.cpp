@@ -187,7 +187,7 @@ void Image::BiLerp(const float x, const float y, float& r, float& g, float& b) {
 	b = std::lerp(R1b, R2b, y - floor(y));
 }
 
-void Image::ToLinearRGB() {
+void Image::TosRGB() {
 	for (size_t i = 0; i < m_size; i++) {
 		float val = m_dataF[i] / 255.f;
 
@@ -205,7 +205,7 @@ void Image::ToLinearRGB() {
 	}
 }
 
-void Image::TosRGB() {
+void Image::ToLinearRGB() {
 	for (size_t i = 0; i < m_size; i++) {
 		float val = m_dataF[i] / 255.f;
 
