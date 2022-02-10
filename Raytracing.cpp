@@ -374,9 +374,9 @@ void Raytracing::TexturedScene() {
 void Raytracing::RenderTile(const size_t startIndex) {
 	m_tiles[startIndex].activeTile = true;
 
-	m_mtx.lock();
+	/*m_mtx.lock();
 	ShowProgress();
-	m_mtx.unlock();
+	m_mtx.unlock();*/
 
 	auto start = std::chrono::high_resolution_clock::now();
 	Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
@@ -469,7 +469,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				std::vector<float> rgb = { r, g ,b };
 
 				for (auto it = rgb.begin(); it != rgb.end(); it++) {
-					float val = (*it);
+					float val = std::clamp((*it), 0.f, 1.f);
 
 					if (val <= 0.0031308f) {
 						val = 12.92f * val;
@@ -629,7 +629,6 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 		return rgb;
 	}
-	return Vector3D();
 }
 
 const bool Raytracing::RayHitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
