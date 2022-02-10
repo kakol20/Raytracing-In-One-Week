@@ -14,6 +14,7 @@ auto enable_vt_mode() -> void;
 
 bool Image::PrintToConsole = true;
 std::mutex StaticMutex::s_mtx = std::mutex();
+thread_local String StaticMutex::s_output = "";
 thread_local unsigned int Random::Seed = 1;
 
 Raytracing RT;

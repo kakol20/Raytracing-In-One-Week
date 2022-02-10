@@ -493,12 +493,14 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 		}
 	}
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // simulate long rendering - temporary
+	//std::this_thread::sleep_for(std::chrono::milliseconds(500)); // simulate long rendering - temporary
 }
 
 void Raytracing::ShowProgress() {
 	// ----- OOF -----
-	String output = "";
+	//output = "";
+
+	std::string output = "";
 	output += oof::clear_screen();
 	output += oof::cursor_visibility(false);
 	output += oof::reset_formatting();
@@ -554,7 +556,7 @@ void Raytracing::ShowProgress() {
 	}
 	output += oof::reset_formatting();
 	output += "] ";
-	output += String::ToString(progressF);
+	output += std::to_string(progressF);
 	output += "%";
 
 	// show tile progress

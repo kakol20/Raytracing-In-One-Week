@@ -6,6 +6,7 @@ public:
 	FastWrite() {};
 	~FastWrite() {};
 
+	static void Write(std::string& output);
 	static void Write(String& output);
 };
 
