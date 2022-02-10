@@ -24,9 +24,10 @@ int main() {
 	if (!RT.Init()) {
 		std::cout << oof::clear_screen() << oof::position(0, 0) << "Failed to initialize raytracer\n";
 	}
-
-	if (!RT.Run()) {
-		std::cout << oof::clear_screen() << oof::position(0, 0) << "Failed to run raytracer\n";
+	else {
+		if (!RT.Run()) {
+			std::cout << oof::clear_screen() << oof::position(0, 0) << "Failed to run raytracer\n";
+		}
 	}
 
 	system("pause");

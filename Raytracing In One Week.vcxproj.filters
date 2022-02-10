@@ -28,6 +28,12 @@
     <Filter Include="Source Files\Raytracing">
       <UniqueIdentifier>{aadf5a7d-d973-4fd9-9928-302bef9a01d2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Maths">
+      <UniqueIdentifier>{ea0ee6b9-b65d-4c6c-a1d6-5fdd0e9aaaad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Maths">
+      <UniqueIdentifier>{945e98bf-a39a-4b96-9ce0-7afbd840759d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -47,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="Raytracing.cpp">
       <Filter>Source Files\Raytracing</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector3D.cpp">
+      <Filter>Source Files\Maths</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="Raytracing.h">
       <Filter>Header Files\Raytracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3D.h">
+      <Filter>Header Files\Maths</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
