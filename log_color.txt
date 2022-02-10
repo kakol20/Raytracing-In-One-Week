@@ -1,6 +1,38 @@
-Threads Used: 4
-Total tiles: 4
-Rendered tile #1 in thread #1 for 118ms
-Rendered tile #0 in thread #0 for 124ms
-Rendered tile #3 in thread #3 for 130ms
-Rendered tile #2 in thread #2 for 155ms
+Threads Used: 6
+Total tiles: 36
+Rendered tile #1 in thread #1 for 21ms
+Rendered tile #0 in thread #0 for 26ms
+Rendered tile #2 in thread #2 for 23ms
+Rendered tile #4 in thread #4 for 20ms
+Rendered tile #5 in thread #5 for 20ms
+Rendered tile #3 in thread #3 for 21ms
+Rendered tile #7 in thread #0 for 25ms
+Rendered tile #6 in thread #1 for 29ms
+Rendered tile #9 in thread #4 for 22ms
+Rendered tile #8 in thread #2 for 25ms
+Rendered tile #10 in thread #5 for 25ms
+Rendered tile #11 in thread #3 for 27ms
+Rendered tile #14 in thread #4 for 23ms
+Rendered tile #13 in thread #1 for 27ms
+Rendered tile #15 in thread #2 for 22ms
+Rendered tile #12 in thread #0 for 36ms
+Rendered tile #17 in thread #3 for 22ms
+Rendered tile #16 in thread #5 for 21ms
+Rendered tile #19 in thread #1 for 20ms
+Rendered tile #18 in thread #4 for 26ms
+Rendered tile #20 in thread #2 for 23ms
+Rendered tile #21 in thread #0 for 20ms
+Rendered tile #22 in thread #3 for 27ms
+Rendered tile #24 in thread #1 for 22ms
+Rendered tile #23 in thread #5 for 26ms
+Rendered tile #25 in thread #4 for 22ms
+Rendered tile #26 in thread #2 for 23ms
+Rendered tile #27 in thread #0 for 20ms
+Rendered tile #28 in thread #3 for 26ms
+Rendered tile #30 in thread #5 for 27ms
+Rendered tile #31 in thread #4 for 25ms
+Rendered tile #32 in thread #2 for 23ms
+Rendered tile #29 in thread #1 for 26ms
+Rendered tile #33 in thread #0 for 24ms
+Rendered tile #34 in thread #3 for 22ms
+Rendered tile #35 in thread #5 for 21ms

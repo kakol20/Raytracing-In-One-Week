@@ -54,7 +54,7 @@ bool Raytracing::Init() {
 			settings >> line;
 
 			consoleOutput += line.GetChar();
-			consoleOutput += '\n';
+			consoleOutput += "\n";
 
 			String first = line.GetFirst("=");
 			//const char* second = line.GetSecond("=");
@@ -106,23 +106,23 @@ bool Raytracing::Init() {
 		settings.open("settings.cfg", std::ios_base::out);
 
 		settings << "# Image Settings\n"
-			<< "imageWidth=" << m_imageWidth << '\n'
+			<< "imageWidth=" << m_imageWidth << "\n"
 			<< "imageHeight=" << m_imageHeight << "\n#\n"
 			<< "# Render Settings\n"
-			<< "rayDepth=" << m_rayDepth << '\n'
-			<< "shadowDepth=" << m_shadowDepth << '\n'
-			<< "threads=" << m_useThreads << '\n'
-			<< "samplesPerPixel=" << m_samplesPerPixel << '\n'
-			<< "tileSize=" << m_tileSize << '\n'
+			<< "rayDepth=" << m_rayDepth << "\n"
+			<< "shadowDepth=" << m_shadowDepth << "\n"
+			<< "threads=" << m_useThreads << "\n"
+			<< "samplesPerPixel=" << m_samplesPerPixel << "\n"
+			<< "tileSize=" << m_tileSize << "\n"
 			<< "## color, normal, albedo or all\n"
-			<< "renderMode=" << m_renderMode << '\n'
+			<< "renderMode=" << m_renderMode << "\n"
 			<< "## final, textured or debug\n"
 			<< "scene=" << m_renderScene << "\n#\n"
 			<< "# Camera Settings\n"
-			<< "aperture=" << m_aperture << '\n'
+			<< "aperture=" << m_aperture << "\n"
 			<< "## In degrees\n"
 			<< "verticalFOV=" << m_verticalFOV << "\n#\n"
-			<< "# Max Seed - " << Random::MaxUInt << '\n'
+			<< "# Max Seed - " << Random::MaxUInt << "\n"
 			<< "randomSeed=" << Random::Seed;
 
 		settings.close();
@@ -200,13 +200,25 @@ bool Raytracing::Init() {
 
 bool Raytracing::Run() {
 	String output("");
-	output += '\a';
+	output += "\a";
 
 	FastWrite::Write(output);
 
+	auto start = std::chrono::high_resolution_clock::now();
+	
 	//m_hdri.Write("temp/test.png", Image::ColorMode::sRGB);
 	if (m_renderMode == "all") {
+		bool success = true;
+
 		// render all modes
+		m_renderMode = "normal";
+		success = RunMode();
+
+		m_renderMode = "albedo";
+		success = RunMode();
+
+		m_renderMode = "color";
+		success = RunMode();
 	}
 	else if (m_renderMode == "color" || m_renderMode == "albedo" || m_renderMode == "normal") {
 		return RunMode();
@@ -214,6 +226,20 @@ bool Raytracing::Run() {
 	else {
 		m_renderMode = "color";
 		return RunMode();
+	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+
+	std::chrono::duration<float> elapsedSec = end - start;
+	std::chrono::duration<float, std::ratio<60, 1>> elapsedMin = end - start;
+
+	std::fstream runTime;
+	runTime.open("runTime.txt", std::ios_base::out);
+	if (runTime.is_open()) {
+		runTime << "Elapsed time in seconds: " << elapsedSec << "\n"
+			<< "Elapsed time in minutes: " << elapsedMin << "\n";
+
+		runTime.close();
 	}
 
 	return true;
@@ -224,6 +250,9 @@ bool Raytracing::RunMode() {
 		(*it).tileComplete = false;
 		(*it).activeTile = false;
 	}
+
+	m_tilesRendered = 0;
+	m_nextAvailable = 0;
 
 	ShuffleTiles();
 
@@ -240,7 +269,7 @@ bool Raytracing::RunMode() {
 		m_log.open("log_color.txt", std::ios_base::out);
 	}
 
-	m_log << "Threads Used: " << m_useThreads << "\nTotal tiles: " << m_tiles.size() << '\n';
+	m_log << "Threads Used: " << m_useThreads << "\nTotal tiles: " << m_tiles.size() << "\n";
 
 	ShowProgress();
 
@@ -283,7 +312,7 @@ bool Raytracing::RunMode() {
 	//m_render.TosRGB();
 
 	if (!m_render.Write(output.GetChar())) {
-		std::cout << oof::clear_screen() << oof::reset_formatting() << "Error saving " << output.GetChar() << '\n';
+		std::cout << oof::clear_screen() << oof::reset_formatting() << "Error saving " << output.GetChar() << "\n";
 
 		system("pause");
 	}
@@ -298,11 +327,13 @@ bool Raytracing::RunMode() {
 	output = "";
 	//output += oof::clear_screen();
 	output += oof::reset_formatting();
-	output += "\n";
+	output += "\n\a";
 
 	FastWrite::Write(output);
 
-	system("pause"); // temporary
+	std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+
+	//system("pause"); // temporary
 	return true;
 }
 
@@ -399,7 +430,7 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	ShowProgress();
 
 	// ----- LOGGING -----
-	m_log << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadID[thisId] << std::dec << " for " << dur << '\n';
+	m_log << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadID[thisId] << std::dec << " for " << dur << "\n";
 
 	size_t nextAvailable = m_nextAvailable;
 	m_nextAvailable++;
@@ -483,19 +514,19 @@ void Raytracing::ShowProgress() {
 	auto thisId = m_threadID[std::this_thread::get_id()];
 	output += std::to_string(thisId);*/
 
-	float progressD = m_tilesRendered / (float)m_tiles.size();
+	float progressF = m_tilesRendered / (float)m_tiles.size();
 	int total = 23;
-	int progressI = (int)floor(progressD * total);
+	int progressI = (int)floor(progressF * total);
 
-	progressD *= 100.f;
+	progressF *= 100.f;
 	//progressD = round(progressD * 100.f) / 100.f;
 
 	int startPos = 1;
 	output += oof::position(5, 0);
-	output += '[';
+	output += "[";
 
 	for (int x = 0; x < total; x++) {
-		float between = (progressD / 100.f) * total;
+		float between = (progressF / 100.f) * total;
 		//between += (float)startPos;
 
 		if (x < progressI) {
@@ -519,8 +550,8 @@ void Raytracing::ShowProgress() {
 	}
 	output += oof::reset_formatting();
 	output += "] ";
-	output += std::to_string(progressD);
-	output += '%';
+	output += String::ToString(progressF);
+	output += "%";
 
 	// show tile progress
 	output += oof::position(6, 0);
@@ -565,17 +596,19 @@ void Raytracing::ShowProgress() {
 }
 
 Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
-	// If we've exceeded the ray bounce limit, no more light is gathered.
+	// If we"ve exceeded the ray bounce limit, no more light is gathered.
 	if (depth <= 0) return Vector3D(0.f, 0.f, 0.f);
 
 	float clipStart = m_nearZero;
-	float clipEnd = 63.2772f;
+	//float clipEnd = 63.2772f;
+	float clipEnd = 1000.f;
 
 	HitRec rec;
 	if (RayHitObject(ray, clipStart, clipEnd, rec)) {
 	}
 
 	Vector3D unitDir = ray.GetDir();
+	unitDir.Normalize();
 
 	if (m_renderMode == "normal") {
 		return (unitDir + Vector3D(1.f, 1.f, 1.f)) / 2.f;
@@ -585,8 +618,8 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		unitDir.UVSphere(u, v);
 		u = 1.f - u;
 
-		u *= (float)m_hdri.GetWidth();
-		v *= (float)m_hdri.GetHeight();
+		u *= (float)(m_hdri.GetWidth());
+		v *= (float)(m_hdri.GetHeight());
 
 		float r, g, b;
 		m_hdri.BiLerp(u, v, r, g, b);
