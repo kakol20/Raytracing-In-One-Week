@@ -37,6 +37,9 @@
     <Filter Include="Header Files\Material">
       <UniqueIdentifier>{5617a17c-b553-4e46-913d-cbf6e8482789}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Material">
+      <UniqueIdentifier>{5af07cea-8a6c-4179-86e2-3b316a94907b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -60,14 +63,14 @@
     <ClCompile Include="Vector3D.cpp">
       <Filter>Source Files\Maths</Filter>
     </ClCompile>
-    <ClCompile Include="Ray.cpp">
-      <Filter>Header Files\Raytracing</Filter>
+    <ClCompile Include="Diffuse.cpp">
+      <Filter>Source Files\Material</Filter>
     </ClCompile>
     <ClCompile Include="HitRec.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Raytracing</Filter>
     </ClCompile>
-    <ClCompile Include="Diffuse.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Ray.cpp">
+      <Filter>Source Files\Raytracing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -101,14 +104,14 @@
     <ClInclude Include="Ray.h">
       <Filter>Header Files\Raytracing</Filter>
     </ClInclude>
-    <ClInclude Include="HitRec.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>Header Files\Material</Filter>
     </ClInclude>
     <ClInclude Include="Diffuse.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="HitRec.h">
+      <Filter>Header Files\Raytracing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
