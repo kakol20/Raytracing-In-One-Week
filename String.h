@@ -38,6 +38,9 @@ public:
 	const char* GetChar() const;
 	size_t Length();
 
+	const char* GetFirst(const char* delimiter) const;
+	const char* GetSecond(const char* delimiter) const;
+
 	// ----- IOSTREAM -----
 	friend std::istream& operator>>(std::istream& is, String& string);
 	friend std::ostream& operator<<(std::ostream& os, const String& string);

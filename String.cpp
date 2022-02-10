@@ -108,6 +108,32 @@ size_t String::Length() {
 	return strlen(m_string);
 }
 
+const char* String::GetFirst(const char* delimiter) const {
+	const size_t SIZE = strlen(m_string) + 1;
+	char* tempString = new char[SIZE];
+	strcpy_s(tempString, SIZE, m_string);
+
+	char* first;
+	char* second = NULL;
+
+	first = strtok_s(tempString, delimiter, &second);
+
+	return first;
+}
+
+const char* String::GetSecond(const char* delimiter) const {
+	const size_t SIZE = strlen(m_string) + 1;
+	char* tempString = new char[SIZE];
+	strcpy_s(tempString, SIZE, m_string);
+
+	char* first;
+	char* second = NULL;
+
+	first = strtok_s(tempString, delimiter, &second);
+
+	return second;
+}
+
 String String::ToString(const float number) {
 	return String(std::to_string(number));
 }
