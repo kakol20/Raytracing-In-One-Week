@@ -11,7 +11,7 @@ bool Raytracing::Init() {
 
 	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
 
-    return true;
+	return true;
 }
 
 bool Raytracing::Run() {
@@ -43,5 +43,5 @@ bool Raytracing::Run() {
 
 	m_hdri.Write("temp/test.png", Image::ColorMode::sRGB);
 
-    return true;
+	return true;
 }
