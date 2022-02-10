@@ -34,6 +34,9 @@
     <Filter Include="Source Files\Maths">
       <UniqueIdentifier>{945e98bf-a39a-4b96-9ce0-7afbd840759d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Material">
+      <UniqueIdentifier>{5617a17c-b553-4e46-913d-cbf6e8482789}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -61,6 +64,9 @@
       <Filter>Header Files\Raytracing</Filter>
     </ClCompile>
     <ClCompile Include="HitRec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Diffuse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -96,6 +102,12 @@
       <Filter>Header Files\Raytracing</Filter>
     </ClInclude>
     <ClInclude Include="HitRec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Header Files\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Diffuse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

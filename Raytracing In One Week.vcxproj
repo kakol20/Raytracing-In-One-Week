@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Diffuse.cpp" />
     <ClCompile Include="FastWrite.cpp" />
     <ClCompile Include="HitRec.cpp" />
     <ClCompile Include="Image.cpp" />
@@ -163,9 +164,11 @@
     <ClCompile Include="Vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Diffuse.h" />
     <ClInclude Include="FastWrite.h" />
     <ClInclude Include="HitRec.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="oof\oof.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Ray.h" />
