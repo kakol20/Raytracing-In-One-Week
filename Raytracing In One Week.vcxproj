@@ -155,12 +155,14 @@
     <ClCompile Include="FastWrite.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Random.cpp" />
+    <ClCompile Include="Raytracing.cpp" />
     <ClCompile Include="String.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FastWrite.h" />
     <ClInclude Include="oof\oof.h" />
     <ClInclude Include="Random.h" />
+    <ClInclude Include="Raytracing.h" />
     <ClInclude Include="stb\stb_image.h" />
     <ClInclude Include="stb\stb_image_write.h" />
     <ClInclude Include="String.h" />

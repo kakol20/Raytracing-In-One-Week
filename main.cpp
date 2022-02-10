@@ -1,49 +1,32 @@
 #include <Windows.h>
+#include <iostream>
 
 #define OOF_IMPL
 #include "oof/oof.h"
 
-#include "FastWrite.h"
+//#include "FastWrite.h"
 #include "Random.h"
-#include "String.h"
+//#include "String.h"
+#include "Raytracing.h"
 
 auto enable_vt_mode() -> void;
 
-thread_local unsigned int Random::Seed = 10022022;
+thread_local unsigned int Random::Seed = 1;
+
+Raytracing RT;
 
 int main() {
 	enable_vt_mode();
 
-	std::cout << oof::cursor_visibility(false);
+	std::cout << oof::cursor_visibility(false) << oof::reset_formatting() << oof::clear_screen() << oof::bg_color({ 12, 12, 12 });
 
-	String output("");
-	output = oof::reset_formatting();
-	output += oof::clear_screen();
-	output += oof::bg_color({ 12, 12, 12 });
-	output += '\a';
-	output += "Hello World!\n";
-	output += String::ToString(8022022);
-	output += '\n';
-	output += "Random unsigned int = ";
-	output += String::ToString(Random::RandomUInt());
-	output += '\n';
-	output += "Random int = ";
-	output += String::ToString(Random::RandInt());
-	output += '\n';
-	output += "Max Int = ";
-	output += String::ToString(Random::MaxUInt);
-	output += '\n';
-	output += "Random float = ";
-	output += String::ToString(Random::RandFloat());
-	output += '\n';
-	output += "Random float between -1 and 1 = ";
-	output += String::ToString(Random::RandFloatRange(-1, 1));
-	output += '\n';
-	output += "Seed After = ";
-	output += String::ToString(Random::Seed);
-	output += '\n';
+	if (!RT.Init()) {
+		std::cout << oof::clear_screen() << oof::position(0, 0) << "Failed to initialize raytracer\n";
+	}
 
-	FastWrite::Write(output);
+	if (!RT.Run()) {
+		std::cout << oof::clear_screen() << oof::position(0, 0) << "Failed to run raytracer\n";
+	}
 
 	system("pause");
 

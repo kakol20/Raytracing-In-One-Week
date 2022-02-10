@@ -22,6 +22,9 @@
     <Filter Include="Source Files\Misc">
       <UniqueIdentifier>{cb144689-80d7-46e7-9e85-e8c49200d962}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Raytracing">
+      <UniqueIdentifier>{27d53aec-c2a0-4f26-883e-cfa734adeef5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -34,6 +37,9 @@
       <Filter>Source Files\Misc</Filter>
     </ClCompile>
     <ClCompile Include="Random.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Raytracing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -54,6 +60,9 @@
       <Filter>Header Files\Misc</Filter>
     </ClInclude>
     <ClInclude Include="Random.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Raytracing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
