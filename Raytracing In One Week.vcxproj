@@ -153,6 +153,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FastWrite.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Raytracing.cpp" />
@@ -160,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FastWrite.h" />
+    <ClInclude Include="Image.h" />
     <ClInclude Include="oof\oof.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Raytracing.h" />
