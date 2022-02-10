@@ -98,7 +98,7 @@ bool Image::Read(const char* file, Image::ColorMode colorMode) {
 		output += file;
 		output += '\n';
 
-		FastWrite(output);
+		FastWrite::Write(output);
 
 		system("pause");
 	}

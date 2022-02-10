@@ -1,4 +1,6 @@
 #pragma once
+#include "Image.h"
+
 class Raytracing {
 public:
 	Raytracing() {};
@@ -6,5 +8,8 @@ public:
 
 	bool Init();
 	bool Run();
+
+private:
+	Image m_hdri;
 };
 

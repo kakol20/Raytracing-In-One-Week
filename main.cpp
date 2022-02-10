@@ -4,14 +4,15 @@
 #define OOF_IMPL
 #include "oof/oof.h"
 
-//#include "FastWrite.h"
 #include "Random.h"
-//#include "String.h"
 #include "Raytracing.h"
+//#include "FastWrite.h"
+//#include "String.h"
 
 auto enable_vt_mode() -> void;
 
 thread_local unsigned int Random::Seed = 1;
+bool Image::PrintToConsole = true;
 
 Raytracing RT;
 
