@@ -1,4 +1,4 @@
-#include <mutex>
+#include <chrono>
 
 #include "oof/oof.h"
 
@@ -33,6 +33,8 @@ Raytracing::Raytracing() {
 	m_useThreads = 6;
 
 	m_nearZero = 1e-8f;
+
+	//m_mtx = std::mutex();
 }
 
 bool Raytracing::Init() {
@@ -185,6 +187,7 @@ bool Raytracing::Init() {
 	}
 
 	m_useThreads = m_useThreads < m_tiles.size() ? m_useThreads : m_tiles.size();
+	m_render = Image(m_imageWidth, m_imageHeight, 3);
 
 	ShowProgress();
 
@@ -224,6 +227,66 @@ bool Raytracing::RunMode() {
 
 	ShuffleTiles();
 
+	// ---------- RENDER ----------
+
+	// ----- logging -----
+	if (m_renderMode == "albedo") {
+		m_log.open("log_albedo.txt", std::ios_base::out);
+	}
+	else if (m_renderMode == "normal") {
+		m_log.open("log_normal.txt", std::ios_base::out);
+	}
+	else {
+		m_log.open("log_color.txt", std::ios_base::out);
+	}
+
+	m_log << "Threads Used: " << m_useThreads << "\nTotal tiles: " << m_tiles.size() << '\n';
+
+	ShowProgress();
+
+	// ----- MULTI THREADING -----
+
+	for (size_t i = 0; i < m_useThreads; i++) {
+		m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
+		m_threadID[m_threads[i].get_id()] = i;
+
+		//m_threads[i].sleep
+		m_nextAvailable++;
+	}
+
+	ShowProgress();
+
+	// check for threads finish
+	for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
+		(*it).join();
+	}
+
+	ShowProgress();
+
+	// ----- SAVE RENDER -----
+	String output;
+	if (m_renderMode == "albedo") {
+		output = "render_a.png";
+	}
+	else if (m_renderMode == "normal") {
+		output = "render_n.png";
+	}
+	else {
+		output = "render_c.png";
+	}
+	//m_render.TosRGB();
+
+	if (!m_render.Write(output.GetChar())) {
+		std::cout << oof::reset_formatting() << "Error saving " << output.GetChar() << '\n';
+
+		system("pause");
+	}
+
+	// ----- END -----
+	m_log.close();
+	m_threads.clear();
+	m_threadID.clear();
+
 	system("pause"); // temporary
 	return true;
 }
@@ -245,6 +308,15 @@ void Raytracing::ShuffleTiles() {
 
 void Raytracing::DebugScene() {
 	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
+
+	// ----- CAMERA -----
+	Vector3D lookFrom(-13.f, 2.f, 0.f);
+	Vector3D lookAt(0.f, 1.f, 0.f);
+	Vector3D dist = lookAt - lookFrom;
+	Vector3D up(0.f, 1.f, 0.f);
+
+	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
+	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
 }
 
 void Raytracing::FinalScene() {
@@ -254,9 +326,124 @@ void Raytracing::TexturedScene() {
 }
 
 void Raytracing::RenderTile(const size_t startIndex) {
+	m_tiles[startIndex].activeTile = true;
+
+	m_mtx.lock();
+	ShowProgress();
+	m_mtx.unlock();
+
+	auto start = std::chrono::high_resolution_clock::now();
+	Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
+	auto end = std::chrono::high_resolution_clock::now();
+	auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+	m_tiles[startIndex].activeTile = false;
+
+	std::thread::id thisId = std::this_thread::get_id();
+
+	m_tiles[startIndex].tileComplete = true;
+
+	m_mtx.lock();
+	m_tilesRendered++;
+
+	Vector3D getColor(0.f, 0.f, 0.f);
+	float count = 0.f;
+	int halfX = m_tiles[startIndex].maxX + m_tiles[startIndex].minX;
+	halfX /= 2;
+
+	for (int xImg = m_tiles[startIndex].minX; xImg < halfX; xImg++) {
+		for (int yImg = m_tiles[startIndex].minY; yImg < m_tiles[startIndex].maxY; yImg++) {
+			count += 1.f;
+			int flippedY = (m_imageHeight - yImg) - 1;
+
+			float r, g, b;
+			m_render.GetRGB(xImg, flippedY, r, g, b);
+
+			getColor += Vector3D(r, g, b);
+		}
+	}
+	getColor /= count;
+	m_tiles[startIndex].leftXTileColor = Vector3D::Clamp(getColor, 0.f, 255.f);
+
+	getColor = Vector3D(0.f, 0.f, 0.f);
+	count = 0.f;
+	for (int xImg = halfX; xImg < m_tiles[startIndex].maxX; xImg++) {
+		for (int yImg = m_tiles[startIndex].minY; yImg < m_tiles[startIndex].maxY; yImg++) {
+			count += 1.f;
+			int flippedY = (m_imageHeight - yImg) - 1;
+
+			float r, g, b;
+			m_render.GetRGB(xImg, flippedY, r, g, b);
+
+			getColor += Vector3D(r, g, b);
+		}
+	}
+	getColor /= count;
+	m_tiles[startIndex].rightXTileColor = Vector3D::Clamp(getColor, 0.f, 255.f);
+
+	ShowProgress();
+
+	// ----- LOGGING -----
+	m_log << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadID[thisId] << std::dec << " for " << dur << '\n';
+
+	size_t nextAvailable = m_nextAvailable;
+	m_nextAvailable++;
+
+	m_mtx.unlock();
+
+	if (nextAvailable < m_tiles.size()) {
+		RenderTile(nextAvailable);
+	}
 }
 
 void Raytracing::Render(const int minX, const int minY, const int maxX, const int maxY) {
+	for (int y = minY; y < maxY; y++) {
+		for (int x = minX; x < maxX; x++) {
+			int flippedY = (m_imageHeight - y) - 1;
+
+			// ----- SEND RAYS -----
+			Vector3D pixelCol;
+			for (int s = 0; s < m_samplesPerPixel; s++) {
+				float u = (x + Random::RandFloat()) / (float)(m_imageWidth - 1);
+				float v = (y + Random::RandFloat()) / (float)(m_imageHeight - 1);
+
+				Ray r = m_camera.GetRay(u, v);
+
+				pixelCol += RayColor(r, m_rayDepth);
+			}
+			float scale = 1.f / (float)m_samplesPerPixel;
+
+			pixelCol *= scale;
+
+			if (m_renderMode != "normal") {
+				float r = pixelCol.GetX();
+				float b = pixelCol.GetY();
+				float g = pixelCol.GetZ();
+
+				std::vector<float> rgb = { r, g ,b };
+
+				for (auto it = rgb.begin(); it != rgb.end(); it++) {
+					float val = (*it);
+
+					if (val <= 0.0031308f) {
+						val = 12.92f * val;
+					}
+					else {
+						val = (1.055f * pow(val, 1.f / 2.4f)) - 0.055f;
+					}
+
+					(*it) = val;
+				}
+
+				pixelCol = Vector3D(rgb[0], rgb[1], rgb[2]);
+			}
+
+			// ----- WRITE COLOR -----
+			pixelCol *= 255.0;
+
+			m_render.SetRGB(x, flippedY, pixelCol.GetX(), pixelCol.GetY(), pixelCol.GetZ());
+		}
+	}
 }
 
 void Raytracing::ShowProgress() {
@@ -363,6 +550,38 @@ void Raytracing::ShowProgress() {
 }
 
 Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
+	// If we've exceeded the ray bounce limit, no more light is gathered.
+	if (depth <= 0) return Vector3D(0.f, 0.f, 0.f);
+
+	float clipStart = m_nearZero;
+	float clipEnd = 63.2772f;
+
+	HitRec rec;
+	if (RayHitObject(ray, clipStart, clipEnd, rec)) {
+
+	}
+
+	Vector3D unitDir = ray.GetDir();
+
+	if (m_renderMode == "normal") {
+		return (unitDir + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+	}
+	else {
+		float u, v;
+		unitDir.UVSphere(u, v);
+		u = 1.f - u;
+
+		u *= (float)m_hdri.GetWidth();
+		v *= (float)m_hdri.GetHeight();
+
+		float r, g, b;
+		m_hdri.BiLerp(u, v, r, g, b);
+
+		Vector3D rgb(r, g, b);
+		rgb /= 255.f;
+
+		return rgb;
+	}
 	return Vector3D();
 }
 

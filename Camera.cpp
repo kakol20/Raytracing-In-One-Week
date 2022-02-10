@@ -10,7 +10,7 @@ Camera::Camera(const float aspectRatio, const float aperture, const float focusD
 
 	// calculate from FOV
 	const float theta = vFOV * (PI / 180.f);
-	const float h = tan(theta / 2.f);
+	const float h = tanf(theta / 2.f);
 	const float vHeight = 2.f * h;
 	const float vWidth = aspectRatio * vHeight;
 

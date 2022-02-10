@@ -73,7 +73,7 @@
       <Filter>Source Files\Raytracing</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Raytracing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

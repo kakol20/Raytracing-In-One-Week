@@ -39,6 +39,7 @@ public: // ----- GETTERS & SETTERS -----
 
 	float GetData(const int index) { return m_dataF[index]; };
 	//void SetData(const int index, const float data) { m_dataF[index] = data; };
+	void GetRGB(const int x, const int y, float& r, float& g, float& b);
 	void SetRGB(const int x, const int y, const float r, const float g, const float b);
 
 	static bool PrintToConsole;
@@ -53,5 +54,6 @@ private: // ----- MEMBER VARIABLE -----
 
 private:
 	Image::FileType GetFileType(const char* file);
+	void ModulusUV(const int x, const int y, int& u, int& v);
 };
 

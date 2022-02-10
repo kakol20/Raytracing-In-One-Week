@@ -28,7 +28,7 @@ protected:
 
 		float r0 = (1.f - refIndex) / (1.f + refIndex);
 		r0 *= r0;
-		return r0 + (1.f - r0) * pow(1.f - cosTheta, 5.f);
+		return r0 + (1.f - r0) * powf(1.f - cosTheta, 5.f);
 	}
 
 	Vector3D Reflect(Vector3D v, Vector3D n) {
@@ -42,9 +42,9 @@ protected:
 
 		float cosTheta = (std::min)(Vector3D::DotProduct(vInv, n), 1.f);
 		Vector3D rOutPerp = (v + (n * cosTheta)) * refractionRatio;
-		Vector3D rOutPara = n * -sqrt(abs(1.f - rOutPerp.SqrMagnitude()));
+		Vector3D rOutPara = n * -sqrtf(abs(1.f - rOutPerp.SqrMagnitude()));
 
-		float sinTheta = sqrt(1.f - cosTheta * cosTheta);
+		float sinTheta = sqrtf(1.f - cosTheta * cosTheta);
 
 		bool cannotRefract = refractionRatio * sinTheta > 1.f;
 

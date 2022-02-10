@@ -1,14 +1,16 @@
 #pragma once
 #include <fstream>
 #include <map>
+#include <mutex>
 #include <thread>
 #include <vector>
 
+#include "Camera.h"
+#include "HitRec.h"
 #include "Image.h"
+#include "Ray.h"
 #include "String.h"
 #include "Vector3D.h"
-#include "Ray.h"
-#include "HitRec.h"
 
 class Raytracing {
 public:
@@ -23,6 +25,8 @@ private:
 	Image m_hdri;
 	Image m_render;
 
+	Camera m_camera;
+
 	bool m_debugScene;
 	float m_aperture, m_verticalFOV;
 	float m_nearZero;
@@ -31,6 +35,7 @@ private:
 	size_t m_nextAvailable;
 	size_t m_useThreads;
 	std::fstream m_log;
+	std::mutex m_mtx;
 	String m_renderMode;
 	String m_renderScene;
 

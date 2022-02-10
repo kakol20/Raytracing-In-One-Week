@@ -224,9 +224,22 @@ void Image::TosRGB() {
 }
 
 int Image::GetIndex(const int x, const int y) {
-	int clampX = std::clamp(x, 0, m_w - 1);
-	int clampY = std::clamp(y, 0, m_h - 1);
+	int clampX;
+	int clampY;
+	ModulusUV(x, y, clampX, clampY);
+	clampX = std::clamp(clampX, 0, m_w - 1);
+	clampY = std::clamp(clampY, 0, m_h - 1);
 	return (clampX + clampY * m_w) * m_channels;
+}
+
+void Image::GetRGB(const int x, const int y, float& r, float& g, float& b) {
+	if (m_channels >= 3) {	
+		int index = GetIndex(x, y);
+
+		r = m_dataF[index + 0];
+		g = m_dataF[index + 1];
+		b = m_dataF[index + 2];
+	}
 }
 
 void Image::SetRGB(const int x, const int y, const float r, const float g, const float b) {
@@ -266,4 +279,17 @@ Image::FileType Image::GetFileType(const char* file) {
 		}
 	}
 	return Image::FileType::PNG;
+}
+
+void Image::ModulusUV(const int x, const int y, int& u, int& v) {
+	u = x % m_w;
+	v = y % m_h;
+
+	if (u < 0) {
+		u = u + m_w;
+	}
+
+	if (v < 0) {
+		v = v + m_h;
+	}
 }
