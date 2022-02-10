@@ -4,6 +4,7 @@
 
 #include "FastWrite.h"
 #include "Random.h"
+#include "StaticMutex.h"
 #include "String.h"
 
 #include "Raytracing.h"
@@ -34,7 +35,7 @@ Raytracing::Raytracing() {
 
 	m_nearZero = 1e-8f;
 
-	//m_mtx = std::mutex();
+	//StaticMutex::s_mtx = std::mutex();
 }
 
 bool Raytracing::Init() {
@@ -374,9 +375,9 @@ void Raytracing::TexturedScene() {
 void Raytracing::RenderTile(const size_t startIndex) {
 	m_tiles[startIndex].activeTile = true;
 
-	/*m_mtx.lock();
+	/*StaticMutex::s_mtx.lock();
 	ShowProgress();
-	m_mtx.unlock();*/
+	StaticMutex::s_mtx.unlock();*/
 
 	auto start = std::chrono::high_resolution_clock::now();
 	Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
@@ -389,7 +390,8 @@ void Raytracing::RenderTile(const size_t startIndex) {
 
 	m_tiles[startIndex].tileComplete = true;
 
-	m_mtx.lock();
+	//StaticMutex::s_mtx.lock();
+	StaticMutex::s_mtx.lock();
 	m_tilesRendered++;
 
 	Vector3D getColor(0.f, 0.f, 0.f);
@@ -432,13 +434,13 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	// ----- LOGGING -----
 	m_log << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadID[thisId] << std::dec << " for " << dur << "\n";
 
-	size_t nextAvailable = m_nextAvailable;
+	size_t next = m_nextAvailable;
 	m_nextAvailable++;
 
-	m_mtx.unlock();
+	StaticMutex::s_mtx.unlock();
 
-	if (nextAvailable < m_tiles.size()) {
-		RenderTile(nextAvailable);
+	if (next < m_tiles.size()) {
+		RenderTile(next);
 	}
 }
 
@@ -490,6 +492,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			m_render.SetRGB(x, flippedY, pixelCol.GetX(), pixelCol.GetY(), pixelCol.GetZ());
 		}
 	}
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // simulate long rendering - temporary
 }
 
 void Raytracing::ShowProgress() {

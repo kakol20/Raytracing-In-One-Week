@@ -35,7 +35,7 @@ private:
 	size_t m_nextAvailable;
 	size_t m_useThreads;
 	std::fstream m_log;
-	std::mutex m_mtx;
+	//std::mutex m_mtx;
 	String m_renderMode;
 	String m_renderScene;
 
