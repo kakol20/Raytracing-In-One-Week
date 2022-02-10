@@ -57,6 +57,12 @@
     <ClCompile Include="Vector3D.cpp">
       <Filter>Source Files\Maths</Filter>
     </ClCompile>
+    <ClCompile Include="Ray.cpp">
+      <Filter>Header Files\Raytracing</Filter>
+    </ClCompile>
+    <ClCompile Include="HitRec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb\stb_image.h">
@@ -85,6 +91,12 @@
     </ClInclude>
     <ClInclude Include="Vector3D.h">
       <Filter>Header Files\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Ray.h">
+      <Filter>Header Files\Raytracing</Filter>
+    </ClInclude>
+    <ClInclude Include="HitRec.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

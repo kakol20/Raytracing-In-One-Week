@@ -50,7 +50,7 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 }
 
 bool Vector3D::NearZero() {
-	const float s = 1e-8;
+	const float s = 1e-8f;
 	return abs(m_x) < s && abs(m_y) < s && abs(m_z) < s;
 }
 
@@ -65,8 +65,8 @@ Vector3D Vector3D::Lerp(const Vector3D& from, const Vector3D& to, const float fa
 
 void Vector3D::UVSphere(float& u, float& v) {
 	float PI = 3.141592653f;
-	u = 0.5 + (atan2(m_x, m_z) / (2.f * PI));
-	v = 0.5 - (asin(m_y) / PI);
+	u = 0.5f + (atan2(m_x, m_z) / (2.f * PI));
+	v = 0.5f - (asin(m_y) / PI);
 }
 
 Vector3D Vector3D::Random(const float min, const float max) {

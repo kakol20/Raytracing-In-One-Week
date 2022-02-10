@@ -153,18 +153,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FastWrite.cpp" />
+    <ClCompile Include="HitRec.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Random.cpp" />
+    <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Raytracing.cpp" />
     <ClCompile Include="String.cpp" />
     <ClCompile Include="Vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FastWrite.h" />
+    <ClInclude Include="HitRec.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="oof\oof.h" />
     <ClInclude Include="Random.h" />
+    <ClInclude Include="Ray.h" />
     <ClInclude Include="Raytracing.h" />
     <ClInclude Include="stb\stb_image.h" />
     <ClInclude Include="stb\stb_image_write.h" />
