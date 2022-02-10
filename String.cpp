@@ -142,6 +142,10 @@ String String::ToString(const int number) {
 	return String(std::to_string(number));
 }
 
+String String::ToString(const unsigned int number) {
+	return String(std::to_string(number));
+}
+
 float String::ToFloat(const char* number) {
 	char* end;
 	return strtof(number, &end);

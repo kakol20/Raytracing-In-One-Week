@@ -49,6 +49,7 @@ public:
 
 	static String ToString(const float number);
 	static String ToString(const int number);
+	static String ToString(const unsigned int number);
 
 	static float ToFloat(const char* number);
 	static int ToInt(const char* number);
