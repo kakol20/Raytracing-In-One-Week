@@ -84,6 +84,9 @@
     <ClCompile Include="Ground.cpp">
       <Filter>Source Files\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Sphere.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb\stb_image.h">
@@ -135,6 +138,9 @@
       <Filter>Header Files\Raytracing</Filter>
     </ClInclude>
     <ClInclude Include="Ground.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
   </ItemGroup>

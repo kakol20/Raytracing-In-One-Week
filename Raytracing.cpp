@@ -6,6 +6,7 @@
 #include "FastWrite.h"
 #include "Ground.h"
 #include "Random.h"
+#include "Sphere.h"
 #include "StaticMutex.h"
 
 #include "Raytracing.h"
@@ -360,7 +361,7 @@ void Raytracing::DebugScene() {
 	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
 
 	// ----- CAMERA -----
-	Vector3D lookFrom(-13.f, 2.f, 0.f);
+	Vector3D lookFrom(0.f, 2.f, 13.f);
 	Vector3D lookAt(0.f, 1.f, 0.f);
 	Vector3D dist = lookAt - lookFrom;
 	Vector3D up(0.f, 1.f, 0.f);
@@ -370,9 +371,15 @@ void Raytracing::DebugScene() {
 
 	// ----- MATERIAL -----
 	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
+	m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.01f, 0.01f));
+	m_matMap["green"] = new Diffuse(Vector3D(0.01f, 0.8f, 0.01f));
+	m_matMap["blue"] = new Diffuse(Vector3D(0.01f, 0.01f, 0.8f));
 
 	// ----- OBJECTS -----
 	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
+	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["diffuse"]));
+	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["green"]));
+	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["blue"]));
 }
 
 void Raytracing::FinalScene() {
@@ -689,16 +696,28 @@ const bool Raytracing::RayHitObject(Ray& ray, const float t_min, const float t_m
 
 Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha) {
 	Vector3D attentuation;
+	Vector3D emission;
 
 	if (rec.GetMat()->Scatter(ray, rec, attentuation, scattered)) {
 		continueRay = true;
 		alpha = false;
-		return attentuation;
+		if (rec.GetMat()->Emission(rec, emission)) {
+			return emission + attentuation;
+		}
+		else {
+			return attentuation;
+		}
 	}
 	else {
 		continueRay = true;
 		alpha = true;
-		return attentuation;
+		
+		if (rec.GetMat()->Emission(rec, emission)) {
+			return emission;
+		}
+		else {
+			return Vector3D(0.f, 0.f, 0.f);
+		}
 	}
 }
 
