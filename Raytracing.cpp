@@ -3,6 +3,7 @@
 #include "oof/oof.h"
 
 #include "Diffuse.h"
+#include "Emissive.h"
 #include "FastWrite.h"
 #include "Ground.h"
 #include "Random.h"
@@ -36,6 +37,8 @@ Raytracing::Raytracing() {
 	m_useThreads = 6;
 
 	m_nearZero = 1e-8f;
+
+	m_hdriStrength = 0.1f;
 
 	//StaticMutex::s_mtx = std::mutex();
 }
@@ -208,7 +211,7 @@ bool Raytracing::Run() {
 	FastWrite::Write(output);
 
 	auto start = std::chrono::high_resolution_clock::now();
-	
+
 	//m_hdri.Write("temp/test.png", Image::ColorMode::sRGB);
 	if (m_renderMode == "all") {
 		bool success = true;
@@ -372,13 +375,13 @@ void Raytracing::DebugScene() {
 	// ----- MATERIAL -----
 	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
 	m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.01f, 0.01f));
-	m_matMap["green"] = new Diffuse(Vector3D(0.01f, 0.8f, 0.01f));
+	m_matMap["emissive"] = new Emissive(Vector3D(0.01f, 0.8f, 0.01f), 4.f);
 	m_matMap["blue"] = new Diffuse(Vector3D(0.01f, 0.01f, 0.8f));
 
 	// ----- OBJECTS -----
 	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
 	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["diffuse"]));
-	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["green"]));
+	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["emissive"]));
 	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["blue"]));
 }
 
@@ -635,7 +638,13 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 		if (m_renderMode == "albedo") {
 			if (!alpha) {
-				return objCol;
+				Vector3D emission;
+				if (rec.GetMat()->Emission(rec, emission)) {
+					return emission;
+				}
+				else {
+					return objCol;
+				}
 			}
 			else {
 				return RayColor(ray, depth - 1);
@@ -645,12 +654,12 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			return (rec.GetNormal() + Vector3D(1.f, 1.f, 1.f)) / 2.f;
 		}
 		else {
-			Vector3D shadowCol = ShadowColor(rec, clipStart, clipEnd, m_shadowDepth < depth ? m_shadowDepth : depth - 1);
+			Vector3D shadowCol = EmissionColor(rec);
 			if (continueRay) {
-				return objCol * shadowCol * RayColor(scattered, depth - 1);
+				return shadowCol + objCol * RayColor(scattered, depth - 1);
 			}
 			else {
-				return objCol * shadowCol;
+				return objCol + shadowCol;
 			}
 		}
 	}
@@ -675,7 +684,8 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		Vector3D rgb(r, g, b);
 		rgb /= 255.f;
 
-		return rgb;
+		//m_hdriStrength = 0.1f;
+		return rgb * m_hdriStrength;
 	}
 }
 
@@ -696,31 +706,24 @@ const bool Raytracing::RayHitObject(Ray& ray, const float t_min, const float t_m
 
 Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha) {
 	Vector3D attentuation;
-	Vector3D emission;
 
 	if (rec.GetMat()->Scatter(ray, rec, attentuation, scattered)) {
 		continueRay = true;
 		alpha = false;
-		if (rec.GetMat()->Emission(rec, emission)) {
-			return emission + attentuation;
-		}
-		else {
-			return attentuation;
-		}
+		return attentuation;
 	}
 	else {
 		continueRay = true;
-		alpha = true;
+		alpha = false;
 		
-		if (rec.GetMat()->Emission(rec, emission)) {
-			return emission;
-		}
-		else {
-			return Vector3D(0.f, 0.f, 0.f);
-		}
+		return Vector3D(0.f, 0.f, 0.f);
 	}
 }
 
-Vector3D Raytracing::ShadowColor(HitRec& rec, const float t_min, const float t_max, const int shadowDepth) {
-	return Vector3D(1.f, 1.f, 1.f); // temporary
+Vector3D Raytracing::EmissionColor(HitRec& rec) {
+	// ----- EMISSIVE OBJECT -----
+	Vector3D emission;
+	rec.GetMat()->Emission(rec, emission);
+
+	return emission; // temporary
 }

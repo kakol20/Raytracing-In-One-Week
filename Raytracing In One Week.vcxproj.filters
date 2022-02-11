@@ -87,6 +87,9 @@
     <ClCompile Include="Sphere.cpp">
       <Filter>Source Files\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Emissive.cpp">
+      <Filter>Source Files\Material</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb\stb_image.h">
@@ -142,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="Sphere.h">
       <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Emissive.h">
+      <Filter>Header Files\Material</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

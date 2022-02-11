@@ -154,6 +154,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Diffuse.cpp" />
+    <ClCompile Include="Emissive.cpp" />
     <ClCompile Include="FastWrite.cpp" />
     <ClCompile Include="Ground.cpp" />
     <ClCompile Include="HitRec.cpp" />
@@ -169,6 +170,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Diffuse.h" />
+    <ClInclude Include="Emissive.h" />
     <ClInclude Include="FastWrite.h" />
     <ClInclude Include="Ground.h" />
     <ClInclude Include="HitRec.h" />

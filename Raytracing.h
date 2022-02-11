@@ -41,6 +41,7 @@ private:
 	//std::mutex m_mtx;
 	String m_renderMode;
 	String m_renderScene;
+	float m_hdriStrength;
 
 private:
 	struct Tile {
@@ -73,7 +74,7 @@ private:
 	const bool RayHitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
 	Vector3D ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha);
-	Vector3D ShadowColor(HitRec& rec, const float t_min, const float t_max, const int shadowDepth);
+	Vector3D EmissionColor(HitRec& rec);
 
 	std::map<String, Material*> m_matMap;
 	std::vector<Object*> m_objects;
