@@ -500,7 +500,8 @@ void Raytracing::ShowProgress() {
 	// ----- OOF -----
 	//output = "";
 
-	std::string output = "";
+	//std::string output = "";
+	String output = "";
 	output += oof::clear_screen();
 	output += oof::cursor_visibility(false);
 	output += oof::reset_formatting();

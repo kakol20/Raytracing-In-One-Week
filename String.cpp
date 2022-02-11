@@ -79,6 +79,8 @@ String& String::operator+=(const char copyChar) {
 	m_string = new char[size];
 	strcpy_s(m_string, size, temp);
 
+	delete[] temp;
+
 	return *this;
 }
 
@@ -92,6 +94,8 @@ String& String::operator+=(const char* copyString) {
 	delete[] m_string;
 	m_string = new char[size];
 	strcpy_s(m_string, size, temp);
+
+	delete[] temp;
 
 	return *this;
 }
@@ -107,6 +111,8 @@ String& String::operator+=(const std::string& copyString) {
 	m_string = new char[size];
 	strcpy_s(m_string, size, temp);
 
+	delete[] temp;
+
 	return *this;
 }
 
@@ -120,6 +126,8 @@ String& String::operator+=(const String& copyString) {
 	delete[] m_string;
 	m_string = new char[size];
 	strcpy_s(m_string, size, temp);
+
+	delete[] temp;
 
 	return *this;
 }
@@ -162,6 +170,8 @@ const char* String::GetFirst(const char* delimiter) const {
 
 	first = strtok_s(tempString, delimiter, &second);
 
+	second = nullptr;
+
 	return first;
 }
 
@@ -174,6 +184,8 @@ const char* String::GetSecond(const char* delimiter) const {
 	char* second = NULL;
 
 	first = strtok_s(tempString, delimiter, &second);
+
+	first = nullptr;
 
 	return second;
 }
