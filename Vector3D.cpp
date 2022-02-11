@@ -3,6 +3,7 @@
 #include "Random.h"
 
 #include "Vector3D.h"
+#include <algorithm>
 
 Vector3D::Vector3D() : Vector3D(0.f, 0.f, 0.f) {
 }
@@ -55,7 +56,7 @@ bool Vector3D::NearZero() {
 }
 
 Vector3D Vector3D::Clamp(const Vector3D& v, const float min, const float max) {
-	return Vector3D();
+	return Vector3D(std::clamp(v.m_x, min, max), std::clamp(v.m_y, min, max), std::clamp(v.m_z, min, max));
 }
 
 Vector3D Vector3D::Lerp(const Vector3D& from, const Vector3D& to, const float factor) {
