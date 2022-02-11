@@ -40,6 +40,12 @@
     <Filter Include="Source Files\Material">
       <UniqueIdentifier>{5af07cea-8a6c-4179-86e2-3b316a94907b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Objects">
+      <UniqueIdentifier>{e0d2bb99-bd82-4fb4-8ed8-ddadc2f2584c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Objects">
+      <UniqueIdentifier>{851e1577-254b-47c2-9d25-df8fdc67f74d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -74,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\Raytracing</Filter>
+    </ClCompile>
+    <ClCompile Include="Ground.cpp">
+      <Filter>Source Files\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -116,11 +125,17 @@
     <ClInclude Include="HitRec.h">
       <Filter>Header Files\Raytracing</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="StaticMutex.h">
       <Filter>Header Files\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Raytracing</Filter>
+    </ClInclude>
+    <ClInclude Include="Ground.h">
+      <Filter>Header Files\Objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

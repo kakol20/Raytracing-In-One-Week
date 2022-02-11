@@ -13,6 +13,11 @@ Diffuse::Diffuse(const Vector3D& albedo) {
 Diffuse::~Diffuse() {
 }
 
+bool Diffuse::Emission(HitRec& rec, Vector3D& emission) {
+	emission = Vector3D(0.f, 0.f, 0.f);
+	return false;
+}
+
 bool Diffuse::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
 	Vector3D unitDir = rayIn.GetDir();
 

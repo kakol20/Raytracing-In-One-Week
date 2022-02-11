@@ -2,10 +2,11 @@
 
 #include "oof/oof.h"
 
+#include "Diffuse.h"
 #include "FastWrite.h"
+#include "Ground.h"
 #include "Random.h"
 #include "StaticMutex.h"
-#include "String.h"
 
 #include "Raytracing.h"
 
@@ -173,7 +174,7 @@ bool Raytracing::Init() {
 				y = y + 0;
 			}
 
-			m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(0.f, 0.f, 0.f), Vector3D(0.f, 0.f, 0.f), countX, countY });
+			m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(1.f, 0.f, 0.f), Vector3D(1.f, 0.f, 0.f), countX, countY });
 
 			y = maxY;
 			l_heightModulo--;
@@ -248,8 +249,10 @@ bool Raytracing::Run() {
 
 bool Raytracing::RunMode() {
 	for (auto it = m_tiles.begin(); it != m_tiles.end(); it++) {
-		(*it).tileComplete = false;
 		(*it).activeTile = false;
+		(*it).leftXTileColor = Vector3D(1.f, 0.f, 0.f);
+		(*it).rightXTileColor = Vector3D(1.f, 0.f, 0.f);
+		(*it).tileComplete = false;
 	}
 
 	m_tilesRendered = 0;
@@ -364,6 +367,12 @@ void Raytracing::DebugScene() {
 
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
+
+	// ----- MATERIAL -----
+	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
+
+	// ----- OBJECTS -----
+	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
 }
 
 void Raytracing::FinalScene() {
@@ -452,8 +461,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			// ----- SEND RAYS -----
 			Vector3D pixelCol;
 			for (int s = 0; s < m_samplesPerPixel; s++) {
-				float u = (x + Random::RandFloat()) / (float)(m_imageWidth - 1);
-				float v = (y + Random::RandFloat()) / (float)(m_imageHeight - 1);
+				float u = (x + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageWidth - 1);
+				float v = (y + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageHeight - 1);
 
 				Ray r = m_camera.GetRay(u, v);
 
@@ -607,11 +616,36 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	if (depth <= 0) return Vector3D(0.f, 0.f, 0.f);
 
 	float clipStart = m_nearZero;
-	//float clipEnd = 63.2772f;
-	float clipEnd = 1000.f;
+	float clipEnd = 63.27716808f;
+	//float clipEnd = 1000.f;
 
 	HitRec rec;
 	if (RayHitObject(ray, clipStart, clipEnd, rec)) {
+		Ray scattered;
+		bool continueRay = false;
+		bool alpha = false;
+		Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
+
+		if (m_renderMode == "albedo") {
+			if (!alpha) {
+				return objCol;
+			}
+			else {
+				return RayColor(ray, depth - 1);
+			}
+		}
+		else if (m_renderMode == "normal") {
+			return (rec.GetNormal() + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+		}
+		else {
+			Vector3D shadowCol = ShadowColor(rec, clipStart, clipEnd, m_shadowDepth < depth ? m_shadowDepth : depth - 1);
+			if (continueRay) {
+				return objCol * shadowCol * RayColor(scattered, depth - 1);
+			}
+			else {
+				return objCol * shadowCol;
+			}
+		}
 	}
 
 	Vector3D unitDir = ray.GetDir();
@@ -639,11 +673,33 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 }
 
 const bool Raytracing::RayHitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
-	return false; // temporary
+	HitRec tempRec;
+	bool hit = false;
+	float closest = t_max;
+
+	for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
+		if ((*it)->Hit(ray, t_min, closest, tempRec)) {
+			hit = true;
+			closest = tempRec.GetT();
+			rec = tempRec;
+		}
+	}
+	return hit;
 }
 
-Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered) {
-	return Vector3D(1.f, 1.f, 1.f); // temporary
+Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha) {
+	Vector3D attentuation;
+
+	if (rec.GetMat()->Scatter(ray, rec, attentuation, scattered)) {
+		continueRay = true;
+		alpha = false;
+		return attentuation;
+	}
+	else {
+		continueRay = true;
+		alpha = true;
+		return attentuation;
+	}
 }
 
 Vector3D Raytracing::ShadowColor(HitRec& rec, const float t_min, const float t_max, const int shadowDepth) {

@@ -8,9 +8,12 @@
 #include "Camera.h"
 #include "HitRec.h"
 #include "Image.h"
+#include "Material.h"
+#include "Object.h"
 #include "Ray.h"
 #include "String.h"
 #include "Vector3D.h"
+#include "String.h"
 
 class Raytracing {
 public:
@@ -69,9 +72,11 @@ private:
 	Vector3D RayColor(Ray& ray, const int depth);
 	const bool RayHitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
-	Vector3D ObjectColor(Ray& ray, HitRec& rec, Ray& scattered);
+	Vector3D ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha);
 	Vector3D ShadowColor(HitRec& rec, const float t_min, const float t_max, const int shadowDepth);
 
+	std::map<String, Material*> m_matMap;
+	std::vector<Object*> m_objects;
 	std::vector<Tile> m_tiles;
 
 	// ----- THREADING -----

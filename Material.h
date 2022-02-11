@@ -10,6 +10,7 @@ public:
 	Material() { m_ior = 1.5f; m_roughness = 0.5f; };
 	virtual ~Material() {};
 
+	virtual bool Emission(HitRec& rec, Vector3D& emission) = 0;
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) = 0;
 
 public:

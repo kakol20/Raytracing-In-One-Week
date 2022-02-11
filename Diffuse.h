@@ -7,6 +7,7 @@ public:
 	Diffuse(const Vector3D& albedo);
 	virtual ~Diffuse();
 
+	virtual bool Emission(HitRec& rec, Vector3D& emission);
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered);
 
 public:
