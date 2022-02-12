@@ -5,6 +5,7 @@
 #include "Diffuse.h"
 #include "Emissive.h"
 #include "FastWrite.h"
+#include "Glass.h"
 #include "Ground.h"
 #include "Metal.h"
 #include "Random.h"
@@ -375,13 +376,14 @@ void Raytracing::DebugScene() {
 
 	// ----- MATERIAL -----
 	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
-	m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.01f, 0.01f));
-	m_matMap["emissive"] = new Emissive(Vector3D(0.01f, 0.8f, 0.01f), 4.f);
+	//m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.01f, 0.01f));
+	m_matMap["emissive"] = new Emissive(Vector3D(1.f, 1.f, 1.f), 4.f);
 	m_matMap["metal"] = new Metal(Vector3D(0.01f, 0.01f, 0.8f), 0.1f, 1.45f);
+	m_matMap["glass"] = new Glass(Vector3D(0.8f, 0.5f, 0.5f), 0.f, 1.5f);
 
 	// ----- OBJECTS -----
 	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
-	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["diffuse"]));
+	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["glass"]));
 	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["emissive"]));
 	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["metal"]));
 }
@@ -726,5 +728,5 @@ Vector3D Raytracing::EmissionColor(HitRec& rec) {
 	Vector3D emission;
 	rec.GetMat()->Emission(rec, emission);
 
-	return emission; // temporary
+	return emission;
 }

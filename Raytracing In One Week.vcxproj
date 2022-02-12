@@ -156,6 +156,7 @@
     <ClCompile Include="Diffuse.cpp" />
     <ClCompile Include="Emissive.cpp" />
     <ClCompile Include="FastWrite.cpp" />
+    <ClCompile Include="Glass.cpp" />
     <ClCompile Include="Ground.cpp" />
     <ClCompile Include="HitRec.cpp" />
     <ClCompile Include="Image.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="Diffuse.h" />
     <ClInclude Include="Emissive.h" />
     <ClInclude Include="FastWrite.h" />
+    <ClInclude Include="Glass.h" />
     <ClInclude Include="Ground.h" />
     <ClInclude Include="HitRec.h" />
     <ClInclude Include="Image.h" />
