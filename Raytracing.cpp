@@ -38,8 +38,9 @@ Raytracing::Raytracing() {
 
 	m_useThreads = 6;
 
-	m_nearZero = 1e-8f;
+	m_nearZero = 1e-6f;
 
+	//m_hdriStrength = 1.f;
 	m_hdriStrength = 0.1f;
 
 	//StaticMutex::s_mtx = std::mutex();
@@ -377,9 +378,9 @@ void Raytracing::DebugScene() {
 	// ----- MATERIAL -----
 	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
 	//m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.01f, 0.01f));
-	m_matMap["emissive"] = new Emissive(Vector3D(1.f, 1.f, 1.f), 4.f);
-	m_matMap["metal"] = new Metal(Vector3D(0.01f, 0.01f, 0.8f), 0.1f, 1.45f);
-	m_matMap["glass"] = new Glass(Vector3D(0.8f, 0.5f, 0.5f), 0.f, 1.5f);
+	m_matMap["emissive"] = new Emissive(Vector3D::Random(0.f, 0.25f), 4.f);
+	m_matMap["metal"] = new Metal(Vector3D::Random(0.5f, 1.f), 0.1f, 1.45f);
+	m_matMap["glass"] = new Glass(Vector3D::Random(0.5f, 1.f), 0.f, 1.5f);
 
 	// ----- OBJECTS -----
 	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
