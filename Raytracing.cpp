@@ -6,6 +6,7 @@
 #include "Emissive.h"
 #include "FastWrite.h"
 #include "Ground.h"
+#include "Metal.h"
 #include "Random.h"
 #include "Sphere.h"
 #include "StaticMutex.h"
@@ -376,13 +377,13 @@ void Raytracing::DebugScene() {
 	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
 	m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.01f, 0.01f));
 	m_matMap["emissive"] = new Emissive(Vector3D(0.01f, 0.8f, 0.01f), 4.f);
-	m_matMap["blue"] = new Diffuse(Vector3D(0.01f, 0.01f, 0.8f));
+	m_matMap["metal"] = new Metal(Vector3D(0.01f, 0.01f, 0.8f), 0.1f, 1.45f);
 
 	// ----- OBJECTS -----
 	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
 	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["diffuse"]));
 	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["emissive"]));
-	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["blue"]));
+	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["metal"]));
 }
 
 void Raytracing::FinalScene() {
@@ -659,7 +660,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				return shadowCol + objCol * RayColor(scattered, depth - 1);
 			}
 			else {
-				return objCol + shadowCol;
+				return shadowCol + objCol;
 			}
 		}
 	}
@@ -715,7 +716,7 @@ Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& co
 	else {
 		continueRay = true;
 		alpha = false;
-		
+
 		return Vector3D(0.f, 0.f, 0.f);
 	}
 }

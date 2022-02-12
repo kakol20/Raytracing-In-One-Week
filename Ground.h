@@ -1,7 +1,7 @@
 #pragma once
 #include "Object.h"
 class Ground :
-    public Object {
+	public Object {
 public:
 	Ground();
 	Ground(const float height, Material* mat, const float uvScale = 1.f);

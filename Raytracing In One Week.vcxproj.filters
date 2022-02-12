@@ -90,6 +90,9 @@
     <ClCompile Include="Emissive.cpp">
       <Filter>Source Files\Material</Filter>
     </ClCompile>
+    <ClCompile Include="Metal.cpp">
+      <Filter>Source Files\Material</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb\stb_image.h">
@@ -147,6 +150,9 @@
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Emissive.h">
+      <Filter>Header Files\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Metal.h">
       <Filter>Header Files\Material</Filter>
     </ClInclude>
   </ItemGroup>

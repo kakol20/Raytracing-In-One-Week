@@ -160,6 +160,7 @@
     <ClCompile Include="HitRec.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Metal.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Raytracing.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="HitRec.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="Metal.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="oof\oof.h" />
     <ClInclude Include="Random.h" />

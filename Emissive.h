@@ -1,7 +1,7 @@
 #pragma once
 #include "Material.h"
 class Emissive :
-    public Material {
+	public Material {
 public:
 	Emissive();
 	Emissive(const Vector3D& albedo, const float intensity);

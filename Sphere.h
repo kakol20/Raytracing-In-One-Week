@@ -1,7 +1,7 @@
 #pragma once
 #include "Object.h"
 class Sphere :
-    public Object {
+	public Object {
 public:
 	Sphere();
 	Sphere(const Vector3D center, const float radius, Material* mat, const float uvScale = 1.f);
