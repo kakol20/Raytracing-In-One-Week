@@ -16,7 +16,6 @@
 
 Raytracing::Raytracing() {
 	// ----- SCENE SETTINGS -----
-	m_debugScene = false;
 
 	// ----- RENDER SETTINGS -----
 	m_aperture = 0.1f;
@@ -204,7 +203,12 @@ bool Raytracing::Init() {
 
 	// ----- SCENE INITIALISATION -----
 
-	DebugScene();
+	if (m_renderScene == "debug") {
+		DebugScene();
+	}
+	else {
+		FinalScene();
+	}
 
 	return true;
 }
@@ -384,7 +388,7 @@ void Raytracing::DebugScene() {
 
 	// ----- MATERIAL -----
 	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
-	//m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.01f, 0.01f));
+	//m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.f1f, 0.f1f));
 	m_matMap["emissive"] = new Emissive(Vector3D::Random(0.f, 1.f), 4.f);
 	m_matMap["metal"] = new Metal(Vector3D::Random(0.5f, 1.f), 0.1f, 1.45f);
 	m_matMap["glass"] = new Glass(Vector3D::Random(0.5f, 1.f), 0.f, 1.5f);
@@ -397,6 +401,128 @@ void Raytracing::DebugScene() {
 }
 
 void Raytracing::FinalScene() {
+	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
+
+	m_hdriStrength = 1.f;
+
+	// ----- CAMERA -----
+	Vector3D lookFrom(13.f, 2.f, 3.f);
+	Vector3D lookAt(0.f, 0.f, 0.f);
+	Vector3D dist = lookAt - lookFrom;
+	Vector3D up(0.f, 1.f, 0.f);
+
+	const float aspectRatio = m_imageWidth / (float)m_imageHeight;
+	m_camera = Camera(aspectRatio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
+
+	// ----- OBJECT CREATION -----
+	// materials
+	m_matMap["ground"] = new Diffuse(Vector3D(0.5f, 0.5f, 0.5f));
+	m_matMap["back"] = new Diffuse(Vector3D(0.4f, 0.2f, 0.1f));
+	m_matMap["middle"] = new Glass(Vector3D(1.f, 1.f, 1.f), 0.0f, 1.5f);
+	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.2f, 0.47f);
+
+	// objects
+	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
+	m_objects.push_back(new Sphere(Vector3D(-4.f, 1.f, 0.f), 1.f, m_matMap["back"]));
+	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["middle"]));
+	m_objects.push_back(new Sphere(Vector3D(4.f, 1.f, 0.f), 1.f, m_matMap["front"]));
+
+	// procedural
+	for (int a = -11; a <= 11; a++) {
+		for (int b = -11; b <= 11; b++) {
+			Vector3D center((float)a, 0.2f, (float)b);
+			Vector3D randPos = Vector3D::Random(-0.507107f, 0.507107f) * Vector3D(1.f, 0.f, 1.f);
+			center += randPos;
+
+			bool intersect = false;
+
+			//if (-0.8f < center.GetZ() && center.GetZ() < 0.8f);
+			//{
+			//	intersect = true;
+			//}
+
+			//if (-1.8f < center.GetX() && center.GetX() < 1.8f) {
+			//	intersect = intersect && true;
+			//}
+
+			if (!intersect) {
+				for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
+					if ((*it)->SphereIntersectSphere(center, 0.2f)) {
+						intersect = true;
+						break;
+					}
+				}
+			}
+
+			if (!intersect) {
+				float chooseMat = Random::RandFloat();
+				float gap = 1.f / 4.f;
+
+				if (chooseMat <= gap) {
+					float h = Random::RandFloatRange(0.f, 360.f);
+					float s = 1.f;
+					float v = 220.f / 255.f;
+
+					float c = v * s;
+					float modh = fmod(h / 60.f, 2.f);
+					float x = c * (1.f - abs(modh - 1.f));
+					float m = v - c;
+
+					float r = 0.f, g = 0.f, b = 0.f;
+					if (h < 60.f) {
+						r = c;
+						g = x;
+					}
+					else if (h < 120.f) {
+						r = x;
+						g = c;
+					}
+					else if (h < 180.f) {
+						g = c;
+						b = x;
+					}
+					else if (h < 240.f) {
+						g = x;
+						b = c;
+					}
+					else if (h < 300.f) {
+						r = x;
+						b = c;
+					}
+					else {
+						r = c;
+						b = x;
+					}
+
+					Vector3D col(r + m, g + m, b + m);
+
+					m_matVec.push_back(new Diffuse(col));
+				}
+				else if (chooseMat <= 2.f * gap) {
+					Vector3D col = Vector3D::Random(0.5f, 1.f);
+					float roughness = Random::RandFloat();
+					float ior = 1.45f;
+
+					m_matVec.push_back(new Metal(col, roughness, ior));
+				}
+				else if (chooseMat <= 3.f * gap) {
+					Vector3D col = Vector3D::Random(0.5f, 1.f);
+					float roughness = Random::RandFloatRange(0.f, 0.5f);
+					float ior = 1.45f;
+
+					m_matVec.push_back(new Glass(col, roughness, ior));
+				}
+				else {
+					Vector3D col = Vector3D::Random(0.f, 1.f);
+					float intensity = Random::RandFloatRange(1.f, 5.f);
+
+					m_matVec.push_back(new Emissive(col, intensity));
+				}
+
+				m_objects.push_back(new Sphere(center, 0.2f, m_matVec.back()));
+			}
+		}
+	}
 }
 
 void Raytracing::TexturedScene() {
@@ -517,7 +643,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			}
 
 			// ----- WRITE COLOR -----
-			pixelCol *= 255.0;
+			pixelCol *= 255.f;
 
 			m_render.SetRGB(x, flippedY, pixelCol.GetX(), pixelCol.GetY(), pixelCol.GetZ());
 		}
@@ -540,16 +666,18 @@ void Raytracing::ShowProgress() {
 
 	output += "Render Mode: ";
 	output += m_renderMode.GetChar();
+	output += "\nTotal Objects: ";
+	output += String::ToString((int)m_objects.size());
 	output += "\nThreads Used: ";
-	output += std::to_string(m_useThreads);
+	output += String::ToString((int)m_useThreads);
 	output += "\nTotal Tiles: ";
-	output += std::to_string(m_tiles.size());
+	output += String::ToString((int)m_tiles.size());
 	output += "\nProgress: ";
-	output += std::to_string(m_tilesRendered);
+	output += String::ToString(m_tilesRendered);
 	/*output += "\nTile #";
 
 	auto thisId = m_threadID[std::this_thread::get_id()];
-	output += std::to_string(thisId);*/
+	output += String::ToString(thisId);*/
 
 	float progressF = m_tilesRendered / (float)m_tiles.size();
 	int total = 23;
@@ -559,7 +687,7 @@ void Raytracing::ShowProgress() {
 	//progressD = round(progressD * 100.f) / 100.f;
 
 	int startPos = 1;
-	output += oof::position(5, 0);
+	output += oof::position(6, 0);
 	output += "[";
 
 	for (int x = 0; x < total; x++) {
@@ -587,7 +715,7 @@ void Raytracing::ShowProgress() {
 	}
 	output += oof::reset_formatting();
 	output += "] ";
-	output += std::to_string(progressF);
+	output += String::ToString(progressF);
 	output += "%";
 
 	// show tile progress
@@ -598,7 +726,7 @@ void Raytracing::ShowProgress() {
 		int y = (*it).tileY;
 
 		for (int i = 0; i <= 1; i++) {
-			output += oof::position((m_yTileCount - y) + 6, 2 * x + i);
+			output += oof::position((m_yTileCount - y) + 7, 2 * x + i);
 
 			if ((*it).tileComplete) {
 				Vector3D col;

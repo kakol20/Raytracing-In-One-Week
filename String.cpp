@@ -211,7 +211,6 @@ String String::ToString(const unsigned int number) {
 float String::ToFloat(const char* number) {
 	char* end;
 	float out = strtof(number, &end);
-
 	//delete end;
 	end = nullptr;
 

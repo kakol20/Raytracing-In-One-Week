@@ -31,7 +31,6 @@ private:
 	Camera m_camera;
 
 	//std::mutex m_mtx;
-	bool m_debugScene;
 	bool m_shuffleTiles;
 	float m_aperture, m_verticalFOV;
 	float m_hdriStrength;
@@ -78,6 +77,7 @@ private:
 	Vector3D EmissionColor(HitRec& rec);
 
 	std::map<String, Material*> m_matMap;
+	std::vector<Material*> m_matVec;
 	std::vector<Object*> m_objects;
 	std::vector<Tile> m_tiles;
 
