@@ -30,18 +30,19 @@ private:
 
 	Camera m_camera;
 
+	//std::mutex m_mtx;
 	bool m_debugScene;
+	bool m_shuffleTiles;
 	float m_aperture, m_verticalFOV;
+	float m_hdriStrength;
 	float m_nearZero;
 	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_rayDepth, m_tileSize, m_shadowDepth;
 	int m_tilesRendered;
 	size_t m_nextAvailable;
 	size_t m_useThreads;
 	std::fstream m_log;
-	//std::mutex m_mtx;
 	String m_renderMode;
 	String m_renderScene;
-	float m_hdriStrength;
 
 private:
 	struct Tile {
@@ -84,4 +85,3 @@ private:
 	std::vector<std::thread> m_threads;
 	std::map<std::thread::id, size_t> m_threadID;
 };
-

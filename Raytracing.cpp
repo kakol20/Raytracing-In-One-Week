@@ -44,6 +44,8 @@ Raytracing::Raytracing() {
 	m_hdriStrength = 0.1f;
 
 	//StaticMutex::s_mtx = std::mutex();
+
+	m_shuffleTiles = false;
 }
 
 bool Raytracing::Init() {
@@ -214,10 +216,11 @@ bool Raytracing::Run() {
 	FastWrite::Write(output);
 
 	auto start = std::chrono::high_resolution_clock::now();
+	
+	bool success = true;
 
 	//m_hdri.Write("temp/test.png", Image::ColorMode::sRGB);
 	if (m_renderMode == "all") {
-		bool success = true;
 
 		// render all modes
 		m_renderMode = "normal";
@@ -228,13 +231,15 @@ bool Raytracing::Run() {
 
 		m_renderMode = "color";
 		success = RunMode();
+
+		//return success;
 	}
 	else if (m_renderMode == "color" || m_renderMode == "albedo" || m_renderMode == "normal") {
-		return RunMode();
+		success = RunMode();
 	}
 	else {
 		m_renderMode = "color";
-		return RunMode();
+		success = RunMode();
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();
@@ -251,7 +256,7 @@ bool Raytracing::Run() {
 		runTime.close();
 	}
 
-	return true;
+	return success;
 }
 
 bool Raytracing::RunMode() {
@@ -349,17 +354,19 @@ bool Raytracing::RunMode() {
 }
 
 void Raytracing::ShuffleTiles() {
-	size_t i = m_tiles.size() - 1;
-	while (i >= 0) {
-		size_t swap = (size_t)round(Random::RandFloatRange(0.f, (float)i));
+	if (m_shuffleTiles) {
+		size_t i = m_tiles.size() - 1;
+		while (i >= 0) {
+			size_t swap = (size_t)round(Random::RandFloatRange(0.f, (float)i));
 
-		if (swap < i) {
-			std::swap(m_tiles[i], m_tiles[swap]);
+			if (swap < i) {
+				std::swap(m_tiles[i], m_tiles[swap]);
+			}
+
+			if (i == 0) break;
+
+			i--;
 		}
-
-		if (i == 0) break;
-
-		i--;
 	}
 }
 
@@ -378,7 +385,7 @@ void Raytracing::DebugScene() {
 	// ----- MATERIAL -----
 	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
 	//m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.01f, 0.01f));
-	m_matMap["emissive"] = new Emissive(Vector3D::Random(0.f, 0.25f), 4.f);
+	m_matMap["emissive"] = new Emissive(Vector3D::Random(0.f, 1.f), 4.f);
 	m_matMap["metal"] = new Metal(Vector3D::Random(0.5f, 1.f), 0.1f, 1.45f);
 	m_matMap["glass"] = new Glass(Vector3D::Random(0.5f, 1.f), 0.f, 1.5f);
 
@@ -455,7 +462,7 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	ShowProgress();
 
 	// ----- LOGGING -----
-	m_log << "Rendered tile #" << std::dec << startIndex << " in thread #" << std::dec << m_threadID[thisId] << std::dec << " for " << dur << "\n";
+	m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << "\n";
 
 	size_t next = m_nextAvailable;
 	m_nextAvailable++;
@@ -658,12 +665,12 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			return (rec.GetNormal() + Vector3D(1.f, 1.f, 1.f)) / 2.f;
 		}
 		else {
-			Vector3D shadowCol = EmissionColor(rec);
+			Vector3D emissionCol = EmissionColor(rec);
 			if (continueRay) {
-				return shadowCol + objCol * RayColor(scattered, depth - 1);
+				return emissionCol + objCol * RayColor(scattered, depth - 1);
 			}
 			else {
-				return shadowCol + objCol;
+				return emissionCol + objCol;
 			}
 		}
 	}
@@ -717,10 +724,13 @@ Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& co
 		return attentuation;
 	}
 	else {
-		continueRay = true;
+		continueRay = false;
 		alpha = false;
 
-		return Vector3D(0.f, 0.f, 0.f);
+		//scattered = 
+		scattered = Ray(rec.GetPoint(), ray.GetDir());
+
+		return attentuation;
 	}
 }
 

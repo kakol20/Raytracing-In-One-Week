@@ -68,18 +68,22 @@ String& String::operator=(const String& copyString) {
 }
 
 String& String::operator+=(const char copyChar) {
-	String copyString = copyChar;
-	size_t size = strlen(m_string) + strlen(copyString.GetChar()) + 1;
+	char* copyCharTemp = new char[2];
+	copyCharTemp[0] = copyChar;
+	copyCharTemp[1] = '\0';
+
+	size_t size = strlen(m_string) + strlen(copyCharTemp) + 1;
 	char* temp = new char[size];
 
 	strcpy_s(temp, size, m_string);
-	strcat_s(temp, size, copyString.GetChar());
+	strcat_s(temp, size, copyCharTemp);
 
 	delete[] m_string;
 	m_string = new char[size];
 	strcpy_s(m_string, size, temp);
 
 	delete[] temp;
+	delete[] copyCharTemp;
 
 	return *this;
 }
@@ -170,6 +174,7 @@ const char* String::GetFirst(const char* delimiter) const {
 
 	first = strtok_s(tempString, delimiter, &second);
 
+	//delete second;
 	second = nullptr;
 
 	return first;
@@ -185,6 +190,7 @@ const char* String::GetSecond(const char* delimiter) const {
 
 	first = strtok_s(tempString, delimiter, &second);
 
+	//delete first;
 	first = nullptr;
 
 	return second;
@@ -204,12 +210,22 @@ String String::ToString(const unsigned int number) {
 
 float String::ToFloat(const char* number) {
 	char* end;
-	return strtof(number, &end);
+	float out = strtof(number, &end);
+
+	//delete end;
+	end = nullptr;
+
+	return out;
 }
 
 int String::ToInt(const char* number) {
 	char* end;
-	return (int)strtol(number, &end, 10);
+	int out = (int)strtol(number, &end, 10);
+
+	//delete end;
+	end = nullptr;
+
+	return out;
 }
 
 void String::Clear() {
