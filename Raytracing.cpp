@@ -656,8 +656,8 @@ void Raytracing::ShowProgress() {
 	// ----- OOF -----
 	//output = "";
 
-	//std::string output = "";
-	String output = "";
+	std::string output = "";
+	//String output = "";
 	output += oof::clear_screen();
 	output += oof::cursor_visibility(false);
 	output += oof::reset_formatting();
@@ -667,13 +667,13 @@ void Raytracing::ShowProgress() {
 	output += "Render Mode: ";
 	output += m_renderMode.GetChar();
 	output += "\nTotal Objects: ";
-	output += String::ToString((int)m_objects.size());
+	output += String::ToString((int)m_objects.size()).GetChar();
 	output += "\nThreads Used: ";
-	output += String::ToString((int)m_useThreads);
+	output += String::ToString((int)m_useThreads).GetChar();
 	output += "\nTotal Tiles: ";
-	output += String::ToString((int)m_tiles.size());
+	output += String::ToString((int)m_tiles.size()).GetChar();
 	output += "\nProgress: ";
-	output += String::ToString(m_tilesRendered);
+	output += String::ToString(m_tilesRendered).GetChar();
 	/*output += "\nTile #";
 
 	auto thisId = m_threadID[std::this_thread::get_id()];
@@ -715,7 +715,7 @@ void Raytracing::ShowProgress() {
 	}
 	output += oof::reset_formatting();
 	output += "] ";
-	output += String::ToString(progressF);
+	output += String::ToString(progressF).GetChar();
 	output += "%";
 
 	// show tile progress

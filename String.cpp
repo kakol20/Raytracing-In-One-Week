@@ -83,7 +83,9 @@ String& String::operator+=(const char copyChar) {
 	strcpy_s(m_string, size, temp);
 
 	delete[] temp;
+	temp = nullptr;
 	delete[] copyCharTemp;
+	copyCharTemp = nullptr;
 
 	return *this;
 }
@@ -100,6 +102,7 @@ String& String::operator+=(const char* copyString) {
 	strcpy_s(m_string, size, temp);
 
 	delete[] temp;
+	temp = nullptr;
 
 	return *this;
 }
@@ -116,6 +119,7 @@ String& String::operator+=(const std::string& copyString) {
 	strcpy_s(m_string, size, temp);
 
 	delete[] temp;
+	temp = nullptr;
 
 	return *this;
 }
@@ -132,6 +136,7 @@ String& String::operator+=(const String& copyString) {
 	strcpy_s(m_string, size, temp);
 
 	delete[] temp;
+	temp = nullptr;
 
 	return *this;
 }
@@ -236,11 +241,13 @@ void String::Clear() {
 std::istream& operator>>(std::istream& is, String& string) {
 	string.Clear();
 
-	char* temp = new char[512];
-	is.getline(temp, 512);
+	char* temp = new char[1024];
+	is.getline(temp, 1024);
 
 	string = temp;
+
 	delete[] temp;
+	temp = nullptr;
 
 	return is;
 }
