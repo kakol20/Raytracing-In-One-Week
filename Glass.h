@@ -10,7 +10,7 @@ public:
 	virtual bool Emission(HitRec& rec, Vector3D& emission);
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered);
 
-	virtual bool IsTransparent(Vector3D uv = Vector3D()) { return true; };
+	virtual bool IsTransmissive(Vector3D uv = Vector3D()) { return true; };
 	virtual float GetRoughness(Vector3D uv = Vector3D()) { return m_roughness; };
 	virtual Vector3D GetAlbedo(Vector3D uv = Vector3D()) { return m_albedo; };
 };

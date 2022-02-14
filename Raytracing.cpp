@@ -37,7 +37,7 @@ Raytracing::Raytracing() {
 
 	m_useThreads = 6;
 
-	m_nearZero = 1e-6f;
+	m_nearZero = 1e-4f;
 
 	//m_hdriStrength = 1.f;
 	m_hdriStrength = 0.1f;
@@ -376,6 +376,10 @@ void Raytracing::ShuffleTiles() {
 
 void Raytracing::DebugScene() {
 	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
+	m_hdriStrength = 0.1f;
+
+	// ----- LIGHTS -----
+	//m_lights.push_back(Light(Vector3D(-20.f, 15.f, -15.f), Vector3D(1.f, 1.f, 1.f), 5.f, 1165.21671522f));
 
 	// ----- CAMERA -----
 	Vector3D lookFrom(0.f, 2.f, 13.f);
@@ -403,7 +407,10 @@ void Raytracing::DebugScene() {
 void Raytracing::FinalScene() {
 	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
 
-	m_hdriStrength = 1.f;
+	m_hdriStrength = 0.1f;
+
+	// ----- LIGHTS -----
+	//m_lights.push_back(Light(Vector3D(20.f, 15.f, 0.f), Vector3D(1.f, 1.f, 1.f), 10.f, 7853.98163397f));
 
 	// ----- CAMERA -----
 	Vector3D lookFrom(13.f, 2.f, 3.f);
@@ -421,11 +428,15 @@ void Raytracing::FinalScene() {
 	m_matMap["middle"] = new Glass(Vector3D(1.f, 1.f, 1.f), 0.0f, 1.5f);
 	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.2f, 0.47f);
 
+	m_matMap["light1"] = new Emissive(Vector3D(0.87207f, 0.995117f, 1.42871f), 10.f);
+
 	// objects
 	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
 	m_objects.push_back(new Sphere(Vector3D(-4.f, 1.f, 0.f), 1.f, m_matMap["back"]));
 	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["middle"]));
 	m_objects.push_back(new Sphere(Vector3D(4.f, 1.f, 0.f), 1.f, m_matMap["front"]));
+
+	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, 0.f), 4.f, m_matMap["light1"]));
 
 	// procedural
 	for (int a = -11; a <= 11; a++) {
@@ -794,11 +805,15 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		}
 		else {
 			Vector3D emissionCol = EmissionColor(rec);
+			//Vector3D lightCol = LightColor(rec, clipStart, clipEnd, m_shadowDepth < depth ? m_shadowDepth : depth - 1);
+
+			Vector3D totalLights = emissionCol/* + lightCol*/;
+
 			if (continueRay) {
-				return emissionCol + objCol * RayColor(scattered, depth - 1);
+				return totalLights + objCol/* * lightCol*/ * RayColor(scattered, depth - 1);
 			}
 			else {
-				return emissionCol + objCol;
+				return totalLights + objCol/* * lightCol*/;
 			}
 		}
 	}
@@ -843,6 +858,14 @@ const bool Raytracing::RayHitObject(Ray& ray, const float t_min, const float t_m
 	return hit;
 }
 
+Vector3D Raytracing::EmissionColor(HitRec& rec) {
+	// ----- EMISSIVE OBJECT -----
+	Vector3D emission;
+	rec.GetMat()->Emission(rec, emission);
+
+	return emission;
+}
+
 Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha) {
 	Vector3D attentuation;
 
@@ -860,12 +883,4 @@ Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& co
 
 		return attentuation;
 	}
-}
-
-Vector3D Raytracing::EmissionColor(HitRec& rec) {
-	// ----- EMISSIVE OBJECT -----
-	Vector3D emission;
-	rec.GetMat()->Emission(rec, emission);
-
-	return emission;
 }

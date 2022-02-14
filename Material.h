@@ -14,7 +14,7 @@ public:
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) = 0;
 
 public:
-	virtual bool IsTransparent(Vector3D uv = Vector3D()) = 0;
+	virtual bool IsTransmissive(Vector3D uv = Vector3D()) = 0;
 	virtual float GetRoughness(Vector3D uv = Vector3D()) = 0;
 	virtual Vector3D GetAlbedo(Vector3D uv = Vector3D()) = 0;
 
