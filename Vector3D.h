@@ -35,6 +35,8 @@ public:
 	static Vector3D Lerp(const Vector3D& from, const Vector3D& to, const float factor);
 	//static Vector3D Slerp(const Vector3D& from, const Vector3D& to, const float t);
 
+	static Vector3D HSVtoRGB(const float h, const float s, const float v);
+
 	void UVSphere(float& u, float& v);
 
 public: // ----- STATIC RANDOM FUNCTIONS -----

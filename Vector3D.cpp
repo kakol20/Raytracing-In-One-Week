@@ -64,6 +64,40 @@ Vector3D Vector3D::Lerp(const Vector3D& from, const Vector3D& to, const float fa
 	return from + ((to - from) * factor);
 }
 
+Vector3D Vector3D::HSVtoRGB(const float h, const float s, const float v) {
+	float c = v * s;
+	float modh = fmod(h / 60.f, 2.f);
+	float x = c * (1.f - abs(modh - 1.f));
+	float m = v - c;
+
+	float r = 0.f, g = 0.f, b = 0.f;
+	if (h < 60.f) {
+		r = c;
+		g = x;
+	}
+	else if (h < 120.f) {
+		r = x;
+		g = c;
+	}
+	else if (h < 180.f) {
+		g = c;
+		b = x;
+	}
+	else if (h < 240.f) {
+		g = x;
+		b = c;
+	}
+	else if (h < 300.f) {
+		r = x;
+		b = c;
+	}
+	else {
+		r = c;
+		b = x;
+	}
+	return Vector3D(r, g, b);
+}
+
 void Vector3D::UVSphere(float& u, float& v) {
 	float PI = 3.141592653f;
 	u = 0.5f + (atan2(m_x, m_z) / (2.f * PI));

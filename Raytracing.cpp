@@ -44,7 +44,7 @@ Raytracing::Raytracing() {
 
 	//StaticMutex::s_mtx = std::mutex();
 
-	m_shuffleTiles = false;
+	m_shuffleTiles = true;
 }
 
 bool Raytracing::Init() {
@@ -266,8 +266,8 @@ bool Raytracing::Run() {
 bool Raytracing::RunMode() {
 	for (auto it = m_tiles.begin(); it != m_tiles.end(); it++) {
 		(*it).activeTile = false;
-		(*it).leftXTileColor = Vector3D(1.f, 0.f, 0.f);
-		(*it).rightXTileColor = Vector3D(1.f, 0.f, 0.f);
+		//(*it).leftXTileColor = Vector3D(1.f, 0.f, 0.f);
+		//(*it).rightXTileColor = Vector3D(1.f, 0.f, 0.f);
 		(*it).tileComplete = false;
 	}
 
@@ -319,7 +319,7 @@ bool Raytracing::RunMode() {
 	//ShowProgress();
 
 	// ----- SAVE RENDER -----
-	String output;
+	std::string output;
 	if (m_renderMode == "albedo") {
 		output = "render_a.png";
 	}
@@ -331,8 +331,8 @@ bool Raytracing::RunMode() {
 	}
 	//m_render.TosRGB();
 
-	if (!m_render.Write(output.GetChar())) {
-		std::cout << oof::clear_screen() << oof::reset_formatting() << "Error saving " << output.GetChar() << "\n";
+	if (!m_render.Write(output.c_str())) {
+		std::cout << oof::clear_screen() << oof::reset_formatting() << "Error saving " << output.c_str() << "\n";
 
 		system("pause");
 	}
@@ -471,43 +471,10 @@ void Raytracing::FinalScene() {
 
 				if (chooseMat <= gap) {
 					float h = Random::RandFloatRange(0.f, 360.f);
-					float s = 1.f;
-					float v = 220.f / 255.f;
+					float s = (204.f - 12.f) / 204.f;
+					float v = 0.8f;
 
-					float c = v * s;
-					float modh = fmod(h / 60.f, 2.f);
-					float x = c * (1.f - abs(modh - 1.f));
-					float m = v - c;
-
-					float r = 0.f, g = 0.f, b = 0.f;
-					if (h < 60.f) {
-						r = c;
-						g = x;
-					}
-					else if (h < 120.f) {
-						r = x;
-						g = c;
-					}
-					else if (h < 180.f) {
-						g = c;
-						b = x;
-					}
-					else if (h < 240.f) {
-						g = x;
-						b = c;
-					}
-					else if (h < 300.f) {
-						r = x;
-						b = c;
-					}
-					else {
-						r = c;
-						b = x;
-					}
-
-					Vector3D col(r + m, g + m, b + m);
-
-					m_matVec.push_back(new Diffuse(col));
+					m_matVec.push_back(new Diffuse(Vector3D::HSVtoRGB(h, s, v)));
 				}
 				else if (chooseMat <= 2.f * gap) {
 					Vector3D col = Vector3D::Random(0.5f, 1.f);
@@ -574,6 +541,10 @@ void Raytracing::RenderTile(const size_t startIndex) {
 			float r, g, b;
 			m_render.GetRGB(xImg, flippedY, r, g, b);
 
+			r = std::lerp(12.f, 204.f, r / 255.f);
+			g = std::lerp(12.f, 204.f, g / 255.f);
+			b = std::lerp(12.f, 204.f, b / 255.f);
+
 			getColor += Vector3D(r, g, b);
 		}
 	}
@@ -589,6 +560,10 @@ void Raytracing::RenderTile(const size_t startIndex) {
 
 			float r, g, b;
 			m_render.GetRGB(xImg, flippedY, r, g, b);
+
+			r = std::lerp(12.f, 204.f, r / 255.f);
+			g = std::lerp(12.f, 204.f, g / 255.f);
+			b = std::lerp(12.f, 204.f, b / 255.f);
 
 			getColor += Vector3D(r, g, b);
 		}
@@ -757,7 +732,7 @@ void Raytracing::ShowProgress() {
 			else {
 				if ((*it).activeTile) {
 					//output += oof::reset_formatting();
-					output += oof::fg_color({ 255, 0, 0 });
+					output += oof::fg_color({ 204, 12, 12 });
 					output += (char)177u;
 				}
 				else {
@@ -805,15 +780,14 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		}
 		else {
 			Vector3D emissionCol = EmissionColor(rec);
-			//Vector3D lightCol = LightColor(rec, clipStart, clipEnd, m_shadowDepth < depth ? m_shadowDepth : depth - 1);
 
-			Vector3D totalLights = emissionCol/* + lightCol*/;
+			Vector3D totalLights = emissionCol;
 
 			if (continueRay) {
-				return totalLights + objCol/* * lightCol*/ * RayColor(scattered, depth - 1);
+				return totalLights + objCol * RayColor(scattered, depth - 1);
 			}
 			else {
-				return totalLights + objCol/* * lightCol*/;
+				return totalLights + objCol;
 			}
 		}
 	}
