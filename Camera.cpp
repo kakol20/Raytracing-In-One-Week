@@ -1,57 +1,62 @@
-#include "Camera.h"
-#include <cmath>
+#include <math.h>
 
-Camera::Camera() {
-	m_origin = Vector3D(0.0f, 0.0f, 0.0f);
-	m_horizontal = Vector3D(2.0f, 0.0f, 0.0f);
-	m_vertical = Vector3D(0.0f, (16.0f / 9.0f) * 2.0f, 0.0f);
-	m_lowerLeftCorner = m_origin - (m_horizontal / 2.0f) - (m_vertical / 2.0f) - Vector3D(0.0f, 0.0f, 16.0f / 9.0f);
+#include "Camera.h"
+
+Camera::Camera() : Camera(1.f, 0.f, 10.f, 90.f, Vector3D(0.f, 0.f, 0.f), Vector3D(0.f, 0.f, 1.f), Vector3D(0.f, 1.f, 0.f)) {
 }
 
-Camera::Camera(const float aspectRatio, const float aperture, const float focusDist, const float vfov, Vector3D lookFrom, Vector3D lookAt, Vector3D vUp) {
-	// calculate from fov
-	const float theta = Degrees2Radians(vfov);
-	const float h = tanf(theta / 2.0f);
-	const float vHeight = 2.0f * h;
+Camera::Camera(const float aspectRatio, const float aperture, const float focusDist, const float vFOV, const Vector3D lookFrom, const Vector3D lookAt, const Vector3D up) {
+	float PI = 3.141592653f;
+
+	// calculate from FOV
+	const float theta = vFOV * (PI / 180.f);
+	const float h = tanf(theta / 2.f);
+	const float vHeight = 2.f * h;
 	const float vWidth = aspectRatio * vHeight;
-	//float focalLength = 1.0f;
 
 	// calculate position
 	m_w = lookFrom - lookAt;
 	m_w.Normalize();
 
-	m_u = vUp.CrossProduct(m_w);
+	m_u = Vector3D::CrossProduct(up, m_w);
 	m_u.Normalize();
 
-	m_v = m_w.CrossProduct(m_u);
-	//v = v.UnitVector();
+	m_v = Vector3D::CrossProduct(m_w, m_u);
 
 	m_origin = lookFrom;
 
 	m_horizontal = m_u * vWidth * focusDist;
 	m_vertical = m_v * vHeight * focusDist;
 
-	m_lowerLeftCorner = m_origin - (m_horizontal / 2.0f) - (m_vertical / 2.0f) - (m_w * focusDist);
+	m_lowerLeftCorner = m_origin - (m_horizontal / 2.f) - (m_vertical / 2.f) - (m_w * focusDist);
 
-	m_lensRadius = aperture / 2.0f;
+	m_lensRadius = aperture / 2.f;
 }
 
 Camera::~Camera() {
 }
 
-Ray Camera::GetRay(const float s, const float t) {
-	//return Ray(m_origin, m_lowerLeftCorner + (m_horizontal * s) + (m_vertical * t) - m_origin);
-	unsigned int bitCount = 32;
-	Vector3D rd = Vector3D::RandomInUnitDisk(bitCount) * m_lensRadius;
+Camera& Camera::operator=(const Camera& copyCamera) {
+	if (this == &copyCamera) return *this;
+
+	m_horizontal = copyCamera.m_horizontal;
+	m_lensRadius = copyCamera.m_lensRadius;
+	m_lowerLeftCorner = copyCamera.m_lowerLeftCorner;
+	m_origin = copyCamera.m_origin;
+	m_u = copyCamera.m_u;
+	m_v = copyCamera.m_v;
+	m_vertical = copyCamera.m_vertical;
+	m_w = copyCamera.m_w;
+
+	return *this;
+}
+
+Ray Camera::GetRay(const float s, const float t) const {
+	Vector3D rd = Vector3D::RandomInUnitDisk() * m_lensRadius;
 	Vector3D offset = (m_u * rd.GetX()) + (m_v * rd.GetY());
 
 	Vector3D dir = m_lowerLeftCorner + (m_horizontal * s) + (m_vertical * t) - m_origin - offset;
 	dir.Normalize();
 
-	return Ray((m_origin + offset), dir);
-}
-
-const float Camera::Degrees2Radians(const float deg) {
-	float PI = 3.14159265f;
-	return deg * PI / 180.0f;
+	return Ray(m_origin + offset, dir);
 }

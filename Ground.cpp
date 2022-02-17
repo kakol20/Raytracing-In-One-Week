@@ -1,33 +1,55 @@
 #include "Ground.h"
 
-Ground::Ground(const float height, Material* mat) {
-	m_pos = Vector3D(0.0f, height, 0.0f);
+Ground::Ground() : Ground(0.f, nullptr) {
+}
+
+Ground::Ground(const float height, Material* mat, const float uvScale) {
+	m_pos = Vector3D(0.f, height, 0.f);
 	m_mat = mat;
+	m_uvScale = uvScale;
+}
+
+Ground::~Ground() {
+	m_mat = nullptr;
 }
 
 bool Ground::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	Vector3D p0 = m_pos;
-	Vector3D n = Vector3D(0.0f, 1.0f, 0.0f);
-	Vector3D l0 = ray.GetOrigin();
-	Vector3D l = ray.GetDirection();
+	Vector3D n(0.f, 1.f, 0.f);
 
-	float lDotN = l.DotProduct(n);
+	Vector3D l0 = ray.GetOrig();
+	Vector3D l = ray.GetDir();
 
-	if (lDotN == 0) return false;
+	float lDotN = Vector3D::DotProduct(l, n);
 
-	// calculate distance
+	if (lDotN == 0.f) return false;
+
+	// distance
 	Vector3D p0SubL0 = p0 - l0;
-	float d = p0SubL0.DotProduct(n) / lDotN;
+	float d = Vector3D::DotProduct(p0SubL0, n) / lDotN;
 
 	if (t_min > d || d > t_max) return false;
 
 	// calculate point
-	Vector3D p = l0 + (l * d);
+	Vector3D p = ray.At(d);
 
 	rec.SetT(d);
 	rec.SetPoint(p);
-	rec.SetMaterial(m_mat);
-	rec.SetNormal(n);
+	rec.SetMat(m_mat);
+	rec.SetFaceNormal(ray, n);
+	rec.SetUV(Vector3D(p.GetX(), p.GetZ(), 0.f) * m_uvScale);
 
 	return true;
+}
+
+bool Ground::SphereIntersectGround(const Vector3D pos, const float radius) {
+	Vector3D spherePos = pos;
+	float sphereHeight = spherePos.GetY() - m_pos.GetY();
+
+	if (sphereHeight < radius) return true;
+	return false;
+}
+
+bool Ground::SphereIntersectSphere(const Vector3D pos, const float radius) {
+	return false;
 }

@@ -1,63 +1,56 @@
+#include "Random.h"
+
 #include "Metal.h"
-#include "LinearFeedbackShift.h"
 
-Metal::Metal() {
-	m_albedo = Vector3D(0.8f, 0.8f, 0.8f);
-	m_roughness = 0.5f;
-	m_ior = 1.5f;
-}
-
-Metal::Metal(const Vector3D& a, const float roughness, const float ior) {
-	m_albedo = a;
-	m_ior = ior;
+Metal::Metal(const Vector3D& albedo, const float roughness, const float ior) {
+	m_albedo = albedo;
 	m_roughness = roughness;
-	m_transparent = false;
+	m_ior = ior;
+
+	m_edgeTint = Vector3D(sqrtf(m_albedo.GetX()), sqrtf(m_albedo.GetY()), sqrtf(m_albedo.GetZ()));
 }
 
-Metal::~Metal() {
+bool Metal::Emission(HitRec& rec, Vector3D& emission) {
+	emission = Vector3D(0.f, 0.f, 0.f);
+	return false;
 }
 
 bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
-	float roughnessModified = m_roughness * m_roughness;
-
-	Vector3D reflected = Reflected(rayIn.GetDirection(), rec.GetNormal());
-
-	// fresnel
-	Vector3D unitDir = rayIn.GetDirection();
-	Vector3D unitDirInv = unitDir * -1.0f;
+	// ----- NORMAL -----
+	Vector3D unitDir = rayIn.GetDir();
+	Vector3D incoming = unitDir * -1.0;
 
 	Vector3D normal = rec.GetNormal();
-	Vector3D incoming = rayIn.GetOrigin() - rec.GetPoint();
-	incoming.Normalize();
 
-	Vector3D fresnelNormal = Vector3D::Lerp(normal, incoming, roughnessModified);
-	fresnelNormal.Normalize();
+	// ----- FRESNEL -----
+	float sqrRoughness = m_roughness * m_roughness;
 
-	float cosTheta = fminf(unitDirInv.DotProduct(fresnelNormal), 1.0f);
-	float refracRatio = rec.GetFrontFace() ? (1.0f / m_ior) : m_ior;
-	float fresnel = Schlick(cosTheta, refracRatio);
+	bool roughnessRand = Random::RandFloat() < sqrRoughness;
 
-	//float fresnelRoughness = std::lerp(fresnel, 1.0f, m_roughness);
+	Vector3D fresnelNormal = roughnessRand ? incoming : normal;
 
-	Vector3D scatterDir;
+	float refractionRatio = rec.GetFrontFace() ? 1.f / m_ior : m_ior;
+	float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
+	float incomingFresnel = fresnel - Fresnel(incoming, incoming, refractionRatio);
 
-	/*scatterDir = Vector3D::Lerp(reflected, scatterDir, fresnelRoughness);*/
-	unsigned int bitCount = 32;
-	bool fresnelRand = LinearFeedbackShift::RandFloat(bitCount) < fresnel;
+	float facing = Vector3D::DotProduct(incoming, normal);
+	facing = std::clamp(facing, 0.f, 1.f);
 
-	if (fresnelRand) {
-		scatterDir = reflected;
-	}
-	else {
-		scatterDir = reflected + (Vector3D::RandomInUnitSphere(bitCount) * roughnessModified);
-	}
+	// ----- MAIN VECTORS -----
+	Vector3D reflect = Reflect(unitDir, normal);
 
-	// Catch degenerate scatter direction
-	if (scatterDir.NearZero()) scatterDir = reflected;
-	scatterDir.Normalize();
+	Vector3D glossy = reflect + (Vector3D::RandomInUnitSphere() * sqrRoughness);
+	if (glossy.NearZero()) glossy = reflect;
+	glossy.Normalize();
+
+	// ----- APPLY MATERIAL -----
+	bool fresnelRand = Random::RandFloat() < incomingFresnel;
+
+	Vector3D scatterDir = fresnelRand ? reflect : glossy;
+
+	attentuation = Vector3D::Lerp(m_albedo, Vector3D(1.f, 1.f, 1.f), incomingFresnel);
+	attentuation = Vector3D::Lerp(m_edgeTint, attentuation, facing);
 
 	scattered = Ray(rec.GetPoint(), scatterDir);
-	attentuation = m_albedo;
-
 	return true;
 }

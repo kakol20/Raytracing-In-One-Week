@@ -1,59 +1,54 @@
 #pragma once
-#include <cmath>
+#include <algorithm>
 
-#include "Ray.h"
 #include "HitRec.h"
-#include "Light.h"
-
-class Object;
+#include "Ray.h"
+#include "Vector3D.h"
 
 class Material {
 public:
-	Material() {
-		m_ior = 1.5f;
-		m_roughness = 0.5f;
-		m_transparent = false;
-	};
-	~Material() {};
+	Material() { m_ior = 1.5f; m_roughness = 0.5f; };
+	virtual ~Material() {};
 
+	virtual bool Emission(HitRec& rec, Vector3D& emission) = 0;
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) = 0;
 
-	const bool IsTransparent() { return m_transparent; };
-	const Vector3D GetAlbedo() { return m_albedo; };
-	const float GetRoughness() { return m_roughness; };
-
-	void CameraPos(const Vector3D camPos) { m_cameraPos = camPos; };
-
-private:
+public:
+	virtual bool IsTransmissive(Vector3D uv = Vector3D()) = 0;
+	virtual float GetRoughness(Vector3D uv = Vector3D()) = 0;
+	virtual Vector3D GetAlbedo(Vector3D uv = Vector3D()) = 0;
 
 protected:
-	Vector3D m_albedo;
 	float m_ior;
 	float m_roughness;
-	bool m_transparent;
-	Vector3D m_cameraPos;
+	Vector3D m_albedo;
 
-	Vector3D Reflected(Vector3D v, Vector3D n) {
-		Vector3D temp = n * v.DotProduct(n);
-		temp *= 2.0f;
-		return v - temp;
-		//return v - (n * v.DotProduct(n) * 2);
-	}
+protected:
+	const float Fresnel(Vector3D dir, Vector3D normal, float refIndex) {
+		float cosTheta = (std::min)(Vector3D::DotProduct(dir, normal), 1.f);
 
-	Vector3D Refract(Vector3D v, Vector3D n, float n1OverN2) {
-		Vector3D vInv = v * -1.0f;
-
-		float cosTheta = fminf(vInv.DotProduct(n), 1.0f);
-		Vector3D rOutPerp = (v + (n * cosTheta)) * n1OverN2;
-		Vector3D rOutPara = n * -sqrtf(fabsf(1.0f - rOutPerp.SqrMagnitude()));
-
-		return rOutPerp + rOutPara;
-	}
-
-	const float Schlick(float cosine, float refIndex) {
-		// Use Schlick's approximation for reflectance.
-		float r0 = (1.0f - refIndex) / (1.0f + refIndex);
+		float r0 = (1.f - refIndex) / (1.f + refIndex);
 		r0 *= r0;
-		return r0 + (1.0f - r0) * powf(1.0f - cosine, 5.0f);
+		return r0 + (1.f - r0) * powf(1.f - cosTheta, 5.f);
+	}
+
+	Vector3D Reflect(Vector3D v, Vector3D n) {
+		Vector3D t = n * Vector3D::DotProduct(v, n);
+		t *= 2.f;
+		return v - t;
+	}
+
+	Vector3D Refract(Vector3D v, Vector3D n, float refractionRatio) {
+		Vector3D vInv = -v;
+
+		float cosTheta = (std::min)(Vector3D::DotProduct(vInv, n), 1.f);
+		Vector3D rOutPerp = (v + (n * cosTheta)) * refractionRatio;
+		Vector3D rOutPara = n * -sqrtf(abs(1.f - rOutPerp.SqrMagnitude()));
+
+		float sinTheta = sqrtf(1.f - cosTheta * cosTheta);
+
+		bool cannotRefract = refractionRatio * sinTheta > 1.f;
+
+		return cannotRefract ? Reflect(v, n) : rOutPerp + rOutPara;
 	}
 };

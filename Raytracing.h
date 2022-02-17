@@ -1,72 +1,87 @@
 #pragma once
-#include <vector>
-#include <map>
-#include <thread>
 #include <fstream>
+#include <map>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 #include "Camera.h"
+#include "HitRec.h"
 #include "Image.h"
-#include "Light.h"
+#include "Material.h"
 #include "Object.h"
+#include "Ray.h"
 #include "String.h"
+#include "String.h"
+#include "Vector3D.h"
 
 class Raytracing {
 public:
 	Raytracing();
+	~Raytracing() {};
 
-	void Init();
-
-	void SetRenderMode(const char* renderMode);
-
+	bool Init();
 	bool Run();
-
-	~Raytracing();
+	bool RunMode();
 
 private:
-	const Vector3D RayColor(Ray& ray, const int depth);
+	Image m_hdri;
+	Image m_render;
 
-	const bool HitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
+	Camera m_camera;
 
-	void Render(const int minX, const int minY, const int maxX, const int maxY);
+	//std::mutex m_mtx;
+	bool m_shuffleTiles;
+	float m_aperture, m_verticalFOV;
+	float m_hdriStrength;
+	float m_nearZero;
+	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_rayDepth, m_tileSize, m_shadowDepth;
+	int m_tilesRendered;
+	size_t m_nextAvailable;
+	size_t m_useThreads;
+	std::fstream m_log;
+	String m_renderMode;
+	String m_renderScene;
 
 private:
 	struct Tile {
 		int minX, minY, maxX, maxY;
+		bool tileComplete;
+		bool activeTile;
+		Vector3D leftXTileColor;
+		Vector3D rightXTileColor;
+		int tileX, tileY;
 	};
+	int m_xTileCount, m_yTileCount;
+
+	void ShuffleTiles();
+
+private:
+	// ----- SCENE CREATION -----
+
+	void DebugScene();
+	void FinalScene();
+	void TexturedScene();
+
+	// ----- RENDERING -----
 
 	void RenderTile(const size_t startIndex);
+	void Render(const int minX, const int minY, const int maxX, const int maxY);
+	void ShowProgress();
 
-	Vector3D BiLerp(const float x, const float y, Image& image);
-	void UVSphere(Vector3D unitDir, float& u, float& v);
+	// raytracing
+	Vector3D RayColor(Ray& ray, const int depth);
+	const bool RayHitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
-private: // member variables
+	Vector3D EmissionColor(HitRec& rec);
+	Vector3D ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha);
+
+	std::map<String, Material*> m_matMap;
+	std::vector<Material*> m_matVec;
 	std::vector<Object*> m_objects;
-	std::vector<std::thread> m_threads;
-	std::map<String, Material*> m_materials;
-	std::map<std::thread::id, size_t> m_threadId;
-	std::vector<Material*> m_proceduralMats;
 	std::vector<Tile> m_tiles;
 
-	size_t m_nextAvailable;
-
-	std::fstream m_log;
-
-	Camera m_camera;
-	Image m_render;
-	Image m_hdri;
-
-	//Light m_mainLight;
-
-	std::vector<Light> m_lights;
-	float m_hdriResolution;
-
-	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_maxDepth, m_tileSize;
-	int m_tilesRendered;
-	float m_aperture, m_verticalFOV;
-
-	bool m_renderNormals;
-	bool m_renderAlbedo;
-
-	String m_renderMode;
-	bool m_debugMode;
+	// ----- THREADING -----
+	std::vector<std::thread> m_threads;
+	std::map<std::thread::id, size_t> m_threadID;
 };

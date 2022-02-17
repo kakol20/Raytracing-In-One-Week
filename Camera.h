@@ -1,17 +1,16 @@
 #pragma once
-#include "Vector3D.h"
 #include "Ray.h"
+#include "Vector3D.h"
 
 class Camera {
 public:
 	Camera();
-	Camera(const float aspectRatio, const float aperture, const float focusDist, const float vfov, Vector3D lookFrom, Vector3D lookAt, Vector3D vUp);
+	Camera(const float aspectRatio, const float aperture, const float focusDist, const float vFOV, const Vector3D lookFrom, const Vector3D lookAt, const Vector3D up);
 	~Camera();
 
-	Ray GetRay(const float s, const float t);
+	Camera& operator=(const Camera& copyCamera);
 
-private:
-	const float Degrees2Radians(const float deg);
+	Ray GetRay(const float s, const float t) const;
 
 private:
 	float m_lensRadius;
@@ -23,3 +22,4 @@ private:
 	Vector3D m_vertical;
 	Vector3D m_w;
 };
+

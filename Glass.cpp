@@ -1,72 +1,50 @@
-#include "Glass.h"
-#include "LinearFeedbackShift.h"
-#include <mutex>
+#include "Random.h"
 
-Glass::Glass() {
-	m_albedo = Vector3D(1.0f, 1.0f, 1.0f);
-	m_ior = 1.45f;
-	m_roughness = 0.0f;
-	m_transparent = true;
+#include "Glass.h"
+
+Glass::Glass(const Vector3D& albedo, const float roughness, const float ior) {
+	m_albedo = albedo;
+	m_roughness = roughness;
+	m_ior = ior;
 }
 
-Glass::Glass(const Vector3D albedo, const float roughness, const float ior) {
-	m_albedo = albedo;
-	m_ior = ior;
-	m_roughness = roughness;
-	m_transparent = true;
+bool Glass::Emission(HitRec& rec, Vector3D& emission) {
+	return false;
 }
 
 bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
-	float roughnessModified = m_roughness * m_roughness;
-	float refracRatio = rec.GetFrontFace() ? (1.0f / m_ior) : m_ior;
-
-	// fresnel
-	Vector3D unitDir = rayIn.GetDirection();
-	Vector3D unitDirInv = unitDir * -1.0f;
+	// ----- NORMAL -----
+	Vector3D unitDir = rayIn.GetDir();
+	Vector3D incoming = unitDir * -1.0;
 
 	Vector3D normal = rec.GetNormal();
-	Vector3D incoming = rayIn.GetOrigin() - rec.GetPoint();
-	incoming.Normalize();
 
-	Vector3D fresnelNormal = Vector3D::Lerp(normal, incoming, roughnessModified);
-	fresnelNormal.Normalize();
+	// ----- FRESNEL -----
+	float sqrRoughness = m_roughness * m_roughness;
 
-	float cosTheta = fminf(unitDirInv.DotProduct(fresnelNormal), 1.0f);
-	float sinTheta = sqrtf(1.0f - cosTheta * cosTheta);
-	float fresnel = Schlick(cosTheta, refracRatio);
-	fresnel = std::clamp(fresnel, 0.0f, 1.0f);
+	bool roughnessRand = Random::RandFloat() < sqrRoughness;
 
-	// Refraction
-	//Vector3D refract = Refract(unitDir, rec.GetNormal(), refracRatio);
+	Vector3D fresnelNormal = roughnessRand ? incoming : normal;
 
-	// Reflection
-	/*Vector3D reflect = Reflected(unitDir, rec.GetNormal());
-	Vector3D reflectRough = reflect + (Vector3D::RandomInUnitSphere(32) * roughnessModified);*/
-	unsigned int bitCount = 32;
+	float refractionRatio = rec.GetFrontFace() ? 1.f / m_ior : m_ior;
+	float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
 
-	bool cannotRefract = refracRatio * sinTheta > 1.0f;
-	bool fresnelRand = LinearFeedbackShift::RandFloat(bitCount) < fresnel;
-	cannotRefract = cannotRefract || fresnelRand;
+	// ----- MAIN VECTORS -----
+	Vector3D refract = Refract(unitDir, normal, refractionRatio);
 
-	Vector3D direction;
-	if (cannotRefract) {
-		direction = Reflected(unitDir, rec.GetNormal());
-	}
-	else {
-		direction = Refract(unitDir, rec.GetNormal(), refracRatio);
-	}
+	Vector3D refractRough = refract + (Vector3D::RandomInUnitSphere() * sqrRoughness);
+	if (refractRough.NearZero()) refractRough = refract;
+	refractRough.Normalize();
 
-	Vector3D scatterDir;
-	if (fresnelRand) {
-		scatterDir = direction;
-	}
-	else {
-		scatterDir = direction + (Vector3D::RandomInUnitSphere(bitCount) * roughnessModified);
-	}
-	scatterDir.Normalize();
+	Vector3D reflect = Reflect(unitDir, normal);
 
-	attentuation = m_albedo;
+	// ----- APPLY MATERIAL -----
+	bool fresnelRand = Random::RandFloat() < fresnel;
+
+	Vector3D scatterDir = fresnelRand ? reflect : refractRough;
+
+	attentuation = Vector3D::Lerp(m_albedo, Vector3D(1.f, 1.f, 1.f), fresnel);
+
 	scattered = Ray(rec.GetPoint(), scatterDir);
-
 	return true;
 }

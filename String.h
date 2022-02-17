@@ -1,65 +1,61 @@
-#ifndef STRING_H
-#define STRING_H
+#pragma once
 
 #include <iostream>
+#include <string>
 
-class String
-{
+class String {
 public:
-
-	//String();
-	String(const char* string = "");
+	String(const char copyChar);
+	String(const char* copyString = "");
+	String(const std::string& copyString);
 	String(const String& copyString);
+	~String();
 
+	// ----- ASSIGNMENT -----
+
+	String& operator=(const char copyChar);
+	String& operator=(const char* copyString);
+	String& operator=(const std::string& copyString);
 	String& operator=(const String& copyString);
-	String& operator=(const char* string);
+
+	String& operator+=(const char copyChar);
+	String& operator+=(const char* copyString);
+	String& operator+=(const std::string& copyString);
+	String& operator+=(const String& copyString);
+
+	// ----- COMPARISON -----
+
+	bool operator==(const char* otherString) const;
+	bool operator==(const String& otherString) const;
+
+	bool operator!=(const char* otherString) const;
+	bool operator!=(const String& otherString) const;
+
+	bool operator<(const String& otherString) const;
+
+	// ----- GETTERS -----
 
 	const char* GetChar() const;
+	size_t Length();
 
 	const char* GetFirst(const char* delimiter) const;
 	const char* GetSecond(const char* delimiter) const;
 
-	String operator+(const String& copyString);
-	String operator+(const char* string);
+	// ----- IOSTREAM -----
+	friend std::istream& operator>>(std::istream& is, String& string);
+	friend std::ostream& operator<<(std::ostream& os, const String& string);
 
-	String& operator+=(const String& copyString);
-	String& operator+=(const char* string);
+	// ----- CONVERSIONS -----
 
-	bool operator==(const String& copyString);
-	bool operator==(const char* string);
+	static String ToString(const float number);
+	static String ToString(const int number);
+	static String ToString(const unsigned int number);
 
-	bool operator!=(const String& copyString);
-	bool operator!=(const char* string);
+	static float ToFloat(const char* number);
+	static int ToInt(const char* number);
 
-	friend bool operator==(const String& first, const String& second);
-	friend bool operator<(const String& first, const String& second);
-
-	size_t Length() const;
-
-	char operator[](int index) const;
-
+	// ----- OTHER -----
 	void Clear();
-
-	bool IsEmpty();
-
-	int Find(char string);
-	int Find(const char* string);
-
-	int Count(char string);
-
-	static int ToInt(const String string);
-	static int ToInt(const char* string);
-
-	static float ToFloat(const char* string);
-
-	~String();
-
 private:
-
 	char* m_string = new char[256];
 };
-
-std::ostream& operator<<(std::ostream& os, const String& string);
-std::istream& operator>>(std::istream& is, String& string);
-
-#endif // !STRING_H

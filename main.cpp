@@ -1,86 +1,62 @@
-#include <chrono>
-#include <fstream>
-#include <mutex>
+#include <Windows.h>
+#include <iostream>
 
+#define OOF_IMPL
+#include "oof/oof.h"
+
+#include "Random.h"
 #include "Raytracing.h"
-#include "LinearFeedbackShift.h"
-#include "String.h"
 #include "StaticMutex.h"
+//#include "FastWrite.h"
+//#include "String.h"
 
-unsigned int LinearFeedbackShift::Seed = 3881995897;
+auto enable_vt_mode() -> void;
+
+bool Image::PrintToConsole = true;
 std::mutex StaticMutex::s_mtx = std::mutex();
+thread_local String StaticMutex::s_output = "";
+thread_local unsigned int Random::Seed = 1;
 
-bool RenderMode(const char* renderMode);
-
-Raytracing raytracing;
+Raytracing RT;
 
 int main() {
-	raytracing.Init();
+	enable_vt_mode();
 
-	String renderMode = "all";
+	std::cout << oof::cursor_visibility(false) << oof::reset_formatting() << oof::clear_screen() << oof::bg_color({ 12, 12, 12 });
 
-	std::fstream settings;
+	if (!RT.Init()) {
+		std::cout << oof::clear_screen() << oof::position(0, 0) << "Failed to initialize raytracer\n";
 
-	settings.open("settings.cfg", std::ios_base::in);
-
-	if (settings.is_open()) {
-		while (!settings.eof()) {
-			String line;
-			settings >> line;
-
-			/*std::cout << line;
-			std::cout << '\n';*/
-
-			String first = line.GetFirst("=");
-
-			if (first == "renderMode") {
-				renderMode = line.GetSecond("=");
-
-				break;
-			}
-		}
-	}
-	settings.close();
-
-	//std::cout << "Render Mode: " << renderMode << '\n';
-	
-	system("pause");
-
-	auto begin = std::chrono::high_resolution_clock::now();
-
-	if (renderMode == "all") {
-		std::cout << "\nRendering Albedo\n";
-		if (!RenderMode("albedo")) return -1;
-
-		std::cout << "\nRendering Normal\n";
-		if (!RenderMode("normal")) return -1;
-
-		std::cout << "\nRendering Color\n";
-		if (!RenderMode("color")) return -1;
-		std::cout << '\n';
+		return -1;
 	}
 	else {
-		if (!RenderMode(renderMode.GetChar())) return -1;
-	}
-
-	auto end = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double> elapsedSec = end - begin;
-	std::chrono::duration<double, std::ratio<60, 1>> elapsedMin = end - begin;
-	//float elapsedF = std::static_
-
-	std::fstream runTime;
-	runTime.open("runTime.txt", std::ios_base::out);
-
-	if (runTime.is_open()) {
-		runTime << "Elapsed time in seconds: " << elapsedSec << '\n'
-			<< "Elapsed time in minutes: " << elapsedMin << '\n';
+		if (!RT.Run()) {
+			std::cout << oof::clear_screen() << oof::position(0, 0) << "Failed to run raytracer\n";
+			return -1;
+		}
 	}
 
 	return 0;
 }
 
-bool RenderMode(const char* renderMode) {
-	raytracing.SetRenderMode(renderMode);
+auto enable_vt_mode() -> void {
+	HANDLE const handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (handle == INVALID_HANDLE_VALUE) {
+		std::terminate(); // error handling
+	}
 
-	return raytracing.Run();
+	DWORD dwMode = 0;
+	if (!GetConsoleMode(handle, &dwMode)) {
+		std::terminate(); // error handling
+	}
+
+	if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) {
+		// VT mode is already enabled
+		return;
+	}
+
+	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	if (!SetConsoleMode(handle, dwMode)) {
+		std::terminate(); // error handling
+	}
 }

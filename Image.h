@@ -1,60 +1,60 @@
-#ifndef IMAGE_H
-#define IMAGE_H
-
-#include <cstdint>
-#include <cstdio>
-#include <string.h>
-#include <iostream>
-
-enum class ImageType {
-	PNG, JPG, BMP, TGA
-};
-
+#pragma once
 class Image {
 public:
-	Image();
-	Image(const char* fileName);
-	Image(int w, int h, int channels);
-
-	Image(const Image& copyImage);
-	Image operator=(const Image& copyImage);
-
-	bool Read(const char* fileName);
-	bool Write(const char* fileName);
-
-	int GetRow();
-	int GetIndex(int x, int y);
-
-	int GetWidth() { return m_w; };
-	int GetHeight() { return m_h; };
-	int GetChannels() { return m_channels; };
-
-	size_t GetSize();
-
-	uint8_t GetData(int index);
-	void SetData(int index, uint8_t data);
-
-	float GetDataF(int index);
-	void SetData(int index, float data);
-
-	void BackgroundColor(const float r, float g, float b, float a);
-
-	~Image();
-
-public: // static public
-	static bool PrintToConsole;
+	enum class ColorMode {
+		Linear, sRGB
+	};
 
 private:
+	enum class FileType {
+		PNG, JPG, BMP, TGA
+	};
 
-	uint8_t* m_data = NULL;
-	float* m_dataF = NULL;
+public:
+	Image();
+	Image(const char* file, Image::ColorMode colorMode = Image::ColorMode::Linear);
+	Image(const Image& copyImage);
+	Image(const int w, const int h, const int channels);
+	~Image();
 
-	size_t m_size = 0;
-	int m_w;
-	int m_h;
-	int m_channels;
+	Image& operator=(const Image& copyImage);
 
-	ImageType GetFileType(const char* fileName);
+public: // ------ MAIN FUNCTIONS -----
+	bool Read(const char* file, Image::ColorMode colorMode = Image::ColorMode::Linear);
+	bool Write(const char* file, Image::ColorMode colorMode = Image::ColorMode::Linear);
+
+public: // ----- OTHER -----
+	void BiLerp(const float x, const float y, float& r, float& g, float& b);
+	void ToLinearRGB();
+	void TosRGB();
+
+public: // ----- GETTERS & SETTERS -----
+	int GetIndex(const int x, const int y);
+
+	int GetWidth() const { return m_w; };
+	int GetHeight() const { return m_h; };
+	int GetChannels() const { return m_channels; };
+
+	size_t GetSize() { return m_size; };
+
+	//void SetData(const int index, const float data) { m_dataF[index] = data; };
+	//float GetData(const int index) { return m_dataF[index]; };
+
+	void GetRGB(const int x, const int y, float& r, float& g, float& b);
+	void SetRGB(const int x, const int y, const float r, const float g, const float b);
+
+	static bool PrintToConsole;
+
+private: // ----- MEMBER VARIABLE -----
+	size_t m_size;
+	int m_w, m_h, m_channels;
+
+	// ----- DATA -----
+	uint8_t* m_data;
+	float* m_dataF;
+
+private:
+	Image::FileType GetFileType(const char* file);
+	void ModulusUV(const int x, const int y, int& u, int& v);
 };
 
-#endif // !IMAGE_H

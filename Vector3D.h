@@ -1,64 +1,92 @@
 #pragma once
-
 class Vector3D {
 public:
 	Vector3D();
 	Vector3D(const float x, const float y, const float z);
-	Vector3D(const Vector3D& copyVector3d);
+	Vector3D(const Vector3D& copyVector);
+	~Vector3D();
+
+private:
+	float m_x, m_y, m_z;
+
+public:
+	// ----- GETTERS -----
+
+	float GetX() { return m_x; };
+	float GetY() { return m_y; };
+	float GetZ() { return m_z; };
+
+	// ----- LENGTH -----
+
+	float Magnitude();
+	float SqrMagnitude();
+	void Normalize();
+
+	// ----- ALGERBAIC OPERATIONS -----
+
+	static float DotProduct(const Vector3D& v1, const Vector3D& v2);
+	static Vector3D CrossProduct(const Vector3D& v1, const Vector3D& v2);
+
+	// ----- OTHER -----
+
+	bool NearZero();
+
+	static Vector3D Clamp(const Vector3D& v, const float min, const float max);
+	static Vector3D Lerp(const Vector3D& from, const Vector3D& to, const float factor);
+	//static Vector3D Slerp(const Vector3D& from, const Vector3D& to, const float t);
+
+	static Vector3D HSVtoRGB(const float h, const float s, const float v);
+
+	void UVSphere(float& u, float& v);
+
+public: // ----- STATIC RANDOM FUNCTIONS -----
+
+	static Vector3D Random(const float min, const float max);
+	static Vector3D RandomInHemisphere(const Vector3D& normal);
+	static Vector3D RandomInUnitDisk();
+	static Vector3D RandomInUnitSphere();
+	static Vector3D RandomUnitVector();
+
+public: // ----- OPERATOR OVERLOADING -----
+	// https://en.cppreference.com/w/cpp/language/operators
 
 	Vector3D& operator=(const Vector3D& copyVector);
 
-	// Division
-	const Vector3D operator/(const Vector3D& copyVector) const;
-	Vector3D& operator/=(const Vector3D& copyVector);
-	const Vector3D operator/(const float scalar) const;
+	// ----- DIVISION -----
+
+	Vector3D operator/(const float scalar) const;
+	Vector3D operator/(const Vector3D& otherVector) const;
 	Vector3D& operator/=(const float scalar);
+	Vector3D& operator/=(const Vector3D& otherVector);
 
-	// Multiplication
-	const Vector3D operator*(const Vector3D& copyVector) const;
-	Vector3D& operator*=(const Vector3D& copyVector);
-	const Vector3D operator*(const float scalar) const;
+	// ----- MULTIPLICATION -----
+
+	Vector3D operator*(const float scalar) const;
+	Vector3D operator*(const Vector3D& otherVector) const;
 	Vector3D& operator*=(const float scalar);
+	Vector3D& operator*=(const Vector3D& otherVector);
 
-	// Addition
-	const Vector3D operator+(const Vector3D& copyVector) const;
-	Vector3D& operator+=(const Vector3D& copyVector);
+	// ----- ADDITION -----
 
-	// Subtraction
-	const Vector3D operator-(const Vector3D& copyVector) const;
-	Vector3D& operator-=(const Vector3D& copyVector);
+	Vector3D operator+(const Vector3D& otherVector) const;
+	Vector3D operator++(int i);
+	Vector3D& operator++();
+	Vector3D& operator+=(const Vector3D& otherVector);
 
-	// Length
-	const float Magnitude();
-	const float SqrMagnitude();
+	// ----- SUBTRACTION -----
 
-	void Normalize();
+	Vector3D operator-(const Vector3D& otherVector) const;
+	Vector3D operator--(int i);
+	Vector3D& operator--();
+	Vector3D& operator-=(const Vector3D& otherVector);
 
-	// Other
-	bool NearZero();
-	float DotProduct(const Vector3D& copyVector);
-	Vector3D CrossProduct(const Vector3D& copyVector);
-	Vector3D UnitVector();
+	// ----- COMPARISON -----
 
-	// Random
-	static Vector3D Random(const unsigned int bitCount);
-	static Vector3D Random(const float min, const float max, const unsigned int bitCount);
-	static Vector3D RandomInHemisphere(const Vector3D& normal, const unsigned int bitCount);
-	static Vector3D RandomInUnitSphere(const unsigned int bitCount);
-	static Vector3D RandomUnitVector(const unsigned int bitCount);
-	static Vector3D RandomInUnitDisk(const unsigned int bitCount);
+	bool operator==(const Vector3D& otherVector) const;
+	bool operator!=(const Vector3D& otherVector) const;
 
-	static Vector3D Lerp(const Vector3D& from, const Vector3D& to, const float factor);
+	// ----- OTHER OPERATORS -----
 
-	~Vector3D();
-
-public: // getters
-	const float GetX() { return m_x; };
-	const float GetY() { return m_y; };
-	const float GetZ() { return m_z; };
-
-private:
-	float m_x;
-	float m_y;
-	float m_z;
+	Vector3D operator-() const;
 };
+

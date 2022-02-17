@@ -6,19 +6,20 @@ class Ray {
 public:
 	Ray();
 	Ray(const Vector3D& orig, const Vector3D& dir);
+	~Ray() {};
 
-	//Vector3D& operator=(const Vector3D& copyVector);
 	Ray& operator=(const Ray& copyRay);
 
-	const Vector3D At(const float t);
+	Vector3D At(const float t);
 
-	~Ray();
+	Vector3D GetDir() { return m_dir; };
+	void SetDir(const Vector3D dir) { m_dir = dir; };
 
-public: // getters
-	Vector3D GetDirection() { return m_dir; }
-	Vector3D GetOrigin() { return m_orig; }
+	Vector3D GetOrig() { return m_orig; };
+	void SetOrig(const Vector3D orig) { m_orig = orig; };
 
 private:
-	Vector3D m_orig;
 	Vector3D m_dir;
+	Vector3D m_orig;
 };
+

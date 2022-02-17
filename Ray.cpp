@@ -1,6 +1,6 @@
 #include "Ray.h"
 
-Ray::Ray() {
+Ray::Ray() : Ray(Vector3D(), Vector3D(1.f, 0.f, 0.f)) {
 }
 
 Ray::Ray(const Vector3D& orig, const Vector3D& dir) {
@@ -9,18 +9,14 @@ Ray::Ray(const Vector3D& orig, const Vector3D& dir) {
 }
 
 Ray& Ray::operator=(const Ray& copyRay) {
-	// TODO: insert return statement here
 	if (&copyRay == this) return *this;
 
-	m_orig = copyRay.m_orig;
 	m_dir = copyRay.m_dir;
+	m_orig = copyRay.m_orig;
 
 	return *this;
 }
 
-const Vector3D Ray::At(const float t) {
+Vector3D Ray::At(const float t) {
 	return m_orig + (m_dir * t);
-}
-
-Ray::~Ray() {
 }
