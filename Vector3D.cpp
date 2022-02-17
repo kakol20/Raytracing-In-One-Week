@@ -95,7 +95,7 @@ Vector3D Vector3D::HSVtoRGB(const float h, const float s, const float v) {
 		r = c;
 		b = x;
 	}
-	return Vector3D(r, g, b);
+	return Vector3D(r + m, g + m, b + m);
 }
 
 void Vector3D::UVSphere(float& u, float& v) {
