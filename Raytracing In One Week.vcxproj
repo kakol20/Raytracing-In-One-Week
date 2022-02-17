@@ -153,6 +153,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Dielectric.cpp" />
     <ClCompile Include="Diffuse.cpp" />
     <ClCompile Include="Emissive.cpp" />
     <ClCompile Include="FastWrite.cpp" />
@@ -171,6 +172,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Dielectric.h" />
     <ClInclude Include="Diffuse.h" />
     <ClInclude Include="Emissive.h" />
     <ClInclude Include="FastWrite.h" />

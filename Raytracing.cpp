@@ -2,6 +2,7 @@
 
 #include "oof/oof.h"
 
+#include "Dielectric.h"
 #include "Diffuse.h"
 #include "Emissive.h"
 #include "FastWrite.h"
@@ -15,8 +16,6 @@
 #include "Raytracing.h"
 
 Raytracing::Raytracing() {
-	// ----- SCENE SETTINGS -----
-
 	// ----- RENDER SETTINGS -----
 	m_aperture = 0.1f;
 	m_imageHeight = 720;
@@ -44,7 +43,7 @@ Raytracing::Raytracing() {
 
 	//StaticMutex::s_mtx = std::mutex();
 
-	m_shuffleTiles = true;
+	m_shuffleTiles = false;
 }
 
 bool Raytracing::Init() {
@@ -157,43 +156,85 @@ bool Raytracing::Init() {
 	int widthModulo = m_imageWidth % maxXTiles;
 	int heightModulo = m_imageHeight % maxYTiles;
 
-	int x = 0;
-	int countX = 0;
-	while (x < m_imageWidth) {
-		m_xTileCount++;
-		int addX = widthModulo > 0 ? xTileSize + 1 : xTileSize;
+	bool startWithX = false;
 
-		int maxX = x + addX;
-		maxX = maxX > m_imageWidth ? m_imageWidth : maxX;
+	if (startWithX) {
+		int x = 0;
+		int countX = 0;
+		while (x < m_imageWidth) {
+			m_xTileCount++;
+			int addX = widthModulo > 0 ? xTileSize + 1 : xTileSize;
 
-		int l_heightModulo = heightModulo;
+			int maxX = x + addX;
+			maxX = maxX > m_imageWidth ? m_imageWidth : maxX;
 
+			int l_heightModulo = heightModulo;
+
+			int y = 0;
+			int yTileCount = 0;
+			int countY = 0;
+			while (y < m_imageHeight) {
+				yTileCount++;
+				int addY = l_heightModulo > 0 ? yTileSize + 1 : yTileSize;
+
+				int maxY = y + addY;
+				maxY = maxY > m_imageHeight ? m_imageHeight : maxY;
+
+				//if (maxX > m_imageWidth || maxY > m_imageHeight) {
+				//	y = y + 0;
+				//}
+
+				m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(1.f, 0.f, 0.f), Vector3D(1.f, 0.f, 0.f), countX, countY });
+
+				y = maxY;
+				l_heightModulo--;
+				countY++;
+			}
+
+			m_yTileCount = yTileCount;
+
+			x = maxX;
+			widthModulo--;
+			countX++;
+		}
+	}
+	else {
 		int y = 0;
-		int yTileCount = 0;
 		int countY = 0;
 		while (y < m_imageHeight) {
-			yTileCount++;
-			int addY = l_heightModulo > 0 ? yTileSize + 1 : yTileSize;
+			m_yTileCount++;
 
+			int addY = heightModulo > 0 ? yTileSize + 1 : yTileSize;
 			int maxY = y + addY;
 			maxY = maxY > m_imageHeight ? m_imageHeight : maxY;
 
-			if (maxX > m_imageWidth || maxY > m_imageHeight) {
-				y = y + 0;
+			int l_widthModulo = widthModulo;
+
+			int x = 0;
+			int xTileCount = 0;
+			int countX = 0;
+			while (x < m_imageWidth) {
+				xTileCount++;
+
+				int addX = l_widthModulo > 0 ? xTileSize + 1 : xTileSize;
+				int maxX = x + addX;
+				maxX = maxX > m_imageWidth ? m_imageWidth : maxX;
+
+				m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(1.f, 0.f, 0.f), Vector3D(1.f, 0.f, 0.f), countX, countY });
+
+				x = maxX;
+				l_widthModulo--;
+				countX++;
 			}
 
-			m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(1.f, 0.f, 0.f), Vector3D(1.f, 0.f, 0.f), countX, countY });
+			m_xTileCount = xTileCount;
 
 			y = maxY;
-			l_heightModulo--;
+			heightModulo--;
 			countY++;
 		}
 
-		m_yTileCount = yTileCount;
-
-		x = maxX;
-		widthModulo--;
-		countX++;
+		std::reverse(m_tiles.begin(), m_tiles.end());
 	}
 
 	m_useThreads = m_useThreads < m_tiles.size() ? m_useThreads : m_tiles.size();
@@ -220,12 +261,11 @@ bool Raytracing::Run() {
 	FastWrite::Write(output);
 
 	auto start = std::chrono::high_resolution_clock::now();
-	
+
 	bool success = true;
 
 	//m_hdri.Write("temp/test.png", Image::ColorMode::sRGB);
 	if (m_renderMode == "all") {
-
 		// render all modes
 		m_renderMode = "normal";
 		success = RunMode();
@@ -424,8 +464,8 @@ void Raytracing::FinalScene() {
 	// ----- OBJECT CREATION -----
 	// materials
 	m_matMap["ground"] = new Diffuse(Vector3D(0.5f, 0.5f, 0.5f));
-	m_matMap["back"] = new Diffuse(Vector3D(0.4f, 0.2f, 0.1f));
-	m_matMap["middle"] = new Glass(Vector3D(1.f, 1.f, 1.f), 0.0f, 1.5f);
+	m_matMap["back"] = new Dielectric(Vector3D(0.4f, 0.2f, 0.1f), 0.1f, 1.46f);
+	m_matMap["middle"] = new Glass(Vector3D(1.f, 1.f, 1.f), 0.f, 1.5f);
 	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.2f, 0.47f);
 
 	m_matMap["light1"] = new Emissive(Vector3D(0.87207f, 0.995117f, 1.42871f), 10.f);
@@ -469,12 +509,15 @@ void Raytracing::FinalScene() {
 				float chooseMat = Random::RandFloat();
 				float gap = 1.f / 4.f;
 
-				if (chooseMat <= gap) {
+				if (chooseMat <= 1.f * gap) {
 					float h = Random::RandFloatRange(0.f, 360.f);
 					float s = (204.f - 12.f) / 204.f;
 					float v = 0.8f;
 
-					m_matVec.push_back(new Diffuse(Vector3D::HSVtoRGB(h, s, v)));
+					float roughness = Random::RandFloat();
+					float ior = 1.46f;
+
+					m_matVec.push_back(new Dielectric(Vector3D::HSVtoRGB(h, s, v), roughness, ior));
 				}
 				else if (chooseMat <= 2.f * gap) {
 					Vector3D col = Vector3D::Random(0.5f, 1.f);
@@ -491,8 +534,8 @@ void Raytracing::FinalScene() {
 					m_matVec.push_back(new Glass(col, roughness, ior));
 				}
 				else {
-					Vector3D col = Vector3D::Random(0.f, 1.f);
-					float intensity = Random::RandFloatRange(1.f, 5.f);
+					Vector3D col = Vector3D::Random(0.0f, 1.f);
+					float intensity = Random::RandFloatRange(0.f, 5.f);
 
 					m_matVec.push_back(new Emissive(col, intensity));
 				}
@@ -772,7 +815,8 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				}
 			}
 			else {
-				return RayColor(ray, depth - 1);
+				scattered = Ray(rec.GetPoint(), ray.GetDir());
+				return RayColor(scattered, depth - 1);
 			}
 		}
 		else if (m_renderMode == "normal") {
@@ -781,13 +825,11 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		else {
 			Vector3D emissionCol = EmissionColor(rec);
 
-			Vector3D totalLights = emissionCol;
-
 			if (continueRay) {
-				return totalLights + objCol * RayColor(scattered, depth - 1);
+				return emissionCol + objCol * RayColor(scattered, depth - 1);
 			}
 			else {
-				return totalLights + objCol;
+				return emissionCol + objCol;
 			}
 		}
 	}
@@ -852,7 +894,7 @@ Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& co
 		continueRay = false;
 		alpha = false;
 
-		//scattered = 
+		//scattered =
 		scattered = Ray(rec.GetPoint(), ray.GetDir());
 
 		return attentuation;
