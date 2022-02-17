@@ -51,6 +51,7 @@ private:
 		Vector3D leftXTileColor;
 		Vector3D rightXTileColor;
 		int tileX, tileY;
+		unsigned int seed;
 	};
 	int m_xTileCount, m_yTileCount;
 

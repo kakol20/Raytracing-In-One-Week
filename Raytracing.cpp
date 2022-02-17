@@ -184,7 +184,7 @@ bool Raytracing::Init() {
 				//	y = y + 0;
 				//}
 
-				m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(1.f, 0.f, 0.f), Vector3D(1.f, 0.f, 0.f), countX, countY });
+				m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(1.f, 0.f, 0.f), Vector3D(1.f, 0.f, 0.f), countX, countY, 0});
 
 				y = maxY;
 				l_heightModulo--;
@@ -220,7 +220,7 @@ bool Raytracing::Init() {
 				int maxX = x + addX;
 				maxX = maxX > m_imageWidth ? m_imageWidth : maxX;
 
-				m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(1.f, 0.f, 0.f), Vector3D(1.f, 0.f, 0.f), countX, countY });
+				m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(1.f, 0.f, 0.f), Vector3D(1.f, 0.f, 0.f), countX, countY, 0 });
 
 				x = maxX;
 				l_widthModulo--;
@@ -249,6 +249,10 @@ bool Raytracing::Init() {
 	}
 	else {
 		FinalScene();
+	}
+
+	for (auto it = m_tiles.begin(); it != m_tiles.end(); it++) {
+		(*it).seed = Random::RandomUInt();
 	}
 
 	return true;
@@ -565,6 +569,8 @@ void Raytracing::TexturedScene() {
 
 void Raytracing::RenderTile(const size_t startIndex) {
 	m_tiles[startIndex].activeTile = true;
+
+	Random::Seed = m_tiles[startIndex].seed;
 
 	/*StaticMutex::s_mtx.lock();
 	ShowProgress();
