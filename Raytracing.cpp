@@ -476,8 +476,8 @@ void Raytracing::FinalScene() {
 	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["middle"]));
 	m_objects.push_back(new Sphere(Vector3D(4.f, 1.f, 0.f), 1.f, m_matMap["front"]));
 
-	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, 0.f), 4.f, m_matMap["light1"]));
-	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, 10.f), 4.f, m_matMap["light1"]));
+	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, -10.f), 4.f, m_matMap["light1"]));
+	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, 10.f), 8.f, m_matMap["light1"]));
 
 	//Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
 	//lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
@@ -525,23 +525,29 @@ void Raytracing::FinalScene() {
 				m_matVec.push_back(new Dielectric(Vector3D::HSVtoRGB(h, s, v), roughness, ior));
 			}
 			else if (chooseMat <= 2.f * gap) {
-				Vector3D col = Vector3D::Random(0.5f, 1.f);
+				float h = Random::RandFloatRange(0.f, 360.f);
+				float s = Random::RandFloatRange(0.f, 0.25f);
+				float v = 1.0f;
+
 				float roughness = Random::RandFloat();
 				float ior = 1.45f;
 
-				m_matVec.push_back(new Metal(col, roughness, ior));
+				m_matVec.push_back(new Metal(Vector3D::HSVtoRGB(h, s, v), roughness, ior));
 			}
 			else if (chooseMat <= 3.f * gap) {
-				Vector3D col = Vector3D::Random(0.5f, 1.f);
+				float h = Random::RandFloatRange(0.f, 360.f);
+				float s = Random::RandFloatRange(0.25f, 0.5f);
+				float v = 1.0f;
+
 				float roughness = Random::RandFloatRange(0.f, 0.5f);
 				float ior = 1.45f;
 
-				m_matVec.push_back(new Glass(col, roughness, ior));
+				m_matVec.push_back(new Glass(Vector3D::HSVtoRGB(h, s, v), roughness, ior));
 			}
 			else {
 				//Vector3D col = Vector3D::Random(0.5f, 1.f);
 				float h = Random::RandFloatRange(0.f, 360.f);
-				float s = 0.5f;
+				float s = Random::RandFloatRange(0.5f, (204.f - 12.f) / 204.f);
 				float v = 1.0f;
 
 				float intensity = Random::RandFloatRange(1.f, 5.f);
