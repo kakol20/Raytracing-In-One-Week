@@ -477,71 +477,79 @@ void Raytracing::FinalScene() {
 	m_objects.push_back(new Sphere(Vector3D(4.f, 1.f, 0.f), 1.f, m_matMap["front"]));
 
 	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, 0.f), 4.f, m_matMap["light1"]));
+	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, 10.f), 4.f, m_matMap["light1"]));
+
+	//Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
+	//lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
+	//lightPos.Normalize();
+	//lightPos *= 25.f;
+	//m_objects.push_back(new Sphere(lightPos, 8.f, m_matMap["light1"]));
 
 	// procedural
-	for (int a = -11; a <= 11; a++) {
-		for (int b = -11; b <= 11; b++) {
-			Vector3D center((float)a, 0.2f, (float)b);
-			Vector3D randPos = Vector3D::Random(-0.507107f, 0.507107f) * Vector3D(1.f, 0.f, 1.f);
+	std::vector<Vector3D> position;
+	for (int x = -11; x <= 11; x++) {
+		for (int y = -11; y <= 11; y++) {
+			Vector3D center((float)x, 0.2f, (float)y);
+			Vector3D randPos(Random::RandFloatRange(-0.507107f, 0.507107f), 0.f, Random::RandFloatRange(-0.507107f, 0.507107f));
+
 			center += randPos;
 
-			bool intersect = false;
+			position.push_back(center);
+		}
+	}
 
-			//if (-0.8f < center.GetZ() && center.GetZ() < 0.8f);
-			//{
-			//	intersect = true;
-			//}
+	for (auto it = position.begin(); it != position.end(); it++) {
+		Vector3D position = (*it);
 
-			//if (-1.8f < center.GetX() && center.GetX() < 1.8f) {
-			//	intersect = intersect && true;
-			//}
+		bool intersect = false;
 
-			if (!intersect) {
-				for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
-					if ((*it)->SphereIntersectSphere(center, 0.2f)) {
-						intersect = true;
-						break;
-					}
-				}
+		for (auto it2 = m_objects.begin(); it2 != m_objects.end(); it2++) {
+			if ((*it2)->SphereIntersectSphere(position, 0.2f)) {
+				intersect = true;
+				break;
+			}
+		}
+
+		if (!intersect) {
+			float chooseMat = Random::RandFloat();
+			float gap = 1.f / 4.f;
+
+			if (chooseMat <= 1.f * gap) {
+				float h = Random::RandFloatRange(0.f, 360.f);
+				float s = (204.f - 12.f) / 204.f;
+				float v = 0.8f;
+
+				float roughness = Random::RandFloat();
+				float ior = 1.46f;
+
+				m_matVec.push_back(new Dielectric(Vector3D::HSVtoRGB(h, s, v), roughness, ior));
+			}
+			else if (chooseMat <= 2.f * gap) {
+				Vector3D col = Vector3D::Random(0.5f, 1.f);
+				float roughness = Random::RandFloat();
+				float ior = 1.45f;
+
+				m_matVec.push_back(new Metal(col, roughness, ior));
+			}
+			else if (chooseMat <= 3.f * gap) {
+				Vector3D col = Vector3D::Random(0.5f, 1.f);
+				float roughness = Random::RandFloatRange(0.f, 0.5f);
+				float ior = 1.45f;
+
+				m_matVec.push_back(new Glass(col, roughness, ior));
+			}
+			else {
+				//Vector3D col = Vector3D::Random(0.5f, 1.f);
+				float h = Random::RandFloatRange(0.f, 360.f);
+				float s = 0.5f;
+				float v = 1.0f;
+
+				float intensity = Random::RandFloatRange(1.f, 5.f);
+
+				m_matVec.push_back(new Emissive(Vector3D::HSVtoRGB(h, s, v), intensity));
 			}
 
-			if (!intersect) {
-				float chooseMat = Random::RandFloat();
-				float gap = 1.f / 4.f;
-
-				if (chooseMat <= 1.f * gap) {
-					float h = Random::RandFloatRange(0.f, 360.f);
-					float s = (204.f - 12.f) / 204.f;
-					float v = 0.8f;
-
-					float roughness = Random::RandFloat();
-					float ior = 1.46f;
-
-					m_matVec.push_back(new Dielectric(Vector3D::HSVtoRGB(h, s, v), roughness, ior));
-				}
-				else if (chooseMat <= 2.f * gap) {
-					Vector3D col = Vector3D::Random(0.5f, 1.f);
-					float roughness = Random::RandFloat();
-					float ior = 1.45f;
-
-					m_matVec.push_back(new Metal(col, roughness, ior));
-				}
-				else if (chooseMat <= 3.f * gap) {
-					Vector3D col = Vector3D::Random(0.5f, 1.f);
-					float roughness = Random::RandFloatRange(0.f, 0.5f);
-					float ior = 1.45f;
-
-					m_matVec.push_back(new Glass(col, roughness, ior));
-				}
-				else {
-					Vector3D col = Vector3D::Random(0.0f, 1.f);
-					float intensity = Random::RandFloatRange(0.f, 5.f);
-
-					m_matVec.push_back(new Emissive(col, intensity));
-				}
-
-				m_objects.push_back(new Sphere(center, 0.2f, m_matVec.back()));
-			}
+			m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 		}
 	}
 }
