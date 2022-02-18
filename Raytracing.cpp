@@ -127,8 +127,6 @@ bool Raytracing::Init() {
 			}
 			else if (first == "threads") {
 				m_useThreads = (unsigned int)String::ToInt(line.GetSecond("="));
-
-				m_useThreads = m_useThreads <= 0 ? std::thread::hardware_concurrency() : m_useThreads;
 			}
 			else if (first == "tileSize") {
 				m_tileSize = String::ToInt(line.GetSecond("="));
@@ -159,7 +157,7 @@ bool Raytracing::Init() {
 			<< "threads=" << m_useThreads << "\n"
 			<< "samplesPerPixel=" << m_samplesPerPixel << "\n"
 			<< "tileSize=" << m_tileSize << "\n"
-			<< "## color, normal, albedo or all\n"
+			<< "## color, normal, albedo, emission or all\n"
 			<< "renderMode=" << m_renderMode << "\n"
 			<< "## final, textured or debug\n"
 			<< "scene=" << m_renderScene << "\n#\n"
@@ -177,6 +175,8 @@ bool Raytracing::Init() {
 	if (Random::Seed == 0) {
 		Random::Seed = 1 | ((unsigned int)0b1 << 31);
 	}
+
+	m_useThreads = m_useThreads <= 0 ? std::thread::hardware_concurrency() : m_useThreads;
 
 	FastWrite::Write(consoleOutput);
 	system("pause");
@@ -310,6 +310,9 @@ bool Raytracing::Run() {
 		m_renderMode = "normal";
 		success = RunMode();
 
+		m_renderMode = "emission";
+		success = RunMode();
+
 		m_renderMode = "albedo";
 		success = RunMode();
 
@@ -318,7 +321,7 @@ bool Raytracing::Run() {
 
 		//return success;
 	}
-	else if (m_renderMode == "color" || m_renderMode == "albedo" || m_renderMode == "normal") {
+	else if (m_renderMode == "color" || m_renderMode == "albedo" || m_renderMode == "normal" || m_renderMode == "emission") {
 		success = RunMode();
 	}
 	else {
@@ -362,6 +365,9 @@ bool Raytracing::RunMode() {
 	if (m_renderMode == "albedo") {
 		m_log.open("log_albedo.txt", std::ios_base::out);
 	}
+	else if (m_renderMode == "emission") {
+		m_log.open("log_emission.txt", std::ios_base::out);
+	}
 	else if (m_renderMode == "normal") {
 		m_log.open("log_normal.txt", std::ios_base::out);
 	}
@@ -403,6 +409,9 @@ bool Raytracing::RunMode() {
 	if (m_renderMode == "albedo") {
 		output = "render_a.png";
 	}
+	else if (m_renderMode == "emission") {
+		output = "render_e.png";
+	}
 	else if (m_renderMode == "normal") {
 		output = "render_n.png";
 	}
@@ -431,7 +440,7 @@ bool Raytracing::RunMode() {
 
 	FastWrite::Write(output);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
 	//system("pause"); // temporary
 	return true;
@@ -909,6 +918,9 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 				return RayColor(scattered, depth - 1);
 			}
 		}
+		else if (m_renderMode == "emission") {
+			return EmissionColor(rec);
+		}
 		else if (m_renderMode == "normal") {
 			return (rec.GetNormal() + Vector3D(1.f, 1.f, 1.f)) / 2.f;
 		}
@@ -929,6 +941,9 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 	if (m_renderMode == "normal") {
 		return (unitDir + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+	}
+	else if (m_renderMode == "emission") {
+		return Vector3D();
 	}
 	else {
 		float u, v;
