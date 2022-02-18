@@ -1,4 +1,7 @@
 #pragma once
+
+#include <cstdint>
+
 class Image {
 public:
 	enum class ColorMode {
@@ -47,7 +50,9 @@ public: // ----- GETTERS & SETTERS -----
 
 private: // ----- MEMBER VARIABLE -----
 	size_t m_size;
-	int m_w, m_h, m_channels;
+	int m_w;
+	int m_h;
+	int m_channels;
 
 	// ----- DATA -----
 	uint8_t* m_data;

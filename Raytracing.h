@@ -18,7 +18,7 @@
 class Raytracing {
 public:
 	Raytracing();
-	~Raytracing() {};
+	~Raytracing();
 
 	bool Init();
 	bool Run();
@@ -77,6 +77,7 @@ private:
 	Vector3D EmissionColor(HitRec& rec);
 	Vector3D ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha);
 
+	std::map<String, Image*> m_textures;
 	std::map<String, Material*> m_matMap;
 	std::vector<Material*> m_matVec;
 	std::vector<Object*> m_objects;

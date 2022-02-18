@@ -97,7 +97,10 @@
       <Filter>Source Files\Material</Filter>
     </ClCompile>
     <ClCompile Include="Dielectric.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Textured.cpp">
+      <Filter>Source Files\Material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -165,7 +168,10 @@
       <Filter>Header Files\Material</Filter>
     </ClInclude>
     <ClInclude Include="Dielectric.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Textured.h">
+      <Filter>Header Files\Material</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
