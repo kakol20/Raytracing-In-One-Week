@@ -2,12 +2,13 @@
 
 #include "Textured.h"
 
-Textured::Textured(Image* albedo, Image* roughnessMetalEmission, Image* normal, const float ior, const Vector3D offset) {
+Textured::Textured(Image* albedo, Image* roughnessMetalEmission, Image* normal, const float ior, const Vector3D offset, const float emissionStrength) {
 	m_albedoTexture = albedo;
 	m_rmeTexture = roughnessMetalEmission;
 	m_normalTexture = normal;
 	m_ior = ior;
 	m_uvOffset = offset;
+	m_emissionStrength = emissionStrength;
 }
 
 Textured::~Textured() {
@@ -36,7 +37,7 @@ bool Textured::Emission(HitRec& rec, Vector3D& emission) {
 	bool emissionRand = Random::RandFloat() <= l_emission;
 
 	if (emissionRand) {
-		emission = albedo;
+		emission = albedo * m_emissionStrength;
 		return true;
 	}
 	else {
@@ -145,9 +146,27 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 }
 
 float Textured::GetRoughness(Vector3D uv) {
-	return 0.0f;
+	// ----- ROUGHNESS, METALNESS & EMISSION -----
+	Vector3D l_uv = (uv + m_uvOffset) * Vector3D(m_rmeTexture->GetWidth() - 1.f, m_rmeTexture->GetHeight() - 1.f, 0.f);
+
+	float roughness, metalness, l_emission;
+	m_rmeTexture->BiLerp(l_uv.GetX(), l_uv.GetY(), roughness, metalness, l_emission);
+	roughness /= 255.f;
+	//metalness /= 255.f;
+	//l_emission /= 255.f;
+
+	return roughness;
 }
 
 Vector3D Textured::GetAlbedo(Vector3D uv) {
-	return Vector3D();
+	// ----- ALBEDO -----
+	Vector3D l_uv = (uv + m_uvOffset) * Vector3D(m_albedoTexture->GetWidth() - 1.f, m_albedoTexture->GetHeight() - 1.f, 0.f);
+	float r, g, b;
+	m_albedoTexture->BiLerp(l_uv.GetX(), l_uv.GetY(), r, g, b);
+
+	r /= 255.f;
+	g /= 255.f;
+	b /= 255.f;
+	//Vector3D albedo(r, g, b);
+	return Vector3D(r, g, b);
 }
