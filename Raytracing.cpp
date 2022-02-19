@@ -576,7 +576,7 @@ void Raytracing::FinalScene() {
 
 		if (!intersect) {
 			float chooseMat = Random::RandFloat();
-			float gap = 1.f / 8.f;
+			float gap = 1.f / 5.f;
 
 			if (chooseMat <= 1.f * gap) {
 				// ----- DIELECTRIC -----
@@ -593,7 +593,7 @@ void Raytracing::FinalScene() {
 			else if (chooseMat <= 2.f * gap) {
 				// ----- METAL -----
 				float h = Random::RandFloatRange(0.f, 360.f);
-				float s = Random::RandFloatRange(0.f, 0.5f);
+				float s = Random::RandFloatRange(0.25f, 0.5f);
 				float v = 1.0f;
 
 				float roughness = Random::RandFloat();
@@ -605,7 +605,7 @@ void Raytracing::FinalScene() {
 			else if (chooseMat <= 3.f * gap) {
 				// ----- GLASS -----
 				float h = Random::RandFloatRange(0.f, 360.f);
-				float s = Random::RandFloatRange(0.f, 0.5f);
+				float s = Random::RandFloatRange(0.f, 0.25f);
 				float v = 1.0f;
 
 				float roughness = Random::RandFloatRange(0.f, 0.5f);
@@ -626,17 +626,23 @@ void Raytracing::FinalScene() {
 				m_matVec.push_back(new Emissive(Vector3D::HSVtoRGB(h, s, v), intensity));
 				m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 			}
-			else if (chooseMat <= 5.f * gap) {
-				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["carbon"], 1.f));
-			}
-			else if (chooseMat <= 6.f * gap) {
-				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["facade"], 1.f));
-			}
-			else if (chooseMat <= 7.f * gap) {
-				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["ornament"], 1.f));
-			}
 			else {
-				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["terracotta"], 1.f));
+				// ----- TEXTURED -----
+				float chooseTextured = Random::RandFloat();
+				float texturedGap = 1.f / 4.f;
+
+				if (chooseTextured <= texturedGap) {
+					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["carbon"], 1.f));
+				}
+				else if (chooseTextured <= 2.f * texturedGap) {
+					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["facade"], 1.f));
+				}
+				else if (chooseTextured <= 3.f * texturedGap) {
+					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["ornament"], 1.f));
+				}
+				else {
+					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["terracotta"], 1.f));
+				}
 			}
 		}
 	}
