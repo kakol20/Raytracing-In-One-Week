@@ -101,44 +101,44 @@ bool Raytracing::Init() {
 			consoleOutput += line.GetChar();
 			consoleOutput += "\n";
 
-			String first = line.GetFirst("=");
-			//const char* second = line.GetSecond("=");
+			String first = line.GetFirst('=');
+			//const char* second = line.GetSecond('=');
 
 			if (first == "imageWidth") {
-				m_imageWidth = String::ToInt(line.GetSecond("="));
+				m_imageWidth = String::ToInt(line.GetSecond('='));
 			}
 			else if (first == "imageHeight") {
-				m_imageHeight = String::ToInt(line.GetSecond("="));
+				m_imageHeight = String::ToInt(line.GetSecond('='));
 			}
 			else if (first == "shadowDepth") {
-				m_shadowDepth = String::ToInt(line.GetSecond("="));
+				m_shadowDepth = String::ToInt(line.GetSecond('='));
 			}
 			else if (first == "rayDepth") {
-				m_rayDepth = String::ToInt(line.GetSecond("="));
+				m_rayDepth = String::ToInt(line.GetSecond('='));
 			}
 			else if (first == "renderMode") {
-				m_renderMode = line.GetSecond("=");
+				m_renderMode = line.GetSecond('=');
 			}
 			else if (first == "scene") {
-				m_renderScene = line.GetSecond("=");
+				m_renderScene = line.GetSecond('=');
 			}
 			else if (first == "samplesPerPixel") {
-				m_samplesPerPixel = String::ToInt(line.GetSecond("="));
+				m_samplesPerPixel = String::ToInt(line.GetSecond('='));
 			}
 			else if (first == "threads") {
-				m_useThreads = (unsigned int)String::ToInt(line.GetSecond("="));
+				m_useThreads = (unsigned int)String::ToInt(line.GetSecond('='));
 			}
 			else if (first == "tileSize") {
-				m_tileSize = String::ToInt(line.GetSecond("="));
+				m_tileSize = String::ToInt(line.GetSecond('='));
 			}
 			else if (first == "aperture") {
-				m_aperture = String::ToFloat(line.GetSecond("="));
+				m_aperture = String::ToFloat(line.GetSecond('='));
 			}
 			else if (first == "verticalFOV") {
-				m_verticalFOV = String::ToFloat(line.GetSecond("="));
+				m_verticalFOV = String::ToFloat(line.GetSecond('='));
 			}
 			else if (first == "randomSeed") {
-				Random::Seed = String::ToInt(line.GetSecond("="));
+				Random::Seed = String::ToUInt(line.GetSecond('='));
 			}
 		}
 
@@ -527,7 +527,7 @@ void Raytracing::FinalScene() {
 	m_matMap["middle"] = new Glass(Vector3D(1.f, 1.f, 1.f), 0.f, 1.5f);
 	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.2f, 0.47f);
 
-	m_matMap["light1"] = new Emissive(Vector3D(0.87207f, 0.995117f, 1.42871f), 10.f);
+	m_matMap["light1"] = new Emissive(Vector3D(0.87207f, 0.995117f, 1.42871f), 5.f);
 
 	m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], nullptr, 1.45f);
 	m_matMap["facade"] = new Textured(m_textures["facade020b_d"], m_textures["facade020b_rme"], nullptr, 1.45f, Vector3D(), 4.f);
@@ -579,6 +579,7 @@ void Raytracing::FinalScene() {
 			float gap = 1.f / 8.f;
 
 			if (chooseMat <= 1.f * gap) {
+				// ----- DIELECTRIC -----
 				float h = Random::RandFloatRange(0.f, 360.f);
 				float s = (204.f - 12.f) / 204.f;
 				float v = 0.8f;
@@ -590,8 +591,9 @@ void Raytracing::FinalScene() {
 				m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 			}
 			else if (chooseMat <= 2.f * gap) {
+				// ----- METAL -----
 				float h = Random::RandFloatRange(0.f, 360.f);
-				float s = Random::RandFloatRange(0.f, 0.25f);
+				float s = Random::RandFloatRange(0.f, 0.5f);
 				float v = 1.0f;
 
 				float roughness = Random::RandFloat();
@@ -601,8 +603,9 @@ void Raytracing::FinalScene() {
 				m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 			}
 			else if (chooseMat <= 3.f * gap) {
+				// ----- GLASS -----
 				float h = Random::RandFloatRange(0.f, 360.f);
-				float s = Random::RandFloatRange(0.25f, 0.5f);
+				float s = Random::RandFloatRange(0.f, 0.5f);
 				float v = 1.0f;
 
 				float roughness = Random::RandFloatRange(0.f, 0.5f);
@@ -612,27 +615,28 @@ void Raytracing::FinalScene() {
 				m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 			}
 			else if (chooseMat <= 4.f * gap) {
+				// ----- EMISSIVE -----
 				//Vector3D col = Vector3D::Random(0.5f, 1.f);
 				float h = Random::RandFloatRange(0.f, 360.f);
-				float s = Random::RandFloatRange(0.5f, (204.f - 12.f) / 204.f);
+				float s = 0.5f;
 				float v = 1.0f;
 
-				float intensity = Random::RandFloatRange(1.f, 5.f);
+				float intensity = Random::RandFloatRange(2.f, 5.f);
 
 				m_matVec.push_back(new Emissive(Vector3D::HSVtoRGB(h, s, v), intensity));
 				m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 			}
 			else if (chooseMat <= 5.f * gap) {
-				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["carbon"]));
+				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["carbon"], 1.f));
 			}
 			else if (chooseMat <= 6.f * gap) {
-				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["facade"]));
+				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["facade"], 1.f));
 			}
 			else if (chooseMat <= 7.f * gap) {
-				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["ornament"]));
+				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["ornament"], 1.f));
 			}
 			else {
-				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["terracotta"]));
+				m_objects.push_back(new Sphere(position, 0.2f, m_matMap["terracotta"], 1.f));
 			}
 		}
 	}

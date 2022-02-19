@@ -262,7 +262,7 @@ void Image::SetRGB(const int x, const int y, const float r, const float g, const
 
 Image::FileType Image::GetFileType(const char* file) {
 	String l_file = file;
-	String type = l_file.GetSecond(".");
+	String type = l_file.GetSecond('.');
 
 	if (type.Length() != 0) {
 		if (type == "bmp") {

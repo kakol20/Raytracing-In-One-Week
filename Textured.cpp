@@ -72,7 +72,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 	b /= 255.f;
 	Vector3D albedo(r, g, b);
 
-	bool emissionRand = Random::RandFloat() < emission;
+	bool emissionRand = Random::RandFloat() <= emission;
 	if (emissionRand) {
 		// ----- EMISSIVE -----
 		attentuation = Vector3D();
@@ -88,16 +88,16 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 		// ----- FRESNEL -----
 		float sqrRoughness = roughness * roughness;
 
-		bool roughnessRand = Random::RandFloat() < sqrRoughness;
+		bool roughnessRand = Random::RandFloat() <= sqrRoughness;
 
 		Vector3D fresnelNormal = roughnessRand ? incoming : normal;
 
 		float refractionRatio = rec.GetFrontFace() ? 1.f / m_ior : m_ior;
 		float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
 
-		bool metalnessRand = Random::RandFloat() < metalness;
+		bool metalnessRand = Random::RandFloat() <= metalness;
 
-		bool fresnelRand = Random::RandFloat() < fresnel;
+		bool fresnelRand = Random::RandFloat() <= fresnel;
 
 		if (metalnessRand) {
 			// ----- METAL-----

@@ -1,18 +1,11 @@
 #include "String.h"
 
 String::String(const char copyChar) {
-	delete[] m_string;
-	m_string = new char[2];
-	m_string[0] = copyChar;
-	m_string[1] = '\0';
+	m_string = copyChar;
 }
 
 String::String(const char* copyString) {
-	delete[] m_string;
-
-	const size_t size = strlen(copyString) + 1;
-	m_string = new char[size];
-	strcpy_s(m_string, size, copyString);
+	m_string = copyString;
 }
 
 String::String(const std::string& copyString) : String(copyString.c_str()) {
@@ -22,35 +15,22 @@ String::String(const String& copyString) : String(copyString.GetChar()) {
 }
 
 String::~String() {
-	delete[] m_string;
 }
 
 String& String::operator=(const char copyChar) {
-	delete[] m_string;
-	m_string = new char[2];
-	m_string[0] = copyChar;
-	m_string[1] = '\0';
+	m_string = copyChar;
 
 	return *this;
 }
 
 String& String::operator=(const char* copyString) {
-	delete[] m_string;
-
-	const size_t size = strlen(copyString) + 1;
-	m_string = new char[size];
-	strcpy_s(m_string, size, copyString);
+	m_string = copyString;
 
 	return *this;
 }
 
 String& String::operator=(const std::string& copyString) {
-	/*return this->operator=(copyString.c_str());*/
-	delete[] m_string;
-
-	const size_t size = strlen(copyString.c_str()) + 1;
-	m_string = new char[size];
-	strcpy_s(m_string, size, copyString.c_str());
+	m_string = copyString;
 
 	return *this;
 }
@@ -58,145 +38,93 @@ String& String::operator=(const std::string& copyString) {
 String& String::operator=(const String& copyString) {
 	if (this == &copyString) return *this;
 
-	delete[] m_string;
-
-	const size_t size = strlen(copyString.GetChar()) + 1;
-	m_string = new char[size];
-	strcpy_s(m_string, size, copyString.GetChar());
+	m_string = copyString.GetChar();
 
 	return *this;
 }
 
 String& String::operator+=(const char copyChar) {
-	char* copyCharTemp = new char[2];
-	copyCharTemp[0] = copyChar;
-	copyCharTemp[1] = '\0';
-
-	size_t size = strlen(m_string) + strlen(copyCharTemp) + 1;
-	char* temp = new char[size];
-
-	strcpy_s(temp, size, m_string);
-	strcat_s(temp, size, copyCharTemp);
-
-	delete[] m_string;
-	m_string = new char[size];
-	strcpy_s(m_string, size, temp);
-
-	delete[] temp;
-	temp = nullptr;
-	delete[] copyCharTemp;
-	copyCharTemp = nullptr;
+	m_string += copyChar;
 
 	return *this;
 }
 
 String& String::operator+=(const char* copyString) {
-	size_t size = strlen(m_string) + strlen(copyString) + 1;
-	char* temp = new char[size];
-
-	strcpy_s(temp, size, m_string);
-	strcat_s(temp, size, copyString);
-
-	delete[] m_string;
-	m_string = new char[size];
-	strcpy_s(m_string, size, temp);
-
-	delete[] temp;
-	temp = nullptr;
+	m_string += copyString;
 
 	return *this;
 }
 
 String& String::operator+=(const std::string& copyString) {
-	size_t size = strlen(m_string) + strlen(copyString.c_str()) + 1;
-	char* temp = new char[size];
-
-	strcpy_s(temp, size, m_string);
-	strcat_s(temp, size, copyString.c_str());
-
-	delete[] m_string;
-	m_string = new char[size];
-	strcpy_s(m_string, size, temp);
-
-	delete[] temp;
-	temp = nullptr;
+	m_string += copyString;
 
 	return *this;
 }
 
 String& String::operator+=(const String& copyString) {
-	size_t size = strlen(m_string) + strlen(copyString.GetChar()) + 1;
-	char* temp = new char[size];
-
-	strcpy_s(temp, size, m_string);
-	strcat_s(temp, size, copyString.GetChar());
-
-	delete[] m_string;
-	m_string = new char[size];
-	strcpy_s(m_string, size, temp);
-
-	delete[] temp;
-	temp = nullptr;
+	m_string += copyString.GetChar();
 
 	return *this;
 }
 
 bool String::operator==(const char* otherString) const {
-	return !strcmp(m_string, otherString);
+	return m_string == otherString;
 }
 
 bool String::operator==(const String& otherString) const {
-	return !strcmp(m_string, otherString.GetChar());
+	return m_string == otherString.GetChar();
 }
 
 bool String::operator!=(const char* otherString) const {
-	return !(!strcmp(m_string, otherString));
+	return !(m_string == otherString);
 }
 
 bool String::operator!=(const String& otherString) const {
-	return !(!strcmp(m_string, otherString.GetChar()));
+	return !(m_string == otherString);
 }
 
 bool String::operator<(const String& otherString) const {
-	return strcmp(m_string, otherString.GetChar()) < 0;
+	return m_string < otherString.GetChar();
 }
 
 const char* String::GetChar() const {
-	return m_string;
+	return m_string.c_str();
 }
 
 size_t String::Length() {
-	return strlen(m_string);
+	return m_string.length();
 }
 
-const char* String::GetFirst(const char* delimiter) const {
-	const size_t SIZE = strlen(m_string) + 1;
-	char* tempString = new char[SIZE];
-	strcpy_s(tempString, SIZE, m_string);
+const std::string String::GetFirst(const char delimiter) const {
+	std::string first;
 
-	char* first;
-	char* second = NULL;
-
-	first = strtok_s(tempString, delimiter, &second);
-
-	//delete second;
-	second = nullptr;
+	//bool out = true;
+	for (auto c : m_string) {
+		if (c == delimiter) {
+			break;
+		}
+		else {
+			first += c;
+		}
+	}
 
 	return first;
 }
 
-const char* String::GetSecond(const char* delimiter) const {
-	const size_t SIZE = strlen(m_string) + 1;
-	char* tempString = new char[SIZE];
-	strcpy_s(tempString, SIZE, m_string);
+const std::string String::GetSecond(const char delimiter) const {
+	std::string second;
 
-	char* first;
-	char* second = NULL;
-
-	first = strtok_s(tempString, delimiter, &second);
-
-	//delete first;
-	first = nullptr;
+	bool firstOut = true;
+	for (auto c : m_string) {
+		if (firstOut) {
+			if (c == delimiter) {
+				firstOut = false;
+			}
+		}
+		else {
+			second += c;
+		}
+	}
 
 	return second;
 }
@@ -222,6 +150,10 @@ float String::ToFloat(const char* number) {
 	return out;
 }
 
+float String::ToFloat(const std::string number) {
+	return std::stof(number);
+}
+
 int String::ToInt(const char* number) {
 	char* end;
 	int out = (int)strtol(number, &end, 10);
@@ -232,22 +164,26 @@ int String::ToInt(const char* number) {
 	return out;
 }
 
+int String::ToInt(const std::string number) {
+	return std::stoi(number);
+}
+
+unsigned int String::ToUInt(const std::string number) {
+	return (unsigned int)std::stoul(number);
+}
+
 void String::Clear() {
-	delete[] m_string;
-	m_string = new char[1];
-	m_string[0] = '\0';
+	m_string.clear();
 }
 
 std::istream& operator>>(std::istream& is, String& string) {
 	string.Clear();
 
-	char* temp = new char[1024];
-	is.getline(temp, 1024);
+	std::string tempString;
 
-	string = temp;
+	std::getline(is, tempString);
 
-	delete[] temp;
-	temp = nullptr;
+	string = tempString;
 
 	return is;
 }

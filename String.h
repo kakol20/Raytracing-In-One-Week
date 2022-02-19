@@ -38,8 +38,8 @@ public:
 	const char* GetChar() const;
 	size_t Length();
 
-	const char* GetFirst(const char* delimiter) const;
-	const char* GetSecond(const char* delimiter) const;
+	const std::string GetFirst(const char delimiter) const;
+	const std::string GetSecond(const char delimiter) const;
 
 	// ----- IOSTREAM -----
 	friend std::istream& operator>>(std::istream& is, String& string);
@@ -52,10 +52,14 @@ public:
 	static String ToString(const unsigned int number);
 
 	static float ToFloat(const char* number);
+	static float ToFloat(const std::string number);
 	static int ToInt(const char* number);
+	static int ToInt(const std::string number);
+	static unsigned int ToUInt(const std::string number);
 
 	// ----- OTHER -----
 	void Clear();
 private:
-	char* m_string = new char[256];
+	//char* m_string = new char[256];
+	std::string m_string;
 };
