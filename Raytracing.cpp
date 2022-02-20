@@ -784,10 +784,11 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 					(*it) = val;
 				}
 
-				pixelCol = Vector3D(rgb[0], rgb[1], rgb[2]);
+				pixelCol = Vector3D(std::clamp(rgb[0], 0.f, 1.f), std::clamp(rgb[1], 0.f, 1.f), std::clamp(rgb[2], 0.f, 1.f));
 			}
 
 			// ----- WRITE COLOR -----
+			pixelCol = Vector3D::OrderedDithering(pixelCol, x, flippedY, 255);
 			pixelCol *= 255.f;
 
 			m_render.SetRGB(x, flippedY, pixelCol.GetX(), pixelCol.GetY(), pixelCol.GetZ());
@@ -882,9 +883,13 @@ void Raytracing::ShowProgress() {
 					col = (*it).rightXTileColor;
 				}
 
-				int r = (int)round(col.GetX());
-				int g = (int)round(col.GetY());
-				int b = (int)round(col.GetZ());
+				col /= 255.f;
+				col = Vector3D::OrderedDithering(col, 2 * x + i, m_yTileCount - y, 63);
+				col *= 255.f;
+
+				int r = std::clamp((int)round(col.GetX()), 12, 204);
+				int g = std::clamp((int)round(col.GetY()), 12, 204);
+				int b = std::clamp((int)round(col.GetZ()), 12, 204);
 				output += oof::fg_color({ r, g, b });
 				output += (char)178u;
 			}

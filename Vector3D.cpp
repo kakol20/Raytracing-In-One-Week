@@ -115,7 +115,7 @@ Vector3D Vector3D::KelvinToRGB(const float kelvin) {
 		r = 329.698727446f * pow(r, -0.1332047592f);
 
 		g = temperature - 60.f;
-		g = 288.1221695283f * pow(g, -0.0755148492);
+		g = 288.1221695283f * pow(g, -0.0755148492f);
 	}
 
 	if (temperature >= 66.f) {
@@ -127,7 +127,7 @@ Vector3D Vector3D::KelvinToRGB(const float kelvin) {
 		}
 		else {
 			b = temperature - 10.f;
-			b = 138.5177312231 * log(b) - 305.0447927307;
+			b = 138.5177312231f * log(b) - 305.0447927307f;
 		}
 	}
 
@@ -135,6 +135,41 @@ Vector3D Vector3D::KelvinToRGB(const float kelvin) {
 	g /= 255.f;
 	b /= 255.f;
 	return Vector3D::Clamp(Vector3D(r, g, b), 0.f, 1.f);
+}
+
+Vector3D Vector3D::OrderedDithering(const Vector3D col, const int x, const int y, const int factor) {
+	const unsigned int Threshold8[] = {
+		 0, 32,  8, 40,  2, 34, 10, 42,
+		48, 16, 56, 24, 50, 18, 58, 26,
+		12, 44,  4, 36, 14, 46,  6, 38,
+		60, 28, 52, 20, 62, 30, 54, 22,
+		 3, 35, 11, 43,  1, 33,  9, 41,
+		51, 19, 59, 27, 49, 17, 57, 25,
+		15, 47,  7, 39, 13, 45,  5, 37,
+		63, 31, 55, 23, 61, 29, 53, 21
+	};
+
+	float r = col.m_x;
+	float g = col.m_y;
+	float b = col.m_z;
+
+	float threshold = (float)Threshold8[(x % 8) + (y % 8) * 8] / 64.f;
+	float octet = 1.f / (float)factor;
+
+	r = r + octet * (threshold - 0.5f);
+	r = round(r * (float)factor) / (float)factor;
+
+	g = g + octet * (threshold - 0.5f);
+	g = round(g * (float)factor) / (float)factor;
+
+	b = b + octet * (threshold - 0.5f);
+	b = round(b * (float)factor) / (float)factor;
+
+	r = std::clamp(r, 0.0f, 1.0f);
+	g = std::clamp(g, 0.0f, 1.0f);
+	b = std::clamp(b, 0.0f, 1.0f);
+
+	return Vector3D(r, g, b);
 }
 
 void Vector3D::UVSphere(float& u, float& v) {

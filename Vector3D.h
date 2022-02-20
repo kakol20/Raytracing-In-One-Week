@@ -35,10 +35,13 @@ public:
 	static Vector3D Lerp(const Vector3D& from, const Vector3D& to, const float factor);
 	//static Vector3D Slerp(const Vector3D& from, const Vector3D& to, const float t);
 
+	void UVSphere(float& u, float& v);
+
+	// ----- COLOR FUNCTIONS -----
+
 	static Vector3D HSVtoRGB(const float h, const float s, const float v);
 	static Vector3D KelvinToRGB(const float kelvin);
-
-	void UVSphere(float& u, float& v);
+	static Vector3D OrderedDithering(const Vector3D col, const int x, const int y, const int factor);
 
 public: // ----- STATIC RANDOM FUNCTIONS -----
 
@@ -90,4 +93,3 @@ public: // ----- OPERATOR OVERLOADING -----
 
 	Vector3D operator-() const;
 };
-
