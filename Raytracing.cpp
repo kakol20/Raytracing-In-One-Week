@@ -527,10 +527,10 @@ void Raytracing::FinalScene() {
 	m_matMap["middle"] = new Glass(Vector3D(1.f, 1.f, 1.f), 0.f, 1.5f);
 	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.2f, 0.47f);
 
-	m_matMap["light1"] = new Emissive(Vector3D(0.87207f, 0.995117f, 1.42871f), 5.f);
+	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(5500.f), 5.f);
 
 	m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], nullptr, 1.45f);
-	m_matMap["facade"] = new Textured(m_textures["facade020b_d"], m_textures["facade020b_rme"], nullptr, 1.45f, Vector3D(), 4.f);
+	m_matMap["facade"] = new Textured(m_textures["facade020b_d"], m_textures["facade020b_rme"], nullptr, 1.45f, Vector3D(), 1.5f);
 	m_matMap["ornament"] = new Textured(m_textures["ornament_d"], m_textures["ornament_rme"], nullptr, 1.45f);
 	m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], nullptr, 1.45f);
 
@@ -617,13 +617,16 @@ void Raytracing::FinalScene() {
 			else if (chooseMat <= 4.f * gap) {
 				// ----- EMISSIVE -----
 				//Vector3D col = Vector3D::Random(0.5f, 1.f);
-				float h = Random::RandFloatRange(0.f, 360.f);
+				/*float h = Random::RandFloatRange(0.f, 360.f);
 				float s = 0.5f;
-				float v = 1.0f;
+				float v = 1.0f;*/
+				float K = Random::RandFloatRange(1000.f, 5500.f);
 
-				float intensity = Random::RandFloatRange(2.f, 5.f);
+				float intensity = 1.f;
+				//float intensity = Random::RandFloatRange(1.f, 2.f);
 
-				m_matVec.push_back(new Emissive(Vector3D::HSVtoRGB(h, s, v), intensity));
+				//m_matVec.push_back(new Emissive(Vector3D::HSVtoRGB(h, s, v), intensity));
+				m_matVec.push_back(new Emissive(Vector3D::KelvinToRGB(K), intensity));
 				m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 			}
 			else {
@@ -794,8 +797,8 @@ void Raytracing::ShowProgress() {
 	// ----- OOF -----
 	//output = "";
 
-	std::string output = "";
-	//String output = "";
+	//std::string output = "";
+	String output = "";
 	output += oof::clear_screen();
 	output += oof::cursor_visibility(false);
 	output += oof::reset_formatting();

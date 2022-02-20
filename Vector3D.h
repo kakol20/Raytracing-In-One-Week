@@ -36,6 +36,7 @@ public:
 	//static Vector3D Slerp(const Vector3D& from, const Vector3D& to, const float t);
 
 	static Vector3D HSVtoRGB(const float h, const float s, const float v);
+	static Vector3D KelvinToRGB(const float kelvin);
 
 	void UVSphere(float& u, float& v);
 

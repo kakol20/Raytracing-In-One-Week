@@ -98,6 +98,45 @@ Vector3D Vector3D::HSVtoRGB(const float h, const float s, const float v) {
 	return Vector3D(r + m, g + m, b + m);
 }
 
+Vector3D Vector3D::KelvinToRGB(const float kelvin) {
+	// https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
+
+	float temperature = kelvin / 100.f;
+
+	float r, g, b;
+	if (temperature <= 66.f) {
+		r = 255.f;
+
+		g = temperature;
+		g = 99.4708025861f * log(g) - 161.1195681661f;
+	}
+	else {
+		r = temperature - 60.f;
+		r = 329.698727446f * pow(r, -0.1332047592f);
+
+		g = temperature - 60.f;
+		g = 288.1221695283f * pow(g, -0.0755148492);
+	}
+
+	if (temperature >= 66.f) {
+		b = 255.f;
+	}
+	else {
+		if (temperature <= 19.f) {
+			b = 0.f;
+		}
+		else {
+			b = temperature - 10.f;
+			b = 138.5177312231 * log(b) - 305.0447927307;
+		}
+	}
+
+	r /= 255.f;
+	g /= 255.f;
+	b /= 255.f;
+	return Vector3D::Clamp(Vector3D(r, g, b), 0.f, 1.f);
+}
+
 void Vector3D::UVSphere(float& u, float& v) {
 	float PI = 3.141592653f;
 	u = 0.5f + (atan2(m_x, m_z) / (2.f * PI));
@@ -166,7 +205,6 @@ Vector3D& Vector3D::operator/=(const float scalar) {
 	m_z /= scalar;
 
 	return *this;
-	
 }
 
 Vector3D& Vector3D::operator/=(const Vector3D& otherVector) {
