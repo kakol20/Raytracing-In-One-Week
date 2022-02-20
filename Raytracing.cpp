@@ -280,6 +280,9 @@ bool Raytracing::Init() {
 
 	// ----- SCENE INITIALISATION -----
 
+	// Assign set seed for running raytracing regardless of scene generation - for consistent rendering of samples
+	unsigned int runSeed = Random::RandomUInt();
+
 	if (m_renderScene == "debug") {
 		DebugScene();
 	}
@@ -287,6 +290,7 @@ bool Raytracing::Init() {
 		FinalScene();
 	}
 
+	Random::Seed = runSeed;
 	for (auto it = m_tiles.begin(); it != m_tiles.end(); it++) {
 		(*it).seed = Random::RandomUInt();
 	}
@@ -622,8 +626,8 @@ void Raytracing::FinalScene() {
 				float v = 1.0f;*/
 				float K = Random::RandFloatRange(1000.f, 5500.f);
 
-				float intensity = 1.f;
-				//float intensity = Random::RandFloatRange(1.f, 2.f);
+				//float intensity = 1.f;
+				float intensity = Random::RandFloatRange(1.f, 2.f);
 
 				//m_matVec.push_back(new Emissive(Vector3D::HSVtoRGB(h, s, v), intensity));
 				m_matVec.push_back(new Emissive(Vector3D::KelvinToRGB(K), intensity));
