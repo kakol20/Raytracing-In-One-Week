@@ -59,6 +59,8 @@ const Vector3D HitRec::TangentToWorld(const Vector3D tangentSpace) {
 
 void HitRec::SetTangents(const Vector3D tangent) {
 	m_tangent = tangent;
+	m_tangent.Normalize();
+	m_normal.Normalize();
 	m_bitangent = Vector3D::CrossProduct(m_normal, m_tangent);
 	//m_bitangent = Vector3D::CrossProduct(m_tangent, m_normal);
 }

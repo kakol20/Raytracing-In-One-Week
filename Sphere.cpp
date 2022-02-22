@@ -6,10 +6,10 @@ Sphere::Sphere() : Sphere(Vector3D(), 1.f, nullptr) {
 }
 
 Sphere::Sphere(const Vector3D center, const float radius, Material* mat, const float uvScale) {
-    m_pos = center;
-    m_radius = radius;
-    m_mat = mat;
-    m_uvScale = uvScale;
+	m_pos = center;
+	m_radius = radius;
+	m_mat = mat;
+	m_uvScale = uvScale;
 }
 
 Sphere::~Sphere() {
@@ -42,19 +42,18 @@ bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	/*rec.t = root;
 	rec.point = ray.At(rec.t);
 	Vector3D outwardNormal = (rec.point - m_pos) / m_radius;*/
-	
 
 	Vector3D outwardNormal = (rec.GetPoint() - m_pos) / m_radius;
 	rec.SetFaceNormal(ray, outwardNormal);
 
 	rec.SetUV(CalculateUV(rec.GetPoint()) * m_uvScale);
 	rec.SetTangents(CalculateTangent(rec));
-	
+
 	return true;
 }
 
 bool Sphere::SphereIntersectGround(const Vector3D pos, const float radius) {
-    return false;
+	return false;
 }
 
 bool Sphere::SphereIntersectSphere(const Vector3D pos, const float radius) {
@@ -71,12 +70,12 @@ bool Sphere::SphereIntersectSphere(const Vector3D pos, const float radius) {
 }
 
 Vector3D Sphere::CalculateTangent(HitRec& rec) {
-	bool way1 = false;
+	bool way1 = true;
 	if (way1) {
 		Vector3D P = rec.GetPoint();
 		Vector3D tangent = P - m_pos;
 		//Vector3D A(0.f, 1.f, 0.f);
-		Vector3D A(0.f, -1.f, 0.f);
+		Vector3D A(0.f, 1.f, 0.f);
 		tangent = Vector3D::CrossProduct(A, tangent);
 		tangent.Normalize();
 		return tangent;

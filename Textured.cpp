@@ -142,10 +142,12 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 				scatterDir.Normalize();
 			}
 			else {
-				scatterDir = Vector3D::RandomInHemisphere(normal);
-				if (scatterDir.NearZero()) scatterDir = normal;
+				scatterDir = Vector3D::RandomInHemisphere(rec.GetNormal());
+				if (scatterDir.NearZero()) scatterDir = rec.GetNormal();
 				scatterDir.Normalize();
 			}
+
+			attentuation = Vector3D::Clamp(attentuation, 0.f, 1.f);
 
 			scattered = Ray(rec.GetPoint(), scatterDir);
 		}
@@ -162,11 +164,17 @@ Vector3D Textured::GetNormal(HitRec& rec) {
 		float x, y, z;
 		m_normalTexture->BiLerp(uv.GetX(), uv.GetY(), x, y, z);
 
+		x /= 255;
+		y /= 255;
+		z /= 255;
+		x = 1.f - x;
+		y = 1.f - y;
+
 		Vector3D normalMap(x, y, z);
 		normalMap = (normalMap * 2.f) - Vector3D(1.f, 1.f, 1.f);
 		normalMap.Normalize();
 
-		return rec.TangentToWorld(normalMap);
+		return rec.TangentToWorld(normalMap) * Vector3D(-1.f, -1.f, 1.f);
 	}
 }
 
