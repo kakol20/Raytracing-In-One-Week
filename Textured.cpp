@@ -83,7 +83,15 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 		Vector3D unitDir = rayIn.GetDir();
 		Vector3D incoming = unitDir * -1.0;
 
-		Vector3D normal = rec.GetNormal();
+		Vector3D normal;
+		if (m_normalTexture == nullptr) {
+			normal = rec.GetNormal();
+		}
+		else {
+			normal = GetNormal(rec);
+			//if (normal.NearZero()) normal = rec.GetNormal();
+			//normal = normalMap;
+		}
 
 		// ----- FRESNEL -----
 		float sqrRoughness = roughness * roughness;
@@ -142,6 +150,23 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			scattered = Ray(rec.GetPoint(), scatterDir);
 		}
 		return true;
+	}
+}
+
+Vector3D Textured::GetNormal(HitRec& rec) {
+	if (m_normalTexture == nullptr) {
+		return rec.GetNormal();
+	}
+	else {
+		Vector3D uv = (rec.GetUV() + m_uvOffset) * Vector3D(m_normalTexture->GetWidth() - 1.f, m_normalTexture->GetHeight() - 1.f, 0.f);
+		float x, y, z;
+		m_normalTexture->BiLerp(uv.GetX(), uv.GetY(), x, y, z);
+
+		Vector3D normalMap(x, y, z);
+		normalMap = (normalMap * 2.f) - Vector3D(1.f, 1.f, 1.f);
+		normalMap.Normalize();
+
+		return rec.TangentToWorld(normalMap);
 	}
 }
 

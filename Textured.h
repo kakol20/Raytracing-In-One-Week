@@ -11,6 +11,7 @@ public:
 
 	virtual bool Emission(HitRec& rec, Vector3D& emission);
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered);
+	virtual Vector3D GetNormal(HitRec& rec);
 
 	virtual bool IsTransmissive(Vector3D uv = Vector3D()) { return false; };
 	virtual float GetRoughness(Vector3D uv = Vector3D());

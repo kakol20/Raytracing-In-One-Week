@@ -2,7 +2,7 @@
 class Vector3D {
 public:
 	Vector3D();
-	Vector3D(const float x, const float y, const float z);
+	Vector3D(const float x, const float y, const float z = 0.f);
 	Vector3D(const Vector3D& copyVector);
 	~Vector3D();
 

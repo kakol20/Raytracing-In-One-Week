@@ -35,17 +35,20 @@ bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 		if (root < t_min || t_max < root) return false;
 	}
 
-	/*rec.t = root;
-	rec.point = ray.At(rec.t);
-	Vector3D outwardNormal = (rec.point - m_pos) / m_radius;*/
 	rec.SetT(root);
 	rec.SetPoint(ray.At(root));
 	rec.SetMat(m_mat);
+
+	/*rec.t = root;
+	rec.point = ray.At(rec.t);
+	Vector3D outwardNormal = (rec.point - m_pos) / m_radius;*/
+	
 
 	Vector3D outwardNormal = (rec.GetPoint() - m_pos) / m_radius;
 	rec.SetFaceNormal(ray, outwardNormal);
 
 	rec.SetUV(CalculateUV(rec.GetPoint()) * m_uvScale);
+	rec.SetTangents(CalculateTangent(rec));
 	
 	return true;
 }
@@ -65,6 +68,30 @@ bool Sphere::SphereIntersectSphere(const Vector3D pos, const float radius) {
 	if (overlap.SqrMagnitude() < m_radius * m_radius) return true;
 
 	return false;
+}
+
+Vector3D Sphere::CalculateTangent(HitRec& rec) {
+	bool way1 = false;
+	if (way1) {
+		Vector3D P = rec.GetPoint();
+		Vector3D tangent = P - m_pos;
+		//Vector3D A(0.f, 1.f, 0.f);
+		Vector3D A(0.f, -1.f, 0.f);
+		tangent = Vector3D::CrossProduct(A, tangent);
+		tangent.Normalize();
+		return tangent;
+	}
+	else {
+		Vector3D P = rec.GetNormal();
+		Vector3D tangent = P;
+		//tangent.Normalize();
+		Vector3D A(0.f, -1.f, 0.f);
+		//Vector3D A(1.f, 0.f, 0.f);
+		//Vector3D A(0.f, 0.f, 1.f);
+		tangent = Vector3D::CrossProduct(A, tangent);
+		tangent.Normalize();
+		return tangent;
+	}
 }
 
 Vector3D Sphere::CalculateUV(const Vector3D point) {

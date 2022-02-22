@@ -286,6 +286,9 @@ bool Raytracing::Init() {
 	if (m_renderScene == "debug") {
 		DebugScene();
 	}
+	else if (m_renderScene == "textured") {
+		TexturedScene();
+	}
 	else {
 		FinalScene();
 	}
@@ -516,12 +519,16 @@ void Raytracing::FinalScene() {
 
 	// ----- TEXTURES -----
 	m_textures["fabric004_d"] = new Image("images/textures/fabric004/Fabric004_d.png", Image::ColorMode::sRGB);
+	m_textures["fabric004_n"] = new Image("images/textures/fabric004/Fabric004_n.png");
 	m_textures["fabric004_rme"] = new Image("images/textures/fabric004/Fabric004_rme.png");
 	m_textures["facade020b_d"] = new Image("images/textures/facade020b/facade020b_d.png", Image::ColorMode::sRGB);
+	m_textures["facade020b_n"] = new Image("images/textures/facade020b/Facade020B_n.png");
 	m_textures["facade020b_rme"] = new Image("images/textures/facade020b/facade020b_rme.png");
 	m_textures["ornament_d"] = new Image("images/textures/ornament/ornament_d.png", Image::ColorMode::sRGB);
+	m_textures["ornament_n"] = new Image("images/textures/ornament/ornament_n.png");
 	m_textures["ornament_rme"] = new Image("images/textures/ornament/ornament_rme.png");
 	m_textures["terracotta_d"] = new Image("images/textures/terracotta/terracotta_d.png", Image::ColorMode::sRGB);
+	m_textures["terracotta_n"] = new Image("images/textures/terracotta/terracotta_n.png");
 	m_textures["terracotta_rme"] = new Image("images/textures/terracotta/terracotta_rme.png");
 
 	// ----- OBJECT CREATION -----
@@ -533,10 +540,12 @@ void Raytracing::FinalScene() {
 
 	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(5500.f), 5.f);
 
-	m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], nullptr, 1.45f);
-	m_matMap["facade"] = new Textured(m_textures["facade020b_d"], m_textures["facade020b_rme"], nullptr, 1.45f, Vector3D(), 1.5f);
-	m_matMap["ornament"] = new Textured(m_textures["ornament_d"], m_textures["ornament_rme"], nullptr, 1.45f);
-	m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], nullptr, 1.45f);
+	m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], m_textures["fabric004_n"], 1.45f);
+	//m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], nullptr, 1.45f);
+
+	m_matMap["facade"] = new Textured(m_textures["facade020b_d"], m_textures["facade020b_rme"], m_textures["facade020b_n"], 1.45f, Vector3D(), 1.5f);
+	m_matMap["ornament"] = new Textured(m_textures["ornament_d"], m_textures["ornament_rme"], m_textures["ornament_n"], 1.45f);
+	m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], m_textures["terracotta_n"], 1.45f);
 
 	// objects
 	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
@@ -661,6 +670,48 @@ void Raytracing::FinalScene() {
 }
 
 void Raytracing::TexturedScene() {
+	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
+	//m_hdriStrength = 0.1f;
+	m_hdriStrength = 1.f;
+
+	// ----- LIGHTS -----
+	//m_lights.push_back(Light(Vector3D(-20.f, 15.f, -15.f), Vector3D(1.f, 1.f, 1.f), 5.f, 1165.21671522f));
+
+	// ----- CAMERA -----
+	Vector3D lookFrom(0.f, 2.f, 13.f);
+	Vector3D lookAt(0.f, 1.f, 0.f);
+	Vector3D dist = lookAt - lookFrom;
+	Vector3D up(0.f, 1.f, 0.f);
+
+	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
+	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
+
+	// ----- TEXTURES -----
+	m_textures["fabric004_d"] = new Image("images/textures/fabric004/Fabric004_d.png", Image::ColorMode::sRGB);
+	m_textures["fabric004_n"] = new Image("images/textures/fabric004/Fabric004_n.png");
+	m_textures["fabric004_rme"] = new Image("images/textures/fabric004/Fabric004_rme.png");
+	m_textures["facade020b_d"] = new Image("images/textures/facade020b/facade020b_d.png", Image::ColorMode::sRGB);
+	m_textures["facade020b_n"] = new Image("images/textures/facade020b/Facade020B_n.png");
+	m_textures["facade020b_rme"] = new Image("images/textures/facade020b/facade020b_rme.png");
+	m_textures["terracotta_d"] = new Image("images/textures/terracotta/terracotta_d.png", Image::ColorMode::sRGB);
+	m_textures["terracotta_n"] = new Image("images/textures/terracotta/terracotta_n.png");
+	m_textures["terracotta_rme"] = new Image("images/textures/terracotta/terracotta_rme.png");
+
+	// ----- MATERIAL -----
+	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
+	m_matMap["facade"] = new Textured(m_textures["facade020b_d"], m_textures["facade020b_rme"], m_textures["facade020b_n"], 1.45f, Vector3D(), 1.f);
+	m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], m_textures["fabric004_n"], 1.45f, Vector3D(), 1.f);
+	m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], m_textures["terracotta_n"], 1.45f);
+
+	//m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(2700.f), 5.f);
+
+	// ----- OBJECTS -----
+	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
+	//m_objects.push_back(new Sphere(Vector3D(-20.f, 15.f, -15.f), 5.f, m_matMap["light1"]));
+
+	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["facade"]));
+	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["carbon"]));
+	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["terracotta"]));
 }
 
 void Raytracing::RenderTile(const size_t startIndex) {
@@ -924,10 +975,10 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		bool continueRay = false;
 		bool alpha = false;
 		Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
+		Vector3D emission = EmissionColor(rec);
 
 		if (m_renderMode == "albedo") {
 			if (!alpha) {
-				Vector3D emission;
 				if (rec.GetMat()->Emission(rec, emission)) {
 					return emission;
 				}
@@ -941,19 +992,19 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			}
 		}
 		else if (m_renderMode == "emission") {
-			return EmissionColor(rec);
+			return emission;
 		}
 		else if (m_renderMode == "normal") {
-			return (rec.GetNormal() + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+			return (rec.GetMat()->GetNormal(rec) + Vector3D(1.f, 1.f, 1.f)) / 2.f;
 		}
 		else {
-			Vector3D emissionCol = EmissionColor(rec);
+			//Vector3D emissionCol = EmissionColor(rec);
 
 			if (continueRay) {
-				return emissionCol + objCol * RayColor(scattered, depth - 1);
+				return /*emission +*/ objCol * RayColor(scattered, depth - 1);
 			}
 			else {
-				return emissionCol + objCol;
+				return emission + objCol;
 			}
 		}
 	}

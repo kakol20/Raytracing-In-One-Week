@@ -103,7 +103,7 @@
       <Filter>Source Files\Material</Filter>
     </ClCompile>
     <ClCompile Include="Matrix3x3.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Maths</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,7 +177,7 @@
       <Filter>Header Files\Material</Filter>
     </ClInclude>
     <ClInclude Include="Matrix3x3.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Maths</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

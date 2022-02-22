@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Matrix3x3.h"
 #include "Ray.h"
 #include "Vector3D.h"
 
@@ -17,8 +18,10 @@ private:
 	bool m_frontFace;
 	float m_t;
 	Material* m_mat;
+	Vector3D m_bitangent;
 	Vector3D m_normal;
 	Vector3D m_point;
+	Vector3D m_tangent;
 	Vector3D m_uv;
 
 public:
@@ -41,5 +44,8 @@ public:
 
 	const Vector3D GetUV() const { return m_uv; };
 	void SetUV(const Vector3D uv) { m_uv = uv; };
+
+	const Vector3D TangentToWorld(const Vector3D tangentSpace);
+	void SetTangents(const Vector3D tangent);
 };
 

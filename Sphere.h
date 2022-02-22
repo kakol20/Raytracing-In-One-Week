@@ -16,6 +16,7 @@ private:
 	float m_radius;
 
 private:
+	Vector3D CalculateTangent(HitRec& rec);
 	Vector3D CalculateUV(const Vector3D point);
 };
 
