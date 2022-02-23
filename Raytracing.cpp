@@ -13,6 +13,7 @@
 #include "Sphere.h"
 #include "StaticMutex.h"
 #include "Textured.h"
+#include "ColorSpace.h"
 
 #include "Raytracing.h"
 
@@ -820,28 +821,14 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 			pixelCol *= scale;
 
-			if (m_renderMode != "normal") {
-				float r = pixelCol.GetX();
-				float g = pixelCol.GetY();
-				float b = pixelCol.GetZ();
-
-				std::vector<float> rgb = { r, g ,b };
-
-				for (auto it = rgb.begin(); it != rgb.end(); it++) {
-					float val = std::clamp((*it), 0.f, 1.f);
-
-					if (val <= 0.0031308f) {
-						val = 12.92f * val;
-					}
-					else {
-						val = (1.055f * pow(val, 1.f / 2.4f)) - 0.055f;
-					}
-
-					(*it) = val;
-				}
-
-				pixelCol = Vector3D(std::clamp(rgb[0], 0.f, 1.f), std::clamp(rgb[1], 0.f, 1.f), std::clamp(rgb[2], 0.f, 1.f));
+			if (m_renderMode == "albedo") {
+				pixelCol = ColorSpace::LinearTosRGB(pixelCol);
 			}
+			else if (m_renderMode == "color" || m_renderMode == "emission") {
+				//pixelCol = ColorSpace::CIEXYZToACES(ColorSpace::LinearToCIEXYZ(pixelCol));
+				pixelCol = ColorSpace::LinearTosRGB(pixelCol);
+			}
+			pixelCol = Vector3D::Clamp(pixelCol, 0.f, 1.f);
 
 			// ----- WRITE COLOR -----
 			pixelCol = Vector3D::OrderedDithering(pixelCol, x, flippedY, 255);
