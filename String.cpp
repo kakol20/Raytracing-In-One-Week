@@ -142,12 +142,12 @@ String String::ToString(const unsigned int number) {
 }
 
 float String::ToFloat(const char* number) {
-	char* end;
-	float out = strtof(number, &end);
-	//delete end;
-	end = nullptr;
+	//char* end;
+	//float out = strtof(number, &end);
+	////delete end;
+	//end = nullptr;
 
-	return out;
+	return std::stof(number);
 }
 
 float String::ToFloat(const std::string number) {

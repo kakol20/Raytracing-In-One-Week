@@ -62,4 +62,3 @@ private:
 	Image::FileType GetFileType(const char* file);
 	void ModulusUV(const int x, const int y, int& u, int& v);
 };
-

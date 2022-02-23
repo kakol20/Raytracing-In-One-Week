@@ -152,39 +152,53 @@ bool Image::Write(const char* file, Image::ColorMode colorMode) {
 }
 
 void Image::BiLerp(const float x, const float y, float& r, float& g, float& b) {
-	int index = 0;
+	int count = 0;
 
-	index = GetIndex((int)floor(x), (int)floor(y));
-	float Q11r = m_dataF[index + 0];
-	float Q11g = m_dataF[index + 1];
-	float Q11b = m_dataF[index + 2];
+	if (m_channels <= 2) {
+		// image is gray scale
+		count = 1;
+	}
+	else {
+		// image is RGB
+		count = 3;
+	}
 
-	index = GetIndex((int)floor(x), (int)ceil(y));
-	float Q12r = m_dataF[index + 0];
-	float Q12g = m_dataF[index + 1];
-	float Q12b = m_dataF[index + 2];
+	for (int i = 0; i < count; i++) {
+		int index = 0;
 
-	index = GetIndex((int)ceil(x), (int)floor(y));
-	float Q21r = m_dataF[index + 0];
-	float Q21g = m_dataF[index + 1];
-	float Q21b = m_dataF[index + 2];
+		index = GetIndex((int)floor(x), (int)floor(y));
+		float Q11 = m_dataF[index + i];
 
-	index = GetIndex((int)ceil(x), (int)ceil(y));
-	float Q22r = m_dataF[index + 0];
-	float Q22g = m_dataF[index + 1];
-	float Q22b = m_dataF[index + 2];
+		index = GetIndex((int)floor(x), (int)ceil(y));
+		float Q12 = m_dataF[index + i];
 
-	float R1r = std::lerp(Q11r, Q21r, x - floor(x));
-	float R1g = std::lerp(Q11g, Q21g, x - floor(x));
-	float R1b = std::lerp(Q11b, Q21b, x - floor(x));
+		index = GetIndex((int)ceil(x), (int)floor(y));
+		float Q21 = m_dataF[index + i];
 
-	float R2r = std::lerp(Q12r, Q22r, x - floor(x));
-	float R2g = std::lerp(Q12g, Q22g, x - floor(x));
-	float R2b = std::lerp(Q12b, Q22b, x - floor(x));
+		index = GetIndex((int)ceil(x), (int)ceil(y));
+		float Q22 = m_dataF[index + i];
 
-	r = std::lerp(R1r, R2r, y - floor(y));
-	g = std::lerp(R1g, R2g, y - floor(y));
-	b = std::lerp(R1b, R2b, y - floor(y));
+		float R1 = std::lerp(Q11, Q21, x - floor(x));
+		float R2 = std::lerp(Q12, Q22, x - floor(x));
+		float temp = std::lerp(R1, R2, y - floor(y));
+
+		if (m_channels <= 2) {
+			r = temp;
+			g = temp;
+			b = temp;
+		}
+		else {
+			if (i == 0) {
+				r = temp;
+			}
+			else if (i == 1) {
+				g = temp;
+			}
+			else {
+				b = temp;
+			}
+		}
+	}
 }
 
 void Image::TosRGB() {
@@ -233,12 +247,18 @@ int Image::GetIndex(const int x, const int y) {
 }
 
 void Image::GetRGB(const int x, const int y, float& r, float& g, float& b) {
-	if (m_channels >= 3) {	
+	if (m_channels >= 3) {
 		int index = GetIndex(x, y);
 
 		r = m_dataF[index + 0];
 		g = m_dataF[index + 1];
 		b = m_dataF[index + 2];
+	}
+	else {
+		int index = GetIndex(x, y);
+		r = m_dataF[index];
+		g = m_dataF[index];
+		b = m_dataF[index];
 	}
 }
 
@@ -254,9 +274,17 @@ void Image::SetRGB(const int x, const int y, const float r, const float g, const
 		m_dataF[index + 1] = l_g;
 		m_dataF[index + 2] = l_b;
 
-		m_data[index + 0] = (unsigned int)round(l_r);
-		m_data[index + 1] = (unsigned int)round(l_g);
-		m_data[index + 2] = (unsigned int)round(l_b);
+		m_data[index + 0] = (uint8_t)round(l_r);
+		m_data[index + 1] = (uint8_t)round(l_g);
+		m_data[index + 2] = (uint8_t)round(l_b);
+	}
+	else {
+		int index = GetIndex(x, y);
+
+		m_dataF[index] = (0.299f * r) + (0.587f * g) + (0.114f * b);
+		m_dataF[index] = std::clamp(m_dataF[index], 0.f, 255.f);
+
+		m_data[index] = (uint8_t)round(m_dataF[index]);
 	}
 }
 
