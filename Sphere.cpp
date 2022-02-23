@@ -5,7 +5,7 @@
 Sphere::Sphere() : Sphere(Vector3D(), 1.f, nullptr) {
 }
 
-Sphere::Sphere(const Vector3D center, const float radius, Material* mat, const float uvScale) {
+Sphere::Sphere(const Vector3D center, const float radius, Material* mat, const Vector3D uvScale) {
 	m_pos = center;
 	m_radius = radius;
 	m_mat = mat;

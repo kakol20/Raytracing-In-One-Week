@@ -7,7 +7,7 @@
 class Object {
 public:
 	Object() {
-		m_uvScale = 1.f;
+		m_uvScale = Vector3D(1.f, 1.f, 1.f);
 	};
 	virtual ~Object() {};
 
@@ -21,5 +21,5 @@ public:
 protected:
 	Vector3D m_pos;
 	Material* m_mat = nullptr;
-	float m_uvScale;
+	Vector3D m_uvScale;
 };

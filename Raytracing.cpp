@@ -649,16 +649,16 @@ void Raytracing::FinalScene() {
 				float texturedGap = 1.f / 4.f;
 
 				if (chooseTextured <= texturedGap) {
-					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["carbon"], 1.f));
+					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["carbon"], Vector3D(2.f, 1.f)));
 				}
 				else if (chooseTextured <= 2.f * texturedGap) {
-					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["facade"], 1.f));
+					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["facade"], Vector3D(2.f, 1.f)));
 				}
 				else if (chooseTextured <= 3.f * texturedGap) {
-					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["ornament"], 1.f));
+					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["ornament"]));
 				}
 				else {
-					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["terracotta"], 1.f));
+					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
 				}
 			}
 		}
@@ -709,13 +709,13 @@ void Raytracing::TexturedScene() {
 	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(2700.f), 10.f);
 
 	// ----- OBJECTS -----
-	m_objects.push_back(new Ground(0.f, m_matMap["terracotta"], 1.f / 3.1f));
+	m_objects.push_back(new Ground(0.f, m_matMap["terracotta"], Vector3D(1.f, 1.f, 1.f) / 3.1f));
 	m_objects.push_back(new Sphere(Vector3D(-20.f, 15.f, -15.f), 5.f, m_matMap["light1"]));
-	m_objects.push_back(new Sphere(Vector3D(0.f, 0.2f, 1.f), 0.2f, m_matMap["terracotta"]));
+	m_objects.push_back(new Sphere(Vector3D(0.f, 2.5f, 0.f), 0.5f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
 
 
-	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["facade"]));
-	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["carbon"]));
+	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["facade"], Vector3D(2.f, 1.f)));
+	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["carbon"], Vector3D(2.f, 1.f)));
 	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["ornament"]));
 
 }
@@ -1054,7 +1054,6 @@ Vector3D Raytracing::EmissionColor(HitRec& rec) {
 
 Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha) {
 	Vector3D attentuation;
-
 	if (rec.GetMat()->Scatter(ray, rec, attentuation, scattered)) {
 		continueRay = true;
 		alpha = false;

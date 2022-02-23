@@ -3,7 +3,7 @@
 Ground::Ground() : Ground(0.f, nullptr) {
 }
 
-Ground::Ground(const float height, Material* mat, const float uvScale) {
+Ground::Ground(const float height, Material* mat, const Vector3D uvScale) {
 	m_pos = Vector3D(0.f, height, 0.f);
 	m_mat = mat;
 	m_uvScale = uvScale;
