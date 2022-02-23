@@ -1,3 +1,4 @@
+#include "ColorSpace.h"
 #include "Random.h"
 
 #include "Metal.h"
@@ -7,7 +8,7 @@ Metal::Metal(const Vector3D& albedo, const float roughness, const float ior) {
 	m_roughness = roughness;
 	m_ior = ior;
 
-	m_edgeTint = Vector3D(sqrtf(m_albedo.GetX()), sqrtf(m_albedo.GetY()), sqrtf(m_albedo.GetZ()));
+	m_edgeTint = ColorSpace::LinearTosRGB(albedo); // brightening color not converting to srgb
 }
 
 bool Metal::Emission(HitRec& rec, Vector3D& emission) {
@@ -44,7 +45,7 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	glossy.Normalize();
 
 	// ----- APPLY MATERIAL -----
-	bool fresnelRand = Random::RandFloat() < incomingFresnel;
+	bool fresnelRand = Random::RandFloat() <= incomingFresnel;
 
 	Vector3D scatterDir = fresnelRand ? reflect : glossy;
 

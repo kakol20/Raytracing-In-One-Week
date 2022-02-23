@@ -699,19 +699,19 @@ void Raytracing::TexturedScene() {
 	m_textures["ornament_rme"] = new Image("images/textures/ornament/ornament_rme.png");
 
 	// ----- MATERIAL -----
-	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
+	//m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
 	m_matMap["facade"] = new Textured(m_textures["facade020b_d"], m_textures["facade020b_rme"], m_textures["facade020b_n"], 1.45f, Vector3D(), 2.f);
 	m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], m_textures["fabric004_n"], 1.45f, Vector3D(), 1.f);
 	//m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], nullptr, 1.45f);
 	m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], m_textures["terracotta_n"], 1.45f);
 	m_matMap["ornament"] = new Textured(m_textures["ornament_d"], m_textures["ornament_rme"], m_textures["ornament_n"], 1.45f);
 
-	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(2700.f), 5.f);
+	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(2700.f), 10.f);
 
 	// ----- OBJECTS -----
 	m_objects.push_back(new Ground(0.f, m_matMap["terracotta"], 1.f / 3.1f));
 	m_objects.push_back(new Sphere(Vector3D(-20.f, 15.f, -15.f), 5.f, m_matMap["light1"]));
-	m_objects.push_back(new Sphere(Vector3D(0.f, 0.2f, 1.f), 0.2f, m_matMap["ground"]));
+	m_objects.push_back(new Sphere(Vector3D(0.f, 0.2f, 1.f), 0.2f, m_matMap["terracotta"]));
 
 
 	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["facade"]));

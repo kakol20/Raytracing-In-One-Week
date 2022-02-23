@@ -1,3 +1,4 @@
+#include "ColorSpace.h"
 #include "Random.h"
 
 #include "Textured.h"
@@ -105,8 +106,6 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 
 		bool metalnessRand = Random::RandFloat() <= metalness;
 
-		bool fresnelRand = Random::RandFloat() <= fresnel;
-
 		if (metalnessRand) {
 			// ----- METAL-----
 			float incomingFresnel = fresnel - Fresnel(incoming, incoming, refractionRatio);
@@ -116,7 +115,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 
 			// color
 			attentuation = Vector3D::Lerp(albedo, Vector3D(1.f, 1.f, 1.f), incomingFresnel);
-			attentuation = Vector3D::Lerp(Vector3D(sqrtf(r), sqrtf(g), sqrtf(b)), attentuation, facing);
+			attentuation = Vector3D::Lerp(ColorSpace::LinearTosRGB(albedo), attentuation, facing);
 
 			// scatter
 			Vector3D reflect = Reflect(unitDir, normal);
@@ -125,6 +124,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			if (glossy.NearZero()) glossy = reflect;
 			glossy.Normalize();
 
+			bool fresnelRand = Random::RandFloat() <= incomingFresnel;
 			Vector3D scatterDir = fresnelRand ? reflect : glossy;
 
 			scattered = Ray(rec.GetPoint(), scatterDir);
@@ -133,6 +133,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			// ----- DIELECTRIC -----
 			attentuation = Vector3D::Lerp(albedo, Vector3D(1.f, 1.f, 1.f), fresnel);
 
+			bool fresnelRand = Random::RandFloat() <= fresnel;
 			Vector3D scatterDir;
 			if (fresnelRand) {
 				scatterDir = Reflect(unitDir, normal);
@@ -147,10 +148,10 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 				scatterDir.Normalize();
 			}
 
-			attentuation = Vector3D::Clamp(attentuation, 0.f, 1.f);
-
 			scattered = Ray(rec.GetPoint(), scatterDir);
 		}
+
+		attentuation = Vector3D::Clamp(attentuation, 0.f, 1.f);
 		return true;
 	}
 }
@@ -167,9 +168,6 @@ Vector3D Textured::GetNormal(HitRec& rec) {
 		x /= 255;
 		y /= 255;
 		z /= 255;
-		//x = 1.f - x;
-		//y = 1.f - y;
-		//z = 1.f - z;
 
 		Vector3D normalMap(x, y, z);
 		normalMap = (normalMap * 2.f) - Vector3D(1.f, 1.f, 1.f);
