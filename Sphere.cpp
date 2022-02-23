@@ -70,27 +70,13 @@ bool Sphere::SphereIntersectSphere(const Vector3D pos, const float radius) {
 }
 
 Vector3D Sphere::CalculateTangent(HitRec& rec) {
-	bool way1 = true;
-	if (way1) {
-		Vector3D P = rec.GetPoint();
-		Vector3D tangent = P - m_pos;
-		//Vector3D A(0.f, 1.f, 0.f);
-		Vector3D A(0.f, 1.f, 0.f);
-		tangent = Vector3D::CrossProduct(A, tangent);
-		tangent.Normalize();
-		return tangent;
-	}
-	else {
-		Vector3D P = rec.GetNormal();
-		Vector3D tangent = P;
-		//tangent.Normalize();
-		Vector3D A(0.f, -1.f, 0.f);
-		//Vector3D A(1.f, 0.f, 0.f);
-		//Vector3D A(0.f, 0.f, 1.f);
-		tangent = Vector3D::CrossProduct(A, tangent);
-		tangent.Normalize();
-		return tangent;
-	}
+	//Vector3D P = rec.GetNormal();
+	Vector3D tangent = rec.GetNormal();
+	//Vector3D A(0.f, 0.f, 1.f);
+	Vector3D A(0.f, 1.f, 0.f);
+	tangent = Vector3D::CrossProduct(A, tangent);
+	tangent.Normalize();
+	return tangent * 1.f;
 }
 
 Vector3D Sphere::CalculateUV(const Vector3D point) {

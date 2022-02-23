@@ -167,14 +167,15 @@ Vector3D Textured::GetNormal(HitRec& rec) {
 		x /= 255;
 		y /= 255;
 		z /= 255;
-		x = 1.f - x;
-		y = 1.f - y;
+		//x = 1.f - x;
+		//y = 1.f - y;
+		//z = 1.f - z;
 
 		Vector3D normalMap(x, y, z);
 		normalMap = (normalMap * 2.f) - Vector3D(1.f, 1.f, 1.f);
 		normalMap.Normalize();
 
-		return rec.TangentToWorld(normalMap) * Vector3D(-1.f, -1.f, 1.f);
+		return rec.TangentToWorld(normalMap) * Vector3D(1.f, 1.f, 1.f);
 	}
 }
 

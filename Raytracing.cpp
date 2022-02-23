@@ -710,10 +710,13 @@ void Raytracing::TexturedScene() {
 	// ----- OBJECTS -----
 	m_objects.push_back(new Ground(0.f, m_matMap["terracotta"], 1.f / 3.1f));
 	m_objects.push_back(new Sphere(Vector3D(-20.f, 15.f, -15.f), 5.f, m_matMap["light1"]));
+	m_objects.push_back(new Sphere(Vector3D(0.f, 0.2f, 1.f), 0.2f, m_matMap["ground"]));
+
 
 	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["facade"]));
 	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["carbon"]));
 	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["ornament"]));
+
 }
 
 void Raytracing::RenderTile(const size_t startIndex) {

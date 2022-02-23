@@ -49,12 +49,11 @@ void HitRec::SetFaceNormal(Ray& ray, Vector3D& outwardNormal) {
 }
 
 const Vector3D HitRec::TangentToWorld(const Vector3D tangentSpace) {
-	Matrix3x3 matrix(m_tangent, m_bitangent, m_normal);
-	matrix.Normalize();
-
-	Vector3D worldSpaceNormal = matrix * tangentSpace;
-	worldSpaceNormal.Normalize();
-	return worldSpaceNormal;
+	Vector3D ts_normal = tangentSpace;
+	Vector3D worldSpace = (m_tangent * ts_normal.GetX()) + (m_bitangent * ts_normal.GetY()) + (m_normal * ts_normal.GetZ());
+	worldSpace.Normalize();
+	return worldSpace;
+	
 }
 
 void HitRec::SetTangents(const Vector3D tangent) {
