@@ -26,16 +26,25 @@ protected:
 
 protected:
 	const float Fresnel(Vector3D dir, Vector3D normal, float refIndex) {
-		float cosTheta = (std::min)(Vector3D::DotProduct(dir, normal), 1.f);
+		float cosTheta = Vector3D::DotProduct(dir, normal);
+		cosTheta = std::clamp(cosTheta, 0.f, 1.f);
+
+		/*float r0 = (1.f - refIndex) / (1.f + refIndex);
+		r0 = r0 * r0;
+		return r0 + (1.f - r0) * powf(1.f - cosTheta, 5.f);*/
 
 		float r0 = (1.f - refIndex) / (1.f + refIndex);
 		r0 *= r0;
-		return r0 + (1.f - r0) * powf(1.f - cosTheta, 5.f);
+
+		float fresnel = r0 + (1.f - r0) * powf(1.f - cosTheta, 5.f);
+
+		return std::clamp(fresnel, 0.f, 1.f);
 	}
 
 	Vector3D Reflect(Vector3D v, Vector3D n) {
-		Vector3D t = n * Vector3D::DotProduct(v, n);
+		Vector3D t = Vector3D::DotProduct(v, n);
 		t *= 2.f;
+		t *= n;
 		return v - t;
 	}
 

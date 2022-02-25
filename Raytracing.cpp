@@ -503,6 +503,7 @@ void Raytracing::CornellBox() {
 	m_objects.push_back(new Plane(Plane::Type::XMinus, Vector3D(1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["green"]));
 	m_objects.push_back(new Plane(Plane::Type::YPlus, Vector3D(0.f, -1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
 	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, 1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
+	m_objects.push_back(new Plane(Plane::Type::ZPlus, Vector3D(0.f, 0.f, -1.f), 2.f, 2.f, m_matMap["white"]));
 }
 
 void Raytracing::DebugScene() {
@@ -961,7 +962,7 @@ void Raytracing::ShowProgress() {
 				}
 
 				col /= 255.f;
-				col = Vector3D::OrderedDithering(col, 2 * x + i, m_yTileCount - y, 63);
+				//col = Vector3D::OrderedDithering(col, 2 * x + i, m_yTileCount - y, 63);
 				col *= 255.f;
 
 				int r = std::clamp((int)round(col.GetX()), 12, 204);
@@ -1039,7 +1040,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	unitDir.Normalize();
 
 	if (m_renderMode == "normal") {
-		return (unitDir + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+		return ((unitDir * -1.f) + Vector3D(1.f, 1.f, 1.f)) / 2.f;
 	}
 	else if (m_renderMode == "emission") {
 		return Vector3D();
