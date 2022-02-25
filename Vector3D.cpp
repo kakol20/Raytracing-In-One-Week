@@ -8,6 +8,12 @@
 Vector3D::Vector3D() : Vector3D(0.f, 0.f, 0.f) {
 }
 
+Vector3D::Vector3D(const float scalar) {
+	m_x = scalar;
+	m_y = scalar;
+	m_z = scalar;
+}
+
 Vector3D::Vector3D(const float x, const float y, const float z) {
 	m_x = x;
 	m_y = y;
@@ -214,6 +220,14 @@ Vector3D Vector3D::RandomUnitVector() {
 	Vector3D o = Vector3D::Random(-1.f, 1.f);
 	o.Normalize();
 	return o;
+}
+
+Vector3D& Vector3D::operator=(const float& scalar) {
+	m_x = scalar;
+	m_y = scalar;
+	m_z = scalar;
+
+	return *this;
 }
 
 Vector3D& Vector3D::operator=(const Vector3D& copyVector) {

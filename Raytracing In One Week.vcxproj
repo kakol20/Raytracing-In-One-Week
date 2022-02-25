@@ -165,6 +165,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix3x3.cpp" />
     <ClCompile Include="Metal.cpp" />
+    <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Raytracing.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="Metal.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="oof\oof.h" />
+    <ClInclude Include="Plane.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Raytracing.h" />

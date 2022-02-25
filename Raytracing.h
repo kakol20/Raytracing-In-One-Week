@@ -60,6 +60,7 @@ private:
 private:
 	// ----- SCENE CREATION -----
 
+	void CornellBox();
 	void DebugScene();
 	void FinalScene();
 	void TexturedScene();

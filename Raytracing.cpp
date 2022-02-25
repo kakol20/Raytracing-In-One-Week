@@ -2,6 +2,7 @@
 
 #include "oof/oof.h"
 
+#include "ColorSpace.h"
 #include "Dielectric.h"
 #include "Diffuse.h"
 #include "Emissive.h"
@@ -9,11 +10,11 @@
 #include "Glass.h"
 #include "Ground.h"
 #include "Metal.h"
+#include "Plane.h"
 #include "Random.h"
 #include "Sphere.h"
 #include "StaticMutex.h"
 #include "Textured.h"
-#include "ColorSpace.h"
 
 #include "Raytracing.h"
 
@@ -160,7 +161,7 @@ bool Raytracing::Init() {
 			<< "tileSize=" << m_tileSize << "\n"
 			<< "## color, normal, albedo, emission or all\n"
 			<< "renderMode=" << m_renderMode << "\n"
-			<< "## final, textured or debug\n"
+			<< "## final, textured, cornell or debug\n"
 			<< "scene=" << m_renderScene << "\n#\n"
 			<< "# Camera Settings\n"
 			<< "aperture=" << m_aperture << "\n"
@@ -289,6 +290,9 @@ bool Raytracing::Init() {
 	}
 	else if (m_renderScene == "textured") {
 		TexturedScene();
+	}
+	else if (m_renderScene == "cornell") {
+		CornellBox();
 	}
 	else {
 		FinalScene();
@@ -469,6 +473,33 @@ void Raytracing::ShuffleTiles() {
 			i--;
 		}
 	}
+}
+
+void Raytracing::CornellBox() {
+	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
+	//m_hdriStrength = 0.01f;
+	m_hdriStrength = 1.f;
+
+	// ----- CAMERA -----
+	Vector3D lookFrom(0.f, 0.f, 7.f);
+	Vector3D lookAt(0.f, 0.f);
+
+	Vector3D dist = lookAt - lookFrom;
+	Vector3D up(0.f, 1.f, 0.f);
+
+	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
+	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
+
+	// ----- MATERIAL -----
+	m_matMap["red"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.941f, 0.8f), 0.7f, 1.45f);
+	m_matMap["green"] = new Dielectric(Vector3D::HSVtoRGB(120.f, 0.941f, 0.8f), 0.7f, 1.45f);
+	//m_matMap["red"] = new Diffuse(Vector3D(0.8f, 0.046875f, 0.046875f));
+	//m_matMap["green"] = new Diffuse(Vector3D(0.046875f, 0.8f, 0.046875f));
+
+	// ----- OBJECTS -----
+	m_objects.push_back(new Plane(Plane::Type::XPlus, Vector3D(-1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["red"]));
+	m_objects.push_back(new Plane(Plane::Type::XMinus, Vector3D(1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["green"]));
+	//m_objects.push_back(new Sphere(Vector3D(0.f), 0.2f, m_matMap["light"]));
 }
 
 void Raytracing::DebugScene() {
@@ -715,11 +746,9 @@ void Raytracing::TexturedScene() {
 
 	m_objects.push_back(new Sphere(Vector3D(0.f, 0.5f, 1.4143f), 0.5f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
 
-
 	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["facade"], Vector3D(2.f, 1.f)));
 	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["carbon"], Vector3D(2.f, 1.f)));
 	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["ornament"]));
-
 }
 
 void Raytracing::RenderTile(const size_t startIndex) {
