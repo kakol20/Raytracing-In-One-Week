@@ -477,8 +477,8 @@ void Raytracing::ShuffleTiles() {
 
 void Raytracing::CornellBox() {
 	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
-	//m_hdriStrength = 0.01f;
-	m_hdriStrength = 1.f;
+	m_hdriStrength = 0.01f;
+	//m_hdriStrength = 1.f;
 
 	// ----- CAMERA -----
 	Vector3D lookFrom(0.f, 0.f, 7.f);
@@ -493,13 +493,16 @@ void Raytracing::CornellBox() {
 	// ----- MATERIAL -----
 	m_matMap["red"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.941f, 0.8f), 0.7f, 1.45f);
 	m_matMap["green"] = new Dielectric(Vector3D::HSVtoRGB(120.f, 0.941f, 0.8f), 0.7f, 1.45f);
-	//m_matMap["red"] = new Diffuse(Vector3D(0.8f, 0.046875f, 0.046875f));
-	//m_matMap["green"] = new Diffuse(Vector3D(0.046875f, 0.8f, 0.046875f));
+	m_matMap["white"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.f, 0.8f), 0.7f, 1.45f);
+	m_matMap["light"] = new Emissive(Vector3D(1.f), 100.f);
 
 	// ----- OBJECTS -----
+	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, 0.999f, 0.f), 0.45f, 0.45f, m_matMap["light"]));
+
 	m_objects.push_back(new Plane(Plane::Type::XPlus, Vector3D(-1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["red"]));
 	m_objects.push_back(new Plane(Plane::Type::XMinus, Vector3D(1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["green"]));
-	//m_objects.push_back(new Sphere(Vector3D(0.f), 0.2f, m_matMap["light"]));
+	m_objects.push_back(new Plane(Plane::Type::YPlus, Vector3D(0.f, -1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
+	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, 1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
 }
 
 void Raytracing::DebugScene() {
