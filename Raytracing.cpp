@@ -539,7 +539,8 @@ void Raytracing::FinalScene() {
 	m_matMap["middle"] = new Glass(Vector3D(1.f, 1.f, 1.f), 0.f, 1.5f);
 	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.2f, 0.47f);
 
-	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(5500.f), 5.f);
+	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(5778.f), 6.5f);
+	m_matMap["light2"] = new Emissive(Vector3D::KelvinToRGB(5778.f), 3.5f);
 
 	m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], m_textures["fabric004_n"], 1.45f);
 	//m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], nullptr, 1.45f);
@@ -555,7 +556,7 @@ void Raytracing::FinalScene() {
 	m_objects.push_back(new Sphere(Vector3D(4.f, 1.f, 0.f), 1.f, m_matMap["front"]));
 
 	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, -10.f), 4.f, m_matMap["light1"]));
-	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, 10.f), 8.f, m_matMap["light1"]));
+	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, 10.f), 8.f, m_matMap["light2"]));
 
 	//Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
 	//lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
@@ -711,7 +712,8 @@ void Raytracing::TexturedScene() {
 	// ----- OBJECTS -----
 	m_objects.push_back(new Ground(0.f, m_matMap["terracotta"], Vector3D(1.f, 1.f, 1.f) / 3.1f));
 	m_objects.push_back(new Sphere(Vector3D(-20.f, 15.f, -15.f), 5.f, m_matMap["light1"]));
-	m_objects.push_back(new Sphere(Vector3D(0.f, 2.5f, 0.f), 0.5f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
+
+	m_objects.push_back(new Sphere(Vector3D(0.f, 0.5f, 1.4143f), 0.5f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
 
 
 	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["facade"], Vector3D(2.f, 1.f)));
