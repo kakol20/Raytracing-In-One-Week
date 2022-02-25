@@ -19,7 +19,7 @@ bool Metal::Emission(HitRec& rec, Vector3D& emission) {
 bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
 	// ----- NORMAL -----
 	Vector3D unitDir = rayIn.GetDir();
-	Vector3D incoming = unitDir * -1.0;
+	Vector3D incoming = unitDir * -1.0f;
 
 	Vector3D normal = rec.GetNormal();
 

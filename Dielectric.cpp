@@ -11,9 +11,12 @@ Dielectric::Dielectric(const Vector3D& albedo, const float roughness, const floa
 bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
 	// ----- NORMAL -----
 	Vector3D unitDir = rayIn.GetDir();
-	Vector3D incoming = unitDir * -1.0;
+	Vector3D incoming = unitDir * -1.0f;
 
 	Vector3D normal = rec.GetNormal();
+
+	normal.Normalize();
+	incoming.Normalize();
 
 	// ----- FRESNEL -----
 	float sqrRoughness = m_roughness * m_roughness;
@@ -25,9 +28,10 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	float refractionRatio = rec.GetFrontFace() ? 1.f / m_ior : m_ior;
 	float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
 
-	bool fresnelRand = fresnel > Random::RandFloat();
+	bool fresnelRand = Random::RandFloat() <= fresnel;
 
 	attentuation = Vector3D::Lerp(m_albedo, Vector3D(1.f, 1.f, 1.f), fresnel);
+	//attentuation = m_albedo;
 	//attentuation = Vector3D(fresnel);
 
 	Vector3D scatterDir;

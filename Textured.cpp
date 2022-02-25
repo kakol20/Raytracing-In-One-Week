@@ -82,7 +82,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 	else {
 		// ----- NORMAL -----
 		Vector3D unitDir = rayIn.GetDir();
-		Vector3D incoming = unitDir * -1.0;
+		Vector3D incoming = unitDir * -1.0f;
 
 		Vector3D normal;
 		if (m_normalTexture == nullptr) {

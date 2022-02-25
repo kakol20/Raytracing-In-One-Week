@@ -481,7 +481,7 @@ void Raytracing::CornellBox() {
 	//m_hdriStrength = 1.f;
 
 	// ----- CAMERA -----
-	Vector3D lookFrom(0.f, 0.f, 7.f);
+	Vector3D lookFrom(0.f, 1e-3f, 7.f);
 	Vector3D lookAt(0.f, 0.f);
 
 	Vector3D dist = lookAt - lookFrom;
@@ -521,6 +521,7 @@ void Raytracing::DebugScene() {
 
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
+	//m_camera = Camera(aspect_ratio, 0.f, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
 
 	// ----- MATERIAL -----
 	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
@@ -850,11 +851,12 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 				Ray r = m_camera.GetRay(u, v);
 
+				//pixelCol += Vector3D::Clamp(RayColor(r, m_rayDepth), 0.f, 1.f);
 				pixelCol += RayColor(r, m_rayDepth);
 			}
-			float scale = 1.f / (float)m_samplesPerPixel;
+			//float scale = 1.f / ;
 
-			pixelCol *= scale;
+			pixelCol /= (float)m_samplesPerPixel;
 
 			if (m_renderMode == "albedo") {
 				pixelCol = ColorSpace::LinearTosRGB(pixelCol);
@@ -1028,7 +1030,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			//Vector3D emissionCol = EmissionColor(rec);
 
 			if (continueRay) {
-				return /*emission +*/ objCol * RayColor(scattered, depth - 1);
+				return emission + objCol * RayColor(scattered, depth - 1);
 			}
 			else {
 				return emission + objCol;

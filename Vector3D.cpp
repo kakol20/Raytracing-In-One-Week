@@ -39,7 +39,7 @@ float Vector3D::SqrMagnitude() {
 void Vector3D::Normalize() {
 	float magnitude = Magnitude();
 
-	if (magnitude != 1.f) {
+	if (magnitude != 1.f && magnitude != 0.f) {
 		m_x /= magnitude;
 		m_y /= magnitude;
 		m_z /= magnitude;
@@ -57,7 +57,7 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 }
 
 bool Vector3D::NearZero() {
-	const float s = 1e-6f;
+	const float s = 1e-5f;
 	return abs(m_x) < s && abs(m_y) < s && abs(m_z) < s;
 }
 
