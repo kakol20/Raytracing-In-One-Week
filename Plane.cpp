@@ -40,7 +40,10 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 		return false;
 	}
 
+	n.Normalize();
+
 	Vector3D l = ray.GetDir();
+	l.Normalize();
 	float dotLN = Vector3D::DotProduct(l, n);
 	if (dotLN != 0.f) {
 		Vector3D p0 = m_pos;
@@ -58,7 +61,10 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 			Vector3D min = m_pos - offset;
 			Vector3D max = m_pos + offset;
 
-			if (min.GetY() <= p.GetY() && p.GetY() <= max.GetY() && min.GetZ() <= p.GetZ() && p.GetZ() <= max.GetZ() && m_pos.GetX() == p.GetX()) {
+			Vector3D axisClose = m_pos - p;
+			axisClose *= Vector3D(1.f, 0.f, 0.f);
+
+			if (min.GetY() <= p.GetY() && p.GetY() <= max.GetY() && min.GetZ() <= p.GetZ() && p.GetZ() <= max.GetZ() && axisClose.NearZero()) {
 				rec.SetT(d);
 				rec.SetPoint(p);
 				rec.SetMat(m_mat);
@@ -90,7 +96,10 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 			Vector3D min = m_pos - offset;
 			Vector3D max = m_pos + offset;
 
-			if (min.GetX() <= p.GetX() && p.GetX() <= max.GetX() && min.GetZ() <= p.GetZ() && p.GetZ() <= max.GetZ() && p.GetY() == m_pos.GetY()) {
+			Vector3D axisClose = m_pos - p;
+			axisClose *= Vector3D(0.f, 1.f, 0.f);
+
+			if (min.GetX() <= p.GetX() && p.GetX() <= max.GetX() && min.GetZ() <= p.GetZ() && p.GetZ() <= max.GetZ() && axisClose.NearZero()) {
 				rec.SetT(d);
 				rec.SetPoint(p);
 				rec.SetMat(m_mat);
@@ -122,7 +131,10 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 			Vector3D min = m_pos - offset;
 			Vector3D max = m_pos + offset;
 
-			if (min.GetX() <= p.GetX() && p.GetX() <= max.GetX() && min.GetY() <= p.GetY() && p.GetY() <= max.GetY() && p.GetZ() == m_pos.GetZ()) {
+			Vector3D axisClose = m_pos - p;
+			axisClose *= Vector3D(0.f, 0.f, 1.f);
+
+			if (min.GetX() <= p.GetX() && p.GetX() <= max.GetX() && min.GetY() <= p.GetY() && p.GetY() <= max.GetY() && axisClose.NearZero()) {
 				rec.SetT(d);
 				rec.SetPoint(p);
 				rec.SetMat(m_mat);

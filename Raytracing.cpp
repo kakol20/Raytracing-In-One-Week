@@ -39,7 +39,9 @@ Raytracing::Raytracing() {
 
 	m_useThreads = 6;
 
-	m_nearZero = 1e-5f;
+	m_nearZero = 1e-6f;
+	m_clipEnd = 63.27716808f;
+	m_clipStart = m_nearZero;
 
 	//m_hdriStrength = 1.f;
 	m_hdriStrength = 0.1f;
@@ -481,28 +483,31 @@ void Raytracing::CornellBox() {
 	//m_hdriStrength = 1.f;
 
 	// ----- CAMERA -----
-	Vector3D lookFrom(0.f, 1e-3f, 7.f);
+	//Vector3D lookFrom(0.f, 1e-3f, 7.f);
+	Vector3D lookFrom(0.f, 0.f, 7.f);
 	Vector3D lookAt(0.f, 0.f);
+	Vector3D up(0.f, 1.f, 0.f);
+
+	m_clipEnd = 1000.f;
 
 	Vector3D dist = lookAt - lookFrom;
-	Vector3D up(0.f, 1.f, 0.f);
 
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
 
 	// ----- MATERIAL -----
-	m_matMap["red"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.941f, 0.8f), 0.7f, 1.45f);
 	m_matMap["green"] = new Dielectric(Vector3D::HSVtoRGB(120.f, 0.941f, 0.8f), 0.7f, 1.45f);
-	m_matMap["white"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.f, 0.8f), 0.7f, 1.45f);
 	m_matMap["light"] = new Emissive(Vector3D(1.f), 100.f);
+	m_matMap["red"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.941f, 0.8f), 0.7f, 1.45f);
+	m_matMap["white"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.f, 0.8f), 0.7f, 1.45f);
 
 	// ----- OBJECTS -----
 	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, 0.999f, 0.f), 0.45f, 0.45f, m_matMap["light"]));
 
-	m_objects.push_back(new Plane(Plane::Type::XPlus, Vector3D(-1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["red"]));
 	m_objects.push_back(new Plane(Plane::Type::XMinus, Vector3D(1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["green"]));
-	m_objects.push_back(new Plane(Plane::Type::YPlus, Vector3D(0.f, -1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
+	m_objects.push_back(new Plane(Plane::Type::XPlus, Vector3D(-1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["red"]));
 	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, 1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
+	m_objects.push_back(new Plane(Plane::Type::YPlus, Vector3D(0.f, -1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
 	m_objects.push_back(new Plane(Plane::Type::ZPlus, Vector3D(0.f, 0.f, -1.f), 2.f, 2.f, m_matMap["white"]));
 }
 
@@ -776,9 +781,7 @@ void Raytracing::RenderTile(const size_t startIndex) {
 
 	m_tiles[startIndex].tileComplete = true;
 
-	//StaticMutex::s_mtx.lock();
-	StaticMutex::s_mtx.lock();
-	m_tilesRendered++;
+	//StaticMutex::s_mtx.lock()
 
 	Vector3D getColor(0.f, 0.f, 0.f);
 	float count = 0.f;
@@ -793,9 +796,9 @@ void Raytracing::RenderTile(const size_t startIndex) {
 			float r, g, b;
 			m_render.GetRGB(xImg, flippedY, r, g, b);
 
-			r = std::lerp(12.f, 204.f, r / 255.f);
+			/*r = std::lerp(12.f, 204.f, r / 255.f);
 			g = std::lerp(12.f, 204.f, g / 255.f);
-			b = std::lerp(12.f, 204.f, b / 255.f);
+			b = std::lerp(12.f, 204.f, b / 255.f);*/
 
 			getColor += Vector3D(r, g, b);
 		}
@@ -813,15 +816,18 @@ void Raytracing::RenderTile(const size_t startIndex) {
 			float r, g, b;
 			m_render.GetRGB(xImg, flippedY, r, g, b);
 
-			r = std::lerp(12.f, 204.f, r / 255.f);
+			/*r = std::lerp(12.f, 204.f, r / 255.f);
 			g = std::lerp(12.f, 204.f, g / 255.f);
-			b = std::lerp(12.f, 204.f, b / 255.f);
+			b = std::lerp(12.f, 204.f, b / 255.f);*/
 
 			getColor += Vector3D(r, g, b);
 		}
 	}
 	getColor /= count;
 	m_tiles[startIndex].rightXTileColor = Vector3D::Clamp(getColor, 0.f, 255.f);
+
+	StaticMutex::s_mtx.lock();
+	m_tilesRendered++;
 
 	ShowProgress();
 
@@ -852,11 +858,27 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				Ray r = m_camera.GetRay(u, v);
 
 				//pixelCol += Vector3D::Clamp(RayColor(r, m_rayDepth), 0.f, 1.f);
-				pixelCol += RayColor(r, m_rayDepth);
+				Vector3D rayColor = RayColor(r, m_rayDepth);
+				//pixelCol += RayColor(r, m_rayDepth);
+
+				if (m_renderMode == "emission" || m_renderMode == "albedo") {
+					rayColor = Vector3D::Clamp(rayColor, 0.f, 1.f);
+				}
+				else if (m_renderMode == "normal") {
+					rayColor.Normalize();
+				}
+				pixelCol += rayColor;
 			}
 			//float scale = 1.f / ;
 
 			pixelCol /= (float)m_samplesPerPixel;
+
+			if (m_renderMode == "normal") {
+				pixelCol.Normalize();
+				pixelCol = (pixelCol + Vector3D(1.f)) / 2.f;
+			}
+
+			pixelCol = Vector3D::Clamp(pixelCol, 0.f, 1.f);
 
 			if (m_renderMode == "albedo") {
 				pixelCol = ColorSpace::LinearTosRGB(pixelCol);
@@ -874,8 +896,6 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			m_render.SetRGB(x, flippedY, pixelCol.GetX(), pixelCol.GetY(), pixelCol.GetZ());
 		}
 	}
-
-	//std::this_thread::sleep_for(std::chrono::milliseconds(500)); // simulate long rendering - temporary
 }
 
 void Raytracing::ShowProgress() {
@@ -891,15 +911,15 @@ void Raytracing::ShowProgress() {
 	output += oof::position(0, 0);
 
 	output += "Render Mode: ";
-	output += m_renderMode.GetChar();
+	output += m_renderMode;
 	output += "\nTotal Objects: ";
-	output += String::ToString((int)m_objects.size()).GetChar();
+	output += String::ToString((int)m_objects.size());
 	output += "\nThreads Used: ";
-	output += String::ToString((int)m_useThreads).GetChar();
+	output += String::ToString((int)m_useThreads);
 	output += "\nTotal Tiles: ";
-	output += String::ToString((int)m_tiles.size()).GetChar();
+	output += String::ToString((int)m_tiles.size());
 	output += "\nProgress: ";
-	output += String::ToString(m_tilesRendered).GetChar();
+	output += String::ToString(m_tilesRendered);
 	/*output += "\nTile #";
 
 	auto thisId = m_threadID[std::this_thread::get_id()];
@@ -938,6 +958,8 @@ void Raytracing::ShowProgress() {
 		}
 		// https://www.asciitable.com
 		output += (char)254u;
+
+		//char end = '\\';
 	}
 	output += oof::reset_formatting();
 	output += "] ";
@@ -964,13 +986,14 @@ void Raytracing::ShowProgress() {
 				}
 
 				col /= 255.f;
-				//col = Vector3D::OrderedDithering(col, 2 * x + i, m_yTileCount - y, 63);
+				col = Vector3D::OrderedDithering(col, 2 * x + i, m_yTileCount - y, 63);
 				col *= 255.f;
 
-				int r = std::clamp((int)round(col.GetX()), 12, 204);
-				int g = std::clamp((int)round(col.GetY()), 12, 204);
-				int b = std::clamp((int)round(col.GetZ()), 12, 204);
+				int r = std::clamp((int)round(col.GetX()), 0, 255);
+				int g = std::clamp((int)round(col.GetY()), 0, 255);
+				int b = std::clamp((int)round(col.GetZ()), 0, 255);
 				output += oof::fg_color({ r, g, b });
+				//output += (char)219u;
 				output += (char)178u;
 			}
 			else {
@@ -994,24 +1017,23 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	// If we"ve exceeded the ray bounce limit, no more light is gathered.
 	if (depth <= 0) return Vector3D(0.f, 0.f, 0.f);
 
-	float clipStart = m_nearZero;
-	float clipEnd = 63.27716808f;
 	//float clipEnd = 1000.f;
 
 	HitRec rec;
-	if (RayHitObject(ray, clipStart, clipEnd, rec)) {
+	if (RayHitObject(ray, m_clipStart, m_clipEnd, rec)) {
 		Ray scattered;
 		bool continueRay = false;
 		bool alpha = false;
-		Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
-		Vector3D emission = EmissionColor(rec);
 
 		if (m_renderMode == "albedo") {
 			if (!alpha) {
+				Vector3D emission = EmissionColor(rec);
 				if (rec.GetMat()->Emission(rec, emission)) {
+					Vector3D emission = EmissionColor(rec);
 					return emission;
 				}
 				else {
+					Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
 					return objCol;
 				}
 			}
@@ -1021,13 +1043,18 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			}
 		}
 		else if (m_renderMode == "emission") {
+			Vector3D emission = EmissionColor(rec);
 			return emission;
 		}
 		else if (m_renderMode == "normal") {
-			return (rec.GetMat()->GetNormal(rec) + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+			Vector3D normal = rec.GetMat()->GetNormal(rec);
+			normal.Normalize();
+			return normal;
 		}
 		else {
 			//Vector3D emissionCol = EmissionColor(rec);
+			Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
+			Vector3D emission = EmissionColor(rec);
 
 			if (continueRay) {
 				return emission + objCol * RayColor(scattered, depth - 1);
@@ -1042,7 +1069,9 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	unitDir.Normalize();
 
 	if (m_renderMode == "normal") {
-		return ((unitDir * -1.f) + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+		//return ((unitDir * -1.f) + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+		return -unitDir;
+		//return Vector3D(-1.f);
 	}
 	else if (m_renderMode == "emission") {
 		return Vector3D();

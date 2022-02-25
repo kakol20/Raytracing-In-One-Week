@@ -42,6 +42,7 @@ private:
 	std::fstream m_log;
 	String m_renderMode;
 	String m_renderScene;
+	float m_clipEnd, m_clipStart;
 
 private:
 	struct Tile {
