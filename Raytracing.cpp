@@ -496,13 +496,16 @@ void Raytracing::CornellBox() {
 	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
 
 	// ----- MATERIAL -----
-	m_matMap["green"] = new Dielectric(Vector3D::HSVtoRGB(120.f, 0.941f, 0.8f), 0.7f, 1.45f);
-	m_matMap["light"] = new Emissive(Vector3D(1.f), 100.f);
-	m_matMap["red"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.941f, 0.8f), 0.7f, 1.45f);
-	m_matMap["white"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.f, 0.8f), 0.7f, 1.45f);
+	float closeToOne = 1.f - m_nearZero;
+
+	m_matMap["light"] = new Emissive(Vector3D(1.f + m_nearZero), 100.f);
+
+	m_matMap["green"] = new Dielectric(Vector3D::HSVtoRGB(120.f, closeToOne, 1.0f), 1.f, 1.45f);
+	m_matMap["red"] = new Dielectric(Vector3D::HSVtoRGB(0.f, closeToOne, 1.0f), 1.f, 1.45f);
+	m_matMap["white"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.f, 1.0f), 1.f, 1.45f);
 
 	// ----- OBJECTS -----
-	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, 0.999f, 0.f), 0.45f, 0.45f, m_matMap["light"]));
+	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, closeToOne, 0.f), 0.45f, 0.45f, m_matMap["light"]));
 
 	m_objects.push_back(new Plane(Plane::Type::XMinus, Vector3D(1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["green"]));
 	m_objects.push_back(new Plane(Plane::Type::XPlus, Vector3D(-1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["red"]));
@@ -864,9 +867,11 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				if (m_renderMode == "emission" || m_renderMode == "albedo") {
 					rayColor = Vector3D::Clamp(rayColor, 0.f, 1.f);
 				}
-				else if (m_renderMode == "normal") {
-					rayColor.Normalize();
-				}
+
+				//else if (m_renderMode == "normal") {
+				//	rayColor.Normalize();
+				//}
+
 				pixelCol += rayColor;
 			}
 			//float scale = 1.f / ;
@@ -986,7 +991,7 @@ void Raytracing::ShowProgress() {
 				}
 
 				col /= 255.f;
-				col = Vector3D::OrderedDithering(col, 2 * x + i, m_yTileCount - y, 63);
+				col = Vector3D::OrderedDithering(col, 2 * x + i, m_yTileCount - y, 255);
 				col *= 255.f;
 
 				int r = std::clamp((int)round(col.GetX()), 0, 255);
