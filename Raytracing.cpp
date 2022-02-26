@@ -883,7 +883,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 						Ray r = m_camera.GetRay(u, v);
 
-						Vector3D rayColor = RayColor(r, m_rayDepth);
+						bool isBackground = false;
+						Vector3D rayColor = RayColor(r, m_rayDepth, isBackground);
 
 						if (m_renderMode == "emission" || m_renderMode == "albedo"/* || m_renderMode == "color"*/) {
 							rayColor = Vector3D::Clamp(rayColor, 0.f, 1.f);
@@ -893,6 +894,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 							rayColor.Normalize();
 							rayColor = (rayColor + Vector3D(1.f)) / 2.f;
 						}
+
+						//rayColor = Vector3D::OrderedDithering(rayColor, (int)round(u), (int)round(v), 255);
 
 						if (!(i == 0 && j == 0)) {
 							Vector3D difference;
@@ -914,8 +917,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 						float v = (y + j) / (float)(m_imageHeight - 1);
 
 						Ray r = m_camera.GetRay(u, v);
-
-						Vector3D rayColor = RayColor(r, m_rayDepth);
+						bool isBackground = false;
+						Vector3D rayColor = RayColor(r, m_rayDepth, isBackground);
 
 						if (m_renderMode == "emission" || m_renderMode == "albedo") {
 							rayColor = Vector3D::Clamp(rayColor, 0.f, 1.f);
@@ -925,6 +928,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 							rayColor.Normalize();
 							rayColor = (rayColor + Vector3D(1.f)) / 2.f;
 						}
+
+						//rayColor = Vector3D::OrderedDithering(rayColor, (int)round(u), (int)round(v), 255);
 
 						if (!(i == 0 && j == 0)) {
 							Vector3D difference;
@@ -947,9 +952,9 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				float v = (y + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageHeight - 1);
 
 				Ray r = m_camera.GetRay(u, v);
-
+				bool isBackground = false;
 				//pixelCol += Vector3D::Clamp(RayColor(r, m_rayDepth), 0.f, 1.f);
-				Vector3D rayColor = RayColor(r, m_rayDepth);
+				Vector3D rayColor = RayColor(r, m_rayDepth, isBackground);
 				//pixelCol += RayColor(r, m_rayDepth);
 
 				if (m_renderMode == "emission" || m_renderMode == "albedo") {
@@ -960,6 +965,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 					//rayColor.Normalize();
 					rayColor = (rayColor + Vector3D(1.f)) / 2.f;
 				}
+
+				//rayColor = Vector3D::OrderedDithering(rayColor, (int)round(u), (int)round(v), 255);
 
 				if (count > 0) {
 					Vector3D difference;
@@ -973,7 +980,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 						bool belowThreshold = avgDiff.Threshold(m_noiseThreshold);
 						//bool belowThreshold = avgDiff.Magnitude() < m_noiseThreshold;
-						if (rayColor.NearZero()) { // bodged fix to black pixels
+						if (rayColor.NearZero() && !isBackground) { // bodged fix to black pixels
 							if (m_renderMode != "color") {
 								count++;
 								pixelCol += rayColor;
@@ -1135,7 +1142,7 @@ void Raytracing::ShowProgress() {
 	FastWrite::Write(output);
 }
 
-Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
+Vector3D Raytracing::RayColor(Ray& ray, const int depth, bool& isBackground) {
 	// If we"ve exceeded the ray bounce limit, no more light is gathered.
 	if (depth <= 0) return Vector3D(0.f, 0.f, 0.f);
 
@@ -1146,6 +1153,8 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		Ray scattered;
 		bool continueRay = false;
 		bool alpha = false;
+
+		isBackground = false;
 
 		if (m_renderMode == "albedo") {
 			if (!alpha) {
@@ -1161,7 +1170,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			}
 			else {
 				scattered = Ray(rec.GetPoint(), ray.GetDir());
-				return RayColor(scattered, depth - 1);
+				return RayColor(scattered, depth - 1, isBackground);
 			}
 		}
 		else if (m_renderMode == "emission") {
@@ -1179,7 +1188,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			Vector3D emission = EmissionColor(rec);
 
 			if (continueRay) {
-				return objCol * RayColor(scattered, depth - 1);
+				return objCol * RayColor(scattered, depth - 1, isBackground);
 			}
 			else {
 				return emission;
@@ -1189,6 +1198,8 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 
 	Vector3D unitDir = ray.GetDir();
 	unitDir.Normalize();
+
+	isBackground = true;
 
 	if (m_renderMode == "normal") {
 		//return ((unitDir * -1.f) + Vector3D(1.f, 1.f, 1.f)) / 2.f;

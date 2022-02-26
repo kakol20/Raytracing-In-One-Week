@@ -74,7 +74,7 @@ private:
 	void ShowProgress();
 
 	// raytracing
-	Vector3D RayColor(Ray& ray, const int depth);
+	Vector3D RayColor(Ray& ray, const int depth, bool & isBackground);
 	const bool RayHitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
 	Vector3D EmissionColor(HitRec& rec);
