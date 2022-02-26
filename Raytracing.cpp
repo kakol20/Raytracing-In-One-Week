@@ -510,7 +510,7 @@ void Raytracing::CornellBox() {
 	// ----- MATERIAL -----
 	float closeToOne = 1.f - m_nearZero;
 
-	m_matMap["light"] = new Emissive(Vector3D(1.f + m_nearZero), 100.f);
+	m_matMap["light"] = new Emissive(Vector3D::KelvinToRGB(2700.f), 100.f);
 
 	m_matMap["green"] = new Dielectric(Vector3D::HSVtoRGB(120.f, closeToOne, 1.0f), 1.f, 1.45f);
 	m_matMap["red"] = new Dielectric(Vector3D::HSVtoRGB(0.f, closeToOne, 1.0f), 1.f, 1.45f);
