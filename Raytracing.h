@@ -33,16 +33,17 @@ private:
 	//std::mutex m_mtx;
 	bool m_shuffleTiles;
 	float m_aperture, m_verticalFOV;
+	float m_clipEnd, m_clipStart;
+	float m_noiseThreshold;
 	float m_hdriStrength;
 	float m_nearZero;
-	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_rayDepth, m_tileSize, m_shadowDepth;
+	int m_imageWidth, m_imageHeight, m_maxSamples, m_rayDepth, m_tileSize/*, m_shadowDepth*/, m_minSamples;
 	int m_tilesRendered;
 	size_t m_nextAvailable;
 	size_t m_useThreads;
 	std::fstream m_log;
 	String m_renderMode;
 	String m_renderScene;
-	float m_clipEnd, m_clipStart;
 
 private:
 	struct Tile {

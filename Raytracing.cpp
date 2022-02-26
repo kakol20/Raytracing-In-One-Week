@@ -24,20 +24,22 @@ Raytracing::Raytracing() {
 	m_imageHeight = 720;
 	m_imageWidth = 1280;
 	m_rayDepth = 12;
-	m_shadowDepth = 4;
+	//m_shadowDepth = 4;
 
-	m_renderMode = "color";
+	m_renderMode = "all";
 
 	m_renderScene = "final";
 
-	m_samplesPerPixel = 128;
+	m_noiseThreshold = 0.01f;
+	m_maxSamples = 256;
+	m_minSamples = 0;
 	m_tileSize = 32;
 	m_verticalFOV = 19.8f;
 
 	m_tilesRendered = 0;
 	m_nextAvailable = 0;
 
-	m_useThreads = 6;
+	m_useThreads = 12;
 
 	m_nearZero = 1e-6f;
 	m_clipEnd = 63.27716808f;
@@ -87,8 +89,8 @@ Raytracing::~Raytracing() {
 }
 
 bool Raytracing::Init() {
-	//Random::Seed = 2790598843;
-	Random::Seed = 1 | ((unsigned int)0b1 << 31);
+	Random::Seed = 19022022;
+	//Random::Seed = 1 | ((unsigned int)0b1 << 31);
 
 	// ----- SETTINGS FILE -----
 	std::fstream settings;
@@ -114,9 +116,11 @@ bool Raytracing::Init() {
 			else if (first == "imageHeight") {
 				m_imageHeight = String::ToInt(line.GetSecond('='));
 			}
-			else if (first == "shadowDepth") {
-				m_shadowDepth = String::ToInt(line.GetSecond('='));
-			}
+
+			//else if (first == "shadowDepth") {
+			//	m_shadowDepth = String::ToInt(line.GetSecond('='));
+			//}
+
 			else if (first == "rayDepth") {
 				m_rayDepth = String::ToInt(line.GetSecond('='));
 			}
@@ -126,8 +130,14 @@ bool Raytracing::Init() {
 			else if (first == "scene") {
 				m_renderScene = line.GetSecond('=');
 			}
-			else if (first == "samplesPerPixel") {
-				m_samplesPerPixel = String::ToInt(line.GetSecond('='));
+			else if (first == "maxSamples") {
+				m_maxSamples = String::ToInt(line.GetSecond('='));
+			}
+			else if (first == "minSamples") {
+				m_minSamples = String::ToInt(line.GetSecond('='));
+			}
+			else if (first == "noiseThreshold") {
+				m_noiseThreshold = String::ToFloat(line.GetSecond('='));
 			}
 			else if (first == "threads") {
 				m_useThreads = (unsigned int)String::ToInt(line.GetSecond('='));
@@ -157,9 +167,11 @@ bool Raytracing::Init() {
 			<< "imageHeight=" << m_imageHeight << "\n#\n"
 			<< "# Render Settings\n"
 			<< "rayDepth=" << m_rayDepth << "\n"
-			<< "shadowDepth=" << m_shadowDepth << "\n"
+			//<< "shadowDepth=" << m_shadowDepth << "\n"
 			<< "threads=" << m_useThreads << "\n"
-			<< "samplesPerPixel=" << m_samplesPerPixel << "\n"
+			<< "maxSamples=" << m_maxSamples << "\n"
+			<< "minSamples=" << m_minSamples << "\n"
+			<< "noiseThreshold=" << m_noiseThreshold << "\n"
 			<< "tileSize=" << m_tileSize << "\n"
 			<< "## color, normal, albedo, emission or all\n"
 			<< "renderMode=" << m_renderMode << "\n"
@@ -854,9 +866,12 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 			// ----- SEND RAYS -----
 			Vector3D pixelCol;
-			for (int s = 0; s < m_samplesPerPixel; s++) {
-				float u = (x + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageWidth - 1);
-				float v = (y + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageHeight - 1);
+			float count = 0.f;
+			Vector3D previous;
+			Vector3D totalDiff;
+			for (int s = 0; s < m_maxSamples; s++) {
+				float u = (x + Random::RandFloat()) / (float)(m_imageWidth - 1);
+				float v = (y + Random::RandFloat()) / (float)(m_imageHeight - 1);
 
 				Ray r = m_camera.GetRay(u, v);
 
@@ -868,15 +883,32 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 					rayColor = Vector3D::Clamp(rayColor, 0.f, 1.f);
 				}
 
-				//else if (m_renderMode == "normal") {
-				//	rayColor.Normalize();
-				//}
+				if (s > 0) {
+					Vector3D difference;
+					difference = previous - rayColor;
+					totalDiff += difference;
+
+					if (s > m_minSamples) {
+						Vector3D avgDiff = totalDiff / count;
+
+						if (avgDiff.Threshold(m_noiseThreshold) /*avgDiff.Magnitude() < m_noiseThreshold*/) {
+							count += 1.f;
+
+							pixelCol += rayColor;
+
+							break;
+						}
+					}
+				}
+
+				//previous = rayColor;
+				count += 1.f;
 
 				pixelCol += rayColor;
 			}
 			//float scale = 1.f / ;
 
-			pixelCol /= (float)m_samplesPerPixel;
+			pixelCol /= count;
 
 			if (m_renderMode == "normal") {
 				pixelCol.Normalize();

@@ -61,6 +61,10 @@ bool Vector3D::NearZero() {
 	return abs(m_x) < s && abs(m_y) < s && abs(m_z) < s;
 }
 
+bool Vector3D::Threshold(const float threshold) {
+	return abs(m_x) < threshold && abs(m_y) < threshold && abs(m_z) < threshold;
+}
+
 Vector3D Vector3D::Clamp(const Vector3D& v, const float min, const float max) {
 	return Vector3D(std::clamp(v.m_x, min, max), std::clamp(v.m_y, min, max), std::clamp(v.m_z, min, max));
 }
