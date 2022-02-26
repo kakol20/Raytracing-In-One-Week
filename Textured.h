@@ -11,7 +11,7 @@ public:
 
 	virtual bool Emission(HitRec& rec, Vector3D& emission);
 	virtual bool Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered);
-	//virtual Vector3D GetNormal(HitRec& rec);
+	virtual Vector3D GetNormal(HitRec& rec);
 
 	virtual bool IsTransmissive(Vector3D uv = Vector3D()) { return false; };
 	virtual float GetRoughness(Vector3D uv = Vector3D());
@@ -23,7 +23,4 @@ private:
 	Image* m_normalTexture;
 	Image* m_rmeTexture;
 	Vector3D m_uvOffset;
-
-private:
-	Vector3D GetNormal(HitRec& rec);
 };

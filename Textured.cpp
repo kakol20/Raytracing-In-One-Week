@@ -98,8 +98,6 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			//normal = normalMap;
 		}
 
-		rec.SetFaceNormal(rayIn, normal);
-
 		// ----- FRESNEL -----
 		float sqrRoughness = roughness * roughness;
 
@@ -162,6 +160,27 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 	}
 }
 
+Vector3D Textured::GetNormal(HitRec& rec) {
+	if (m_normalTexture == nullptr) {
+		return rec.GetNormal();
+	}
+	else {
+		Vector3D uv = (rec.GetUV() + m_uvOffset) * Vector3D((float)m_normalTexture->GetWidth(), (float)m_normalTexture->GetHeight(), 0.f);
+		float x, y, z;
+		m_normalTexture->BiLerp(uv.GetX(), uv.GetY(), x, y, z);
+
+		x /= 255;
+		y /= 255;
+		z /= 255;
+
+		Vector3D normalMap(x, y, z);
+		normalMap = (normalMap * 2.f) - Vector3D(1.f, 1.f, 1.f);
+		normalMap.Normalize();
+
+		return rec.TangentToWorld(normalMap) * Vector3D(1.f, 1.f, 1.f);
+	}
+}
+
 float Textured::GetRoughness(Vector3D uv) {
 	// ----- ROUGHNESS, METALNESS & EMISSION -----
 	Vector3D l_uv = (uv + m_uvOffset) * Vector3D((float)m_rmeTexture->GetWidth(), (float)m_rmeTexture->GetHeight(), 0.f);
@@ -186,25 +205,4 @@ Vector3D Textured::GetAlbedo(Vector3D uv) {
 	b /= 255.f;
 	//Vector3D albedo(r, g, b);
 	return Vector3D(r, g, b);
-}
-
-Vector3D Textured::GetNormal(HitRec& rec) {
-	if (m_normalTexture == nullptr) {
-		return rec.GetNormal();
-	}
-	else {
-		Vector3D uv = (rec.GetUV() + m_uvOffset) * Vector3D((float)m_normalTexture->GetWidth(), (float)m_normalTexture->GetHeight(), 0.f);
-		float x, y, z;
-		m_normalTexture->BiLerp(uv.GetX(), uv.GetY(), x, y, z);
-
-		x /= 255;
-		y /= 255;
-		z /= 255;
-
-		Vector3D normalMap(x, y, z);
-		normalMap = (normalMap * 2.f) - Vector3D(1.f, 1.f, 1.f);
-		normalMap.Normalize();
-
-		return rec.TangentToWorld(normalMap) * Vector3D(1.f, 1.f, 1.f);
-	}
 }

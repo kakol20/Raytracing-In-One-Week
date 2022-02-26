@@ -1087,7 +1087,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 			return emission;
 		}
 		else if (m_renderMode == "normal") {
-			Vector3D normal = rec.GetNormal();
+			Vector3D normal = rec.GetMat()->GetNormal(rec);
 			normal.Normalize();
 			return normal;
 		}
