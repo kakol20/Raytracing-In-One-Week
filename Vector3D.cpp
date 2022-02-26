@@ -44,6 +44,11 @@ void Vector3D::Normalize() {
 		m_y /= magnitude;
 		m_z /= magnitude;
 	}
+	else if (magnitude == 0.f) {
+		m_x = NAN;
+		m_y = NAN;
+		m_z = NAN;
+	}
 }
 
 float Vector3D::DotProduct(const Vector3D& v1, const Vector3D& v2) {
@@ -69,6 +74,10 @@ void Vector3D::Abs() {
 	m_x = abs(m_x);
 	m_y = abs(m_y);
 	m_z = abs(m_z);
+}
+
+bool Vector3D::IsNAN() {
+	return isnan(m_x) || isnan(m_y) || isnan(m_z);
 }
 
 Vector3D Vector3D::Clamp(const Vector3D& v, const float min, const float max) {
@@ -251,14 +260,27 @@ Vector3D& Vector3D::operator=(const Vector3D& copyVector) {
 }
 
 Vector3D Vector3D::operator/(const float scalar) const {
+	if (scalar == 0.f) return Vector3D(1.f);
+		
 	return Vector3D(m_x / scalar, m_y / scalar, m_z / scalar);
 }
 
 Vector3D Vector3D::operator/(const Vector3D& otherVector) const {
-	return Vector3D(m_x / otherVector.m_x, m_y / otherVector.m_y, m_z / otherVector.m_z);
+	float x = otherVector.m_x == 0.f ? NAN : m_x / otherVector.m_x;
+	float y = otherVector.m_y == 0.f ? NAN : m_y / otherVector.m_y;
+	float z = otherVector.m_z == 0.f ? NAN : m_z / otherVector.m_z;
+	return Vector3D(x, y, z);
 }
 
 Vector3D& Vector3D::operator/=(const float scalar) {
+	if (scalar == 0.f) {
+		m_x = NAN;
+		m_y = NAN;
+		m_z = NAN;
+
+		return *this;
+	}
+	
 	m_x /= scalar;
 	m_y /= scalar;
 	m_z /= scalar;
@@ -267,9 +289,13 @@ Vector3D& Vector3D::operator/=(const float scalar) {
 }
 
 Vector3D& Vector3D::operator/=(const Vector3D& otherVector) {
-	m_x /= otherVector.m_x;
-	m_y /= otherVector.m_y;
-	m_z /= otherVector.m_z;
+	float x = otherVector.m_x == 0.f ? NAN : m_x / otherVector.m_x;
+	float y = otherVector.m_y == 0.f ? NAN : m_y / otherVector.m_y;
+	float z = otherVector.m_z == 0.f ? NAN : m_z / otherVector.m_z;
+
+	m_x = x;
+	m_y = y;
+	m_z = z;
 
 	return *this;
 }

@@ -78,6 +78,7 @@ bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 			rec.SetMat(m_mat);
 
 			Vector3D outwardNormal = (rec.GetPoint() - m_pos) / m_radius;
+			//outwardNormal.Normalize();
 			rec.SetFaceNormal(ray, outwardNormal);
 
 			rec.SetUV(CalculateUV(rec.GetPoint()) * m_uvScale);
