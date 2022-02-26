@@ -866,9 +866,9 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 			// ----- SEND RAYS -----
 			Vector3D pixelCol;
-			float count = 0.f;
+			int count = 0;
 			Vector3D previous;
-			Vector3D totalDiff;
+			Vector3D totalDiff(0.f);
 			for (int s = 0; s < m_maxSamples; s++) {
 				float u = (x + Random::RandFloat()) / (float)(m_imageWidth - 1);
 				float v = (y + Random::RandFloat()) / (float)(m_imageHeight - 1);
@@ -883,6 +883,11 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 					rayColor = Vector3D::Clamp(rayColor, 0.f, 1.f);
 				}
 
+				if (m_renderMode == "normal") {
+					rayColor.Normalize();
+					rayColor = (rayColor + Vector3D(1.f)) / 2.f;
+				}
+
 				if (s > 0) {
 					Vector3D difference;
 					difference = previous - rayColor;
@@ -890,13 +895,13 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 					totalDiff += difference;
 
 					if (s > m_minSamples) {
-						Vector3D avgDiff = totalDiff / count;
+						Vector3D avgDiff = totalDiff / (float)count;
 						//Vector3D avgDiff = totalDiff;
 
 						bool belowThreshold = avgDiff.Threshold(m_noiseThreshold);
 						//bool belowThreshold = avgDiff.Magnitude() < m_noiseThreshold;
 						if (belowThreshold) {
-							count += 1.f;
+							count++;
 							pixelCol += rayColor;
 
 							break;
@@ -905,18 +910,13 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				}
 
 				previous = rayColor;
-				count += 1.f;
 
+				count++;
 				pixelCol += rayColor;
 			}
 			//float scale = 1.f / ;
 
-			pixelCol /= count;
-
-			if (m_renderMode == "normal") {
-				pixelCol.Normalize();
-				pixelCol = (pixelCol + Vector3D(1.f)) / 2.f;
-			}
+			pixelCol /= (float)count;
 
 			pixelCol = Vector3D::Clamp(pixelCol, 0.f, 1.f);
 
