@@ -23,15 +23,15 @@ Raytracing::Raytracing() {
 	m_aperture = 0.1f;
 	m_imageHeight = 720;
 	m_imageWidth = 1280;
-	m_rayDepth = 12;
+	m_rayDepth = 32;
 	//m_shadowDepth = 4;
 
 	m_renderMode = "all";
 
 	m_renderScene = "final";
 
-	m_noiseThreshold = 0.01f;
-	m_maxSamples = 256;
+	m_noiseThreshold = 0.0001f;
+	m_maxSamples = 512;
 	m_minSamples = 0;
 	m_tileSize = 32;
 	m_verticalFOV = 19.8f;
