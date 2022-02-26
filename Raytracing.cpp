@@ -947,6 +947,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 			int uniformCount = count;
 
+			bool checkForNearZero = true;
 			for (int s = 0; s < m_maxSamples - uniformCount; s++) {
 				float u = (x + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageWidth - 1);
 				float v = (y + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageHeight - 1);
@@ -980,8 +981,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 						bool belowThreshold = avgDiff.Threshold(m_noiseThreshold);
 						//bool belowThreshold = avgDiff.Magnitude() < m_noiseThreshold;
-						if (rayColor.NearZero() && !isBackground) { // bodged fix to black pixels
-							if (m_renderMode != "color") {
+						if (rayColor.NearZero() && !isBackground && checkForNearZero) { // bodged fix to black pixels
+							if (m_renderMode != "color" && belowThreshold) {
 								count++;
 								pixelCol += rayColor;
 
@@ -994,6 +995,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 							break;
 						}
+
+						if (belowThreshold && !rayColor.NearZero()) checkForNearZero = false;
 					}
 				}
 
