@@ -32,6 +32,7 @@ public:
 
 	bool NearZero();
 	bool Threshold(const float threshold);
+	void Abs();
 
 	static Vector3D Clamp(const Vector3D& v, const float min, const float max);
 	static Vector3D Lerp(const Vector3D& from, const Vector3D& to, const float factor);

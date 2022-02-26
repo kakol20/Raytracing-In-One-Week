@@ -35,7 +35,7 @@ bool Textured::Emission(HitRec& rec, Vector3D& emission) {
 	Vector3D albedo(r, g, b);
 	albedo /= 255.f;
 	float emissionModified = l_emission * m_emissionStrength;
-	l_emission = round(l_emission);
+	l_emission = roundf(l_emission);
 
 	bool emissionRand = Random::RandFloat() <= l_emission;
 
@@ -65,7 +65,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 		emission = 0.f;
 	}
 
-	emission = round(emission);
+	emission = roundf(emission);
 
 	// ----- ALBEDO -----
 	uv = (rec.GetUV() + m_uvOffset) * Vector3D((float)m_albedoTexture->GetWidth(), (float)m_albedoTexture->GetHeight(), 0.f);

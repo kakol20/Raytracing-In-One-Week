@@ -50,7 +50,7 @@ Raytracing::Raytracing() {
 
 	//StaticMutex::s_mtx = std::mutex();
 
-	m_shuffleTiles = false;
+	m_shuffleTiles = true;
 }
 
 Raytracing::~Raytracing() {
@@ -886,14 +886,17 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				if (s > 0) {
 					Vector3D difference;
 					difference = previous - rayColor;
+					difference.Abs();
 					totalDiff += difference;
 
 					if (s > m_minSamples) {
 						Vector3D avgDiff = totalDiff / count;
+						//Vector3D avgDiff = totalDiff;
 
-						if (avgDiff.Threshold(m_noiseThreshold) /*avgDiff.Magnitude() < m_noiseThreshold*/) {
+						bool belowThreshold = avgDiff.Threshold(m_noiseThreshold);
+						//bool belowThreshold = avgDiff.Magnitude() < m_noiseThreshold;
+						if (belowThreshold) {
 							count += 1.f;
-
 							pixelCol += rayColor;
 
 							break;
@@ -901,7 +904,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 					}
 				}
 
-				//previous = rayColor;
+				previous = rayColor;
 				count += 1.f;
 
 				pixelCol += rayColor;
