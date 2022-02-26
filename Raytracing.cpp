@@ -528,7 +528,7 @@ void Raytracing::CornellBox() {
 
 void Raytracing::DebugScene() {
 	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
-	m_hdriStrength = 0.1f;
+	m_hdriStrength = 1.f;
 
 	// ----- LIGHTS -----
 	//m_lights.push_back(Light(Vector3D(-20.f, 15.f, -15.f), Vector3D(1.f, 1.f, 1.f), 5.f, 1165.21671522f));
@@ -544,17 +544,22 @@ void Raytracing::DebugScene() {
 	//m_camera = Camera(aspect_ratio, 0.f, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
 
 	// ----- MATERIAL -----
+	m_matMap["dielectric"] = new Dielectric(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), 1.f, 1.f), 0.1f, 1.45f);
+	m_matMap["diffuse"] = new Diffuse(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), 1.f, 1.f));
+	m_matMap["emissive"] = new Emissive(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), Random::RandFloatRange(0.25f, 0.5f), 1.f), 1.f);
+	m_matMap["glass"] = new Glass(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), Random::RandFloatRange(0.f, 0.25f), 1.f), 0.f, 1.5f);
 	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
-	//m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.f1f, 0.f1f));
-	m_matMap["emissive"] = new Emissive(Vector3D::Random(0.f, 1.f), 4.f);
-	m_matMap["metal"] = new Metal(Vector3D::Random(0.5f, 1.f), 0.1f, 1.45f);
-	m_matMap["glass"] = new Glass(Vector3D::Random(0.5f, 1.f), 0.f, 1.5f);
+	m_matMap["metal"] = new Metal(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), Random::RandFloatRange(0.5f, 1.f), 1.f), 0.1f, 1.45f);
 
 	// ----- OBJECTS -----
 	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
+
 	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["glass"]));
 	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["emissive"]));
 	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["metal"]));
+
+	m_objects.push_back(new Sphere(Vector3D(-1.25, 0.5f, 1.4143f), 0.5f, m_matMap["diffuse"]));
+	m_objects.push_back(new Sphere(Vector3D(1.25, 0.5f, 1.4143f), 0.5f, m_matMap["dielectric"]));
 }
 
 void Raytracing::FinalScene() {
@@ -870,7 +875,39 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			Vector3D previous;
 			Vector3D totalDiff(0.f);
 
-			if (m_maxSamples >= 4) {
+			if (m_minSamples > 9) {
+				for (float i = 0.f; i <= 1; i += 0.5f) {
+					for (float j = 0.f; j <= 1; j += 0.5f) {
+						float u = (x + i) / (float)(m_imageWidth - 1);
+						float v = (y + j) / (float)(m_imageHeight - 1);
+
+						Ray r = m_camera.GetRay(u, v);
+
+						Vector3D rayColor = RayColor(r, m_rayDepth);
+
+						if (m_renderMode == "emission" || m_renderMode == "albedo"/* || m_renderMode == "color"*/) {
+							rayColor = Vector3D::Clamp(rayColor, 0.f, 1.f);
+						}
+
+						if (m_renderMode == "normal") {
+							rayColor.Normalize();
+							rayColor = (rayColor + Vector3D(1.f)) / 2.f;
+						}
+
+						if (!(i == 0 && j == 0)) {
+							Vector3D difference;
+							difference = previous - rayColor;
+							difference.Abs();
+							totalDiff += difference;
+						}
+
+						previous = rayColor;
+						count++;
+						pixelCol += rayColor;
+					}
+				}
+			}
+			else if (m_maxSamples > 4) {
 				for (int i = 0; i <= 1; i++) {
 					for (int j = 0; j <= 1; j++) {
 						float u = (x + i) / (float)(m_imageWidth - 1);
@@ -902,11 +939,12 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 					}
 				}
 			}
-			
 
-			for (int s = 0; s < m_maxSamples - count; s++) {
-				float u = (x + Random::RandFloat()) / (float)(m_imageWidth - 1);
-				float v = (y + Random::RandFloat()) / (float)(m_imageHeight - 1);
+			int uniformCount = count;
+
+			for (int s = 0; s < m_maxSamples - uniformCount; s++) {
+				float u = (x + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageWidth - 1);
+				float v = (y + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageHeight - 1);
 
 				Ray r = m_camera.GetRay(u, v);
 
@@ -919,23 +957,31 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				}
 
 				if (m_renderMode == "normal") {
-					rayColor.Normalize();
+					//rayColor.Normalize();
 					rayColor = (rayColor + Vector3D(1.f)) / 2.f;
 				}
 
-				if (m_maxSamples > 4) {
+				if (count > 0) {
 					Vector3D difference;
 					difference = previous - rayColor;
 					difference.Abs();
 					totalDiff += difference;
 
-					if (s > m_minSamples) {
+					if (s > m_minSamples - uniformCount) {
 						Vector3D avgDiff = totalDiff / (float)count;
 						//Vector3D avgDiff = totalDiff;
 
 						bool belowThreshold = avgDiff.Threshold(m_noiseThreshold);
 						//bool belowThreshold = avgDiff.Magnitude() < m_noiseThreshold;
-						if (belowThreshold) {
+						if (rayColor.NearZero()) { // bodged fix to black pixels
+							if (m_renderMode != "color") {
+								count++;
+								pixelCol += rayColor;
+
+								break;
+							}
+						}
+						else if (belowThreshold) {
 							count++;
 							pixelCol += rayColor;
 
@@ -952,16 +998,17 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			//float scale = 1.f / ;
 
 			pixelCol /= (float)count;
-
 			pixelCol = Vector3D::Clamp(pixelCol, 0.f, 1.f);
 
-			if (m_renderMode == "albedo") {
+			if (m_renderMode == "albedo" || m_renderMode == "color" || m_renderMode == "emission") {
 				pixelCol = ColorSpace::LinearTosRGB(pixelCol);
 			}
-			else if (m_renderMode == "color" || m_renderMode == "emission") {
-				//pixelCol = ColorSpace::CIEXYZToACES(ColorSpace::LinearToCIEXYZ(pixelCol));
-				pixelCol = ColorSpace::LinearTosRGB(pixelCol);
-			}
+
+			//else if () {
+			//	//pixelCol = ColorSpace::CIEXYZToACES(ColorSpace::LinearToCIEXYZ(pixelCol));
+			//	pixelCol = ColorSpace::LinearTosRGB(pixelCol);
+			//}
+
 			pixelCol = Vector3D::Clamp(pixelCol, 0.f, 1.f);
 
 			// ----- WRITE COLOR -----
@@ -1108,7 +1155,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 					return emission;
 				}
 				else {
-					Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
+					Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha, 4);
 					return objCol;
 				}
 			}
@@ -1128,14 +1175,14 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 		}
 		else {
 			//Vector3D emissionCol = EmissionColor(rec);
-			Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
+			Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha, 4);
 			Vector3D emission = EmissionColor(rec);
 
 			if (continueRay) {
-				return emission + objCol * RayColor(scattered, depth - 1);
+				return objCol * RayColor(scattered, depth - 1);
 			}
 			else {
-				return emission + objCol;
+				return emission;
 			}
 		}
 	}
@@ -1154,7 +1201,8 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	else {
 		float u, v;
 		unitDir.UVSphere(u, v);
-		u = 1.f - u;
+		//u = 1.f - u;
+		u -= 1.f;
 
 		u *= (float)(m_hdri.GetWidth());
 		v *= (float)(m_hdri.GetHeight());
@@ -1193,12 +1241,17 @@ Vector3D Raytracing::EmissionColor(HitRec& rec) {
 	return emission;
 }
 
-Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha) {
+Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha, const int maxIterations) {
 	Vector3D attentuation;
 	if (rec.GetMat()->Scatter(ray, rec, attentuation, scattered)) {
 		continueRay = true;
 		alpha = false;
-		return attentuation;
+		if (attentuation.NearZero() && maxIterations > 0) {
+			return ObjectColor(ray, rec, scattered, continueRay, alpha, maxIterations - 1);
+		}
+		else {
+			return attentuation;
+		}
 	}
 	else {
 		continueRay = false;

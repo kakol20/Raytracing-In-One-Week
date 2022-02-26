@@ -16,40 +16,77 @@ Sphere::~Sphere() {
 }
 
 bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
-	Vector3D oc = ray.GetOrig() - m_pos;
-	float a = ray.GetDir().SqrMagnitude();
-	float half_b = Vector3D::DotProduct(oc, ray.GetDir());
-	float c = oc.SqrMagnitude() - m_radius * m_radius;
+	bool method1 = false;
+	if (method1) {
+		Vector3D oc = ray.GetOrig() - m_pos;
+		float a = ray.GetDir().SqrMagnitude();
+		float half_b = Vector3D::DotProduct(oc, ray.GetDir());
+		float c = oc.SqrMagnitude() - m_radius * m_radius;
 
-	float discriminant = half_b * half_b - a * c;
+		float discriminant = half_b * half_b - a * c;
 
-	if (discriminant < 0.f) return false;
+		if (discriminant < 0.f) return false;
 
-	float sqrtd = sqrt(discriminant);
+		float sqrtd = sqrt(discriminant);
 
-	// Find the nearest root that lies in the acceptable range.
-	float root = (-half_b - sqrtd) / a;
-	if (root < t_min || t_max < root) {
-		root = (-half_b + sqrtd) / a;
+		// Find the nearest root that lies in the acceptable range.
+		float root = (-half_b - sqrtd) / a;
+		if (root < t_min || t_max < root) {
+			root = (-half_b + sqrtd) / a;
 
-		if (root < t_min || t_max < root) return false;
+			if (root < t_min || t_max < root) return false;
+		}
+
+		rec.SetT(root);
+		rec.SetPoint(ray.At(root));
+		rec.SetMat(m_mat);
+
+		/*rec.t = root;
+		rec.point = ray.At(rec.t);
+		Vector3D outwardNormal = (rec.point - m_pos) / m_radius;*/
+
+		Vector3D outwardNormal = (rec.GetPoint() - m_pos) / m_radius;
+		rec.SetFaceNormal(ray, outwardNormal);
+
+		rec.SetUV(CalculateUV(rec.GetPoint()) * m_uvScale);
+		rec.SetTangents(CalculateTangent(rec));
+		return true;
+	}
+	else {
+		float r = m_radius;
+		Vector3D c = m_pos;
+		Vector3D o = ray.GetOrig();
+		Vector3D u = ray.GetDir();
+
+		Vector3D oc = o - c;
+		float quadC = oc.SqrMagnitude() - (r * r);
+		float quadB = Vector3D::DotProduct(u, oc);
+
+		float delta = (quadB * quadB) - quadC;
+		if (delta >= 0) {
+			float sqrtD = sqrt(delta);
+
+			float d = (-quadB) - sqrtD;
+			if (d < t_min || t_max < d) {
+				d = (-quadB) + sqrtD;
+
+				if (d < t_min || t_max < d) return false;
+			}
+
+			rec.SetT(d);
+			rec.SetPoint(ray.At(d));
+			rec.SetMat(m_mat);
+
+			Vector3D outwardNormal = (rec.GetPoint() - m_pos) / m_radius;
+			rec.SetFaceNormal(ray, outwardNormal);
+
+			rec.SetUV(CalculateUV(rec.GetPoint()) * m_uvScale);
+			rec.SetTangents(CalculateTangent(rec));
+			return true;
+		}
 	}
 
-	rec.SetT(root);
-	rec.SetPoint(ray.At(root));
-	rec.SetMat(m_mat);
-
-	/*rec.t = root;
-	rec.point = ray.At(rec.t);
-	Vector3D outwardNormal = (rec.point - m_pos) / m_radius;*/
-
-	Vector3D outwardNormal = (rec.GetPoint() - m_pos) / m_radius;
-	rec.SetFaceNormal(ray, outwardNormal);
-
-	rec.SetUV(CalculateUV(rec.GetPoint()) * m_uvScale);
-	rec.SetTangents(CalculateTangent(rec));
-
-	return true;
+	return false;
 }
 
 bool Sphere::SphereIntersectGround(const Vector3D pos, const float radius) {

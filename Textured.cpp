@@ -88,15 +88,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 		Vector3D unitDir = rayIn.GetDir();
 		Vector3D incoming = unitDir * -1.0f;
 
-		Vector3D normal;
-		if (m_normalTexture == nullptr) {
-			normal = rec.GetNormal();
-		}
-		else {
-			normal = GetNormal(rec);
-			//if (normal.NearZero()) normal = rec.GetNormal();
-			//normal = normalMap;
-		}
+		Vector3D normal = GetNormal(rec);
 
 		// ----- FRESNEL -----
 		float sqrRoughness = roughness * roughness;
