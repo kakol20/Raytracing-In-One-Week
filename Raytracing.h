@@ -78,7 +78,7 @@ private:
 	const bool RayHitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
 	Vector3D EmissionColor(HitRec& rec);
-	Vector3D ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha, const int maxIterations);
+	Vector3D ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha);
 
 	std::map<String, Image*> m_textures;
 	std::map<String, Material*> m_matMap;

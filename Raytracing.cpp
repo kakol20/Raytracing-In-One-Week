@@ -1164,7 +1164,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth, bool& isBackground) {
 					return emission;
 				}
 				else {
-					Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha, 4);
+					Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
 					return objCol;
 				}
 			}
@@ -1184,7 +1184,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth, bool& isBackground) {
 		}
 		else {
 			//Vector3D emissionCol = EmissionColor(rec);
-			Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha, 4);
+			Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
 			Vector3D emission = EmissionColor(rec);
 
 			if (continueRay) {
@@ -1252,17 +1252,13 @@ Vector3D Raytracing::EmissionColor(HitRec& rec) {
 	return emission;
 }
 
-Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha, const int maxIterations) {
+Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha) {
 	Vector3D attentuation;
 	if (rec.GetMat()->Scatter(ray, rec, attentuation, scattered)) {
 		continueRay = true;
 		alpha = false;
-		if (attentuation.NearZero() && maxIterations > 0) {
-			return ObjectColor(ray, rec, scattered, continueRay, alpha, maxIterations - 1);
-		}
-		else {
-			return attentuation;
-		}
+
+		return attentuation;
 	}
 	else {
 		continueRay = false;
