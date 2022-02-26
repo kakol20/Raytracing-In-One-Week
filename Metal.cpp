@@ -18,10 +18,11 @@ bool Metal::Emission(HitRec& rec, Vector3D& emission) {
 
 bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
 	// ----- NORMAL -----
-	Vector3D unitDir = rayIn.GetDir();
-	Vector3D incoming = unitDir * -1.0f;
-
 	Vector3D normal = rec.GetNormal();
+
+	Vector3D unitDir = rayIn.GetDir();
+	if (rayIn.GetDir().NearZero()) unitDir = normal * -1.f;
+	Vector3D incoming = unitDir * -1.0f;
 
 	// ----- FRESNEL -----
 	float sqrRoughness = m_roughness * m_roughness;
@@ -54,13 +55,22 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	Vector3D scatterDir = fresnelRand ? reflect : glossy;
 	//Vector3D scatterDir = glossy;
 
+	bool debug = false;
+	if (debug) {
+		if (attentuation.NearZero()) attentuation = m_albedo;
+
+		float scatterDot = Vector3D::DotProduct(scatterDir, normal);
+
+		attentuation = scatterDot < 0.f ? Vector3D(0.f, 1.f) : Vector3D(1.f, 0.f);
+		scatterDir = Vector3D::RandomInHemisphere(normal);
+	}
+	else {
+		attentuation = Vector3D::Lerp(m_albedo, Vector3D(1.f, 1.f, 1.f), incomingFresnel);
+		attentuation = Vector3D::Lerp(m_edgeTint, attentuation, facing);
+	}
+
 	scatterDir.Normalize();
 
-	attentuation = Vector3D::Lerp(m_albedo, Vector3D(1.f, 1.f, 1.f), incomingFresnel);
-	attentuation = Vector3D::Lerp(m_edgeTint, attentuation, facing);
-
-	if (attentuation.NearZero()) attentuation = m_albedo;
-
 	scattered = Ray(rec.GetPoint(), scatterDir);
-	return Vector3D::DotProduct(scatterDir, normal) > 0;
+	return true;
 }

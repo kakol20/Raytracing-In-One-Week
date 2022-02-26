@@ -41,9 +41,9 @@ Raytracing::Raytracing() {
 
 	m_useThreads = 12;
 
-	m_nearZero = 1e-6f;
+	m_nearZero = 1e-6f; 
 	m_clipEnd = 63.27716808f;
-	m_clipStart = m_nearZero;
+	m_clipStart = 1e-4f; // ----- MUST KEEP LIKE THIS TO PREVENT BLACK SPECKLES -----
 
 	//m_hdriStrength = 1.f;
 	m_hdriStrength = 0.1f;
@@ -871,7 +871,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 			// ----- SEND RAYS -----
 			Vector3D pixelCol;
-			int count = 0;
+			float count = 0.f;
 			Vector3D previous;
 			Vector3D totalDiff(0.f);
 
@@ -945,7 +945,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				}
 			}
 
-			int uniformCount = count;
+			float uniformCount = count;
 
 			for (int s = 0; s < m_maxSamples - uniformCount; s++) {
 				float u = (x + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageWidth - 1);
@@ -955,6 +955,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				bool isBackground = false;
 				//pixelCol += Vector3D::Clamp(RayColor(r, m_rayDepth), 0.f, 1.f);
 				Vector3D rayColor = RayColor(r, m_rayDepth, isBackground);
+				if (rayColor.IsNAN()) rayColor = Vector3D(1.f, 0.f, 1.f);
+				//if (rayColor.NearZero()) rayColor = Vector3D(1.f, 0.f, 1.f);
 				//pixelCol += RayColor(r, m_rayDepth);
 
 				if (m_renderMode == "emission" || m_renderMode == "albedo") {
@@ -968,19 +970,19 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 				//rayColor = Vector3D::OrderedDithering(rayColor, (int)round(u), (int)round(v), 255);
 
-				if (count > 0) {
+				if (count > 0.f) {
 					Vector3D difference;
 					difference = previous - rayColor;
 					difference.Abs();
 					totalDiff += difference;
 
-					if (s > m_minSamples - uniformCount) {
+					if (count > (float)m_minSamples) {
 						Vector3D avgDiff = totalDiff / (float)count;
 						//Vector3D avgDiff = totalDiff;
 
 						bool belowThreshold = avgDiff.Threshold(m_noiseThreshold);
 						//bool belowThreshold = avgDiff.Magnitude() < m_noiseThreshold;
-						if (rayColor.NearZero() && !isBackground) { // bodged fix to black pixels
+						if (/*rayColor.NearZero() && !isBackground*/ false) { // bodged fix to black pixels
 							if (m_renderMode != "color") {
 								count++;
 								pixelCol += rayColor;
@@ -1016,7 +1018,11 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			//	pixelCol = ColorSpace::LinearTosRGB(pixelCol);
 			//}
 
-			pixelCol = Vector3D::Clamp(pixelCol, 0.f, 1.f);
+			//pixelCol = Vector3D::Clamp(pixelCol, 0.f, 1.f);
+
+			if (pixelCol.IsNAN()) {
+				pixelCol = Vector3D(1.f, 0.f, 1.f);
+			}
 
 			// ----- WRITE COLOR -----
 			pixelCol = Vector3D::OrderedDithering(pixelCol, x, flippedY, 255);
