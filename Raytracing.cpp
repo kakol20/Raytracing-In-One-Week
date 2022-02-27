@@ -41,9 +41,9 @@ Raytracing::Raytracing() {
 
 	m_useThreads = 12;
 
-	m_nearZero = 1e-6f; 
+	m_nearZero = 1e-4f; // ----- MUST KEEP LIKE THIS (1e-4f) TO PREVENT BLACK SPECKLES -----
 	m_clipEnd = 63.27716808f;
-	m_clipStart = 1e-4f; // ----- MUST KEEP LIKE THIS TO PREVENT BLACK SPECKLES -----
+	m_clipStart = 1e-4f;
 
 	//m_hdriStrength = 1.f;
 	m_hdriStrength = 0.1f;
@@ -575,6 +575,7 @@ void Raytracing::FinalScene() {
 	Vector3D lookAt(0.f, 0.f, 0.f);
 	Vector3D dist = lookAt - lookFrom;
 	Vector3D up(0.f, 1.f, 0.f);
+	m_clipEnd = 63.27716808f;
 
 	const float aspectRatio = m_imageWidth / (float)m_imageHeight;
 	m_camera = Camera(aspectRatio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
@@ -871,83 +872,11 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 			// ----- SEND RAYS -----
 			Vector3D pixelCol;
-			float count = 0.f;
+			int count = 0;
 			Vector3D previous;
 			Vector3D totalDiff(0.f);
 
-			if (m_minSamples > 9) {
-				for (float i = 0.f; i <= 1; i += 0.5f) {
-					for (float j = 0.f; j <= 1; j += 0.5f) {
-						float u = (x + i) / (float)(m_imageWidth - 1);
-						float v = (y + j) / (float)(m_imageHeight - 1);
-
-						Ray r = m_camera.GetRay(u, v);
-
-						bool isBackground = false;
-						Vector3D rayColor = RayColor(r, m_rayDepth, isBackground);
-
-						if (m_renderMode == "emission" || m_renderMode == "albedo"/* || m_renderMode == "color"*/) {
-							rayColor = Vector3D::Clamp(rayColor, 0.f, 1.f);
-						}
-
-						if (m_renderMode == "normal") {
-							rayColor.Normalize();
-							rayColor = (rayColor + Vector3D(1.f)) / 2.f;
-						}
-
-						//rayColor = Vector3D::OrderedDithering(rayColor, (int)round(u), (int)round(v), 255);
-
-						if (!(i == 0 && j == 0)) {
-							Vector3D difference;
-							difference = previous - rayColor;
-							difference.Abs();
-							totalDiff += difference;
-						}
-
-						previous = rayColor;
-						count++;
-						pixelCol += rayColor;
-					}
-				}
-			}
-			else if (m_maxSamples > 4) {
-				for (int i = 0; i <= 1; i++) {
-					for (int j = 0; j <= 1; j++) {
-						float u = (x + i) / (float)(m_imageWidth - 1);
-						float v = (y + j) / (float)(m_imageHeight - 1);
-
-						Ray r = m_camera.GetRay(u, v);
-						bool isBackground = false;
-						Vector3D rayColor = RayColor(r, m_rayDepth, isBackground);
-
-						if (m_renderMode == "emission" || m_renderMode == "albedo") {
-							rayColor = Vector3D::Clamp(rayColor, 0.f, 1.f);
-						}
-
-						if (m_renderMode == "normal") {
-							rayColor.Normalize();
-							rayColor = (rayColor + Vector3D(1.f)) / 2.f;
-						}
-
-						//rayColor = Vector3D::OrderedDithering(rayColor, (int)round(u), (int)round(v), 255);
-
-						if (!(i == 0 && j == 0)) {
-							Vector3D difference;
-							difference = previous - rayColor;
-							difference.Abs();
-							totalDiff += difference;
-						}
-
-						previous = rayColor;
-						count++;
-						pixelCol += rayColor;
-					}
-				}
-			}
-
-			float uniformCount = count;
-
-			for (int s = 0; s < m_maxSamples - uniformCount; s++) {
+			for (int s = 0; s < m_maxSamples; s++) {
 				float u = (x + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageWidth - 1);
 				float v = (y + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageHeight - 1);
 
@@ -970,27 +899,20 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 				//rayColor = Vector3D::OrderedDithering(rayColor, (int)round(u), (int)round(v), 255);
 
-				if (count > 0.f) {
+				if (count > 0) {
 					Vector3D difference;
 					difference = previous - rayColor;
 					difference.Abs();
 					totalDiff += difference;
 
-					if (count > (float)m_minSamples) {
+					if (count > m_minSamples) {
 						Vector3D avgDiff = totalDiff / (float)count;
 						//Vector3D avgDiff = totalDiff;
 
 						bool belowThreshold = avgDiff.Threshold(m_noiseThreshold);
 						//bool belowThreshold = avgDiff.Magnitude() < m_noiseThreshold;
-						if (/*rayColor.NearZero() && !isBackground*/ false) { // bodged fix to black pixels
-							if (m_renderMode != "color") {
-								count++;
-								pixelCol += rayColor;
 
-								break;
-							}
-						}
-						else if (belowThreshold) {
+						if (belowThreshold) {
 							count++;
 							pixelCol += rayColor;
 

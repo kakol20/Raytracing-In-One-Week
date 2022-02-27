@@ -62,7 +62,7 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 }
 
 bool Vector3D::NearZero() {
-	const float s = 1e-6f;
+	const float s = 1e-4f;
 	return abs(m_x) < s && abs(m_y) < s && abs(m_z) < s;
 }
 
