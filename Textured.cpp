@@ -91,7 +91,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 		Vector3D normal = GetNormal(rec);
 
 		// ----- FRESNEL -----
-		float sqrRoughness = roughness * roughness;
+		float sqrRoughness = roughness/* * roughness*/;
 
 		bool roughnessRand = Random::RandFloat() <= sqrRoughness;
 

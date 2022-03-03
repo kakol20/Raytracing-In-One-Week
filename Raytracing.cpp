@@ -16,6 +16,7 @@
 #include "Sphere.h"
 #include "StaticMutex.h"
 #include "Textured.h"
+#include "TranslatedObj.h"
 
 #include "Raytracing.h"
 
@@ -60,11 +61,21 @@ Raytracing::~Raytracing() {
 	std::vector<Material*> m_matVec;
 	std::vector<Object*> m_objects;
 	std::vector<Tile> m_tiles;*/
-	if (!m_textures.empty()) {
-		for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
+
+	if (!m_objects.empty()) {
+		for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
+			delete (*it);
+			(*it) = nullptr;
+		}
+		m_objects.clear();
+	}
+
+	if (!m_unrenderedObjects.empty()) {
+		for (auto it = m_unrenderedObjects.begin(); it != m_unrenderedObjects.end(); it++) {
 			delete (*it).second;
 			(*it).second = nullptr;
 		}
+		m_unrenderedObjects.clear();
 	}
 
 	if (!m_matMap.empty()) {
@@ -72,6 +83,7 @@ Raytracing::~Raytracing() {
 			delete (*it).second;
 			(*it).second = nullptr;
 		}
+		m_matMap.clear();
 	}
 
 	if (!m_matVec.empty()) {
@@ -79,13 +91,15 @@ Raytracing::~Raytracing() {
 			delete (*it);
 			(*it) = nullptr;
 		}
+		m_matVec.clear();
 	}
 
-	if (!m_objects.empty()) {
-		for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
-			delete (*it);
-			(*it) = nullptr;
+	if (!m_textures.empty()) {
+		for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
+			delete (*it).second;
+			(*it).second = nullptr;
 		}
+		m_textures.clear();
 	}
 }
 
@@ -513,13 +527,19 @@ void Raytracing::CornellBox() {
 
 	m_matMap["light"] = new Emissive(Vector3D::KelvinToRGB(2700.f), 100.f);
 
-	m_matMap["green"] = new Dielectric(Vector3D::HSVtoRGB(120.f, closeToOne, 1.0f), 1.f, 1.45f);
-	m_matMap["red"] = new Dielectric(Vector3D::HSVtoRGB(0.f, closeToOne, 1.0f), 1.f, 1.45f);
-	m_matMap["blue"] = new Dielectric(Vector3D::HSVtoRGB(240.f, closeToOne, 1.0f), 1.f, 1.45f);
-	m_matMap["white"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.f, 1.0f), 1.f, 1.45f);
+	m_matMap["green"] = new Dielectric(Vector3D(0.f, 0.502887f, 0.f), 1.f, 1.45f);
+	m_matMap["red"]   = new Dielectric(Vector3D(0.502887f, 0.f, 0.f), 1.f, 1.45f);
+	//m_matMap["blue"] = new Dielectric(Vector3D::HSVtoRGB(240.f, closeToOne, 1.0f), 1.f, 1.45f);
+	m_matMap["white"] = new Dielectric(Vector3D(0.401978f), 0.5f, 1.45f);
+
+	m_matMap["glass"] = new Glass(Vector3D(1.f), m_nearZero, 1.5f);
+	m_matMap["metal"] = new Metal(Vector3D(0.401978f), 0.25f, 2.95f);
 
 	// ----- OBJECTS -----
-	m_objects.reserve(7);
+	m_objects.reserve(10);
+
+	m_unrenderedObjects["shortBlock"] = new Box(Vector3D(0.5f), m_matMap["white"]);
+	m_unrenderedObjects["tallBlock"]  = new Box(Vector3D(0.5f, 1.f, 0.5f), m_matMap["white"]);
 
 	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, closeToOne, 0.f), 0.45f, 0.45f, m_matMap["light"]));
 
@@ -529,7 +549,12 @@ void Raytracing::CornellBox() {
 	m_objects.push_back(new Plane(Plane::Type::YPlus, Vector3D(0.f, -1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
 	m_objects.push_back(new Plane(Plane::Type::ZPlus, Vector3D(0.f, 0.f, -1.f), 2.f, 2.f, m_matMap["white"]));
 
-	m_objects.push_back(new Box(Vector3D(0.5f), m_matMap["blue"]));
+	//m_objects.push_back(new Box(Vector3D(0.5f), m_matMap["blue"]));
+	m_objects.push_back(new TranslatedObj(Vector3D(0.33f, -0.75f, 0.43f), m_unrenderedObjects["shortBlock"]));
+	m_objects.push_back(new TranslatedObj(Vector3D(-0.32f, -0.5f, -0.24f), m_unrenderedObjects["tallBlock"]));
+
+	m_objects.push_back(new Sphere(Vector3D(0.33f, -0.3f, 0.43f), 0.2f, m_matMap["glass"]));
+	m_objects.push_back(new Sphere(Vector3D(-0.32f, 0.2f, -0.24f), 0.2f, m_matMap["metal"]));
 }
 
 void Raytracing::DebugScene() {

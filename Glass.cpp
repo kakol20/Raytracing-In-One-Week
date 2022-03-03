@@ -20,7 +20,7 @@ bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	Vector3D normal = rec.GetNormal();
 
 	// ----- FRESNEL -----
-	float sqrRoughness = m_roughness * m_roughness;
+	float sqrRoughness = m_roughness/* * m_roughness*/;
 
 	bool roughnessRand = Random::RandFloat() < sqrRoughness;
 

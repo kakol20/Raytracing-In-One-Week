@@ -28,6 +28,7 @@ Box::~Box() {
 			delete (*it);
 			(*it) = nullptr;
 		}
+		m_planes.clear();
 	}
 
 	m_mat = nullptr;

@@ -82,6 +82,7 @@ private:
 
 	std::map<String, Image*> m_textures;
 	std::map<String, Material*> m_matMap;
+	std::map<String, Object*> m_unrenderedObjects;
 	std::vector<Material*> m_matVec;
 	std::vector<Object*> m_objects;
 	std::vector<Tile> m_tiles;

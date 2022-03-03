@@ -19,7 +19,7 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	incoming.Normalize();
 
 	// ----- FRESNEL -----
-	float sqrRoughness = m_roughness * m_roughness;
+	float sqrRoughness = m_roughness/* * m_roughness*/;
 
 	bool roughnessRand = Random::RandFloat() <= sqrRoughness;
 

@@ -25,7 +25,7 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	Vector3D incoming = unitDir * -1.0f;
 
 	// ----- FRESNEL -----
-	float sqrRoughness = m_roughness * m_roughness;
+	float sqrRoughness = m_roughness/* * m_roughness*/;
 
 	bool roughnessRand = Random::RandFloat() < sqrRoughness;
 
