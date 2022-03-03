@@ -63,7 +63,7 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 
 bool Vector3D::NearZero() {
 	const float s = 1e-4f;
-	return abs(m_x) < s && abs(m_y) < s && abs(m_z) < s;
+	return abs(m_x) <= s && abs(m_y) <= s && abs(m_z) <= s;
 }
 
 bool Vector3D::Threshold(const float threshold) {
@@ -208,18 +208,21 @@ Vector3D Vector3D::Random(const float min, const float max) {
 }
 
 Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
-	Vector3D rand = Vector3D::RandomInUnitSphere();
-	if (Vector3D::DotProduct(normal, rand) < 0.f) {
-		rand *= 1.f;
+	while (true) {
+		Vector3D rand = Vector3D::RandomInUnitSphere();
+		if (Vector3D::DotProduct(normal, rand) < 0.f) {
+			rand *= -1.f;
+		}
+
+		if (Vector3D::DotProduct(normal, rand) > 1e-4f) return rand;
 	}
-	return rand;
 }
 
 Vector3D Vector3D::RandomInUnitDisk() {
 	while (true) {
 		Vector3D o = Vector3D(Random::RandFloatRange(-1.f, 1.f), Random::RandFloatRange(-1.f, 1.f), 0.f);
 
-		if (o.SqrMagnitude() >= 1.0) continue;
+		if (o.SqrMagnitude() > 1.0) continue;
 
 		return o;
 	}
@@ -229,7 +232,7 @@ Vector3D Vector3D::RandomInUnitSphere() {
 	while (true) {
 		Vector3D o = Vector3D::Random(-1.f, 1.f);
 
-		if (o.SqrMagnitude() >= 1.0) continue;
+		if (o.SqrMagnitude() > 1.0) continue;
 
 		return o;
 	}

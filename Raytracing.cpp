@@ -511,7 +511,7 @@ void Raytracing::CornellBox() {
 
 	// ----- CAMERA -----
 	//Vector3D lookFrom(0.f, 1e-3f, 7.f);
-	Vector3D lookFrom(0.f, 0.f, 7.f);
+	Vector3D lookFrom(0.f, 0.f, 6.7f);
 	Vector3D lookAt(0.f, 0.f);
 	Vector3D up(0.f, 1.f, 0.f);
 

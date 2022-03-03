@@ -55,6 +55,7 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 		if (t_min > d || d > t_max) return false;
 
 		Vector3D p = l0 + (l * d);
+		float nearZero = 1e-3f;
 
 		if (m_type == Plane::Type::XMinus || m_type == Plane::Type::XPlus) {
 			Vector3D offset = Vector3D(0.f, 1.f, 1.f) * Vector3D(0.f, m_height / 2.f, m_width / 2.f);
@@ -64,7 +65,7 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 			Vector3D axisClose = m_pos - p;
 			axisClose *= Vector3D(1.f, 0.f, 0.f);
 
-			if (min.GetY() <= p.GetY() && p.GetY() <= max.GetY() && min.GetZ() <= p.GetZ() && p.GetZ() <= max.GetZ() && axisClose.NearZero()) {
+			if (min.GetY() <= p.GetY() && p.GetY() <= max.GetY() && min.GetZ() <= p.GetZ() && p.GetZ() <= max.GetZ() && axisClose.Threshold(nearZero)) {
 				rec.SetT(d);
 				rec.SetPoint(p);
 				rec.SetMat(m_mat);
@@ -99,7 +100,7 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 			Vector3D axisClose = m_pos - p;
 			axisClose *= Vector3D(0.f, 1.f, 0.f);
 
-			if (min.GetX() <= p.GetX() && p.GetX() <= max.GetX() && min.GetZ() <= p.GetZ() && p.GetZ() <= max.GetZ() && axisClose.NearZero()) {
+			if (min.GetX() <= p.GetX() && p.GetX() <= max.GetX() && min.GetZ() <= p.GetZ() && p.GetZ() <= max.GetZ() && axisClose.Threshold(nearZero)) {
 				rec.SetT(d);
 				rec.SetPoint(p);
 				rec.SetMat(m_mat);
@@ -134,7 +135,7 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 			Vector3D axisClose = m_pos - p;
 			axisClose *= Vector3D(0.f, 0.f, 1.f);
 
-			if (min.GetX() <= p.GetX() && p.GetX() <= max.GetX() && min.GetY() <= p.GetY() && p.GetY() <= max.GetY() && axisClose.NearZero()) {
+			if (min.GetX() <= p.GetX() && p.GetX() <= max.GetX() && min.GetY() <= p.GetY() && p.GetY() <= max.GetY() && axisClose.Threshold(nearZero)) {
 				rec.SetT(d);
 				rec.SetPoint(p);
 				rec.SetMat(m_mat);
