@@ -53,8 +53,6 @@ bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	rec.SetUV(CalculateUV(rec.GetPoint()) * m_uvScale);
 	rec.SetTangents(CalculateTangent(rec));
 	return true;
-
-	return true;
 }
 
 bool Sphere::SphereIntersectGround(const Vector3D pos, const float radius) {

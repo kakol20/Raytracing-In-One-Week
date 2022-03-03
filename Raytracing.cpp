@@ -2,6 +2,7 @@
 
 #include "oof/oof.h"
 
+#include "Box.h"
 #include "ColorSpace.h"
 #include "Dielectric.h"
 #include "Diffuse.h"
@@ -514,9 +515,12 @@ void Raytracing::CornellBox() {
 
 	m_matMap["green"] = new Dielectric(Vector3D::HSVtoRGB(120.f, closeToOne, 1.0f), 1.f, 1.45f);
 	m_matMap["red"] = new Dielectric(Vector3D::HSVtoRGB(0.f, closeToOne, 1.0f), 1.f, 1.45f);
+	m_matMap["blue"] = new Dielectric(Vector3D::HSVtoRGB(240.f, closeToOne, 1.0f), 1.f, 1.45f);
 	m_matMap["white"] = new Dielectric(Vector3D::HSVtoRGB(0.f, 0.f, 1.0f), 1.f, 1.45f);
 
 	// ----- OBJECTS -----
+	m_objects.reserve(7);
+
 	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, closeToOne, 0.f), 0.45f, 0.45f, m_matMap["light"]));
 
 	m_objects.push_back(new Plane(Plane::Type::XMinus, Vector3D(1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["green"]));
@@ -524,6 +528,8 @@ void Raytracing::CornellBox() {
 	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, 1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
 	m_objects.push_back(new Plane(Plane::Type::YPlus, Vector3D(0.f, -1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
 	m_objects.push_back(new Plane(Plane::Type::ZPlus, Vector3D(0.f, 0.f, -1.f), 2.f, 2.f, m_matMap["white"]));
+
+	m_objects.push_back(new Box(Vector3D(0.5f), m_matMap["blue"]));
 }
 
 void Raytracing::DebugScene() {
@@ -697,10 +703,10 @@ void Raytracing::FinalScene() {
 				/*float h = Random::RandFloatRange(0.f, 360.f);
 				float s = 0.5f;
 				float v = 1.0f;*/
-				float K = Random::RandFloatRange(1000.f, 5500.f);
+				float K = Random::RandFloatRange(1000.f, 12200.f);
 
 				//float intensity = 1.f;
-				float intensity = Random::RandFloatRange(1.f, 2.f);
+				float intensity = Random::RandFloatRange(1.f, 4.f);
 
 				//m_matVec.push_back(new Emissive(Vector3D::HSVtoRGB(h, s, v), intensity));
 				m_matVec.push_back(new Emissive(Vector3D::KelvinToRGB(K), intensity));
