@@ -20,7 +20,7 @@ Textured::~Textured() {
 
 bool Textured::Emission(HitRec& rec, Vector3D& emission) {
 	// ----- ROUGHNESS, METALNESS & EMISSION -----
-	Vector3D uv = (rec.GetUV() + m_uvOffset) * Vector3D(m_rmeTexture->GetWidth(), m_rmeTexture->GetHeight(), 0.f);
+	Vector3D uv = (rec.GetUV() + m_uvOffset) * Vector3D((float)m_rmeTexture->GetWidth(), (float)m_rmeTexture->GetHeight(), 0.f);
 
 	float roughness, metalness, l_emission;
 	m_rmeTexture->BiLerp(uv.GetX(), uv.GetY(), roughness, metalness, l_emission);
@@ -29,11 +29,13 @@ bool Textured::Emission(HitRec& rec, Vector3D& emission) {
 	l_emission /= 255.f;
 
 	// ----- ALBEDO -----
-	uv = (rec.GetUV() + m_uvOffset) * Vector3D(m_albedoTexture->GetWidth(), m_albedoTexture->GetHeight(), 0.f);
+	uv = (rec.GetUV() + m_uvOffset) * Vector3D((float)m_albedoTexture->GetWidth(), (float)m_albedoTexture->GetHeight(), 0.f);
 	float r, g, b;
 	m_albedoTexture->BiLerp(uv.GetX(), uv.GetY(), r, g, b);
 	Vector3D albedo(r, g, b);
 	albedo /= 255.f;
+	//float emissionModified = l_emission * m_emissionStrength;
+	//l_emission = roundf(l_emission);
 
 	bool emissionRand = Random::RandFloat() <= l_emission;
 
@@ -48,7 +50,7 @@ bool Textured::Emission(HitRec& rec, Vector3D& emission) {
 
 bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
 	// ----- ROUGHNESS, METALNESS & EMISSION -----
-	Vector3D uv = (rec.GetUV() + m_uvOffset) * Vector3D(m_rmeTexture->GetWidth(), m_rmeTexture->GetHeight(), 0.f);
+	Vector3D uv = (rec.GetUV() + m_uvOffset) * Vector3D((float)m_rmeTexture->GetWidth(), (float)m_rmeTexture->GetHeight(), 0.f);
 
 	float roughness, metalness, emission;
 	if (m_rmeTexture != nullptr) {
@@ -63,8 +65,10 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 		emission = 0.f;
 	}
 
+	//emission = roundf(emission);
+
 	// ----- ALBEDO -----
-	uv = (rec.GetUV() + m_uvOffset) * Vector3D(m_albedoTexture->GetWidth(), m_albedoTexture->GetHeight(), 0.f);
+	uv = (rec.GetUV() + m_uvOffset) * Vector3D((float)m_albedoTexture->GetWidth(), (float)m_albedoTexture->GetHeight(), 0.f);
 	float r, g, b;
 	m_albedoTexture->BiLerp(uv.GetX(), uv.GetY(), r, g, b);
 
@@ -82,20 +86,12 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 	else {
 		// ----- NORMAL -----
 		Vector3D unitDir = rayIn.GetDir();
-		Vector3D incoming = unitDir * -1.0;
+		Vector3D incoming = unitDir * -1.0f;
 
-		Vector3D normal;
-		if (m_normalTexture == nullptr) {
-			normal = rec.GetNormal();
-		}
-		else {
-			normal = GetNormal(rec);
-			//if (normal.NearZero()) normal = rec.GetNormal();
-			//normal = normalMap;
-		}
+		Vector3D normal = GetNormal(rec);
 
 		// ----- FRESNEL -----
-		float sqrRoughness = roughness * roughness;
+		float sqrRoughness = roughness/* * roughness*/;
 
 		bool roughnessRand = Random::RandFloat() <= sqrRoughness;
 
@@ -105,6 +101,10 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 		float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
 
 		bool metalnessRand = Random::RandFloat() <= metalness;
+
+		float nearZero = 1e-4f;
+
+		Vector3D reflect = Reflect(unitDir, normal);
 
 		if (metalnessRand) {
 			// ----- METAL-----
@@ -118,7 +118,6 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			attentuation = Vector3D::Lerp(ColorSpace::LinearTosRGB(albedo), attentuation, facing);
 
 			// scatter
-			Vector3D reflect = Reflect(unitDir, normal);
 
 			Vector3D glossy = reflect + (Vector3D::RandomInUnitSphere() * sqrRoughness);
 			if (glossy.NearZero()) glossy = reflect;
@@ -127,6 +126,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			bool fresnelRand = Random::RandFloat() <= incomingFresnel;
 			Vector3D scatterDir = fresnelRand ? reflect : glossy;
 
+			if (Vector3D::DotProduct(normal, scatterDir) < nearZero) scatterDir = reflect;
 			scattered = Ray(rec.GetPoint(), scatterDir);
 		}
 		else {
@@ -136,10 +136,10 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			bool fresnelRand = Random::RandFloat() <= fresnel;
 			Vector3D scatterDir;
 			if (fresnelRand) {
-				scatterDir = Reflect(unitDir, normal);
+				scatterDir = reflect;
 				scatterDir += Vector3D::RandomInUnitSphere() * sqrRoughness;
 
-				if (scatterDir.NearZero()) scatterDir = Reflect(unitDir, normal);
+				if (scatterDir.NearZero()) scatterDir = reflect;
 				scatterDir.Normalize();
 			}
 			else {
@@ -148,6 +148,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 				scatterDir.Normalize();
 			}
 
+			if (Vector3D::DotProduct(normal, scatterDir) < nearZero) scatterDir = reflect;
 			scattered = Ray(rec.GetPoint(), scatterDir);
 		}
 
@@ -161,7 +162,7 @@ Vector3D Textured::GetNormal(HitRec& rec) {
 		return rec.GetNormal();
 	}
 	else {
-		Vector3D uv = (rec.GetUV() + m_uvOffset) * Vector3D(m_normalTexture->GetWidth(), m_normalTexture->GetHeight(), 0.f);
+		Vector3D uv = (rec.GetUV() + m_uvOffset) * Vector3D((float)m_normalTexture->GetWidth(), (float)m_normalTexture->GetHeight(), 0.f);
 		float x, y, z;
 		m_normalTexture->BiLerp(uv.GetX(), uv.GetY(), x, y, z);
 
@@ -179,7 +180,7 @@ Vector3D Textured::GetNormal(HitRec& rec) {
 
 float Textured::GetRoughness(Vector3D uv) {
 	// ----- ROUGHNESS, METALNESS & EMISSION -----
-	Vector3D l_uv = (uv + m_uvOffset) * Vector3D(m_rmeTexture->GetWidth(), m_rmeTexture->GetHeight(), 0.f);
+	Vector3D l_uv = (uv + m_uvOffset) * Vector3D((float)m_rmeTexture->GetWidth(), (float)m_rmeTexture->GetHeight(), 0.f);
 
 	float roughness, metalness, l_emission;
 	m_rmeTexture->BiLerp(l_uv.GetX(), l_uv.GetY(), roughness, metalness, l_emission);
@@ -192,7 +193,7 @@ float Textured::GetRoughness(Vector3D uv) {
 
 Vector3D Textured::GetAlbedo(Vector3D uv) {
 	// ----- ALBEDO -----
-	Vector3D l_uv = (uv + m_uvOffset) * Vector3D(m_albedoTexture->GetWidth(), m_albedoTexture->GetHeight(), 0.f);
+	Vector3D l_uv = (uv + m_uvOffset) * Vector3D((float)m_albedoTexture->GetWidth(), (float)m_albedoTexture->GetHeight(), 0.f);
 	float r, g, b;
 	m_albedoTexture->BiLerp(l_uv.GetX(), l_uv.GetY(), r, g, b);
 

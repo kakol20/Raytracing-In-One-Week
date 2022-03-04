@@ -29,26 +29,29 @@ bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 
 	// Find the nearest root that lies in the acceptable range.
 	float root = (-half_b - sqrtd) / a;
-	if (root < t_min || t_max < root) {
+	/*if (root < t_min || t_max < root) {
 		root = (-half_b + sqrtd) / a;
 
 		if (root < t_min || t_max < root) return false;
-	}
+	}*/
 
+	Vector3D dist = ray.GetOrig() - ray.At(root);
+	if (root < t_min || t_max < root || dist.Threshold(t_min)) {
+		root = (-half_b + sqrtd) / a;
+
+		dist = ray.GetOrig() - ray.At(root);
+		if (root < t_min || t_max < root || dist.Threshold(t_min)) return false;
+	}
+	
 	rec.SetT(root);
 	rec.SetPoint(ray.At(root));
 	rec.SetMat(m_mat);
-
-	/*rec.t = root;
-	rec.point = ray.At(rec.t);
-	Vector3D outwardNormal = (rec.point - m_pos) / m_radius;*/
 
 	Vector3D outwardNormal = (rec.GetPoint() - m_pos) / m_radius;
 	rec.SetFaceNormal(ray, outwardNormal);
 
 	rec.SetUV(CalculateUV(rec.GetPoint()) * m_uvScale);
 	rec.SetTangents(CalculateTangent(rec));
-
 	return true;
 }
 

@@ -45,7 +45,7 @@ HitRec& HitRec::operator=(const HitRec& copyHitRec) {
 
 void HitRec::SetFaceNormal(Ray& ray, Vector3D& outwardNormal) {
 	m_frontFace = Vector3D::DotProduct(ray.GetDir(), outwardNormal) < 0.f;
-	m_normal = m_frontFace ? outwardNormal : -outwardNormal;
+	m_normal = m_frontFace ? outwardNormal : outwardNormal * -1.f;
 }
 
 const Vector3D HitRec::TangentToWorld(const Vector3D tangentSpace) {

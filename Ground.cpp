@@ -33,6 +33,11 @@ bool Ground::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	// calculate point
 	Vector3D p = ray.At(d);
 
+	Vector3D axisClose = m_pos - p;
+	axisClose *= Vector3D(0.f, 1.f, 0.f);
+
+	if (!axisClose.NearZero()) return false;
+
 	rec.SetT(d);
 	rec.SetPoint(p);
 	rec.SetMat(m_mat);

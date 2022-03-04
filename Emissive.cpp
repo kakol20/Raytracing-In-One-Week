@@ -20,5 +20,6 @@ bool Emissive::Emission(HitRec& rec, Vector3D& emission) {
 }
 
 bool Emissive::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
+	attentuation = m_albedo;
 	return false;
 }

@@ -2,6 +2,8 @@
 
 #include "oof/oof.h"
 
+#include "Box.h"
+#include "ColorSpace.h"
 #include "Dielectric.h"
 #include "Diffuse.h"
 #include "Emissive.h"
@@ -9,11 +11,13 @@
 #include "Glass.h"
 #include "Ground.h"
 #include "Metal.h"
+#include "Plane.h"
 #include "Random.h"
+#include "RotatedObj.h"
 #include "Sphere.h"
 #include "StaticMutex.h"
 #include "Textured.h"
-#include "ColorSpace.h"
+#include "TranslatedObj.h"
 
 #include "Raytracing.h"
 
@@ -22,30 +26,36 @@ Raytracing::Raytracing() {
 	m_aperture = 0.1f;
 	m_imageHeight = 720;
 	m_imageWidth = 1280;
-	m_rayDepth = 12;
-	m_shadowDepth = 4;
+	m_rayDepth = 32;
+	//m_shadowDepth = 4;
 
-	m_renderMode = "color";
+	m_renderMode = "all";
 
 	m_renderScene = "final";
 
-	m_samplesPerPixel = 128;
+	m_noiseThreshold = 0.0001f;
+	m_maxSamples = 512;
+	m_minSamples = 0;
 	m_tileSize = 32;
 	m_verticalFOV = 19.8f;
 
 	m_tilesRendered = 0;
 	m_nextAvailable = 0;
 
-	m_useThreads = 6;
+	m_useThreads = 12;
 
-	m_nearZero = 1e-5f;
+	m_nearZero = 1e-4f; // ----- MUST KEEP LIKE THIS (1e-4f) TO PREVENT BLACK SPECKLES -----
+	m_clipEnd = 63.27716808f;
+	m_clipStart = 1e-4f;
 
 	//m_hdriStrength = 1.f;
 	m_hdriStrength = 0.1f;
 
 	//StaticMutex::s_mtx = std::mutex();
 
-	m_shuffleTiles = false;
+	m_shuffleTiles = true;
+
+	//Vector3D testRotation = Vector3D::Rotate(Vector3D(1.f, 0.f, 0.f), Vector3D())
 }
 
 Raytracing::~Raytracing() {
@@ -54,11 +64,21 @@ Raytracing::~Raytracing() {
 	std::vector<Material*> m_matVec;
 	std::vector<Object*> m_objects;
 	std::vector<Tile> m_tiles;*/
-	if (!m_textures.empty()) {
-		for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
+
+	if (!m_objects.empty()) {
+		for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
+			delete (*it);
+			(*it) = nullptr;
+		}
+		m_objects.clear();
+	}
+
+	if (!m_unrenderedObjects.empty()) {
+		for (auto it = m_unrenderedObjects.begin(); it != m_unrenderedObjects.end(); it++) {
 			delete (*it).second;
 			(*it).second = nullptr;
 		}
+		m_unrenderedObjects.clear();
 	}
 
 	if (!m_matMap.empty()) {
@@ -66,6 +86,7 @@ Raytracing::~Raytracing() {
 			delete (*it).second;
 			(*it).second = nullptr;
 		}
+		m_matMap.clear();
 	}
 
 	if (!m_matVec.empty()) {
@@ -73,19 +94,21 @@ Raytracing::~Raytracing() {
 			delete (*it);
 			(*it) = nullptr;
 		}
+		m_matVec.clear();
 	}
 
-	if (!m_objects.empty()) {
-		for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
-			delete (*it);
-			(*it) = nullptr;
+	if (!m_textures.empty()) {
+		for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
+			delete (*it).second;
+			(*it).second = nullptr;
 		}
+		m_textures.clear();
 	}
 }
 
 bool Raytracing::Init() {
-	//Random::Seed = 2790598843;
-	Random::Seed = 1 | ((unsigned int)0b1 << 31);
+	Random::Seed = 19022022;
+	//Random::Seed = 1 | ((unsigned int)0b1 << 31);
 
 	// ----- SETTINGS FILE -----
 	std::fstream settings;
@@ -111,9 +134,11 @@ bool Raytracing::Init() {
 			else if (first == "imageHeight") {
 				m_imageHeight = String::ToInt(line.GetSecond('='));
 			}
-			else if (first == "shadowDepth") {
-				m_shadowDepth = String::ToInt(line.GetSecond('='));
-			}
+
+			//else if (first == "shadowDepth") {
+			//	m_shadowDepth = String::ToInt(line.GetSecond('='));
+			//}
+
 			else if (first == "rayDepth") {
 				m_rayDepth = String::ToInt(line.GetSecond('='));
 			}
@@ -123,8 +148,14 @@ bool Raytracing::Init() {
 			else if (first == "scene") {
 				m_renderScene = line.GetSecond('=');
 			}
-			else if (first == "samplesPerPixel") {
-				m_samplesPerPixel = String::ToInt(line.GetSecond('='));
+			else if (first == "maxSamples") {
+				m_maxSamples = String::ToInt(line.GetSecond('='));
+			}
+			else if (first == "minSamples") {
+				m_minSamples = String::ToInt(line.GetSecond('='));
+			}
+			else if (first == "noiseThreshold") {
+				m_noiseThreshold = String::ToFloat(line.GetSecond('='));
 			}
 			else if (first == "threads") {
 				m_useThreads = (unsigned int)String::ToInt(line.GetSecond('='));
@@ -154,13 +185,15 @@ bool Raytracing::Init() {
 			<< "imageHeight=" << m_imageHeight << "\n#\n"
 			<< "# Render Settings\n"
 			<< "rayDepth=" << m_rayDepth << "\n"
-			<< "shadowDepth=" << m_shadowDepth << "\n"
+			//<< "shadowDepth=" << m_shadowDepth << "\n"
 			<< "threads=" << m_useThreads << "\n"
-			<< "samplesPerPixel=" << m_samplesPerPixel << "\n"
+			<< "maxSamples=" << m_maxSamples << "\n"
+			<< "minSamples=" << m_minSamples << "\n"
+			<< "noiseThreshold=" << m_noiseThreshold << "\n"
 			<< "tileSize=" << m_tileSize << "\n"
 			<< "## color, normal, albedo, emission or all\n"
 			<< "renderMode=" << m_renderMode << "\n"
-			<< "## final, textured or debug\n"
+			<< "## final, textured, cornell or debug\n"
 			<< "scene=" << m_renderScene << "\n#\n"
 			<< "# Camera Settings\n"
 			<< "aperture=" << m_aperture << "\n"
@@ -289,6 +322,9 @@ bool Raytracing::Init() {
 	}
 	else if (m_renderScene == "textured") {
 		TexturedScene();
+	}
+	else if (m_renderScene == "cornell") {
+		CornellBox();
 	}
 	else {
 		FinalScene();
@@ -471,9 +507,65 @@ void Raytracing::ShuffleTiles() {
 	}
 }
 
+void Raytracing::CornellBox() {
+	m_hdri.Read("images/hdri/lebombo_2k.png", Image::ColorMode::sRGB);
+	m_hdriStrength = 0.0255f;
+	//m_hdriStrength = 1.f;
+
+	// ----- CAMERA -----
+	//Vector3D lookFrom(0.f, 1e-3f, 7.f);
+	Vector3D lookFrom(0.f, 0.f, 6.7f);
+	Vector3D lookAt(0.f, 0.f);
+	Vector3D up(0.f, 1.f, 0.f);
+
+	m_clipEnd = 1000.f;
+
+	Vector3D dist = lookAt - lookFrom;
+
+	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
+	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
+
+	// ----- MATERIAL -----
+	float closeToOne = 1.f - m_nearZero;
+
+	m_matMap["light"] = new Emissive(Vector3D::KelvinToRGB(2700.f), 100.f);
+
+	m_matMap["green"] = new Dielectric(Vector3D(0.f, 0.502887f, 0.f), 1.f, 1.45f);
+	m_matMap["red"] = new Dielectric(Vector3D(0.502887f, 0.f, 0.f), 1.f, 1.45f);
+	//m_matMap["blue"] = new Dielectric(Vector3D::HSVtoRGB(240.f, closeToOne, 1.0f), 1.f, 1.45f);
+	m_matMap["white"] = new Dielectric(Vector3D(0.401978f), 0.5f, 1.45f);
+
+	m_matMap["glass"] = new Glass(Vector3D(1.f), m_nearZero, 1.5f);
+	m_matMap["metal"] = new Metal(Vector3D(0.401978f), 0.25f, 2.95f);
+
+	// ----- OBJECTS -----
+	m_objects.reserve(10);
+
+	m_unrenderedObjects["shortBlock"] = new Box(Vector3D(0.5f), m_matMap["white"]);
+	m_unrenderedObjects["tallBlock"] = new Box(Vector3D(0.5f, 1.f, 0.5f), m_matMap["white"]);
+
+	m_unrenderedObjects["shortBlock_r"] = new RotatedObj(Vector3D(0.f, -16.5f, 0.f), m_unrenderedObjects["shortBlock"]);
+	m_unrenderedObjects["tallBlock_r"]  = new RotatedObj(Vector3D(0.f, 17.6f, 0.f), m_unrenderedObjects["tallBlock"]);
+
+	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, closeToOne, 0.f), 0.45f, 0.45f, m_matMap["light"]));
+
+	m_objects.push_back(new Plane(Plane::Type::XMinus, Vector3D(1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["green"]));
+	m_objects.push_back(new Plane(Plane::Type::XPlus, Vector3D(-1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["red"]));
+	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, 1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
+	m_objects.push_back(new Plane(Plane::Type::YPlus, Vector3D(0.f, -1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
+	m_objects.push_back(new Plane(Plane::Type::ZPlus, Vector3D(0.f, 0.f, -1.f), 2.f, 2.f, m_matMap["white"]));
+
+	//m_objects.push_back(new Box(Vector3D(0.5f), m_matMap["blue"]));
+	m_objects.push_back(new TranslatedObj(Vector3D(0.33f, -0.75f, 0.43f), m_unrenderedObjects["shortBlock_r"]));
+	m_objects.push_back(new TranslatedObj(Vector3D(-0.32f, -0.5f, -0.24f), m_unrenderedObjects["tallBlock_r"]));
+
+	m_objects.push_back(new Sphere(Vector3D(0.33f, -0.3f, 0.43f), 0.2f, m_matMap["glass"]));
+	m_objects.push_back(new Sphere(Vector3D(-0.32f, 0.2f, -0.24f), 0.2f, m_matMap["metal"]));
+}
+
 void Raytracing::DebugScene() {
 	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
-	m_hdriStrength = 0.1f;
+	m_hdriStrength = 1.f;
 
 	// ----- LIGHTS -----
 	//m_lights.push_back(Light(Vector3D(-20.f, 15.f, -15.f), Vector3D(1.f, 1.f, 1.f), 5.f, 1165.21671522f));
@@ -486,19 +578,25 @@ void Raytracing::DebugScene() {
 
 	const float aspect_ratio = m_imageWidth / (float)m_imageHeight;
 	m_camera = Camera(aspect_ratio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
+	//m_camera = Camera(aspect_ratio, 0.f, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
 
 	// ----- MATERIAL -----
+	m_matMap["dielectric"] = new Dielectric(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), 1.f, 1.f), 0.1f, 1.45f);
+	m_matMap["diffuse"] = new Diffuse(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), 1.f, 1.f));
+	m_matMap["emissive"] = new Emissive(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), Random::RandFloatRange(0.25f, 0.5f), 1.f), 1.f);
+	m_matMap["glass"] = new Glass(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), Random::RandFloatRange(0.f, 0.25f), 1.f), 0.f, 1.5f);
 	m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
-	//m_matMap["diffuse"] = new Diffuse(Vector3D(0.8f, 0.f1f, 0.f1f));
-	m_matMap["emissive"] = new Emissive(Vector3D::Random(0.f, 1.f), 4.f);
-	m_matMap["metal"] = new Metal(Vector3D::Random(0.5f, 1.f), 0.1f, 1.45f);
-	m_matMap["glass"] = new Glass(Vector3D::Random(0.5f, 1.f), 0.f, 1.5f);
+	m_matMap["metal"] = new Metal(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), Random::RandFloatRange(0.5f, 1.f), 1.f), 0.1f, 1.45f);
 
 	// ----- OBJECTS -----
 	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
+
 	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["glass"]));
 	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["emissive"]));
 	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["metal"]));
+
+	m_objects.push_back(new Sphere(Vector3D(-1.25, 0.5f, 1.4143f), 0.5f, m_matMap["diffuse"]));
+	m_objects.push_back(new Sphere(Vector3D(1.25, 0.5f, 1.4143f), 0.5f, m_matMap["dielectric"]));
 }
 
 void Raytracing::FinalScene() {
@@ -514,6 +612,7 @@ void Raytracing::FinalScene() {
 	Vector3D lookAt(0.f, 0.f, 0.f);
 	Vector3D dist = lookAt - lookFrom;
 	Vector3D up(0.f, 1.f, 0.f);
+	m_clipEnd = 63.27716808f;
 
 	const float aspectRatio = m_imageWidth / (float)m_imageHeight;
 	m_camera = Camera(aspectRatio, m_aperture, dist.Magnitude(), m_verticalFOV, lookFrom, lookAt, up);
@@ -537,7 +636,7 @@ void Raytracing::FinalScene() {
 	m_matMap["ground"] = new Diffuse(Vector3D(0.5f, 0.5f, 0.5f));
 	m_matMap["back"] = new Dielectric(Vector3D(0.4f, 0.2f, 0.1f), 0.1f, 1.46f);
 	m_matMap["middle"] = new Glass(Vector3D(1.f, 1.f, 1.f), 0.f, 1.5f);
-	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.2f, 0.47f);
+	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.04f, 0.47f);
 
 	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(5778.f), 6.5f);
 	m_matMap["light2"] = new Emissive(Vector3D::KelvinToRGB(5778.f), 3.5f);
@@ -635,10 +734,10 @@ void Raytracing::FinalScene() {
 				/*float h = Random::RandFloatRange(0.f, 360.f);
 				float s = 0.5f;
 				float v = 1.0f;*/
-				float K = Random::RandFloatRange(1000.f, 5500.f);
+				float K = Random::RandFloatRange(1000.f, 12200.f);
 
 				//float intensity = 1.f;
-				float intensity = Random::RandFloatRange(1.f, 2.f);
+				float intensity = Random::RandFloatRange(1.f, 4.f);
 
 				//m_matVec.push_back(new Emissive(Vector3D::HSVtoRGB(h, s, v), intensity));
 				m_matVec.push_back(new Emissive(Vector3D::KelvinToRGB(K), intensity));
@@ -694,7 +793,7 @@ void Raytracing::TexturedScene() {
 	m_textures["facade020b_rme"] = new Image("images/textures/facade020b/facade020b_rme.png");
 	m_textures["terracotta_d"] = new Image("images/textures/terracotta/terracotta_d.png", Image::ColorMode::sRGB);
 	m_textures["terracotta_n"] = new Image("images/textures/terracotta/terracotta_n.png");
-	m_textures["terracotta_rme"] = new Image("images/textures/terracotta/terracotta_rme.png");
+	m_textures["terracotta_rme"] = new Image("images/textures/terracotta/terracotta_rme.png", Image::ColorMode::sRGB);
 	m_textures["ornament_d"] = new Image("images/textures/ornament/ornament_d.png", Image::ColorMode::sRGB);
 	m_textures["ornament_n"] = new Image("images/textures/ornament/ornament_n.png");
 	m_textures["ornament_rme"] = new Image("images/textures/ornament/ornament_rme.png");
@@ -715,11 +814,9 @@ void Raytracing::TexturedScene() {
 
 	m_objects.push_back(new Sphere(Vector3D(0.f, 0.5f, 1.4143f), 0.5f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
 
-
 	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["facade"], Vector3D(2.f, 1.f)));
 	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["carbon"], Vector3D(2.f, 1.f)));
 	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["ornament"]));
-
 }
 
 void Raytracing::RenderTile(const size_t startIndex) {
@@ -742,9 +839,7 @@ void Raytracing::RenderTile(const size_t startIndex) {
 
 	m_tiles[startIndex].tileComplete = true;
 
-	//StaticMutex::s_mtx.lock();
-	StaticMutex::s_mtx.lock();
-	m_tilesRendered++;
+	//StaticMutex::s_mtx.lock()
 
 	Vector3D getColor(0.f, 0.f, 0.f);
 	float count = 0.f;
@@ -759,9 +854,9 @@ void Raytracing::RenderTile(const size_t startIndex) {
 			float r, g, b;
 			m_render.GetRGB(xImg, flippedY, r, g, b);
 
-			r = std::lerp(12.f, 204.f, r / 255.f);
+			/*r = std::lerp(12.f, 204.f, r / 255.f);
 			g = std::lerp(12.f, 204.f, g / 255.f);
-			b = std::lerp(12.f, 204.f, b / 255.f);
+			b = std::lerp(12.f, 204.f, b / 255.f);*/
 
 			getColor += Vector3D(r, g, b);
 		}
@@ -779,15 +874,18 @@ void Raytracing::RenderTile(const size_t startIndex) {
 			float r, g, b;
 			m_render.GetRGB(xImg, flippedY, r, g, b);
 
-			r = std::lerp(12.f, 204.f, r / 255.f);
+			/*r = std::lerp(12.f, 204.f, r / 255.f);
 			g = std::lerp(12.f, 204.f, g / 255.f);
-			b = std::lerp(12.f, 204.f, b / 255.f);
+			b = std::lerp(12.f, 204.f, b / 255.f);*/
 
 			getColor += Vector3D(r, g, b);
 		}
 	}
 	getColor /= count;
 	m_tiles[startIndex].rightXTileColor = Vector3D::Clamp(getColor, 0.f, 255.f);
+
+	StaticMutex::s_mtx.lock();
+	m_tilesRendered++;
 
 	ShowProgress();
 
@@ -811,26 +909,79 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 			// ----- SEND RAYS -----
 			Vector3D pixelCol;
-			for (int s = 0; s < m_samplesPerPixel; s++) {
+			int count = 0;
+			Vector3D previous;
+			Vector3D totalDiff(0.f);
+
+			for (int s = 0; s < m_maxSamples; s++) {
 				float u = (x + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageWidth - 1);
 				float v = (y + Random::RandFloatRange(-1.f, 1.f)) / (float)(m_imageHeight - 1);
 
 				Ray r = m_camera.GetRay(u, v);
+				bool isBackground = false;
+				//pixelCol += Vector3D::Clamp(RayColor(r, m_rayDepth), 0.f, 1.f);
+				Vector3D rayColor = RayColor(r, m_rayDepth, isBackground);
+				if (rayColor.IsNAN()) rayColor = Vector3D(1.f, 0.f, 1.f);
+				//if (rayColor.NearZero()) rayColor = Vector3D(1.f, 0.f, 1.f);
+				//pixelCol += RayColor(r, m_rayDepth);
 
-				pixelCol += RayColor(r, m_rayDepth);
-			}
-			float scale = 1.f / (float)m_samplesPerPixel;
+				if (m_renderMode == "emission" || m_renderMode == "albedo") {
+					rayColor = Vector3D::Clamp(rayColor, 0.f, 1.f);
+				}
 
-			pixelCol *= scale;
+				if (m_renderMode == "normal") {
+					//rayColor.Normalize();
+					rayColor = (rayColor + Vector3D(1.f)) / 2.f;
+				}
 
-			if (m_renderMode == "albedo") {
-				pixelCol = ColorSpace::LinearTosRGB(pixelCol);
+				//rayColor = Vector3D::OrderedDithering(rayColor, (int)round(u), (int)round(v), 255);
+
+				if (count > 0) {
+					Vector3D difference;
+					difference = previous - rayColor;
+					difference.Abs();
+					totalDiff += difference;
+
+					if (count > m_minSamples) {
+						Vector3D avgDiff = totalDiff / (float)count;
+						//Vector3D avgDiff = totalDiff;
+
+						bool belowThreshold = avgDiff.Threshold(m_noiseThreshold);
+						//bool belowThreshold = avgDiff.Magnitude() < m_noiseThreshold;
+
+						if (belowThreshold) {
+							count++;
+							pixelCol += rayColor;
+
+							break;
+						}
+					}
+				}
+
+				previous = rayColor;
+
+				count++;
+				pixelCol += rayColor;
 			}
-			else if (m_renderMode == "color" || m_renderMode == "emission") {
-				//pixelCol = ColorSpace::CIEXYZToACES(ColorSpace::LinearToCIEXYZ(pixelCol));
-				pixelCol = ColorSpace::LinearTosRGB(pixelCol);
-			}
+			//float scale = 1.f / ;
+
+			pixelCol /= (float)count;
 			pixelCol = Vector3D::Clamp(pixelCol, 0.f, 1.f);
+
+			if (m_renderMode == "albedo" || m_renderMode == "color" || m_renderMode == "emission") {
+				pixelCol = ColorSpace::LinearTosRGB(pixelCol);
+			}
+
+			//else if () {
+			//	//pixelCol = ColorSpace::CIEXYZToACES(ColorSpace::LinearToCIEXYZ(pixelCol));
+			//	pixelCol = ColorSpace::LinearTosRGB(pixelCol);
+			//}
+
+			//pixelCol = Vector3D::Clamp(pixelCol, 0.f, 1.f);
+
+			if (pixelCol.IsNAN()) {
+				pixelCol = Vector3D(1.f, 0.f, 1.f);
+			}
 
 			// ----- WRITE COLOR -----
 			pixelCol = Vector3D::OrderedDithering(pixelCol, x, flippedY, 255);
@@ -839,8 +990,6 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			m_render.SetRGB(x, flippedY, pixelCol.GetX(), pixelCol.GetY(), pixelCol.GetZ());
 		}
 	}
-
-	//std::this_thread::sleep_for(std::chrono::milliseconds(500)); // simulate long rendering - temporary
 }
 
 void Raytracing::ShowProgress() {
@@ -856,15 +1005,15 @@ void Raytracing::ShowProgress() {
 	output += oof::position(0, 0);
 
 	output += "Render Mode: ";
-	output += m_renderMode.GetChar();
+	output += m_renderMode;
 	output += "\nTotal Objects: ";
-	output += String::ToString((int)m_objects.size()).GetChar();
+	output += String::ToString((int)m_objects.size());
 	output += "\nThreads Used: ";
-	output += String::ToString((int)m_useThreads).GetChar();
+	output += String::ToString((int)m_useThreads);
 	output += "\nTotal Tiles: ";
-	output += String::ToString((int)m_tiles.size()).GetChar();
+	output += String::ToString((int)m_tiles.size());
 	output += "\nProgress: ";
-	output += String::ToString(m_tilesRendered).GetChar();
+	output += String::ToString(m_tilesRendered);
 	/*output += "\nTile #";
 
 	auto thisId = m_threadID[std::this_thread::get_id()];
@@ -903,6 +1052,8 @@ void Raytracing::ShowProgress() {
 		}
 		// https://www.asciitable.com
 		output += (char)254u;
+
+		//char end = '\\';
 	}
 	output += oof::reset_formatting();
 	output += "] ";
@@ -929,13 +1080,14 @@ void Raytracing::ShowProgress() {
 				}
 
 				col /= 255.f;
-				col = Vector3D::OrderedDithering(col, 2 * x + i, m_yTileCount - y, 63);
+				col = Vector3D::OrderedDithering(col, 2 * x + i, m_yTileCount - y, 255);
 				col *= 255.f;
 
-				int r = std::clamp((int)round(col.GetX()), 12, 204);
-				int g = std::clamp((int)round(col.GetY()), 12, 204);
-				int b = std::clamp((int)round(col.GetZ()), 12, 204);
+				int r = std::clamp((int)round(col.GetX()), 0, 255);
+				int g = std::clamp((int)round(col.GetY()), 0, 255);
+				int b = std::clamp((int)round(col.GetZ()), 0, 255);
 				output += oof::fg_color({ r, g, b });
+				//output += (char)219u;
 				output += (char)178u;
 			}
 			else {
@@ -955,50 +1107,57 @@ void Raytracing::ShowProgress() {
 	FastWrite::Write(output);
 }
 
-Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
+Vector3D Raytracing::RayColor(Ray& ray, const int depth, bool& isBackground) {
 	// If we"ve exceeded the ray bounce limit, no more light is gathered.
-	if (depth <= 0) return Vector3D(0.f, 0.f, 0.f);
+	if (depth <= 0) return Vector3D(m_nearZero);
 
-	float clipStart = m_nearZero;
-	float clipEnd = 63.27716808f;
 	//float clipEnd = 1000.f;
 
 	HitRec rec;
-	if (RayHitObject(ray, clipStart, clipEnd, rec)) {
+	if (RayHitObject(ray, m_clipStart, m_clipEnd, rec)) {
 		Ray scattered;
 		bool continueRay = false;
 		bool alpha = false;
-		Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
-		Vector3D emission = EmissionColor(rec);
+
+		isBackground = false;
 
 		if (m_renderMode == "albedo") {
 			if (!alpha) {
+				Vector3D emission = EmissionColor(rec);
 				if (rec.GetMat()->Emission(rec, emission)) {
+					Vector3D emission = EmissionColor(rec);
 					return emission;
 				}
 				else {
+					Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
 					return objCol;
 				}
 			}
 			else {
 				scattered = Ray(rec.GetPoint(), ray.GetDir());
-				return RayColor(scattered, depth - 1);
+				return RayColor(scattered, depth - 1, isBackground);
 			}
 		}
 		else if (m_renderMode == "emission") {
+			Vector3D emission = EmissionColor(rec);
 			return emission;
 		}
 		else if (m_renderMode == "normal") {
-			return (rec.GetMat()->GetNormal(rec) + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+			Vector3D normal = rec.GetMat()->GetNormal(rec);
+			//Vector3D normal = rec.GetNormal();
+			normal.Normalize();
+			return normal;
 		}
 		else {
 			//Vector3D emissionCol = EmissionColor(rec);
+			Vector3D objCol = ObjectColor(ray, rec, scattered, continueRay, alpha);
+			Vector3D emission = EmissionColor(rec);
 
 			if (continueRay) {
-				return /*emission +*/ objCol * RayColor(scattered, depth - 1);
+				return objCol * RayColor(scattered, depth - 1, isBackground);
 			}
 			else {
-				return emission + objCol;
+				return emission;
 			}
 		}
 	}
@@ -1006,8 +1165,12 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	Vector3D unitDir = ray.GetDir();
 	unitDir.Normalize();
 
+	isBackground = true;
+
 	if (m_renderMode == "normal") {
-		return (unitDir + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+		//return ((unitDir * -1.f) + Vector3D(1.f, 1.f, 1.f)) / 2.f;
+		return -unitDir;
+		//return Vector3D(-1.f);
 	}
 	else if (m_renderMode == "emission") {
 		return Vector3D();
@@ -1015,7 +1178,8 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth) {
 	else {
 		float u, v;
 		unitDir.UVSphere(u, v);
-		u = 1.f - u;
+		//u = 1.f - u;
+		u -= 1.f;
 
 		u *= (float)(m_hdri.GetWidth());
 		v *= (float)(m_hdri.GetHeight());
@@ -1059,6 +1223,7 @@ Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& co
 	if (rec.GetMat()->Scatter(ray, rec, attentuation, scattered)) {
 		continueRay = true;
 		alpha = false;
+
 		return attentuation;
 	}
 	else {

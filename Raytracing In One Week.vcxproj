@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Box.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ColorSpace.cpp" />
     <ClCompile Include="Dielectric.cpp" />
@@ -165,15 +166,19 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix3x3.cpp" />
     <ClCompile Include="Metal.cpp" />
+    <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Raytracing.cpp" />
+    <ClCompile Include="RotatedObj.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="String.cpp" />
     <ClCompile Include="Textured.cpp" />
+    <ClCompile Include="TranslatedObj.cpp" />
     <ClCompile Include="Vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Box.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ColorSpace.h" />
     <ClInclude Include="Dielectric.h" />
@@ -189,15 +194,18 @@
     <ClInclude Include="Metal.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="oof\oof.h" />
+    <ClInclude Include="Plane.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Raytracing.h" />
+    <ClInclude Include="RotatedObj.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="StaticMutex.h" />
     <ClInclude Include="stb\stb_image.h" />
     <ClInclude Include="stb\stb_image_write.h" />
     <ClInclude Include="String.h" />
     <ClInclude Include="Textured.h" />
+    <ClInclude Include="TranslatedObj.h" />
     <ClInclude Include="Vector3D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

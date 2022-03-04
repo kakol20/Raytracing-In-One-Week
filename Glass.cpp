@@ -15,12 +15,12 @@ bool Glass::Emission(HitRec& rec, Vector3D& emission) {
 bool Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered) {
 	// ----- NORMAL -----
 	Vector3D unitDir = rayIn.GetDir();
-	Vector3D incoming = unitDir * -1.0;
+	Vector3D incoming = unitDir * -1.0f;
 
 	Vector3D normal = rec.GetNormal();
 
 	// ----- FRESNEL -----
-	float sqrRoughness = m_roughness * m_roughness;
+	float sqrRoughness = m_roughness/* * m_roughness*/;
 
 	bool roughnessRand = Random::RandFloat() < sqrRoughness;
 

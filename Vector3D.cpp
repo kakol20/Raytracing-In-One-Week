@@ -8,6 +8,12 @@
 Vector3D::Vector3D() : Vector3D(0.f, 0.f, 0.f) {
 }
 
+Vector3D::Vector3D(const float scalar) {
+	m_x = scalar;
+	m_y = scalar;
+	m_z = scalar;
+}
+
 Vector3D::Vector3D(const float x, const float y, const float z) {
 	m_x = x;
 	m_y = y;
@@ -33,10 +39,15 @@ float Vector3D::SqrMagnitude() {
 void Vector3D::Normalize() {
 	float magnitude = Magnitude();
 
-	if (magnitude != 1.f) {
+	if (magnitude != 1.f && magnitude != 0.f) {
 		m_x /= magnitude;
 		m_y /= magnitude;
 		m_z /= magnitude;
+	}
+	else if (magnitude == 0.f) {
+		m_x = NAN;
+		m_y = NAN;
+		m_z = NAN;
 	}
 }
 
@@ -50,9 +61,55 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 		v1.m_x * v2.m_y - v1.m_y * v2.m_x);
 }
 
+Vector3D Vector3D::Rotate(const Vector3D& v, const Vector3D& radians) {
+	Vector3D l_v = v;
+	Vector3D l_radians = radians;
+	// X Axis rotation
+	float cosTheta = cos(l_radians.GetX());
+	float sinTheta = sin(l_radians.GetX());
+
+	float y = (cosTheta * l_v.GetY()) - (sinTheta * l_v.GetZ());
+	float z = (sinTheta * l_v.GetY()) + (cosTheta * l_v.GetZ());
+
+	Vector3D out(l_v.GetX(), y, z);
+
+	// Y Axis rotation
+	cosTheta = cos(l_radians.GetY());
+	sinTheta = sin(l_radians.GetY());
+
+	float x =  (cosTheta * out.GetX()) + (sinTheta * out.GetZ());
+	z       = -(sinTheta * out.GetX()) + (cosTheta * out.GetZ());
+
+	out = Vector3D(x, out.GetY(), z);
+
+	// Z Axis rotation
+	cosTheta = cos(l_radians.GetZ());
+	sinTheta = sin(l_radians.GetZ());
+
+	x = (cosTheta * out.GetX()) - (sinTheta * out.GetY());
+	y = (sinTheta * out.GetX()) + (cosTheta * out.GetY());
+
+	out = Vector3D(x, y, out.GetZ());
+	return out;
+}
+
 bool Vector3D::NearZero() {
-	const float s = 1e-5f;
-	return abs(m_x) < s && abs(m_y) < s && abs(m_z) < s;
+	const float s = 1e-4f;
+	return abs(m_x) <= s && abs(m_y) <= s && abs(m_z) <= s;
+}
+
+bool Vector3D::Threshold(const float threshold) {
+	return abs(m_x) < threshold && abs(m_y) < threshold && abs(m_z) < threshold;
+}
+
+void Vector3D::Abs() {
+	m_x = abs(m_x);
+	m_y = abs(m_y);
+	m_z = abs(m_z);
+}
+
+bool Vector3D::IsNAN() {
+	return isnan(m_x) || isnan(m_y) || isnan(m_z);
 }
 
 Vector3D Vector3D::Clamp(const Vector3D& v, const float min, const float max) {
@@ -183,18 +240,22 @@ Vector3D Vector3D::Random(const float min, const float max) {
 }
 
 Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
-	Vector3D rand = Vector3D::RandomInUnitSphere();
-	if (Vector3D::DotProduct(normal, rand) < 0.f) {
-		rand *= 1.f;
+	while (true) {
+		Vector3D rand = Vector3D::RandomInUnitSphere();
+		if (Vector3D::DotProduct(normal, rand) < 0.f) {
+			rand *= -1.f;
+		}
+
+		if (Vector3D::DotProduct(normal, rand) > 1e-4f) return rand;
+		//if (Vector3D::DotProduct(normal, rand) > 1e-4f) return normal;
 	}
-	return rand;
 }
 
 Vector3D Vector3D::RandomInUnitDisk() {
 	while (true) {
 		Vector3D o = Vector3D(Random::RandFloatRange(-1.f, 1.f), Random::RandFloatRange(-1.f, 1.f), 0.f);
 
-		if (o.SqrMagnitude() >= 1.0) continue;
+		if (o.SqrMagnitude() > 1.0) continue;
 
 		return o;
 	}
@@ -204,7 +265,7 @@ Vector3D Vector3D::RandomInUnitSphere() {
 	while (true) {
 		Vector3D o = Vector3D::Random(-1.f, 1.f);
 
-		if (o.SqrMagnitude() >= 1.0) continue;
+		if (o.SqrMagnitude() > 1.0) continue;
 
 		return o;
 	}
@@ -214,6 +275,14 @@ Vector3D Vector3D::RandomUnitVector() {
 	Vector3D o = Vector3D::Random(-1.f, 1.f);
 	o.Normalize();
 	return o;
+}
+
+Vector3D& Vector3D::operator=(const float& scalar) {
+	m_x = scalar;
+	m_y = scalar;
+	m_z = scalar;
+
+	return *this;
 }
 
 Vector3D& Vector3D::operator=(const Vector3D& copyVector) {
@@ -227,14 +296,27 @@ Vector3D& Vector3D::operator=(const Vector3D& copyVector) {
 }
 
 Vector3D Vector3D::operator/(const float scalar) const {
+	if (scalar == 0.f) return Vector3D(1.f);
+		
 	return Vector3D(m_x / scalar, m_y / scalar, m_z / scalar);
 }
 
 Vector3D Vector3D::operator/(const Vector3D& otherVector) const {
-	return Vector3D(m_x / otherVector.m_x, m_y / otherVector.m_y, m_z / otherVector.m_z);
+	float x = otherVector.m_x == 0.f ? NAN : m_x / otherVector.m_x;
+	float y = otherVector.m_y == 0.f ? NAN : m_y / otherVector.m_y;
+	float z = otherVector.m_z == 0.f ? NAN : m_z / otherVector.m_z;
+	return Vector3D(x, y, z);
 }
 
 Vector3D& Vector3D::operator/=(const float scalar) {
+	if (scalar == 0.f) {
+		m_x = NAN;
+		m_y = NAN;
+		m_z = NAN;
+
+		return *this;
+	}
+	
 	m_x /= scalar;
 	m_y /= scalar;
 	m_z /= scalar;
@@ -243,9 +325,13 @@ Vector3D& Vector3D::operator/=(const float scalar) {
 }
 
 Vector3D& Vector3D::operator/=(const Vector3D& otherVector) {
-	m_x /= otherVector.m_x;
-	m_y /= otherVector.m_y;
-	m_z /= otherVector.m_z;
+	float x = otherVector.m_x == 0.f ? NAN : m_x / otherVector.m_x;
+	float y = otherVector.m_y == 0.f ? NAN : m_y / otherVector.m_y;
+	float z = otherVector.m_z == 0.f ? NAN : m_z / otherVector.m_z;
+
+	m_x = x;
+	m_y = y;
+	m_z = z;
 
 	return *this;
 }

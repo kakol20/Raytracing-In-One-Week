@@ -33,9 +33,11 @@ private:
 	//std::mutex m_mtx;
 	bool m_shuffleTiles;
 	float m_aperture, m_verticalFOV;
+	float m_clipEnd, m_clipStart;
+	float m_noiseThreshold;
 	float m_hdriStrength;
 	float m_nearZero;
-	int m_imageWidth, m_imageHeight, m_samplesPerPixel, m_rayDepth, m_tileSize, m_shadowDepth;
+	int m_imageWidth, m_imageHeight, m_maxSamples, m_rayDepth, m_tileSize/*, m_shadowDepth*/, m_minSamples;
 	int m_tilesRendered;
 	size_t m_nextAvailable;
 	size_t m_useThreads;
@@ -60,6 +62,7 @@ private:
 private:
 	// ----- SCENE CREATION -----
 
+	void CornellBox();
 	void DebugScene();
 	void FinalScene();
 	void TexturedScene();
@@ -71,7 +74,7 @@ private:
 	void ShowProgress();
 
 	// raytracing
-	Vector3D RayColor(Ray& ray, const int depth);
+	Vector3D RayColor(Ray& ray, const int depth, bool & isBackground);
 	const bool RayHitObject(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
 	Vector3D EmissionColor(HitRec& rec);
@@ -79,6 +82,7 @@ private:
 
 	std::map<String, Image*> m_textures;
 	std::map<String, Material*> m_matMap;
+	std::map<String, Object*> m_unrenderedObjects;
 	std::vector<Material*> m_matVec;
 	std::vector<Object*> m_objects;
 	std::vector<Tile> m_tiles;
