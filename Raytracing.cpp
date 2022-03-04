@@ -13,6 +13,7 @@
 #include "Metal.h"
 #include "Plane.h"
 #include "Random.h"
+#include "RotatedObj.h"
 #include "Sphere.h"
 #include "StaticMutex.h"
 #include "Textured.h"
@@ -53,6 +54,8 @@ Raytracing::Raytracing() {
 	//StaticMutex::s_mtx = std::mutex();
 
 	m_shuffleTiles = true;
+
+	//Vector3D testRotation = Vector3D::Rotate(Vector3D(1.f, 0.f, 0.f), Vector3D())
 }
 
 Raytracing::~Raytracing() {
@@ -528,7 +531,7 @@ void Raytracing::CornellBox() {
 	m_matMap["light"] = new Emissive(Vector3D::KelvinToRGB(2700.f), 100.f);
 
 	m_matMap["green"] = new Dielectric(Vector3D(0.f, 0.502887f, 0.f), 1.f, 1.45f);
-	m_matMap["red"]   = new Dielectric(Vector3D(0.502887f, 0.f, 0.f), 1.f, 1.45f);
+	m_matMap["red"] = new Dielectric(Vector3D(0.502887f, 0.f, 0.f), 1.f, 1.45f);
 	//m_matMap["blue"] = new Dielectric(Vector3D::HSVtoRGB(240.f, closeToOne, 1.0f), 1.f, 1.45f);
 	m_matMap["white"] = new Dielectric(Vector3D(0.401978f), 0.5f, 1.45f);
 
@@ -539,7 +542,10 @@ void Raytracing::CornellBox() {
 	m_objects.reserve(10);
 
 	m_unrenderedObjects["shortBlock"] = new Box(Vector3D(0.5f), m_matMap["white"]);
-	m_unrenderedObjects["tallBlock"]  = new Box(Vector3D(0.5f, 1.f, 0.5f), m_matMap["white"]);
+	m_unrenderedObjects["tallBlock"] = new Box(Vector3D(0.5f, 1.f, 0.5f), m_matMap["white"]);
+
+	m_unrenderedObjects["shortBlock_r"] = new RotatedObj(Vector3D(0.f, -16.5f, 0.f), m_unrenderedObjects["shortBlock"]);
+	m_unrenderedObjects["tallBlock_r"]  = new RotatedObj(Vector3D(0.f, 17.6f, 0.f), m_unrenderedObjects["tallBlock"]);
 
 	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, closeToOne, 0.f), 0.45f, 0.45f, m_matMap["light"]));
 
@@ -550,8 +556,8 @@ void Raytracing::CornellBox() {
 	m_objects.push_back(new Plane(Plane::Type::ZPlus, Vector3D(0.f, 0.f, -1.f), 2.f, 2.f, m_matMap["white"]));
 
 	//m_objects.push_back(new Box(Vector3D(0.5f), m_matMap["blue"]));
-	m_objects.push_back(new TranslatedObj(Vector3D(0.33f, -0.75f, 0.43f), m_unrenderedObjects["shortBlock"]));
-	m_objects.push_back(new TranslatedObj(Vector3D(-0.32f, -0.5f, -0.24f), m_unrenderedObjects["tallBlock"]));
+	m_objects.push_back(new TranslatedObj(Vector3D(0.33f, -0.75f, 0.43f), m_unrenderedObjects["shortBlock_r"]));
+	m_objects.push_back(new TranslatedObj(Vector3D(-0.32f, -0.5f, -0.24f), m_unrenderedObjects["tallBlock_r"]));
 
 	m_objects.push_back(new Sphere(Vector3D(0.33f, -0.3f, 0.43f), 0.2f, m_matMap["glass"]));
 	m_objects.push_back(new Sphere(Vector3D(-0.32f, 0.2f, -0.24f), 0.2f, m_matMap["metal"]));
@@ -630,7 +636,7 @@ void Raytracing::FinalScene() {
 	m_matMap["ground"] = new Diffuse(Vector3D(0.5f, 0.5f, 0.5f));
 	m_matMap["back"] = new Dielectric(Vector3D(0.4f, 0.2f, 0.1f), 0.1f, 1.46f);
 	m_matMap["middle"] = new Glass(Vector3D(1.f, 1.f, 1.f), 0.f, 1.5f);
-	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.2f, 0.47f);
+	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.04f, 0.47f);
 
 	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(5778.f), 6.5f);
 	m_matMap["light2"] = new Emissive(Vector3D::KelvinToRGB(5778.f), 3.5f);
@@ -787,7 +793,7 @@ void Raytracing::TexturedScene() {
 	m_textures["facade020b_rme"] = new Image("images/textures/facade020b/facade020b_rme.png");
 	m_textures["terracotta_d"] = new Image("images/textures/terracotta/terracotta_d.png", Image::ColorMode::sRGB);
 	m_textures["terracotta_n"] = new Image("images/textures/terracotta/terracotta_n.png");
-	m_textures["terracotta_rme"] = new Image("images/textures/terracotta/terracotta_rme.png");
+	m_textures["terracotta_rme"] = new Image("images/textures/terracotta/terracotta_rme.png", Image::ColorMode::sRGB);
 	m_textures["ornament_d"] = new Image("images/textures/ornament/ornament_d.png", Image::ColorMode::sRGB);
 	m_textures["ornament_n"] = new Image("images/textures/ornament/ornament_n.png");
 	m_textures["ornament_rme"] = new Image("images/textures/ornament/ornament_rme.png");
@@ -1103,7 +1109,7 @@ void Raytracing::ShowProgress() {
 
 Vector3D Raytracing::RayColor(Ray& ray, const int depth, bool& isBackground) {
 	// If we"ve exceeded the ray bounce limit, no more light is gathered.
-	if (depth <= 0) return Vector3D(0.f, 0.f, 0.f);
+	if (depth <= 0) return Vector3D(m_nearZero);
 
 	//float clipEnd = 1000.f;
 
@@ -1138,6 +1144,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth, bool& isBackground) {
 		}
 		else if (m_renderMode == "normal") {
 			Vector3D normal = rec.GetMat()->GetNormal(rec);
+			//Vector3D normal = rec.GetNormal();
 			normal.Normalize();
 			return normal;
 		}

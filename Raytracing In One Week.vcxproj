@@ -170,6 +170,7 @@
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Raytracing.cpp" />
+    <ClCompile Include="RotatedObj.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="String.cpp" />
     <ClCompile Include="Textured.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="Random.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Raytracing.h" />
+    <ClInclude Include="RotatedObj.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="StaticMutex.h" />
     <ClInclude Include="stb\stb_image.h" />

@@ -61,6 +61,38 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 		v1.m_x * v2.m_y - v1.m_y * v2.m_x);
 }
 
+Vector3D Vector3D::Rotate(const Vector3D& v, const Vector3D& radians) {
+	Vector3D l_v = v;
+	Vector3D l_radians = radians;
+	// X Axis rotation
+	float cosTheta = cos(l_radians.GetX());
+	float sinTheta = sin(l_radians.GetX());
+
+	float y = (cosTheta * l_v.GetY()) - (sinTheta * l_v.GetZ());
+	float z = (sinTheta * l_v.GetY()) + (cosTheta * l_v.GetZ());
+
+	Vector3D out(l_v.GetX(), y, z);
+
+	// Y Axis rotation
+	cosTheta = cos(l_radians.GetY());
+	sinTheta = sin(l_radians.GetY());
+
+	float x =  (cosTheta * out.GetX()) + (sinTheta * out.GetZ());
+	z       = -(sinTheta * out.GetX()) + (cosTheta * out.GetZ());
+
+	out = Vector3D(x, out.GetY(), z);
+
+	// Z Axis rotation
+	cosTheta = cos(l_radians.GetZ());
+	sinTheta = sin(l_radians.GetZ());
+
+	x = (cosTheta * out.GetX()) - (sinTheta * out.GetY());
+	y = (sinTheta * out.GetX()) + (cosTheta * out.GetY());
+
+	out = Vector3D(x, y, out.GetZ());
+	return out;
+}
+
 bool Vector3D::NearZero() {
 	const float s = 1e-4f;
 	return abs(m_x) <= s && abs(m_y) <= s && abs(m_z) <= s;

@@ -23,9 +23,11 @@ bool TranslatedObj::Hit(Ray& ray, const float t_min, const float t_max, HitRec& 
 }
 
 bool TranslatedObj::SphereIntersectGround(const Vector3D pos, const float radius) {
-	return m_object->SphereIntersectGround(pos, radius);
+	Vector3D tPos = pos + m_pos;
+	return m_object->SphereIntersectGround(tPos, radius);
 }
 
 bool TranslatedObj::SphereIntersectSphere(const Vector3D pos, const float radius) {
-	return m_object->SphereIntersectSphere(pos, radius);
+	Vector3D tPos = pos + m_pos;
+	return m_object->SphereIntersectSphere(tPos, radius);
 }

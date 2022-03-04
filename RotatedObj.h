@@ -1,12 +1,18 @@
 #pragma once
 #include "Object.h"
-class TranslatedObj :
+class RotatedObj :
 	public Object {
-
 public:
-	TranslatedObj() : TranslatedObj(Vector3D(), nullptr) {};
-	TranslatedObj(const Vector3D translation, Object* object);
-	virtual ~TranslatedObj();
+	RotatedObj() : RotatedObj(Vector3D(), nullptr) {};
+	
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="degrees">Angles in degrees</param>
+	/// <param name="object"></param>
+	RotatedObj(const Vector3D degrees, Object* object);
+
+	virtual ~RotatedObj();
 
 	virtual bool Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
@@ -15,5 +21,6 @@ public:
 
 private:
 	Object* m_object;
+	Vector3D m_radians;
 };
 
