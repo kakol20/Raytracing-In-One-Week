@@ -505,8 +505,8 @@ void Raytracing::ShuffleTiles() {
 }
 
 void Raytracing::CornellBox() {
-	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
-	m_hdriStrength = 0.01f;
+	m_hdri.Read("images/hdri/lebombo_2k.png", Image::ColorMode::sRGB);
+	m_hdriStrength = 0.0255f;
 	//m_hdriStrength = 1.f;
 
 	// ----- CAMERA -----

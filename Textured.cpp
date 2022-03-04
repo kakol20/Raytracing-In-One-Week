@@ -102,6 +102,10 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 
 		bool metalnessRand = Random::RandFloat() <= metalness;
 
+		float nearZero = 1e-4f;
+
+		Vector3D reflect = Reflect(unitDir, normal);
+
 		if (metalnessRand) {
 			// ----- METAL-----
 			float incomingFresnel = fresnel - Fresnel(incoming, incoming, refractionRatio);
@@ -114,7 +118,6 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			attentuation = Vector3D::Lerp(ColorSpace::LinearTosRGB(albedo), attentuation, facing);
 
 			// scatter
-			Vector3D reflect = Reflect(unitDir, normal);
 
 			Vector3D glossy = reflect + (Vector3D::RandomInUnitSphere() * sqrRoughness);
 			if (glossy.NearZero()) glossy = reflect;
@@ -123,6 +126,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			bool fresnelRand = Random::RandFloat() <= incomingFresnel;
 			Vector3D scatterDir = fresnelRand ? reflect : glossy;
 
+			if (Vector3D::DotProduct(normal, scatterDir) < nearZero) scatterDir = reflect;
 			scattered = Ray(rec.GetPoint(), scatterDir);
 		}
 		else {
@@ -132,10 +136,10 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			bool fresnelRand = Random::RandFloat() <= fresnel;
 			Vector3D scatterDir;
 			if (fresnelRand) {
-				scatterDir = Reflect(unitDir, normal);
+				scatterDir = reflect;
 				scatterDir += Vector3D::RandomInUnitSphere() * sqrRoughness;
 
-				if (scatterDir.NearZero()) scatterDir = Reflect(unitDir, normal);
+				if (scatterDir.NearZero()) scatterDir = reflect;
 				scatterDir.Normalize();
 			}
 			else {
@@ -144,6 +148,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 				scatterDir.Normalize();
 			}
 
+			if (Vector3D::DotProduct(normal, scatterDir) < nearZero) scatterDir = reflect;
 			scattered = Ray(rec.GetPoint(), scatterDir);
 		}
 

@@ -58,7 +58,6 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	bool debug = false;
 	if (debug) {
 		if (attentuation.NearZero()) attentuation = m_albedo;
-
 		float scatterDot = Vector3D::DotProduct(scatterDir, normal);
 
 		attentuation = scatterDot < 0.f ? Vector3D(0.f, 1.f) : Vector3D(1.f, 0.f);
@@ -70,6 +69,7 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	}
 
 	scatterDir.Normalize();
+	if (Vector3D::DotProduct(normal, scatterDir) < 0.f) scatterDir = reflect;
 
 	scattered = Ray(rec.GetPoint(), scatterDir);
 	return true;

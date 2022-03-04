@@ -215,6 +215,7 @@ Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
 		}
 
 		if (Vector3D::DotProduct(normal, rand) > 1e-4f) return rand;
+		//if (Vector3D::DotProduct(normal, rand) > 1e-4f) return normal;
 	}
 }
 

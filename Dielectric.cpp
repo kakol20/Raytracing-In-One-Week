@@ -35,8 +35,9 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	//attentuation = Vector3D(fresnel);
 
 	Vector3D scatterDir;
+	Vector3D reflect = Reflect(unitDir, normal);
+
 	if (fresnelRand) {
-		Vector3D reflect = Reflect(unitDir, normal);
 		scatterDir = reflect;
 		scatterDir += Vector3D::RandomInUnitSphere() * sqrRoughness;
 
@@ -48,6 +49,8 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 		if (scatterDir.NearZero()) scatterDir = normal;
 		scatterDir.Normalize();
 	}
+
+	if (Vector3D::DotProduct(normal, scatterDir) < 1e-4f) scatterDir = reflect;
 
 	scattered = Ray(rec.GetPoint(), scatterDir);
 	return true;

@@ -43,7 +43,7 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	n.Normalize();
 
 	Vector3D l = ray.GetDir();
-	l.Normalize();
+	//l.Normalize();
 	float dotLN = Vector3D::DotProduct(l, n);
 	if (dotLN != 0.f) {
 		Vector3D p0 = m_pos;
@@ -55,10 +55,10 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 		if (t_min > d || d > t_max) return false;
 
 		Vector3D p = l0 + (l * d);
-		float nearZero = 1e-3f;
+		float nearZero = 1e-4f;
 
 		if (m_type == Plane::Type::XMinus || m_type == Plane::Type::XPlus) {
-			Vector3D offset = Vector3D(0.f, 1.f, 1.f) * Vector3D(0.f, m_height / 2.f, m_width / 2.f);
+			Vector3D offset = Vector3D(0.f, m_height / 2.f, m_width / 2.f);
 			Vector3D min = m_pos - offset;
 			Vector3D max = m_pos + offset;
 
@@ -93,7 +93,7 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 			}
 		}
 		else if (m_type == Plane::Type::YMinus || m_type == Plane::Type::YPlus) {
-			Vector3D offset = Vector3D(1.f, 0.f, 1.f) * Vector3D(m_width / 2.f, 0.f, m_height / 2.f);
+			Vector3D offset = Vector3D(m_width / 2.f, 0.f, m_height / 2.f);
 			Vector3D min = m_pos - offset;
 			Vector3D max = m_pos + offset;
 
@@ -128,7 +128,7 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 			}
 		}
 		else {
-			Vector3D offset = Vector3D(1.f, 1.f, 0.f) * Vector3D(m_width / 2.f, m_height / 2.f, 0.f);
+			Vector3D offset = Vector3D(m_width / 2.f, m_height / 2.f, 0.f);
 			Vector3D min = m_pos - offset;
 			Vector3D max = m_pos + offset;
 
