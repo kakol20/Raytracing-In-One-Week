@@ -9,6 +9,10 @@ public:
 	// Using only needed functions
 
 	Vector3D operator*(const Vector3D& v) const;
+	
+	static Vector3D RotateX(const Vector3D& v, const float radians);
+	static Vector3D RotateY(const Vector3D& v, const float radians);
+	static Vector3D RotateZ(const Vector3D& v, const float radians);
 
 	float Determinant();
 	void Normalize();

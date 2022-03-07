@@ -17,6 +17,7 @@
 #include "Sphere.h"
 #include "StaticMutex.h"
 #include "Textured.h"
+#include "TransformedObject.h"
 #include "TranslatedObj.h"
 
 #include "Raytracing.h"
@@ -65,12 +66,12 @@ Raytracing::~Raytracing() {
 	std::vector<Object*> m_objects;
 	std::vector<Tile> m_tiles;*/
 
-	if (!m_objects.empty()) {
-		for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
+	if (!m_renderedObjects.empty()) {
+		for (auto it = m_renderedObjects.begin(); it != m_renderedObjects.end(); it++) {
 			delete (*it);
 			(*it) = nullptr;
 		}
-		m_objects.clear();
+		m_renderedObjects.clear();
 	}
 
 	if (!m_unrenderedObjects.empty()) {
@@ -530,37 +531,41 @@ void Raytracing::CornellBox() {
 
 	m_matMap["light"] = new Emissive(Vector3D::KelvinToRGB(2700.f), 100.f);
 
-	m_matMap["green"] = new Dielectric(Vector3D(0.f, 0.502887f, 0.f), 1.f, 1.45f);
 	m_matMap["red"] = new Dielectric(Vector3D(0.502887f, 0.f, 0.f), 1.f, 1.45f);
-	//m_matMap["blue"] = new Dielectric(Vector3D::HSVtoRGB(240.f, closeToOne, 1.0f), 1.f, 1.45f);
+	m_matMap["green"] = new Dielectric(Vector3D(0.f, 0.502887f, 0.f), 1.f, 1.45f);
+	m_matMap["blue"] = new Dielectric(Vector3D(0.f, 0.f, 0.502887f), 1.f, 1.45f);
 	m_matMap["white"] = new Dielectric(Vector3D(0.401978f), 0.5f, 1.45f);
 
 	m_matMap["glass"] = new Glass(Vector3D(1.f), m_nearZero, 1.5f);
 	m_matMap["metal"] = new Metal(Vector3D(0.401978f), 0.25f, 2.95f);
 
 	// ----- OBJECTS -----
-	m_objects.reserve(10);
+	m_renderedObjects.reserve(10);
 
 	m_unrenderedObjects["shortBlock"] = new Box(Vector3D(0.5f), m_matMap["white"]);
 	m_unrenderedObjects["tallBlock"] = new Box(Vector3D(0.5f, 1.f, 0.5f), m_matMap["white"]);
+	m_unrenderedObjects["glassBlock"] = new Box(Vector3D(0.2309f), m_matMap["glass"]);
+	m_unrenderedObjects["metalBlock"] = new Box(Vector3D(0.2309f), m_matMap["metal"]);
 
-	m_unrenderedObjects["shortBlock_r"] = new RotatedObj(Vector3D(0.f, -16.5f, 0.f), m_unrenderedObjects["shortBlock"]);
-	m_unrenderedObjects["tallBlock_r"]  = new RotatedObj(Vector3D(0.f, 17.6f, 0.f), m_unrenderedObjects["tallBlock"]);
+	//m_unrenderedObjects["glassBlock"] = new Sphere(Vector3D(0.f, 0.f, 0.f), 0.2f, m_matMap["glass"]);
 
-	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, closeToOne, 0.f), 0.45f, 0.45f, m_matMap["light"]));
+	m_renderedObjects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, closeToOne, 0.f), 0.45f, 0.45f, m_matMap["light"]));
 
-	m_objects.push_back(new Plane(Plane::Type::XMinus, Vector3D(1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["green"]));
-	m_objects.push_back(new Plane(Plane::Type::XPlus, Vector3D(-1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["red"]));
-	m_objects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, 1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
-	m_objects.push_back(new Plane(Plane::Type::YPlus, Vector3D(0.f, -1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
-	m_objects.push_back(new Plane(Plane::Type::ZPlus, Vector3D(0.f, 0.f, -1.f), 2.f, 2.f, m_matMap["white"]));
+	m_renderedObjects.push_back(new Plane(Plane::Type::XMinus, Vector3D(1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["green"]));
+	m_renderedObjects.push_back(new Plane(Plane::Type::XPlus, Vector3D(-1.f, 0.f, 0.f), 2.f, 2.f, m_matMap["red"]));
+	m_renderedObjects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, 1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
+	m_renderedObjects.push_back(new Plane(Plane::Type::YPlus, Vector3D(0.f, -1.f, 0.f), 2.f, 2.f, m_matMap["white"]));
+	m_renderedObjects.push_back(new Plane(Plane::Type::ZPlus, Vector3D(0.f, 0.f, -1.f), 2.f, 2.f, m_matMap["white"]));
 
 	//m_objects.push_back(new Box(Vector3D(0.5f), m_matMap["blue"]));
-	m_objects.push_back(new TranslatedObj(Vector3D(0.33f, -0.75f, 0.43f), m_unrenderedObjects["shortBlock_r"]));
-	m_objects.push_back(new TranslatedObj(Vector3D(-0.32f, -0.5f, -0.24f), m_unrenderedObjects["tallBlock_r"]));
+	m_renderedObjects.push_back(new TransformedObject(Vector3D(0.f, -16.5f, 0.f), Vector3D(0.33f, -0.75f, 0.43f), m_unrenderedObjects["shortBlock"]));
+	m_renderedObjects.push_back(new TransformedObject(Vector3D(0.f, 17.6f, 0.f), Vector3D(-0.32f, -0.5f, -0.24f), m_unrenderedObjects["tallBlock"]));
 
-	m_objects.push_back(new Sphere(Vector3D(0.33f, -0.3f, 0.43f), 0.2f, m_matMap["glass"]));
-	m_objects.push_back(new Sphere(Vector3D(-0.32f, 0.2f, -0.24f), 0.2f, m_matMap["metal"]));
+	//m_renderedObjects.push_back(new Sphere(Vector3D(0.33f, -0.3f, 0.43f), 0.2f, m_matMap["glass"]));
+	//m_renderedObjects.push_back(new Sphere(Vector3D(-0.32f, 0.2f, -0.24f), 0.2f, m_matMap["metal"]));
+	m_renderedObjects.push_back(new TransformedObject(Vector3D::Random(0.f, 360.f), Vector3D(0.33f, -0.3f, 0.43f), m_unrenderedObjects["glassBlock"]));
+	m_renderedObjects.push_back(new TransformedObject(Vector3D::Random(0.f, 360.f), Vector3D(-0.32f, 0.2f, -0.24f), m_unrenderedObjects["metalBlock"]));
+
 }
 
 void Raytracing::DebugScene() {
@@ -589,14 +594,14 @@ void Raytracing::DebugScene() {
 	m_matMap["metal"] = new Metal(Vector3D::HSVtoRGB(Random::RandFloatRange(0.f, 360.f), Random::RandFloatRange(0.5f, 1.f), 1.f), 0.1f, 1.45f);
 
 	// ----- OBJECTS -----
-	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
+	m_renderedObjects.push_back(new Ground(0.f, m_matMap["ground"]));
 
-	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["glass"]));
-	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["emissive"]));
-	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["metal"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["glass"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["emissive"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["metal"]));
 
-	m_objects.push_back(new Sphere(Vector3D(-1.25, 0.5f, 1.4143f), 0.5f, m_matMap["diffuse"]));
-	m_objects.push_back(new Sphere(Vector3D(1.25, 0.5f, 1.4143f), 0.5f, m_matMap["dielectric"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(-1.25, 0.5f, 1.4143f), 0.5f, m_matMap["diffuse"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(1.25, 0.5f, 1.4143f), 0.5f, m_matMap["dielectric"]));
 }
 
 void Raytracing::FinalScene() {
@@ -649,13 +654,13 @@ void Raytracing::FinalScene() {
 	m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], m_textures["terracotta_n"], 1.45f);
 
 	// objects
-	m_objects.push_back(new Ground(0.f, m_matMap["ground"]));
-	m_objects.push_back(new Sphere(Vector3D(-4.f, 1.f, 0.f), 1.f, m_matMap["back"]));
-	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["middle"]));
-	m_objects.push_back(new Sphere(Vector3D(4.f, 1.f, 0.f), 1.f, m_matMap["front"]));
+	m_renderedObjects.push_back(new Ground(0.f, m_matMap["ground"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(-4.f, 1.f, 0.f), 1.f, m_matMap["back"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["middle"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(4.f, 1.f, 0.f), 1.f, m_matMap["front"]));
 
-	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, -10.f), 4.f, m_matMap["light1"]));
-	m_objects.push_back(new Sphere(Vector3D(20.f, 15.f, 10.f), 8.f, m_matMap["light2"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(20.f, 15.f, -10.f), 4.f, m_matMap["light1"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(20.f, 15.f, 10.f), 8.f, m_matMap["light2"]));
 
 	//Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
 	//lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
@@ -681,7 +686,7 @@ void Raytracing::FinalScene() {
 
 		bool intersect = false;
 
-		for (auto it2 = m_objects.begin(); it2 != m_objects.end(); it2++) {
+		for (auto it2 = m_renderedObjects.begin(); it2 != m_renderedObjects.end(); it2++) {
 			if ((*it2)->SphereIntersectSphere(position, 0.2f)) {
 				intersect = true;
 				break;
@@ -702,7 +707,7 @@ void Raytracing::FinalScene() {
 				float ior = 1.46f;
 
 				m_matVec.push_back(new Dielectric(Vector3D::HSVtoRGB(h, s, v), roughness, ior));
-				m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
+				m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 			}
 			else if (chooseMat <= 2.f * gap) {
 				// ----- METAL -----
@@ -714,7 +719,7 @@ void Raytracing::FinalScene() {
 				float ior = 1.45f;
 
 				m_matVec.push_back(new Metal(Vector3D::HSVtoRGB(h, s, v), roughness, ior));
-				m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
+				m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 			}
 			else if (chooseMat <= 3.f * gap) {
 				// ----- GLASS -----
@@ -726,7 +731,7 @@ void Raytracing::FinalScene() {
 				float ior = 1.45f;
 
 				m_matVec.push_back(new Glass(Vector3D::HSVtoRGB(h, s, v), roughness, ior));
-				m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
+				m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 			}
 			else if (chooseMat <= 4.f * gap) {
 				// ----- EMISSIVE -----
@@ -741,7 +746,7 @@ void Raytracing::FinalScene() {
 
 				//m_matVec.push_back(new Emissive(Vector3D::HSVtoRGB(h, s, v), intensity));
 				m_matVec.push_back(new Emissive(Vector3D::KelvinToRGB(K), intensity));
-				m_objects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
+				m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
 			}
 			else {
 				// ----- TEXTURED -----
@@ -749,16 +754,16 @@ void Raytracing::FinalScene() {
 				float texturedGap = 1.f / 4.f;
 
 				if (chooseTextured <= texturedGap) {
-					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["carbon"], Vector3D(2.f, 1.f)));
+					m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matMap["carbon"], Vector3D(2.f, 1.f)));
 				}
 				else if (chooseTextured <= 2.f * texturedGap) {
-					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["facade"], Vector3D(2.f, 1.f)));
+					m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matMap["facade"], Vector3D(2.f, 1.f)));
 				}
 				else if (chooseTextured <= 3.f * texturedGap) {
-					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["ornament"]));
+					m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matMap["ornament"]));
 				}
 				else {
-					m_objects.push_back(new Sphere(position, 0.2f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
+					m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
 				}
 			}
 		}
@@ -809,14 +814,14 @@ void Raytracing::TexturedScene() {
 	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(2700.f), 10.f);
 
 	// ----- OBJECTS -----
-	m_objects.push_back(new Ground(0.f, m_matMap["terracotta"], Vector3D(1.f, 1.f, 1.f) / 3.1f));
-	m_objects.push_back(new Sphere(Vector3D(-20.f, 15.f, -15.f), 5.f, m_matMap["light1"]));
+	m_renderedObjects.push_back(new Ground(0.f, m_matMap["terracotta"], Vector3D(1.f, 1.f, 1.f) / 3.1f));
+	m_renderedObjects.push_back(new Sphere(Vector3D(-20.f, 15.f, -15.f), 5.f, m_matMap["light1"]));
 
-	m_objects.push_back(new Sphere(Vector3D(0.f, 0.5f, 1.4143f), 0.5f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
+	m_renderedObjects.push_back(new Sphere(Vector3D(0.f, 0.5f, 1.4143f), 0.5f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
 
-	m_objects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["facade"], Vector3D(2.f, 1.f)));
-	m_objects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["carbon"], Vector3D(2.f, 1.f)));
-	m_objects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["ornament"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(-2.5f, 1.f, 0.f), 1.f, m_matMap["facade"], Vector3D(2.f, 1.f)));
+	m_renderedObjects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["carbon"], Vector3D(2.f, 1.f)));
+	m_renderedObjects.push_back(new Sphere(Vector3D(2.5f, 1.f, 0.f), 1.f, m_matMap["ornament"]));
 }
 
 void Raytracing::RenderTile(const size_t startIndex) {
@@ -1007,7 +1012,7 @@ void Raytracing::ShowProgress() {
 	output += "Render Mode: ";
 	output += m_renderMode;
 	output += "\nTotal Objects: ";
-	output += String::ToString((int)m_objects.size());
+	output += String::ToString((int)m_renderedObjects.size());
 	output += "\nThreads Used: ";
 	output += String::ToString((int)m_useThreads);
 	output += "\nTotal Tiles: ";
@@ -1200,7 +1205,7 @@ const bool Raytracing::RayHitObject(Ray& ray, const float t_min, const float t_m
 	bool hit = false;
 	float closest = t_max;
 
-	for (auto it = m_objects.begin(); it != m_objects.end(); it++) {
+	for (auto it = m_renderedObjects.begin(); it != m_renderedObjects.end(); it++) {
 		if ((*it)->Hit(ray, t_min, closest, tempRec)) {
 			hit = true;
 			closest = tempRec.GetT();

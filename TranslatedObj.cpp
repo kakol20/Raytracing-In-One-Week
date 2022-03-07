@@ -10,12 +10,14 @@ TranslatedObj::~TranslatedObj() {
 }
 
 bool TranslatedObj::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
+	if (m_object == nullptr) return false;
 	Ray localRay = Ray(ray.GetOrig() - m_pos, ray.GetDir());
 
 	if (!m_object->Hit(localRay, t_min, t_max, rec)) return false;
 
 	rec.SetPoint(rec.GetPoint() + m_pos);
 
+	//Vector3D normal = rec.GetFrontFace() ? rec.GetNormal() : -rec.GetNormal();
 	Vector3D normal = rec.GetNormal();
 	rec.SetFaceNormal(localRay, normal);
 

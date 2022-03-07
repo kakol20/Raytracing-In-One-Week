@@ -1,9 +1,10 @@
 #include <cmath>
+#include <algorithm>
 
 #include "Random.h"
+#include "Matrix3x3.h"
 
 #include "Vector3D.h"
-#include <algorithm>
 
 Vector3D::Vector3D() : Vector3D(0.f, 0.f, 0.f) {
 }
@@ -62,34 +63,12 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 }
 
 Vector3D Vector3D::Rotate(const Vector3D& v, const Vector3D& radians) {
-	Vector3D l_v = v;
-	Vector3D l_radians = radians;
-	// X Axis rotation
-	float cosTheta = cos(l_radians.GetX());
-	float sinTheta = sin(l_radians.GetX());
+	Vector3D out = v;
 
-	float y = (cosTheta * l_v.GetY()) - (sinTheta * l_v.GetZ());
-	float z = (sinTheta * l_v.GetY()) + (cosTheta * l_v.GetZ());
+	out = Matrix3x3::RotateX(out, radians.m_x);
+	out = Matrix3x3::RotateY(out, radians.m_y);
+	out = Matrix3x3::RotateZ(out, radians.m_z);
 
-	Vector3D out(l_v.GetX(), y, z);
-
-	// Y Axis rotation
-	cosTheta = cos(l_radians.GetY());
-	sinTheta = sin(l_radians.GetY());
-
-	float x =  (cosTheta * out.GetX()) + (sinTheta * out.GetZ());
-	z       = -(sinTheta * out.GetX()) + (cosTheta * out.GetZ());
-
-	out = Vector3D(x, out.GetY(), z);
-
-	// Z Axis rotation
-	cosTheta = cos(l_radians.GetZ());
-	sinTheta = sin(l_radians.GetZ());
-
-	x = (cosTheta * out.GetX()) - (sinTheta * out.GetY());
-	y = (sinTheta * out.GetX()) + (cosTheta * out.GetY());
-
-	out = Vector3D(x, y, out.GetZ());
 	return out;
 }
 
@@ -296,7 +275,7 @@ Vector3D& Vector3D::operator=(const Vector3D& copyVector) {
 }
 
 Vector3D Vector3D::operator/(const float scalar) const {
-	if (scalar == 0.f) return Vector3D(1.f);
+	if (scalar == 0.f) return Vector3D(NAN);
 		
 	return Vector3D(m_x / scalar, m_y / scalar, m_z / scalar);
 }

@@ -120,6 +120,9 @@
     <ClCompile Include="RotatedObj.cpp">
       <Filter>Source Files\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="TransformedObject.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb\stb_image.h">
@@ -208,6 +211,9 @@
     </ClInclude>
     <ClInclude Include="RotatedObj.h">
       <Filter>Header Files\Raytracing</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformedObject.h">
+      <Filter>Header Files\Objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

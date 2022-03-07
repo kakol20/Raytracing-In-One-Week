@@ -84,7 +84,7 @@ private:
 	std::map<String, Material*> m_matMap;
 	std::map<String, Object*> m_unrenderedObjects;
 	std::vector<Material*> m_matVec;
-	std::vector<Object*> m_objects;
+	std::vector<Object*> m_renderedObjects;
 	std::vector<Tile> m_tiles;
 
 	// ----- THREADING -----
