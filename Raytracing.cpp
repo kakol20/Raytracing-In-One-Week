@@ -544,10 +544,10 @@ void Raytracing::CornellBox() {
 
 	m_unrenderedObjects["shortBlock"] = new Box(Vector3D(0.5f), m_matMap["white"]);
 	m_unrenderedObjects["tallBlock"] = new Box(Vector3D(0.5f, 1.f, 0.5f), m_matMap["white"]);
-	m_unrenderedObjects["glassBlock"] = new Box(Vector3D(0.2309f), m_matMap["glass"]);
 	m_unrenderedObjects["metalBlock"] = new Box(Vector3D(0.2309f), m_matMap["metal"]);
 
-	//m_unrenderedObjects["glassBlock"] = new Sphere(Vector3D(0.f, 0.f, 0.f), 0.2f, m_matMap["glass"]);
+	m_unrenderedObjects["glassBlock"] = new Box(Vector3D(0.2309f), m_matMap["glass"]);
+	//m_unrenderedObjects["glassBlock"] = new Sphere(Vector3D(0.f), 0.2f, m_matMap["glass"]);
 
 	m_renderedObjects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, closeToOne, 0.f), 0.45f, 0.45f, m_matMap["light"]));
 

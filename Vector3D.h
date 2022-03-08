@@ -27,7 +27,9 @@ public:
 
 	static float DotProduct(const Vector3D& v1, const Vector3D& v2);
 	static Vector3D CrossProduct(const Vector3D& v1, const Vector3D& v2);
-	static Vector3D Rotate(const Vector3D& v, const Vector3D& radians);
+
+	//static Vector3D Rotate(const Vector3D& v, const Vector3D& radians);
+	static Vector3D RotateAxis(const Vector3D& v, const Vector3D& axis, const float radians);
 
 	// ----- OTHER -----
 

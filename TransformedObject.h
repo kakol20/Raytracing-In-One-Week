@@ -27,9 +27,7 @@ private:
 
     //Object* m_scaledObject;
     //Object* m_rotatedObject;
-    Object* m_xRotatedObject;
-    Object* m_yRotatedObject;
-    Object* m_zRotatedObject;
+    Object* m_rotatedObject;
     Object* m_translatedObject;
 };
 

@@ -3,6 +3,7 @@
 
 #include "Random.h"
 #include "Matrix3x3.h"
+#include "Quaternion.h"
 
 #include "Vector3D.h"
 
@@ -62,14 +63,21 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 		v1.m_x * v2.m_y - v1.m_y * v2.m_x);
 }
 
-Vector3D Vector3D::Rotate(const Vector3D& v, const Vector3D& radians) {
-	Vector3D out = v;
+Vector3D Vector3D::RotateAxis(const Vector3D& v, const Vector3D& axis, const float radians) {
+	Quaternion p(0.f, v.m_x, v.m_y, v.m_z);
 
-	out = Matrix3x3::RotateX(out, radians.m_x);
-	out = Matrix3x3::RotateY(out, radians.m_y);
-	out = Matrix3x3::RotateZ(out, radians.m_z);
+	float sinTheta = sin(radians / 2.f);
+	float cosTheta = cos(radians / 2.f);
 
-	return out;
+	Vector3D ijk = axis * sinTheta;
+	//Vector3D ijk_negative = -ijk;
+
+	Quaternion r(cosTheta, ijk.GetX(), ijk.GetY(), ijk.GetZ());
+	Quaternion rInverse(cosTheta, -ijk.GetX(), -ijk.GetY(), -ijk.GetZ());
+
+	Quaternion result = Quaternion::HamProduct(Quaternion::HamProduct(r, p), rInverse);
+
+	return result.GetIJK();
 }
 
 bool Vector3D::NearZero() {
@@ -276,7 +284,7 @@ Vector3D& Vector3D::operator=(const Vector3D& copyVector) {
 
 Vector3D Vector3D::operator/(const float scalar) const {
 	if (scalar == 0.f) return Vector3D(NAN);
-		
+
 	return Vector3D(m_x / scalar, m_y / scalar, m_z / scalar);
 }
 
@@ -295,7 +303,7 @@ Vector3D& Vector3D::operator/=(const float scalar) {
 
 		return *this;
 	}
-	
+
 	m_x /= scalar;
 	m_y /= scalar;
 	m_z /= scalar;

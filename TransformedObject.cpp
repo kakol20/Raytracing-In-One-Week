@@ -13,25 +13,17 @@ TransformedObject::TransformedObject(const Vector3D rotation, const Vector3D tra
 	//m_scaledObject = new ScaledObject(scale, nullptr);
 	//m_rotatedObject = new RotatedObj(rotation, m_object);
 	//m_translatedObject = new TranslatedObj(translation, m_rotatedObject);
-	m_xRotatedObject = new RotatedObj(rotation * Vector3D(1.f, 0.f, 0.f), m_object);
-	m_yRotatedObject = new RotatedObj(rotation * Vector3D(0.f, 1.f, 0.f), m_xRotatedObject);
-	m_zRotatedObject = new RotatedObj(rotation * Vector3D(0.f, 0.f, 1.f), m_yRotatedObject);
+	m_rotatedObject = new RotatedObj(rotation, m_object);
 	
-	m_translatedObject = new TranslatedObj(translation, m_zRotatedObject);
+	m_translatedObject = new TranslatedObj(translation, m_rotatedObject);
 }
 
 TransformedObject::~TransformedObject() {
 	delete m_translatedObject;
 	m_translatedObject = nullptr;
 
-	delete m_zRotatedObject;
-	m_zRotatedObject = nullptr;
-
-	delete m_yRotatedObject;
-	m_yRotatedObject = nullptr;
-
-	delete m_xRotatedObject;
-	m_xRotatedObject = nullptr;
+	delete m_rotatedObject;
+	m_rotatedObject = nullptr;
 	
 	//delete m_scaledObject;
 	//m_scaledObject = nullptr;
