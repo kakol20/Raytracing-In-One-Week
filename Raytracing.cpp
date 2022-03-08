@@ -643,17 +643,20 @@ void Raytracing::FinalScene() {
 	m_matMap["middle"] = new Glass(Vector3D(1.f, 1.f, 1.f), 0.f, 1.5f);
 	m_matMap["front"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.04f, 0.47f);
 
-	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(5778.f), 6.5f);
-	m_matMap["light2"] = new Emissive(Vector3D::KelvinToRGB(5778.f), 3.5f);
+	m_matMap["light1"] = new Emissive(Vector3D::KelvinToRGB(5778.f), 3.3f);
+	m_matMap["light2"] = new Emissive(Vector3D::KelvinToRGB(5778.f), 1.7f);
 
 	m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], m_textures["fabric004_n"], 1.45f);
-	//m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], nullptr, 1.45f);
-
 	m_matMap["facade"] = new Textured(m_textures["facade020b_d"], m_textures["facade020b_rme"], m_textures["facade020b_n"], 1.45f, Vector3D(), 1.5f);
 	m_matMap["ornament"] = new Textured(m_textures["ornament_d"], m_textures["ornament_rme"], m_textures["ornament_n"], 1.45f);
 	m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], m_textures["terracotta_n"], 1.45f);
 
 	// objects
+	m_unrenderedObjects["carbon"] = new Sphere(Vector3D(), 0.2f, m_matMap["carbon"], Vector3D(2.f, 1.f));
+	m_unrenderedObjects["facade"] = new Sphere(Vector3D(), 0.2f, m_matMap["facade"], Vector3D(2.f, 1.f));
+	m_unrenderedObjects["ornament"] = new Sphere(Vector3D(), 0.2f, m_matMap["ornament"]);
+	m_unrenderedObjects["terracotta"] = new Sphere(Vector3D(), 0.2f, m_matMap["terracotta"], Vector3D(2.f, 1.f));
+
 	m_renderedObjects.push_back(new Ground(0.f, m_matMap["ground"]));
 	m_renderedObjects.push_back(new Sphere(Vector3D(-4.f, 1.f, 0.f), 1.f, m_matMap["back"]));
 	m_renderedObjects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["middle"]));
@@ -661,12 +664,6 @@ void Raytracing::FinalScene() {
 
 	m_renderedObjects.push_back(new Sphere(Vector3D(20.f, 15.f, -10.f), 4.f, m_matMap["light1"]));
 	m_renderedObjects.push_back(new Sphere(Vector3D(20.f, 15.f, 10.f), 8.f, m_matMap["light2"]));
-
-	//Vector3D lightPos = Vector3D(158.0f, 242.0f, 81.0f) / 255.0f;
-	//lightPos = (lightPos * 2.0f) - Vector3D(1.0f, 1.0f, 1.0f);
-	//lightPos.Normalize();
-	//lightPos *= 25.f;
-	//m_objects.push_back(new Sphere(lightPos, 8.f, m_matMap["light1"]));
 
 	// procedural
 	std::vector<Vector3D> position;
@@ -695,7 +692,7 @@ void Raytracing::FinalScene() {
 
 		if (!intersect) {
 			float chooseMat = Random::RandFloat();
-			float gap = 1.f / 5.f;
+			float gap = 1.f / 8.f;
 
 			if (chooseMat <= 1.f * gap) {
 				// ----- DIELECTRIC -----
@@ -735,14 +732,10 @@ void Raytracing::FinalScene() {
 			}
 			else if (chooseMat <= 4.f * gap) {
 				// ----- EMISSIVE -----
-				//Vector3D col = Vector3D::Random(0.5f, 1.f);
-				/*float h = Random::RandFloatRange(0.f, 360.f);
-				float s = 0.5f;
-				float v = 1.0f;*/
 				float K = Random::RandFloatRange(1000.f, 12200.f);
 
 				//float intensity = 1.f;
-				float intensity = Random::RandFloatRange(1.f, 4.f);
+				float intensity = Random::RandFloatRange(1.f, 2.f);
 
 				//m_matVec.push_back(new Emissive(Vector3D::HSVtoRGB(h, s, v), intensity));
 				m_matVec.push_back(new Emissive(Vector3D::KelvinToRGB(K), intensity));
@@ -752,27 +745,24 @@ void Raytracing::FinalScene() {
 				// ----- TEXTURED -----
 				float chooseTextured = Random::RandFloat();
 				float texturedGap = 1.f / 4.f;
+				
+				Vector3D randomRotation = Vector3D::Random(0.f, 360.f);
 
-				if (chooseTextured <= texturedGap) {
-					m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matMap["carbon"], Vector3D(2.f, 1.f)));
+				if (chooseMat <= 5.f * gap) {
+					m_renderedObjects.push_back(new TransformedObject(randomRotation, position, m_unrenderedObjects["carbon"]));
 				}
-				else if (chooseTextured <= 2.f * texturedGap) {
-					m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matMap["facade"], Vector3D(2.f, 1.f)));
+				else if (chooseMat <= 6.f * gap) {
+					m_renderedObjects.push_back(new TransformedObject(randomRotation, position, m_unrenderedObjects["facade"]));
 				}
-				else if (chooseTextured <= 3.f * texturedGap) {
-					m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matMap["ornament"]));
+				else if (chooseMat <= 7.f * gap) {
+					m_renderedObjects.push_back(new TransformedObject(randomRotation, position, m_unrenderedObjects["ornament"]));
 				}
 				else {
-					m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matMap["terracotta"], Vector3D(2.f, 1.f)));
+					m_renderedObjects.push_back(new TransformedObject(randomRotation, position, m_unrenderedObjects["terracotta"]));
 				}
 			}
 		}
 	}
-
-	/*m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], nullptr, 1.45f);
-	m_matMap["facade"] = new Textured(m_textures["facade020b_d"], m_textures["facade020b_rme"], nullptr, 1.45f);
-	m_matMap["ornament"] = new Textured(m_textures["ornament_d"], m_textures["ornament_rme"], nullptr, 1.45f);
-	m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], nullptr, 1.45f);*/
 }
 
 void Raytracing::TexturedScene() {
@@ -807,7 +797,6 @@ void Raytracing::TexturedScene() {
 	//m_matMap["ground"] = new Diffuse(Vector3D(0.8f, 0.8f, 0.8f));
 	m_matMap["facade"] = new Textured(m_textures["facade020b_d"], m_textures["facade020b_rme"], m_textures["facade020b_n"], 1.45f, Vector3D(), 2.f);
 	m_matMap["carbon"] = new Textured(m_textures["fabric004_d"], m_textures["fabric004_rme"], m_textures["fabric004_n"], 1.45f, Vector3D(), 1.f);
-	//m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], nullptr, 1.45f);
 	m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], m_textures["terracotta_n"], 1.45f);
 	m_matMap["ornament"] = new Textured(m_textures["ornament_d"], m_textures["ornament_rme"], m_textures["ornament_n"], 1.45f);
 
