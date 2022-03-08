@@ -17,17 +17,20 @@ public:
 
     virtual bool Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
+    bool RotationHit(Ray& ray, const float t_min, const float t_max, HitRec& rec);
+    bool TranslationHit(Ray& ray, const float t_min, const float t_max, HitRec& rec);
+
     virtual bool SphereIntersectGround(const Vector3D pos, const float radius);
     virtual bool SphereIntersectSphere(const Vector3D pos, const float radius);
 private:
     Object* m_object;
     //Vector3D m_scale;
-    //Vector3D m_rotation;
-    //Vector3D m_translation;
+    Vector3D m_rotation;
+    Vector3D m_translation;
 
     //Object* m_scaledObject;
     //Object* m_rotatedObject;
-    Object* m_rotatedObject;
-    Object* m_translatedObject;
+    //Object* m_rotatedObject;
+    //Object* m_translatedObject;
 };
 
