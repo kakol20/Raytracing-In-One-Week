@@ -44,6 +44,8 @@ public:
 	const Vector3D GetUV() const { return m_uv; };
 	void SetUV(const Vector3D uv) { m_uv = uv; };
 
+	//const Vector3D GetTangent() const { return m_tangent; };
+	const Vector3D GetTangent() const { return m_tangent; };
 	const Vector3D TangentToWorld(const Vector3D tangentSpace);
 	void SetTangents(const Vector3D tangent);
 };

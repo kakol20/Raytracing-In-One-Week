@@ -40,35 +40,40 @@ bool TransformedObject::Hit(Ray& ray, const float t_min, const float t_max, HitR
 }
 
 bool TransformedObject::ScaleHit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
-	Vector3D rayOrig = ray.GetOrig() / m_scale;
-	Vector3D rayDir = ray.GetDir();
+	bool enableScaling = false;
+	if (enableScaling) {
+		Vector3D rayOrig = ray.GetOrig() / m_scale;
+		Vector3D rayDir = ray.GetDir() / m_scale;
+		rayDir.Normalize();
 
-	rayDir /= Vector3D(m_scale.GetX(), 1.f, 1.f);
-	rayDir.Normalize();
+		Ray localRay(rayOrig, rayDir);
+		HitRec temprec;
+		if (!m_object->Hit(localRay, t_min, t_max * 2.f, temprec)) return false;
 
-	rayDir /= Vector3D(1.f, m_scale.GetY(), 1.f);
-	rayDir.Normalize();
+		Vector3D normal = temprec.GetNormal() / m_scale;
+		normal.Normalize();
+		Vector3D tangent = temprec.GetTangent() / m_scale;
+		tangent.Normalize();
 
-	rayDir /= Vector3D(1.f, 1.f, m_scale.GetZ());
-	rayDir.Normalize();
+		Vector3D point = temprec.GetPoint() * m_scale;
+		Vector3D diff = ray.GetOrig() - point;
+		float magnitude = diff.Magnitude();
 
-	Ray localRay(rayOrig, rayDir);
-	if (!m_object->Hit(localRay, t_min / 2.f, t_max * 2.f, rec)) return false;
+		if (t_min > magnitude || magnitude > t_max) return false;
 
-	Vector3D normal = rec.GetNormal() * m_scale;
-	normal.Normalize();
+		temprec.SetT(magnitude);
+		temprec.SetPoint(point);
+		temprec.SetNormal(normal);
+		temprec.SetTangents(tangent);
 
-	Vector3D point = rec.GetPoint() * m_scale;
-	Vector3D diff = ray.GetOrig() - point;
-	float magnitude = diff.Magnitude();
+		rec = temprec;
 
-	if (t_min > magnitude || magnitude > t_max) return false;
-
-	rec.SetT(magnitude);
-	rec.SetPoint(point);
-	rec.SetNormal(normal);
-
-	return true;
+		return true;
+	}
+	else {
+		return m_object->Hit(ray, t_min, t_max, rec);
+	}
+	
 }
 
 bool TransformedObject::RotationHit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
@@ -95,15 +100,19 @@ bool TransformedObject::RotationHit(Ray& ray, const float t_min, const float t_m
 
 	Vector3D point = Vector3D::RotateAxis(rec.GetPoint(), yDir, m_rotation.GetY());
 	Vector3D normal = Vector3D::RotateAxis(rec.GetNormal(), yDir, m_rotation.GetY());
+	Vector3D tangent = Vector3D::RotateAxis(rec.GetTangent(), yDir, m_rotation.GetY());
 
 	point = Vector3D::RotateAxis(point, xDir, m_rotation.GetX());
 	normal = Vector3D::RotateAxis(normal, xDir, m_rotation.GetX());
+	tangent = Vector3D::RotateAxis(tangent, xDir, m_rotation.GetX());
 
 	point = Vector3D::RotateAxis(point, zDir, m_rotation.GetZ());
 	normal = Vector3D::RotateAxis(normal, zDir, m_rotation.GetZ());
+	tangent = Vector3D::RotateAxis(tangent, zDir, m_rotation.GetZ());
 
 	rec.SetPoint(point);
 	rec.SetNormal(normal);
+	rec.SetTangents(tangent);
 
 	return true;
 }

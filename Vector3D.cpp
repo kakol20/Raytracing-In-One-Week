@@ -30,7 +30,7 @@ Vector3D::~Vector3D() {
 
 float Vector3D::Magnitude() {
 	float sqrtMag = SqrMagnitude();
-	if (sqrtMag == 1.f) return 1.f;
+	//if (sqrtMag == 1.f) return 1.f;
 	return sqrt(sqrtMag);
 }
 
@@ -79,7 +79,7 @@ bool Vector3D::NearZero() {
 }
 
 bool Vector3D::Threshold(const float threshold) {
-	return abs(m_x) < threshold && abs(m_y) < threshold && abs(m_z) < threshold;
+	return abs(m_x) <= threshold && abs(m_y) <= threshold && abs(m_z) <= threshold;
 }
 
 void Vector3D::Abs() {
