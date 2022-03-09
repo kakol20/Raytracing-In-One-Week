@@ -135,17 +135,19 @@ bool TransformedObject::SphereIntersectGround(const Vector3D pos, const float ra
 	Vector3D zDir = Vector3D(0.f, 0.f, 1.f);
 
 	Vector3D newPos = pos;
-	newPos = Vector3D::RotateAxis(pos, yDir, m_rotation.GetY());
-	newPos = Vector3D::RotateAxis(pos, xDir, m_rotation.GetX());
-	newPos = Vector3D::RotateAxis(pos, zDir, m_rotation.GetZ());
 
-	newPos += m_translation;
+	newPos -= m_translation;
+
+	newPos = Vector3D::RotateAxis(pos, zDir, m_rotation.GetZ());
+	newPos = Vector3D::RotateAxis(pos, xDir, m_rotation.GetX());
+	newPos = Vector3D::RotateAxis(pos, yDir, m_rotation.GetY());
+
 	return m_object->SphereIntersectGround(newPos, radius);
 }
 
 bool TransformedObject::SphereIntersectSphere(const Vector3D pos, const float radius) {
 	Vector3D newPos = pos;
 
-	newPos += m_translation;
+	newPos -= m_translation;
 	return m_object->SphereIntersectSphere(newPos, radius);
 }
