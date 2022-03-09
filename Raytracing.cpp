@@ -912,7 +912,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			// ----- SEND RAYS -----
 			Vector3D pixelCol;
 			int count = 0;
-			Vector3D previous;
+			Vector3D previous(0.f);
 			Vector3D totalDiff(0.f);
 
 			for (int s = 0; s < m_maxSamples; s++) {
@@ -940,7 +940,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 				if (count > 0) {
 					Vector3D difference;
-					difference = previous - rayColor;
+					difference = previous - (rayColor * 255.f);
 					difference.Abs();
 					totalDiff += difference;
 
@@ -960,7 +960,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 					}
 				}
 
-				previous = rayColor;
+				previous = rayColor * 255.f;
 
 				count++;
 				pixelCol += rayColor;

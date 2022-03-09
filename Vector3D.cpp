@@ -79,7 +79,7 @@ bool Vector3D::NearZero() {
 }
 
 bool Vector3D::Threshold(const float threshold) {
-	return abs(m_x) <= threshold && abs(m_y) <= threshold && abs(m_z) <= threshold;
+	return abs(m_x) < threshold && abs(m_y) < threshold && abs(m_z) < threshold;
 }
 
 void Vector3D::Abs() {
