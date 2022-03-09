@@ -4,9 +4,9 @@
 
 #include "TransformedObject.h"
 
-TransformedObject::TransformedObject(const Vector3D scale, const Vector3D rotation, const Vector3D translation, Object* object) {
+TransformedObject::TransformedObject(const Vector3D rotation, const Vector3D translation, Object* object) {
 	m_object = object;
-	m_scale = scale;
+	//m_scale = scale;
 	m_rotation = rotation * Vector3D(3.14159265f / 180.f);
 	m_translation = translation;
 
@@ -39,38 +39,6 @@ bool TransformedObject::Hit(Ray& ray, const float t_min, const float t_max, HitR
 	return TranslationHit(ray, t_min, t_max, rec);
 }
 
-bool TransformedObject::ScaleHit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
-	Vector3D rayOrig = ray.GetOrig() / m_scale;
-	Vector3D rayDir = ray.GetDir();
-
-	rayDir /= Vector3D(m_scale.GetX(), 1.f, 1.f);
-	rayDir.Normalize();
-
-	rayDir /= Vector3D(1.f, m_scale.GetY(), 1.f);
-	rayDir.Normalize();
-
-	rayDir /= Vector3D(1.f, 1.f, m_scale.GetZ());
-	rayDir.Normalize();
-
-	Ray localRay(rayOrig, rayDir);
-	if (!m_object->Hit(localRay, t_min / 2.f, t_max * 2.f, rec)) return false;
-
-	Vector3D normal = rec.GetNormal() * m_scale;
-	normal.Normalize();
-
-	Vector3D point = rec.GetPoint() * m_scale;
-	Vector3D diff = ray.GetOrig() - point;
-	float magnitude = diff.Magnitude();
-
-	if (t_min > magnitude || magnitude > t_max) return false;
-
-	rec.SetT(magnitude);
-	rec.SetPoint(point);
-	rec.SetNormal(normal);
-
-	return true;
-}
-
 bool TransformedObject::RotationHit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	if (m_object == nullptr) return false;
 
@@ -91,7 +59,7 @@ bool TransformedObject::RotationHit(Ray& ray, const float t_min, const float t_m
 	rayDir = Vector3D::RotateAxis(rayDir, yDir, -m_rotation.GetY());
 
 	Ray localRay(rayOrig, rayDir);
-	if (!ScaleHit(localRay, t_min, t_max, rec)) return false;
+	if (!m_object->Hit(localRay, t_min, t_max, rec)) return false;
 
 	Vector3D point = Vector3D::RotateAxis(rec.GetPoint(), yDir, m_rotation.GetY());
 	Vector3D normal = Vector3D::RotateAxis(rec.GetNormal(), yDir, m_rotation.GetY());
@@ -125,8 +93,7 @@ bool TransformedObject::SphereIntersectGround(const Vector3D pos, const float ra
 	Vector3D yDir = Vector3D(0.f, 1.f, 0.f);
 	Vector3D zDir = Vector3D(0.f, 0.f, 1.f);
 
-	Vector3D newPos = pos;
-	newPos = Vector3D::RotateAxis(pos, yDir, m_rotation.GetY());
+	Vector3D newPos = Vector3D::RotateAxis(pos, yDir, m_rotation.GetY());
 	newPos = Vector3D::RotateAxis(pos, xDir, m_rotation.GetX());
 	newPos = Vector3D::RotateAxis(pos, zDir, m_rotation.GetZ());
 
@@ -135,8 +102,5 @@ bool TransformedObject::SphereIntersectGround(const Vector3D pos, const float ra
 }
 
 bool TransformedObject::SphereIntersectSphere(const Vector3D pos, const float radius) {
-	Vector3D newPos = pos;
-
-	newPos += m_translation;
-	return m_object->SphereIntersectSphere(newPos, radius);
+	return m_object->SphereIntersectSphere(pos, radius);
 }
