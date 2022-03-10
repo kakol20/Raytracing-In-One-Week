@@ -50,6 +50,9 @@ public:
 
 	Vector3D GetIJK();
 
+	static Quaternion VectorToPure(const Vector3D& v);
+	static Quaternion AxisToRotation(const Vector3D& axis, const float radians);
+
 private:
 	float m_w;
 	float m_i;

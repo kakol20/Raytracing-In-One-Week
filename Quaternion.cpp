@@ -99,3 +99,16 @@ void Quaternion::Normalize() {
 Vector3D Quaternion::GetIJK() {
 	return Vector3D(m_i, m_j, m_k);
 }
+
+Quaternion Quaternion::VectorToPure(const Vector3D& v) {
+	Vector3D l_v = v;
+	return Quaternion(0.f, l_v.GetX(), l_v.GetY(), l_v.GetZ());
+}
+
+Quaternion Quaternion::AxisToRotation(const Vector3D& axis, const float radians) {
+	float sinTheta = sin(radians / 2.f);
+	float cosTheta = cos(radians / 2.f);
+	Vector3D ijk = axis * sinTheta;
+
+	return Quaternion(cosTheta, ijk.GetX(), ijk.GetY(), ijk.GetZ());
+}

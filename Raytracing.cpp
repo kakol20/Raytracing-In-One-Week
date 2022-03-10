@@ -540,7 +540,7 @@ void Raytracing::CornellBox() {
 	m_matMap["metal"] = new Metal(Vector3D(0.401978f), 0.25f, 2.95f);
 
 	// ----- OBJECTS -----
-	m_renderedObjects.reserve(10);
+	m_renderedObjects.reserve(11);
 
 	m_unrenderedObjects["shortBlock"] = new Box(Vector3D(0.5f), m_matMap["white"]);
 	m_unrenderedObjects["tallBlock"] = new Box(Vector3D(0.5f, 1.f, 0.5f), m_matMap["white"]);
@@ -550,7 +550,8 @@ void Raytracing::CornellBox() {
 	m_unrenderedObjects["metalBlock"] = new Box(Vector3D(0.2309f), m_matMap["metal"]);
 
 	//m_unrenderedObjects["glassBlock"] = new Box(Vector3D(1.f), m_matMap["glass"]);
-	m_unrenderedObjects["glassBlock"] = new Box(Vector3D(0.2309f), m_matMap["glass"]);
+	m_unrenderedObjects["glassBlock1"] = new Box(Vector3D(0.2309f), m_matMap["glass"]);
+	m_unrenderedObjects["glassBlock2"] = new Box(Vector3D(0.2309f / 2.f), m_matMap["glass"]);
 	//m_unrenderedObjects["glassBlock"] = new Sphere(Vector3D(0.f), 1.f, m_matMap["glass"]);
 
 	m_renderedObjects.push_back(new Plane(Plane::Type::YMinus, Vector3D(0.f, closeToOne, 0.f), 0.45f, 0.45f, m_matMap["light"]));
@@ -570,7 +571,9 @@ void Raytracing::CornellBox() {
 	m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), Vector3D(0.f, 17.6f, 0.f), Vector3D(-0.32f, -0.5f, -0.24f), m_unrenderedObjects["tallBlock"]));
 
 	//m_renderedObjects.push_back(new TransformedObject(Vector3D(0.2309f), Vector3D::Random(0.f, 360.f), Vector3D(0.33f, -0.3f, 0.43f), m_unrenderedObjects["glassBlock"]));
-	m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), Vector3D::Random(0.f, 360.f), Vector3D(0.33f, -0.3f, 0.43f), m_unrenderedObjects["glassBlock"]));
+	Vector3D glassBlockRotation = Vector3D::Random(0.f, 360.f);
+	m_renderedObjects.push_back(new TransformedObject(false, glassBlockRotation, Vector3D(0.33f, -0.3f, 0.43f), m_unrenderedObjects["glassBlock1"]));
+	m_renderedObjects.push_back(new TransformedObject(true, glassBlockRotation, Vector3D(0.33f, -0.3f, 0.43f), m_unrenderedObjects["glassBlock2"]));
 
 	//m_renderedObjects.push_back(new TransformedObject(Vector3D(0.2309f), Vector3D::Random(0.f, 360.f), Vector3D(-0.32f, 0.2f, -0.24f), m_unrenderedObjects["metalBlock"]));
 	m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), Vector3D::Random(0.f, 360.f), Vector3D(-0.32f, 0.2f, -0.24f), m_unrenderedObjects["metalBlock"]));
