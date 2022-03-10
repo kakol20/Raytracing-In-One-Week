@@ -32,6 +32,29 @@ public:
 
 	static Vector3D RotateAxis(const Vector3D& v, const Vector3D& axis, const float radians);
 
+	/// <summary>
+	/// YXZ Euler Rotation
+	/// </summary>
+	/// <param name="v"></param>
+	/// <param name="yxz">in radians</param>
+	static Vector3D QuaternionYXZ(const Vector3D& v, const Vector3D& yxz);
+
+	/// <summary>
+	/// Conjugate Rotation
+	/// </summary>
+	/// <param name="v"></param>
+	/// <param name="yxz">in radians</param>
+	/// <returns></returns>
+	static Vector3D QuaternionYXZConj(const Vector3D& v, const Vector3D& yxz);
+
+	/// <summary>
+	/// ZXY Euler Rotation
+	/// </summary>
+	/// <param name="v"></param>
+	/// <param name="zxy">in radians</param>
+	/// <returns></returns>
+	static Vector3D QuaternionZXY(const Vector3D& v, const Vector3D& zxy);
+
 	// ----- OTHER -----
 
 	bool NearZero();

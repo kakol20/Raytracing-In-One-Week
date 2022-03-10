@@ -8,6 +8,7 @@ TransformedObject::TransformedObject(const Vector3D scale, const Vector3D rotati
 	m_object = object;
 	m_scale = scale;
 	m_rotation = rotation * Vector3D(3.14159265f / 180.f);
+	m_rotation *= Vector3D(1.f, 1.f, -1.f);
 	m_translation = translation;
 
 	//m_scaledObject = new ScaledObject(scale, nullptr);
@@ -76,7 +77,7 @@ bool TransformedObject::ScaleHit(Ray& ray, const float t_min, const float t_max,
 	
 }
 
-bool TransformedObject::RotationHit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
+bool TransformedObject::RotationHitV1(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	if (m_object == nullptr) return false;
 
 	Vector3D xDir = Vector3D(1.f, 0.f, 0.f);
@@ -117,12 +118,44 @@ bool TransformedObject::RotationHit(Ray& ray, const float t_min, const float t_m
 	return true;
 }
 
+bool TransformedObject::RotationHitV2(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
+	if (m_object == nullptr) return false;
+
+	//Vector3D rayOrig = Vector3D::RotateZXY(ray.GetOrig(), -m_rotation);
+	//Vector3D rayDir = Vector3D::RotateZXY(ray.GetDir(), -m_rotation);
+
+	Vector3D rayOrig = Vector3D::QuaternionZXY(ray.GetOrig(), -m_rotation);
+	Vector3D rayDir = Vector3D::QuaternionZXY(ray.GetDir(), -m_rotation);
+
+	//rayOrig.Normalize();
+	//rayOrig *= ray.GetOrig().Magnitude();
+
+	//rayDir.Normalize();
+
+	Ray localRay(rayOrig, rayDir);
+	if (!ScaleHit(localRay, t_min, t_max, rec)) return false;
+
+	Vector3D point = Vector3D::QuaternionYXZ(rec.GetPoint(), m_rotation);
+	Vector3D normal = Vector3D::QuaternionYXZ(rec.GetNormal(), m_rotation);
+	Vector3D tangent = Vector3D::QuaternionYXZ(rec.GetTangent(), m_rotation);
+
+	//normal.Normalize();
+	//tangent.Normalize();
+
+	rec.SetPoint(point);
+	rec.SetNormal(normal);
+	rec.SetTangents(tangent);
+
+	return true;
+}
+
 bool TransformedObject::TranslationHit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	if (m_object == nullptr) return false;
 
 	Ray localRay(ray.GetOrig() - m_translation, ray.GetDir());
 
-	if (!RotationHit(localRay, t_min, t_max, rec)) return false;
+	//if (!RotationHitV1(localRay, t_min, t_max, rec)) return false;
+	if (!RotationHitV2(localRay, t_min, t_max, rec)) return false;
 
 	rec.SetPoint(rec.GetPoint() + m_translation);
 
@@ -132,7 +165,7 @@ bool TransformedObject::TranslationHit(Ray& ray, const float t_min, const float 
 bool TransformedObject::SphereIntersectGround(const Vector3D pos, const float radius) {
 	Vector3D xDir = Vector3D(1.f, 0.f, 0.f);
 	Vector3D yDir = Vector3D(0.f, 1.f, 0.f);
-	Vector3D zDir = Vector3D(0.f, 0.f, 1.f);
+	Vector3D zDir = Vector3D(0.f, 0.f, -1.f);
 
 	Vector3D newPos = pos;
 

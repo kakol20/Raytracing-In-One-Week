@@ -66,10 +66,45 @@ Vector3D Vector3D::RotateAxis(const Vector3D& v, const Vector3D& axis, const flo
 	//Vector3D ijk_negative = -ijk;
 
 	Quaternion r(cosTheta, ijk.GetX(), ijk.GetY(), ijk.GetZ());
-	Quaternion rInverse(cosTheta, -ijk.GetX(), -ijk.GetY(), -ijk.GetZ());
+	r.Normalize();
 
-	Quaternion result = Quaternion::HamProduct(Quaternion::HamProduct(r, p), rInverse);
+	Quaternion result = Quaternion::RotationQuat(r, p);
 
+	return result.GetIJK();
+}
+
+Vector3D Vector3D::QuaternionYXZ(const Vector3D& v, const Vector3D& yxz) {
+	Quaternion p(0.f, v.m_x, v.m_y, v.m_z);
+
+	Quaternion r = Quaternion::ToQuaternionYXZ(yxz.m_y, yxz.m_x, yxz.m_z);
+	r.Normalize();
+
+	Quaternion result = Quaternion::RotationQuat(r, p);
+	//result.Normalize();
+	return result.GetIJK();
+}
+
+Vector3D Vector3D::QuaternionYXZConj(const Vector3D& v, const Vector3D& yxz) {
+	Quaternion p(0.f, v.m_x, v.m_y, v.m_z);
+
+	Quaternion r = Quaternion::ToQuaternionYXZ(yxz.m_y, yxz.m_x, yxz.m_z);
+	r.Normalize();
+	r.Conjugate();
+
+	Quaternion result = Quaternion::RotationQuat(r, p);
+	//result.Normalize();
+	return result.GetIJK();
+}
+
+Vector3D Vector3D::QuaternionZXY(const Vector3D& v, const Vector3D& zxy) {
+	Quaternion p(0.f, v.m_x, v.m_y, v.m_z);
+
+	Quaternion r = Quaternion::ToQuaternionZXY(zxy.m_z, zxy.m_x, zxy.m_y);
+	r.Normalize();
+
+	Quaternion result = Quaternion::RotationQuat(r, p);
+	//Quaternion result = Quaternion::HamProduct(r, p);
+	//result.Normalize();
 	return result.GetIJK();
 }
 

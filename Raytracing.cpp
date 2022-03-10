@@ -563,6 +563,7 @@ void Raytracing::CornellBox() {
 
 	//m_objects.push_back(new Box(Vector3D(0.5f), m_matMap["blue"]));
 	//m_renderedObjects.push_back(new TransformedObject(Vector3D(0.5f), Vector3D(0.f, -16.5f, 0.f), Vector3D(0.33f, -0.75f, 0.43f), m_unrenderedObjects["block"]));
+	//m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), Vector3D(30.f, -16.5f, 30.f), Vector3D(0.33f, -0.75f, 0.43f), m_unrenderedObjects["shortBlock"]));
 	m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), Vector3D(0.f, -16.5f, 0.f), Vector3D(0.33f, -0.75f, 0.43f), m_unrenderedObjects["shortBlock"]));
 
 	//m_renderedObjects.push_back(new TransformedObject(Vector3D(0.5f, 1.f, 0.5f), Vector3D(0.f, 17.6f, 0.f), Vector3D(-0.32f, -0.5f, -0.24f), m_unrenderedObjects["block"]));
