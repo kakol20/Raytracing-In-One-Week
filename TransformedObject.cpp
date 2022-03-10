@@ -132,30 +132,32 @@ bool TransformedObject::RotationHitV1(Ray& ray, const float t_min, const float t
 bool TransformedObject::RotationHitV2(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	if (m_object == nullptr) return false;
 
-	//Vector3D rayOrig = Vector3D::RotateZXY(ray.GetOrig(), -m_rotation);
-	//Vector3D rayDir = Vector3D::RotateZXY(ray.GetDir(), -m_rotation);
+	Quaternion rotation = Quaternion::ToQuaternionYXZ(m_rotation.GetY(), m_rotation.GetX(), m_rotation.GetZ());
+	rotation.Normalize();
+	rotation.Conjugate();
 
-	Vector3D rayOrig = Vector3D::QuaternionZXY(ray.GetOrig(), -m_rotation);
-	Vector3D rayDir = Vector3D::QuaternionZXY(ray.GetDir(), -m_rotation);
+	// Rotate ray
+	Quaternion rayOrig = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(ray.GetOrig()));
+	Quaternion rayDir = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(ray.GetDir()));
 
-	//rayOrig.Normalize();
-	//rayOrig *= ray.GetOrig().Magnitude();
-
-	//rayDir.Normalize();
-
-	Ray localRay(rayOrig, rayDir);
+	// Calculate hit
+	Ray localRay(rayOrig.GetIJK(), rayDir.GetIJK());
 	if (!ScaleHit(localRay, t_min, t_max, rec)) return false;
 
-	Vector3D point = Vector3D::QuaternionYXZ(rec.GetPoint(), m_rotation);
-	Vector3D normal = Vector3D::QuaternionYXZ(rec.GetNormal(), m_rotation);
-	Vector3D tangent = Vector3D::QuaternionYXZ(rec.GetTangent(), m_rotation);
+	// Rotate
+	rotation.Conjugate();
+	Quaternion point = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetPoint()));
+	Quaternion normal = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetNormal()));
+	Quaternion tangent = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetTangent()));
 
-	//normal.Normalize();
-	//tangent.Normalize();
+	Vector3D normalVec = normal.GetIJK();
+	normal.Normalize();
+	Vector3D tangentVec = tangent.GetIJK();
+	tangentVec.Normalize();
 
-	rec.SetPoint(point);
-	rec.SetNormal(normal);
-	rec.SetTangents(tangent);
+	rec.SetPoint(point.GetIJK());
+	rec.SetNormal(normalVec);
+	rec.SetTangents(tangentVec);
 
 	return true;
 }
