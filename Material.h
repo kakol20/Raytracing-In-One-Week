@@ -58,7 +58,7 @@ protected:
 		if (t.NearZero()) t = n;
 		t.Normalize();
 
-		if (Vector3D::DotProduct(n, t) < 0.f) t = n;
+		//if (Vector3D::DotProduct(n, t) < 0.f) t = n;
 
 		return t;
 	}

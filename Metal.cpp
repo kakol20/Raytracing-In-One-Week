@@ -69,7 +69,7 @@ bool Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	}
 
 	scatterDir.Normalize();
-	if (Vector3D::DotProduct(normal, scatterDir) < 0.f) scatterDir = reflect;
+	if (Vector3D::DotProduct(normal, scatterDir) < 1e-4f) scatterDir = reflect;
 
 	scattered = Ray(rec.GetPoint(), scatterDir);
 	return true;

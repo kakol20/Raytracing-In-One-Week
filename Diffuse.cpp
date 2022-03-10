@@ -24,6 +24,8 @@ bool Diffuse::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scat
 	Vector3D scatterDir = Vector3D::RandomInHemisphere(rec.GetNormal());
 	scatterDir.Normalize();
 
+	if (Vector3D::DotProduct(rec.GetNormal(), scatterDir) < 1e-4f) scatterDir = -unitDir;
+
 	attentuation = m_albedo;
 	scattered = Ray(rec.GetPoint(), scatterDir);
 	return true;

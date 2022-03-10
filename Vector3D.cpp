@@ -30,7 +30,7 @@ Vector3D::~Vector3D() {
 
 float Vector3D::Magnitude() {
 	float sqrtMag = SqrMagnitude();
-	//if (sqrtMag == 1.f) return 1.f;
+	if (sqrtMag == 1.f) return 1.f;
 	return sqrt(sqrtMag);
 }
 
@@ -220,25 +220,23 @@ Vector3D Vector3D::Random(const float min, const float max) {
 }
 
 Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
-	while (true) {
-		Vector3D rand = Vector3D::RandomInUnitSphere();
-		if (Vector3D::DotProduct(normal, rand) < 0.f) {
-			rand *= -1.f;
-		}
-
-		if (Vector3D::DotProduct(normal, rand) > 1e-4f) return rand;
-		//if (Vector3D::DotProduct(normal, rand) > 1e-4f) return normal;
+	Vector3D rand = Vector3D::RandomInUnitSphere();
+	if (Vector3D::DotProduct(normal, rand) < 0.f) {
+		rand *= -1.f;
 	}
+
+	//if (Vector3D::DotProduct(normal, rand) > 1e-4f) return rand;
+	return rand;
 }
 
 Vector3D Vector3D::RandomInUnitDisk() {
-	while (true) {
-		Vector3D o = Vector3D(Random::RandFloatRange(-1.f, 1.f), Random::RandFloatRange(-1.f, 1.f), 0.f);
+	Vector3D o = Vector3D(Random::RandFloatRange(-1.f, 1.f), Random::RandFloatRange(-1.f, 1.f), 0.f);
 
-		if (o.SqrMagnitude() > 1.0) continue;
-
-		return o;
+	if (o.SqrMagnitude() > 1.0) {
+		o.Normalize();
 	}
+
+	return o;
 }
 
 Vector3D Vector3D::RandomInUnitSphere() {
