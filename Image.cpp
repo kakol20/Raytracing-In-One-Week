@@ -82,14 +82,7 @@ Image& Image::operator=(const Image& copyImage) {
 bool Image::Read(const char* file, Image::ColorMode colorMode) {
 	m_data = stbi_load(file, &m_w, &m_h, &m_channels, 0);
 
-	m_size = (size_t)m_w * m_h * m_channels;
-
-	m_dataF = new float[m_size];
-	for (size_t i = 0; i < m_size; i++) {
-		m_dataF[i] = (float)m_data[i];
-	}
-
-	if (m_data == NULL && Image::PrintToConsole) {
+	if (m_data == NULL) {
 		//std::cout << "\nError reading file: " << file << '\n';
 		String output = "";
 		output += oof::clear_screen();
@@ -100,11 +93,45 @@ bool Image::Read(const char* file, Image::ColorMode colorMode) {
 
 		FastWrite::Write(output);
 
+		// create missing texture texture
+		m_w = 32;
+		m_h = 32;
+		m_channels = 3;
+
+		m_size = (size_t)m_w * m_h * m_channels;
+
+		m_data = new uint8_t[m_size];
+		m_dataF = new float[m_size];
+
+		for (size_t i = 0; i < m_size; i++) {
+			m_data[i] = 0;
+			m_dataF[i] = 0.f;
+		}
+
+		for (int x = 0; x < m_w; x++) {
+			for (int y = 0; y < m_h; y++) {
+				if ((x < 16 && y < 16) || (x >= 16 && y >= 16)) {
+					SetRGB(x, y, 255.f, 0.f, 255.f);
+				}
+				else {
+					SetRGB(x, y, 0.f, 0.f, 0.f);
+				}
+			}
+		}
+
 		system("pause");
 	}
+	else {
+		m_size = (size_t)m_w * m_h * m_channels;
 
-	if (colorMode == Image::ColorMode::sRGB) {
-		ToLinearRGB();
+		m_dataF = new float[m_size];
+		for (size_t i = 0; i < m_size; i++) {
+			m_dataF[i] = (float)m_data[i];
+		}
+
+		if (colorMode == Image::ColorMode::sRGB) {
+			ToLinearRGB();
+		}
 	}
 
 	return m_data != NULL;

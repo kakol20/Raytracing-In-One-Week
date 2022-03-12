@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <math.h>
 
 #include "Plane.h"
@@ -57,6 +58,8 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 		Vector3D p = l0 + (l * d);
 		float nearZero = 1e-4f;
 
+		Vector3D divide(fminf(m_height, m_width));
+
 		if (m_type == Plane::Type::XMinus || m_type == Plane::Type::XPlus) {
 			Vector3D offset = Vector3D(0.f, m_height / 2.f, m_width / 2.f);
 			Vector3D min = m_pos - offset;
@@ -84,7 +87,6 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 				}
 
 				Vector3D uv = Vector3D(p.GetZ(), p.GetY());
-				Vector3D divide = topRight - bottomLeft;
 				divide += Vector3D(0.f, 0.f, 1.f); // prevent divide by zero
 				uv = (uv - bottomLeft) / divide;
 				rec.SetUV(uv * m_uvScale);
@@ -119,7 +121,6 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 				}
 
 				Vector3D uv = Vector3D(p.GetX(), p.GetZ());
-				Vector3D divide = topRight - bottomLeft;
 				divide += Vector3D(0.f, 0.f, 1.f); // prevent divide by zero
 				uv = (uv - bottomLeft) / divide;
 				rec.SetUV(uv * m_uvScale);
@@ -154,7 +155,6 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 				}
 
 				Vector3D uv = Vector3D(p.GetX(), p.GetY());
-				Vector3D divide = topRight - bottomLeft;
 				divide += Vector3D(0.f, 0.f, 1.f); // prevent divide by zero
 				uv = (uv - bottomLeft) / divide;
 				rec.SetUV(uv * m_uvScale);
