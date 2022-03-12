@@ -32,7 +32,7 @@ Raytracing::Raytracing() {
 
 	m_renderMode = "all";
 
-	m_renderScene = "final";
+	m_renderScene = "full";
 
 	m_noiseThreshold = 0.0001f;
 	m_maxSamples = 512;
@@ -332,7 +332,7 @@ bool Raytracing::Init() {
 		CornellBox();
 	}
 	else {
-		m_fileFolder = "renders/final/";
+		m_fileFolder = "renders/full/";
 		FinalScene();
 	}
 
