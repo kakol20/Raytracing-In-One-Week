@@ -318,16 +318,21 @@ bool Raytracing::Init() {
 	// Assign set seed for running raytracing regardless of scene generation - for consistent rendering of samples
 	unsigned int runSeed = Random::RandomUInt();
 
+	m_fileFolder = "";
 	if (m_renderScene == "debug") {
+		m_fileFolder = "renders/debug/";
 		DebugScene();
 	}
 	else if (m_renderScene == "textured") {
+		m_fileFolder = "renders/textured/";
 		TexturedScene();
 	}
 	else if (m_renderScene == "cornell") {
+		m_fileFolder = "renders/cornell/";
 		CornellBox();
 	}
 	else {
+		m_fileFolder = "renders/final/";
 		FinalScene();
 	}
 
@@ -380,7 +385,9 @@ bool Raytracing::Run() {
 	std::chrono::duration<float, std::ratio<60, 1>> elapsedMin = end - start;
 
 	std::fstream runTime;
-	runTime.open("runTime.txt", std::ios_base::out);
+	String fileLocation = m_fileFolder;
+	fileLocation += "runTime.txt";
+	runTime.open(m_fileFolder.GetChar(), std::ios_base::out);
 	if (runTime.is_open()) {
 		runTime << "Elapsed time in seconds: " << elapsedSec << "\n"
 			<< "Elapsed time in minutes: " << elapsedMin << "\n";
@@ -407,17 +414,22 @@ bool Raytracing::RunMode() {
 	// ---------- RENDER ----------
 
 	// ----- logging -----
+	String output = m_fileFolder;
 	if (m_renderMode == "albedo") {
-		m_log.open("log_albedo.txt", std::ios_base::out);
+		output += "log_albedo.txt";
+		m_log.open(output.GetChar(), std::ios_base::out);
 	}
 	else if (m_renderMode == "emission") {
-		m_log.open("log_emission.txt", std::ios_base::out);
+		output += "log_emission.txt";
+		m_log.open(output.GetChar(), std::ios_base::out);
 	}
 	else if (m_renderMode == "normal") {
-		m_log.open("log_normal.txt", std::ios_base::out);
+		output += "log_normal.txt";
+		m_log.open(output.GetChar(), std::ios_base::out);
 	}
 	else {
-		m_log.open("log_color.txt", std::ios_base::out);
+		output += "log_color.txt";
+		m_log.open(output.GetChar(), std::ios_base::out);
 	}
 
 	m_log << "Threads Used: " << m_useThreads << "\nTotal tiles: " << m_tiles.size() << "\n";
@@ -450,23 +462,23 @@ bool Raytracing::RunMode() {
 	//ShowProgress();
 
 	// ----- SAVE RENDER -----
-	std::string output;
+	output = m_fileFolder;
 	if (m_renderMode == "albedo") {
-		output = "render_a.png";
+		output += "render_a.png";
 	}
 	else if (m_renderMode == "emission") {
-		output = "render_e.png";
+		output += "render_e.png";
 	}
 	else if (m_renderMode == "normal") {
-		output = "render_n.png";
+		output += "render_n.png";
 	}
 	else {
-		output = "render_c.png";
+		output += "render_c.png";
 	}
 	//m_render.TosRGB();
 
-	if (!m_render.Write(output.c_str())) {
-		std::cout << oof::clear_screen() << oof::reset_formatting() << "Error saving " << output.c_str() << "\n";
+	if (!m_render.Write(output.GetChar())) {
+		std::cout << oof::clear_screen() << oof::reset_formatting() << "Error saving " << output.GetChar() << "\n";
 
 		system("pause");
 	}
@@ -577,7 +589,6 @@ void Raytracing::CornellBox() {
 
 	//m_renderedObjects.push_back(new TransformedObject(Vector3D(0.2309f), Vector3D::Random(0.f, 360.f), Vector3D(-0.32f, 0.2f, -0.24f), m_unrenderedObjects["metalBlock"]));
 	m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), Vector3D::Random(0.f, 360.f), Vector3D(-0.32f, 0.2f, -0.24f), m_unrenderedObjects["metalBlock"]));
-
 }
 
 void Raytracing::DebugScene() {
@@ -757,7 +768,7 @@ void Raytracing::FinalScene() {
 				// ----- TEXTURED -----
 				float chooseTextured = Random::RandFloat();
 				float texturedGap = 1.f / 4.f;
-				
+
 				Vector3D randomRotation = Vector3D::Random(0.f, 360.f);
 
 				if (chooseMat <= 5.f * gap) {

@@ -34,14 +34,15 @@ private:
 	bool m_shuffleTiles;
 	float m_aperture, m_verticalFOV;
 	float m_clipEnd, m_clipStart;
-	float m_noiseThreshold;
 	float m_hdriStrength;
 	float m_nearZero;
+	float m_noiseThreshold;
 	int m_imageWidth, m_imageHeight, m_maxSamples, m_rayDepth, m_tileSize/*, m_shadowDepth*/, m_minSamples;
 	int m_tilesRendered;
 	size_t m_nextAvailable;
 	size_t m_useThreads;
 	std::fstream m_log;
+	String m_fileFolder;
 	String m_renderMode;
 	String m_renderScene;
 
