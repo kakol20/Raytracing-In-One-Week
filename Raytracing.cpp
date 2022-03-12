@@ -387,7 +387,7 @@ bool Raytracing::Run() {
 	std::fstream runTime;
 	String fileLocation = m_fileFolder;
 	fileLocation += "runTime.txt";
-	runTime.open(m_fileFolder.GetChar(), std::ios_base::out);
+	runTime.open(fileLocation.GetChar(), std::ios_base::out);
 	if (runTime.is_open()) {
 		runTime << "Elapsed time in seconds: " << elapsedSec << "\n"
 			<< "Elapsed time in minutes: " << elapsedMin << "\n";
