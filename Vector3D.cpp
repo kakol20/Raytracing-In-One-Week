@@ -244,6 +244,22 @@ Vector3D Vector3D::OrderedDithering(const Vector3D col, const int x, const int y
 	return Vector3D(r, g, b);
 }
 
+bool Vector3D::BoxBetween(const Vector3D& v, const Vector3D& min, const Vector3D& max, const float threshold) {
+	float xMin = fminf(min.m_x, max.m_x);
+	float yMin = fminf(min.m_y, max.m_y);
+	float zMin = fminf(min.m_z, max.m_z);
+
+	float xMax = fmaxf(min.m_x, max.m_x);
+	float yMax = fmaxf(min.m_y, max.m_y);
+	float zMax = fmaxf(min.m_z, max.m_z);
+
+	if (v.m_x < xMin - threshold || v.m_x > xMax + threshold) return false;
+	if (v.m_y < yMin - threshold || v.m_y > yMax + threshold) return false;
+	if (v.m_z < zMin - threshold || v.m_z > zMax + threshold) return false;
+
+	return true;
+}
+
 void Vector3D::UVSphere(float& u, float& v) {
 	float PI = 3.141592653f;
 	u = 0.5f + (atan2(m_x, m_z) / (2.f * PI));

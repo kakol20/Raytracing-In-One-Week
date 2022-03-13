@@ -1,4 +1,6 @@
 #pragma once
+#include "Quaternion.h"
+
 #include "Object.h"
 class Plane :
     public Object {
@@ -19,6 +21,7 @@ public:
 private:
     float m_height;
     float m_width;
+    Quaternion m_rotation;
     Plane::Type m_type;
 };
 

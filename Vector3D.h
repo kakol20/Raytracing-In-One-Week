@@ -66,6 +66,16 @@ public:
 	static Vector3D Lerp(const Vector3D& from, const Vector3D& to, const float factor);
 	//static Vector3D Slerp(const Vector3D& from, const Vector3D& to, const float t);
 
+	/// <summary>
+	/// Check if vector lies between min and max in a box
+	/// </summary>
+	/// <param name="v"></param>
+	/// <param name="min"></param>
+	/// <param name="max"></param>
+	/// <param name="threshold">to account for floating point precision</param>
+	/// <returns></returns>
+	static bool BoxBetween(const Vector3D& v, const Vector3D& min, const Vector3D& max, const float threshold);
+
 	void UVSphere(float& u, float& v);
 
 	// ----- COLOR FUNCTIONS -----

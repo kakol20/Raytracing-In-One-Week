@@ -40,6 +40,15 @@ Quaternion Quaternion::RotationQuat(const Quaternion& rotation, const Quaternion
 	return Quaternion::HamProduct(Quaternion::HamProduct(rotation, point), rInv);
 }
 
+Quaternion Quaternion::RotationQuat(const Quaternion& rotation, const Vector3D& point) {
+	return Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(point));
+}
+
+Vector3D Quaternion::RotationVec(const Quaternion& rotation, const Vector3D& v) {
+	Quaternion result = Quaternion::RotationQuat(rotation, v);
+	return result.GetIJK();
+}
+
 Quaternion Quaternion::ToQuaternionYXZ(const float y, const float x, const float z) {
 	float sin1 = sin(y / 2.f);
 	float cos1 = cos(y / 2.f);

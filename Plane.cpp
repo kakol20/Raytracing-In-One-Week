@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <math.h>
-
 #include "Plane.h"
 
 Plane::Plane(Plane::Type type, const Vector3D origin, const float width, const float height, Material* mat, const Vector3D uvScale) {
@@ -10,6 +9,28 @@ Plane::Plane(Plane::Type type, const Vector3D origin, const float width, const f
 	m_type = type;
 	m_uvScale = uvScale;
 	m_width = width;
+
+	const float PI = 3.14159265f;
+	if (m_type == Plane::Type::XMinus) {
+		m_rotation = Quaternion::AxisToRotation(Vector3D(0.f, 1.f, 0.f), -PI / 2.f);
+	}
+	else if (m_type == Plane::Type::XPlus) {
+		m_rotation = Quaternion::AxisToRotation(Vector3D(0.f, 1.f, 0.f), PI / 2.f);
+	}
+	else if (m_type == Plane::Type::YMinus) {
+		m_rotation = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), PI / 2.f);
+	}
+	else if (m_type == Plane::Type::YPlus) {
+		m_rotation = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), -PI / 2.f);
+	}
+	else if (m_type == Plane::Type::ZMinus) {
+		m_rotation = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), PI);
+	}
+	else {
+		m_rotation = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), 0.f);
+	}
+
+	m_rotation.Normalize();
 }
 
 Plane::~Plane() {
@@ -17,172 +38,67 @@ Plane::~Plane() {
 }
 
 bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
-	Vector3D n;
-	switch (m_type) {
-	case Plane::Type::XPlus:
-		n = Vector3D(1.f, 0.f, 0.f);
-		break;
-	case Plane::Type::XMinus:
-		n = Vector3D(-1.f, 0.f, 0.f);
-		break;
-	case Plane::Type::YPlus:
-		n = Vector3D(0.f, 1.f, 0.f);
-		break;
-	case Plane::Type::YMinus:
-		n = Vector3D(0.f, -1.f, 0.f);
-		break;
-	case Plane::Type::ZPlus:
-		n = Vector3D(0.f, 0.f, 1.f);
-		break;
-	case Plane::Type::ZMinus:
-		n = Vector3D(0.f, 0.f, -1.f);
-		break;
-	default:
-		return false;
+	Ray localRay = Ray(ray.GetOrig() - m_pos, ray.GetDir());
+
+	Quaternion rotationInv = m_rotation;
+	rotationInv.Conjugate();
+
+	if (m_type == Plane::Type::YPlus) {
+		int temp = 1 + 1;
 	}
 
-	n.Normalize();
+	Vector3D normal(0.f, 0.f, 1.f);
+	normal = Quaternion::RotationVec(m_rotation, normal);
+	normal.Normalize();
 
-	Vector3D l = ray.GetDir();
-	//l.Normalize();
-	float dotLN = Vector3D::DotProduct(l, n);
-	if (dotLN != 0.f) {
-		Vector3D p0 = m_pos;
-		Vector3D l0 = ray.GetOrig();
+	float lDotN = Vector3D::DotProduct(localRay.GetDir(), normal);
+	if (abs(lDotN) <= 1e-4f) return false; // account for floating point precision
 
-		float d = Vector3D::DotProduct(p0 - l0, n) / dotLN;
-		
-		d = fabsf(d);
-		if (t_min > d || d > t_max) return false;
+	float d = Vector3D::DotProduct(Vector3D(0.f) - localRay.GetOrig(), normal) / lDotN;
 
-		Vector3D p = l0 + (l * d);
-		float nearZero = 1e-4f;
+	if (d <= t_min || d >= t_max) return false;
 
-		Vector3D divide(fminf(m_height, m_width));
+	Vector3D point = localRay.GetOrig() + (localRay.GetDir() * d);
 
-		if (m_type == Plane::Type::XMinus || m_type == Plane::Type::XPlus) {
-			Vector3D offset = Vector3D(0.f, m_height / 2.f, m_width / 2.f);
-			Vector3D min = m_pos - offset;
-			Vector3D max = m_pos + offset;
+	Vector3D maxPoint = Vector3D(m_width / 2, m_height / 2.f, 0.f);
+	Vector3D minPoint = -maxPoint;
 
-			Vector3D axisClose = m_pos - p;
-			axisClose *= Vector3D(1.f, 0.f, 0.f);
+	Vector3D uvPoint = Quaternion::RotationVec(rotationInv, point);
 
-			if (min.GetY() <= p.GetY() && p.GetY() <= max.GetY() && min.GetZ() <= p.GetZ() && p.GetZ() <= max.GetZ() && axisClose.Threshold(nearZero)) {
-				rec.SetT(d);
-				rec.SetPoint(p);
-				rec.SetMat(m_mat);
-				rec.SetFaceNormal(ray, n);
+	//if (!Vector3D::BoxBetween(uvPoint, minPoint, maxPoint, 1e-4f)) return false;
+	if (!(abs(uvPoint.GetX()) <= maxPoint.GetX() && abs(uvPoint.GetY()) <= maxPoint.GetY())) return false;
+	if (abs(uvPoint.GetZ()) > 1e-4f) return false;
 
-				Vector3D bottomLeft, topRight;
-				if (m_type == Plane::Type::XPlus) {
-					bottomLeft = Vector3D(max.GetZ(), min.GetY());
-					topRight = Vector3D(min.GetZ(), max.GetY());
+	uvPoint *= (Vector3D(1.f, 1.f, 0.f));
+	point += m_pos;
 
-					rec.SetTangent(Vector3D(0.f, 0.f, -1.f));
-					rec.SetBitangent(Vector3D(0.f, -1.f, 0.f));
-				}
-				else {
-					bottomLeft = Vector3D(min.GetZ(), min.GetY());
-					topRight = Vector3D(max.GetZ(), max.GetY());
+	rec.SetT(d);
+	rec.SetPoint(point);
+	rec.SetMat(m_mat);
+	rec.SetFaceNormal(localRay, normal);
 
-					rec.SetTangent(Vector3D(0.f, 0.f, 1.f));
-					rec.SetBitangent(Vector3D(0.f, -1.f, 0.f));
-				}
+	// Normal Mapping
+	Vector3D tangent = Vector3D(1.f, 0.f, 0.f);
+	Vector3D bitangent = Vector3D::CrossProduct(Vector3D(0.f, 0.f, 1.f), tangent);
 
-				Vector3D uv = Vector3D(p.GetZ(), p.GetY());
-				uv = (uv - bottomLeft);
-				uv.Abs();
-				uv /= divide;
+	//if (m_type == Plane::Type::ZPlus || m_type == Plane::Type::ZMinus || m_type == Plane::Type::XMinus || m_type == Plane::Type::) bitangent *= -1.f;
 
-				rec.SetUV(uv * m_uvScale);
+	tangent = Quaternion::RotationVec(m_rotation, tangent);
+	tangent.Normalize();
+	bitangent = Quaternion::RotationVec(m_rotation, bitangent);
+	bitangent.Normalize();
 
-				return true;
-			}
-		}
-		else if (m_type == Plane::Type::YMinus || m_type == Plane::Type::YPlus) {
-			Vector3D offset = Vector3D(m_width / 2.f, 0.f, m_height / 2.f);
-			Vector3D min = m_pos - offset;
-			Vector3D max = m_pos + offset;
+	rec.SetTangent(tangent);
+	rec.SetBitangent(bitangent);
 
-			Vector3D axisClose = m_pos - p;
-			axisClose *= Vector3D(0.f, 1.f, 0.f);
+	// UV Calculation
+	Vector3D divide(fminf(m_width, m_height), fminf(m_width, m_height), 1.f);
+	uvPoint -= minPoint;
+	uvPoint /= divide;
+	uvPoint = Vector3D(uvPoint.GetX(), 1.f - uvPoint.GetY());
+	uvPoint *= m_uvScale;
 
-			if (min.GetX() <= p.GetX() && p.GetX() <= max.GetX() && min.GetZ() <= p.GetZ() && p.GetZ() <= max.GetZ() && axisClose.Threshold(nearZero)) {
-				rec.SetT(d);
-				rec.SetPoint(p);
-				rec.SetMat(m_mat);
-				rec.SetFaceNormal(ray, n);
+	rec.SetUV(uvPoint);
 
-				Vector3D bottomLeft, topRight;
-				if (m_type == Plane::Type::YPlus) {
-					bottomLeft = Vector3D(min.GetX(), max.GetZ());
-					topRight = Vector3D(max.GetX(), min.GetZ());
-					
-					rec.SetTangent(Vector3D(1.f, 0.f, 0.f));
-					rec.SetBitangent(Vector3D(0.f, 0.f, 1.f));
-				}
-				else {
-					bottomLeft = Vector3D(max.GetX(), min.GetZ());
-					topRight = Vector3D(min.GetX(), max.GetZ());
-
-					rec.SetTangent(Vector3D(-1.f, 0.f, 0.f));
-					rec.SetBitangent(Vector3D(0.f, 0.f, -1.f));
-				}
-
-				Vector3D uv = Vector3D(p.GetX(), p.GetZ());
-				uv = (uv - bottomLeft);
-				uv.Abs();
-				uv /= divide;
-
-				rec.SetUV(uv * m_uvScale);
-
-				return true;
-			}
-		}
-		else {
-			Vector3D offset = Vector3D(m_width / 2.f, m_height / 2.f, 0.f);
-			Vector3D min = m_pos - offset;
-			Vector3D max = m_pos + offset;
-
-			Vector3D axisClose = m_pos - p;
-			axisClose *= Vector3D(0.f, 0.f, 1.f);
-
-			if (min.GetX() <= p.GetX() && p.GetX() <= max.GetX() && min.GetY() <= p.GetY() && p.GetY() <= max.GetY() && axisClose.Threshold(nearZero)) {
-				rec.SetT(d);
-				rec.SetPoint(p);
-				rec.SetMat(m_mat);
-				rec.SetFaceNormal(ray, n);
-
-				Vector3D bottomLeft, topRight;
-				if (m_type == Plane::Type::ZPlus) {
-					bottomLeft = Vector3D(min.GetX(), min.GetY());
-					topRight = Vector3D(max.GetX(), max.GetY());
-					//rec.SetTangents(Vector3D(1.f, 0.f, 0.f), true);
-
-					rec.SetTangent(Vector3D(1.f, 0.f, 0.f));
-					rec.SetBitangent(Vector3D(0.f, 1.f, 0.f));
-				}
-				else {
-					bottomLeft = Vector3D(max.GetX(), min.GetY());
-					topRight = Vector3D(min.GetX(), max.GetY());
-					//rec.SetTangents(Vector3D(-1.f, 0.f, 0.f), true);
-
-					rec.SetTangent(Vector3D(-1.f, 0.f, 0.f));
-					rec.SetBitangent(Vector3D(0.f, 1.f, 0.f));
-				}
-
-				Vector3D uv = Vector3D(p.GetX(), p.GetY());
-				uv = (uv - bottomLeft);
-				uv.Abs();
-				uv /= divide;
-
-				uv *= Vector3D(1.f, -1.f);
-				rec.SetUV(uv * m_uvScale);
-
-				return true;
-			}
-		}
-	}
-	return false;
+	return true;
 }

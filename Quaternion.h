@@ -22,6 +22,8 @@ public:
 	static Quaternion HamProduct(const Quaternion& q1, const Quaternion& q2);
 
 	static Quaternion RotationQuat(const Quaternion& rotation, const Quaternion& point);
+	static Quaternion RotationQuat(const Quaternion& rotation, const Vector3D& point);
+	static Vector3D RotationVec(const Quaternion& rotation, const Vector3D& v);
 
 	// https://ntrs.nasa.gov/citations/19770024290
 
@@ -51,6 +53,13 @@ public:
 	Vector3D GetIJK();
 
 	static Quaternion VectorToPure(const Vector3D& v);
+
+	/// <summary>
+	/// Convert Axis Rotation to Quaternion Rotation
+	/// </summary>
+	/// <param name="axis"></param>
+	/// <param name="radians">in degrees</param>
+	/// <returns></returns>
 	static Quaternion AxisToRotation(const Vector3D& axis, const float radians);
 
 private:
