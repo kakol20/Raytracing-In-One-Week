@@ -24,10 +24,10 @@ Plane::Plane(Plane::Type type, const Vector3D origin, const float width, const f
 		m_rotation = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), -PI / 2.f);
 	}
 	else if (m_type == Plane::Type::ZMinus) {
-		m_rotation = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), PI);
+		m_rotation = Quaternion::AxisToRotation(Vector3D(0.f, 1.f, 0.f), PI);
 	}
 	else {
-		m_rotation = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), 0.f);
+		m_rotation = Quaternion::AxisToRotation(Vector3D(0.f, 1.f, 0.f), 0.f);
 	}
 
 	m_rotation.Normalize();
@@ -40,8 +40,7 @@ Plane::~Plane() {
 bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	Ray localRay = Ray(ray.GetOrig() - m_pos, ray.GetDir());
 
-	Quaternion rotationInv = m_rotation;
-	rotationInv.Conjugate();
+	Quaternion rotationInv = -m_rotation;
 
 	Vector3D normal(0.f, 0.f, 1.f);
 	normal = Quaternion::RotationVec(m_rotation, normal);
