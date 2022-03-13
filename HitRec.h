@@ -36,7 +36,7 @@ public:
 	void SetMat(Material* mat) { m_mat = mat; };
 
 	const Vector3D GetNormal() const { return m_normal; };
-	void SetNormal(const Vector3D normal) { m_normal = normal; };
+	void SetNormal(const Vector3D normal) { m_normal = normal; m_normal.Normalize(); };
 
 	const Vector3D GetPoint() const { return m_point; };
 	void SetPoint(const Vector3D point) { m_point = point; };
@@ -46,10 +46,10 @@ public:
 
 	//const Vector3D GetTangent() const { return m_tangent; };
 	const Vector3D GetTangent() const { return m_tangent; };
-	void SetTangent(const Vector3D tangent) { m_tangent = tangent; };
+	void SetTangent(const Vector3D tangent) { m_tangent = tangent; m_tangent.Normalize(); };
 
 	const Vector3D GetBitangent() const { return m_bitangent; };
-	void SetBitangent(const Vector3D bitangent) { m_bitangent = bitangent; };
+	void SetBitangent(const Vector3D bitangent) { m_bitangent = bitangent; m_bitangent.Normalize(); };
 
 	const Vector3D TangentToWorld(const Vector3D tangentSpace);
 };

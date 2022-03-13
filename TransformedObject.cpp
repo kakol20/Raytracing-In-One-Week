@@ -1,7 +1,6 @@
 //#include "ScaledObject.h"
 //#include "RotatedObj.h"
 //#include "TranslatedObj.h"
-#include "Quaternion.h"
 
 #include "TransformedObject.h"
 
@@ -19,6 +18,13 @@ TransformedObject::TransformedObject(const Vector3D scale, const Vector3D rotati
 	//m_rotatedObject = new RotatedObj(rotation, m_object);
 	
 	//m_translatedObject = new TranslatedObj(translation, m_rotatedObject);
+
+	m_xAxisRotation = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), m_rotation.GetX());
+	m_xAxisRotation.Normalize();
+	m_yAxisRotation = Quaternion::AxisToRotation(Vector3D(0.f, 1.f, 0.f), m_rotation.GetY());
+	m_yAxisRotation.Normalize();
+	m_zAxisRotation = Quaternion::AxisToRotation(Vector3D(0.f, 0.f, 1.f), m_rotation.GetZ());
+	m_zAxisRotation.Normalize();
 }
 
 TransformedObject::TransformedObject(const bool flipNormals, const Vector3D rotation, const Vector3D translation, Object* object) {
@@ -28,6 +34,13 @@ TransformedObject::TransformedObject(const bool flipNormals, const Vector3D rota
 	m_rotation *= Vector3D(1.f, 1.f, -1.f);
 	m_translation = translation;
 	m_flipNormals = false;
+
+	m_xAxisRotation = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), m_rotation.GetX());
+	m_xAxisRotation.Normalize();
+	m_yAxisRotation = Quaternion::AxisToRotation(Vector3D(0.f, 1.f, 0.f), m_rotation.GetY());
+	m_yAxisRotation.Normalize();
+	m_zAxisRotation = Quaternion::AxisToRotation(Vector3D(0.f, 0.f, 1.f), m_rotation.GetZ());
+	m_zAxisRotation.Normalize();
 }
 
 TransformedObject::~TransformedObject() {
@@ -88,108 +101,27 @@ bool TransformedObject::ScaleHit(Ray& ray, const float t_min, const float t_max,
 	
 }
 
-bool TransformedObject::RotationHitV1(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
-	if (m_object == nullptr) return false;
-
-	Vector3D xDir = Vector3D(1.f, 0.f, 0.f);
-	Vector3D yDir = Vector3D(0.f, 1.f, 0.f);
-	Vector3D zDir = Vector3D(0.f, 0.f, 1.f);
-
-	// forward rotation
-	Vector3D rayOrig = Vector3D::RotateAxis(ray.GetOrig(), zDir, -m_rotation.GetZ());
-	Vector3D rayDir = Vector3D::RotateAxis(ray.GetDir(), zDir, -m_rotation.GetZ());
-
-	// side rotation
-	rayOrig = Vector3D::RotateAxis(rayOrig, xDir, -m_rotation.GetX());
-	rayDir = Vector3D::RotateAxis(rayDir, xDir, -m_rotation.GetX());
-
-	// up rotation
-	rayOrig = Vector3D::RotateAxis(rayOrig, yDir, -m_rotation.GetY());
-	rayDir = Vector3D::RotateAxis(rayDir, yDir, -m_rotation.GetY());
-
-	Ray localRay(rayOrig, rayDir);
-	if (!ScaleHit(localRay, t_min, t_max, rec)) return false;
-
-	Vector3D point = Vector3D::RotateAxis(rec.GetPoint(), yDir, m_rotation.GetY());
-	Vector3D normal = Vector3D::RotateAxis(rec.GetNormal(), yDir, m_rotation.GetY());
-	Vector3D tangent = Vector3D::RotateAxis(rec.GetTangent(), yDir, m_rotation.GetY());
-	Vector3D bitangent = Vector3D::RotateAxis(rec.GetBitangent(), yDir, m_rotation.GetY());
-
-	point = Vector3D::RotateAxis(point, xDir, m_rotation.GetX());
-	normal = Vector3D::RotateAxis(normal, xDir, m_rotation.GetX());
-	tangent = Vector3D::RotateAxis(tangent, xDir, m_rotation.GetX());
-	bitangent = Vector3D::RotateAxis(bitangent, xDir, m_rotation.GetX());
-
-	point = Vector3D::RotateAxis(point, zDir, m_rotation.GetZ());
-	normal = Vector3D::RotateAxis(normal, zDir, m_rotation.GetZ());
-	tangent = Vector3D::RotateAxis(tangent, zDir, m_rotation.GetZ());
-	bitangent = Vector3D::RotateAxis(bitangent, zDir, m_rotation.GetZ());
-
-	rec.SetPoint(point);
-	rec.SetNormal(normal);
-	rec.SetTangent(tangent);
-	rec.SetBitangent(bitangent);
-
-	return true;
-}
-
-bool TransformedObject::RotationHitV2(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
-	if (m_object == nullptr) return false;
-
-	Quaternion rotation = Quaternion::ToQuaternionYXZ(m_rotation.GetY(), m_rotation.GetX(), m_rotation.GetZ());
-	rotation.Normalize();
-	rotation.Conjugate();
-
-	// Rotate ray
-	Quaternion rayOrig = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(ray.GetOrig()));
-	Quaternion rayDir = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(ray.GetDir()));
-
-	// Calculate hit
-	Ray localRay(rayOrig.GetIJK(), rayDir.GetIJK());
-	if (!ScaleHit(localRay, t_min, t_max, rec)) return false;
-
-	// Rotate
-	rotation.Conjugate();
-	Quaternion point = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetPoint()));
-	Quaternion normal = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetNormal()));
-	Quaternion tangent = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetTangent()));
-	Quaternion bitangent = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetBitangent()));
-
-	Vector3D normalVec = normal.GetIJK();
-	normal.Normalize();
-	Vector3D tangentVec = tangent.GetIJK();
-	tangentVec.Normalize();
-	Vector3D bitangentVec = bitangent.GetIJK();
-	bitangentVec.Normalize();
-
-	rec.SetPoint(point.GetIJK());
-	rec.SetNormal(normalVec);
-	rec.SetTangent(tangentVec);
-	rec.SetBitangent(bitangentVec);
-
-	return true;
-}
-
-bool TransformedObject::RotationHitV3(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
+bool TransformedObject::RotationHit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	if (m_object == nullptr) return false;
 
 	Quaternion rayOrig = Quaternion::VectorToPure(ray.GetOrig());
 	Quaternion rayDir = Quaternion::VectorToPure(ray.GetDir());
 
+	Quaternion zInv = -m_zAxisRotation;
+	Quaternion xInv = -m_xAxisRotation;
+	Quaternion yInv = -m_yAxisRotation;
+
 	// Z Axis rotation
-	Quaternion zAxisRot = Quaternion::AxisToRotation(Vector3D(0.f, 0.f, 1.f), -m_rotation.GetZ());
-	rayOrig = Quaternion::RotationQuat(zAxisRot, rayOrig);
-	rayDir = Quaternion::RotationQuat(zAxisRot, rayDir);
+	rayOrig = Quaternion::RotationQuat(zInv, rayOrig);
+	rayDir = Quaternion::RotationQuat(zInv, rayDir);
 
 	// X Axis rotation
-	Quaternion xAxisRot = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), -m_rotation.GetX());
-	rayOrig = Quaternion::RotationQuat(xAxisRot, Quaternion::VectorToPure(rayOrig.GetIJK()));
-	rayDir = Quaternion::RotationQuat(xAxisRot, Quaternion::VectorToPure(rayDir.GetIJK()));
+	rayOrig = Quaternion::RotationQuat(xInv, Quaternion::VectorToPure(rayOrig.GetIJK()));
+	rayDir = Quaternion::RotationQuat(xInv, Quaternion::VectorToPure(rayDir.GetIJK()));
 
 	// Y Axis rotation
-	Quaternion yAxisRot = Quaternion::AxisToRotation(Vector3D(0.f, 1.f, 0.f), -m_rotation.GetY());
-	rayOrig = Quaternion::RotationQuat(yAxisRot, Quaternion::VectorToPure(rayOrig.GetIJK()));
-	rayDir = Quaternion::RotationQuat(yAxisRot, Quaternion::VectorToPure(rayDir.GetIJK()));
+	rayOrig = Quaternion::RotationQuat(yInv, Quaternion::VectorToPure(rayOrig.GetIJK()));
+	rayDir = Quaternion::RotationQuat(yInv, Quaternion::VectorToPure(rayDir.GetIJK()));
 
 	// Calculate hit
 	Ray localRay = Ray(rayOrig.GetIJK(), rayDir.GetIJK());
@@ -201,25 +133,22 @@ bool TransformedObject::RotationHitV3(Ray& ray, const float t_min, const float t
 	Quaternion bitangent = Quaternion::VectorToPure(rec.GetBitangent());
 
 	// Y Axis rotation
-	yAxisRot.Conjugate();
-	point = Quaternion::RotationQuat(yAxisRot, point);
-	normal = Quaternion::RotationQuat(yAxisRot, normal);
-	tangent = Quaternion::RotationQuat(yAxisRot, tangent);
-	bitangent = Quaternion::RotationQuat(yAxisRot, bitangent);
+	point = Quaternion::RotationQuat(m_yAxisRotation, point);
+	normal = Quaternion::RotationQuat(m_yAxisRotation, normal);
+	tangent = Quaternion::RotationQuat(m_yAxisRotation, tangent);
+	bitangent = Quaternion::RotationQuat(m_yAxisRotation, bitangent);
 
 	// X Axis rotation
-	xAxisRot.Conjugate();
-	point = Quaternion::RotationQuat(xAxisRot, Quaternion::VectorToPure(point.GetIJK()));
-	normal = Quaternion::RotationQuat(xAxisRot, Quaternion::VectorToPure(normal.GetIJK()));
-	tangent = Quaternion::RotationQuat(xAxisRot, Quaternion::VectorToPure(tangent.GetIJK()));
-	bitangent = Quaternion::RotationQuat(xAxisRot, Quaternion::VectorToPure(bitangent.GetIJK()));
+	point = Quaternion::RotationQuat(m_xAxisRotation, Quaternion::VectorToPure(point.GetIJK()));
+	normal = Quaternion::RotationQuat(m_xAxisRotation, Quaternion::VectorToPure(normal.GetIJK()));
+	tangent = Quaternion::RotationQuat(m_xAxisRotation, Quaternion::VectorToPure(tangent.GetIJK()));
+	bitangent = Quaternion::RotationQuat(m_xAxisRotation, Quaternion::VectorToPure(bitangent.GetIJK()));
 
 	// Z Axis rotation
-	zAxisRot.Conjugate();
-	point = Quaternion::RotationQuat(zAxisRot, Quaternion::VectorToPure(point.GetIJK()));
-	normal = Quaternion::RotationQuat(zAxisRot, Quaternion::VectorToPure(normal.GetIJK()));
-	tangent = Quaternion::RotationQuat(zAxisRot, Quaternion::VectorToPure(tangent.GetIJK()));
-	bitangent = Quaternion::RotationQuat(zAxisRot, Quaternion::VectorToPure(bitangent.GetIJK()));
+	point = Quaternion::RotationQuat(m_zAxisRotation, Quaternion::VectorToPure(point.GetIJK()));
+	normal = Quaternion::RotationQuat(m_zAxisRotation, Quaternion::VectorToPure(normal.GetIJK()));
+	tangent = Quaternion::RotationQuat(m_zAxisRotation, Quaternion::VectorToPure(tangent.GetIJK()));
+	bitangent = Quaternion::RotationQuat(m_zAxisRotation, Quaternion::VectorToPure(bitangent.GetIJK()));
 
 	rec.SetPoint(point.GetIJK());
 	rec.SetNormal(normal.GetIJK());
@@ -234,9 +163,7 @@ bool TransformedObject::TranslationHit(Ray& ray, const float t_min, const float 
 
 	Ray localRay(ray.GetOrig() - m_translation, ray.GetDir());
 
-	if (!RotationHitV1(localRay, t_min, t_max, rec)) return false;
-	//if (!RotationHitV2(localRay, t_min, t_max, rec)) return false;
-	//if (!RotationHitV3(localRay, t_min, t_max, rec)) return false;
+	if (!RotationHit(localRay, t_min, t_max, rec)) return false;
 
 	rec.SetPoint(rec.GetPoint() + m_translation);
 
@@ -248,17 +175,13 @@ bool TransformedObject::TranslationHit(Ray& ray, const float t_min, const float 
 }
 
 bool TransformedObject::SphereIntersectGround(const Vector3D pos, const float radius) {
-	Vector3D xDir = Vector3D(1.f, 0.f, 0.f);
-	Vector3D yDir = Vector3D(0.f, 1.f, 0.f);
-	Vector3D zDir = Vector3D(0.f, 0.f, -1.f);
-
 	Vector3D newPos = pos;
 
 	newPos -= m_translation;
 
-	newPos = Vector3D::RotateAxis(pos, zDir, m_rotation.GetZ());
-	newPos = Vector3D::RotateAxis(pos, xDir, m_rotation.GetX());
-	newPos = Vector3D::RotateAxis(pos, yDir, m_rotation.GetY());
+	newPos = Quaternion::RotationVec(-m_zAxisRotation, newPos);
+	newPos = Quaternion::RotationVec(-m_xAxisRotation, newPos);
+	newPos = Quaternion::RotationVec(-m_yAxisRotation, newPos);
 
 	return m_object->SphereIntersectGround(newPos, radius);
 }

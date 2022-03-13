@@ -22,20 +22,20 @@ Quaternion& Quaternion::operator=(const Quaternion& copyQuaternion) {
 
 	return *this;
 }
+Quaternion Quaternion::operator-() const {
+	return Quaternion(m_w, m_i * -1.f, m_j * -1.f, m_k * -1.f);
+}
 Quaternion Quaternion::HamProduct(const Quaternion& q1, const Quaternion& q2) {
 	float w = (q1.m_w * q2.m_w) - (q1.m_i * q2.m_i) - (q1.m_j * q2.m_j) - (q1.m_k * q2.m_k);
 	float i = (q1.m_w * q2.m_i) + (q1.m_i * q2.m_w) + (q1.m_j * q2.m_k) - (q1.m_k * q2.m_j);
 	float j = (q1.m_w * q2.m_j) - (q1.m_i * q2.m_k) + (q1.m_j * q2.m_w) + (q1.m_k * q2.m_i);
 	float k = (q1.m_w * q2.m_k) + (q1.m_i * q2.m_j) - (q1.m_j * q2.m_i) + (q1.m_k * q2.m_w);
-
-	Quaternion out = Quaternion(w, i, j, k);
 	//out.Normalize();
-	return out;
+	return Quaternion(w, i, j, k);
 }
 
 Quaternion Quaternion::RotationQuat(const Quaternion& rotation, const Quaternion& point) {
-	Quaternion rInv = rotation;
-	rInv.Conjugate();
+	Quaternion rInv = -rotation;
 
 	return Quaternion::HamProduct(Quaternion::HamProduct(rotation, point), rInv);
 }

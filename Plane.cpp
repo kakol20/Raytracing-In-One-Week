@@ -43,13 +43,8 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	Quaternion rotationInv = m_rotation;
 	rotationInv.Conjugate();
 
-	if (m_type == Plane::Type::YPlus) {
-		int temp = 1 + 1;
-	}
-
 	Vector3D normal(0.f, 0.f, 1.f);
 	normal = Quaternion::RotationVec(m_rotation, normal);
-	normal.Normalize();
 
 	float lDotN = Vector3D::DotProduct(localRay.GetDir(), normal);
 	if (abs(lDotN) <= 1e-4f) return false; // account for floating point precision
@@ -79,14 +74,12 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 
 	// Normal Mapping
 	Vector3D tangent = Vector3D(1.f, 0.f, 0.f);
-	Vector3D bitangent = Vector3D::CrossProduct(Vector3D(0.f, 0.f, 1.f), tangent);
+	Vector3D bitangent = Vector3D(0.f, 1.f, 0.f);
 
 	//if (m_type == Plane::Type::ZPlus || m_type == Plane::Type::ZMinus || m_type == Plane::Type::XMinus || m_type == Plane::Type::) bitangent *= -1.f;
 
 	tangent = Quaternion::RotationVec(m_rotation, tangent);
-	tangent.Normalize();
 	bitangent = Quaternion::RotationVec(m_rotation, bitangent);
-	bitangent.Normalize();
 
 	rec.SetTangent(tangent);
 	rec.SetBitangent(bitangent);

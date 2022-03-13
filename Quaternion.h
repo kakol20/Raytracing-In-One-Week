@@ -16,6 +16,12 @@ public:
 	/// <returns></returns>
 	Quaternion& operator=(const Quaternion& copyQuaternion);
 
+	/// <summary>
+	/// Conjugate quaternion
+	/// </summary>
+	/// <returns></returns>
+	Quaternion operator-() const;
+
 	// ----- OTHER -----
 
 	// Hamilton product
@@ -46,6 +52,7 @@ public:
 	static Quaternion ToQuaternionZXY(const float z, const float x, const float y);
 
 	void Conjugate();
+
 	void Normalize();
 
 	// ----- GETTERS & SETTERS -----
@@ -58,7 +65,7 @@ public:
 	/// Convert Axis Rotation to Quaternion Rotation
 	/// </summary>
 	/// <param name="axis"></param>
-	/// <param name="radians">in degrees</param>
+	/// <param name="radians">in radians</param>
 	/// <returns></returns>
 	static Quaternion AxisToRotation(const Vector3D& axis, const float radians);
 

@@ -720,7 +720,7 @@ void Raytracing::FinalScene() {
 
 		if (!intersect) {
 			float chooseMat = Random::RandFloat();
-			float gap = 1.f / 9.f;
+			float gap = 1.f / 7.5f;
 
 			if (chooseMat <= 1.f * gap) {
 				// ----- DIELECTRIC -----
@@ -771,25 +771,25 @@ void Raytracing::FinalScene() {
 			}
 			else {
 				// ----- TEXTURED -----
-				float chooseTextured = Random::RandFloat();
-				float texturedGap = 1.f / 4.f;
+				//float chooseTextured = Random::RandFloat();
+				//float texturedGap = 1.f / 4.f;
 
 				Vector3D randomRotation = Vector3D::Random(0.f, 360.f);
 
-				if (chooseMat <= 5.f * gap) {
-					m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), randomRotation, position, m_unrenderedObjects["carbon"]));
+				if (chooseMat <= 4.5f * gap) {
+					m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["carbon"]));
 				}
-				else if (chooseMat <= 6.f * gap) {
-					m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), randomRotation, position, m_unrenderedObjects["facade"]));
+				else if (chooseMat <= 5.f * gap) {
+					m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["facade"]));
+				}
+				else if (chooseMat <= 6.5f * gap) {
+					m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["ornament"]));
 				}
 				else if (chooseMat <= 7.f * gap) {
-					m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), randomRotation, position, m_unrenderedObjects["ornament"]));
-				}
-				else if (chooseMat <= 8.f * gap) {
-					m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), randomRotation, position, m_unrenderedObjects["bricks"]));
+					m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["bricks"]));
 				}
 				else {
-					m_renderedObjects.push_back(new TransformedObject(Vector3D(1.f), randomRotation, position, m_unrenderedObjects["terracotta"]));
+					m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["terracotta"]));
 				}
 			}
 		}

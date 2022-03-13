@@ -1,4 +1,5 @@
 #pragma once
+#include "Quaternion.h"
 #include "Object.h"
 class TransformedObject :
 	public Object {
@@ -30,17 +31,18 @@ public:
 	virtual bool SphereIntersectGround(const Vector3D pos, const float radius);
 	virtual bool SphereIntersectSphere(const Vector3D pos, const float radius);
 private:
-	Object* m_object;
-	Vector3D m_scale;
-	Vector3D m_rotation;
-	Vector3D m_translation;
 	bool m_flipNormals;
+	Object* m_object;
+	Quaternion m_xAxisRotation;
+	Quaternion m_yAxisRotation;
+	Quaternion m_zAxisRotation;
+	Vector3D m_rotation;
+	Vector3D m_scale;
+	Vector3D m_translation;
 
 	bool ScaleHit(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
-	bool RotationHitV1(Ray& ray, const float t_min, const float t_max, HitRec& rec);
-	bool RotationHitV2(Ray& ray, const float t_min, const float t_max, HitRec& rec);
-	bool RotationHitV3(Ray& ray, const float t_min, const float t_max, HitRec& rec);
+	bool RotationHit(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
 	bool TranslationHit(Ray& ray, const float t_min, const float t_max, HitRec& rec);
 
