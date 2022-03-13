@@ -803,6 +803,8 @@ void Raytracing::TexturedScene() {
 
 	// ----- CAMERA -----
 	Vector3D lookFrom(0.f, 2.f, 13.f);
+	//Vector3D lookFrom(-13.f, 2.f, 0.f);
+	//Vector3D lookFrom(0.f, 9.f, 9.f);
 	Vector3D lookAt(0.f, 1.f, 0.f);
 	Vector3D dist = lookAt - lookFrom;
 	Vector3D up(0.f, 1.f, 0.f);
@@ -853,7 +855,7 @@ void Raytracing::TexturedScene() {
 	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(0.f), Vector3D(0.f, 1.f, 0.f), m_unrenderedObjects["carbon"]));
 	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(0.f), Vector3D(2.5f, 1.f, 0.f), m_unrenderedObjects["ornament"]));
 
-	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(45.f), Vector3D(-1.25f, 0.5f, 1.5f), m_unrenderedObjects["facade"]));
+	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(45.f, 45.f, 45.f), Vector3D(-1.25f, 0.5f, 1.5f), m_unrenderedObjects["facade"]));
 	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(0.f), Vector3D(1.25f, 0.5f, 1.5f), m_unrenderedObjects["terracotta"]));
 }
 

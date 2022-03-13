@@ -76,7 +76,7 @@ bool TransformedObject::ScaleHit(Ray& ray, const float t_min, const float t_max,
 		temprec.SetT(magnitude);
 		temprec.SetPoint(point);
 		temprec.SetNormal(normal);
-		temprec.SetTangents(tangent);
+		//temprec.SetTangents(tangent);
 
 		rec = temprec;
 
@@ -113,18 +113,22 @@ bool TransformedObject::RotationHitV1(Ray& ray, const float t_min, const float t
 	Vector3D point = Vector3D::RotateAxis(rec.GetPoint(), yDir, m_rotation.GetY());
 	Vector3D normal = Vector3D::RotateAxis(rec.GetNormal(), yDir, m_rotation.GetY());
 	Vector3D tangent = Vector3D::RotateAxis(rec.GetTangent(), yDir, m_rotation.GetY());
+	Vector3D bitangent = Vector3D::RotateAxis(rec.GetBitangent(), yDir, m_rotation.GetY());
 
 	point = Vector3D::RotateAxis(point, xDir, m_rotation.GetX());
 	normal = Vector3D::RotateAxis(normal, xDir, m_rotation.GetX());
 	tangent = Vector3D::RotateAxis(tangent, xDir, m_rotation.GetX());
+	bitangent = Vector3D::RotateAxis(bitangent, xDir, m_rotation.GetX());
 
 	point = Vector3D::RotateAxis(point, zDir, m_rotation.GetZ());
 	normal = Vector3D::RotateAxis(normal, zDir, m_rotation.GetZ());
 	tangent = Vector3D::RotateAxis(tangent, zDir, m_rotation.GetZ());
+	bitangent = Vector3D::RotateAxis(bitangent, zDir, m_rotation.GetZ());
 
 	rec.SetPoint(point);
 	rec.SetNormal(normal);
-	rec.SetTangents(tangent);
+	rec.SetTangent(tangent);
+	rec.SetBitangent(bitangent);
 
 	return true;
 }
@@ -149,15 +153,19 @@ bool TransformedObject::RotationHitV2(Ray& ray, const float t_min, const float t
 	Quaternion point = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetPoint()));
 	Quaternion normal = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetNormal()));
 	Quaternion tangent = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetTangent()));
+	Quaternion bitangent = Quaternion::RotationQuat(rotation, Quaternion::VectorToPure(rec.GetBitangent()));
 
 	Vector3D normalVec = normal.GetIJK();
 	normal.Normalize();
 	Vector3D tangentVec = tangent.GetIJK();
 	tangentVec.Normalize();
+	Vector3D bitangentVec = bitangent.GetIJK();
+	bitangentVec.Normalize();
 
 	rec.SetPoint(point.GetIJK());
 	rec.SetNormal(normalVec);
-	rec.SetTangents(tangentVec);
+	rec.SetTangent(tangentVec);
+	rec.SetBitangent(bitangentVec);
 
 	return true;
 }
@@ -190,28 +198,33 @@ bool TransformedObject::RotationHitV3(Ray& ray, const float t_min, const float t
 	Quaternion point = Quaternion::VectorToPure(rec.GetPoint());
 	Quaternion normal = Quaternion::VectorToPure(rec.GetNormal());
 	Quaternion tangent = Quaternion::VectorToPure(rec.GetTangent());
+	Quaternion bitangent = Quaternion::VectorToPure(rec.GetBitangent());
 
 	// Y Axis rotation
 	yAxisRot.Conjugate();
 	point = Quaternion::RotationQuat(yAxisRot, point);
 	normal = Quaternion::RotationQuat(yAxisRot, normal);
 	tangent = Quaternion::RotationQuat(yAxisRot, tangent);
+	bitangent = Quaternion::RotationQuat(yAxisRot, bitangent);
 
 	// X Axis rotation
 	xAxisRot.Conjugate();
 	point = Quaternion::RotationQuat(xAxisRot, Quaternion::VectorToPure(point.GetIJK()));
 	normal = Quaternion::RotationQuat(xAxisRot, Quaternion::VectorToPure(normal.GetIJK()));
 	tangent = Quaternion::RotationQuat(xAxisRot, Quaternion::VectorToPure(tangent.GetIJK()));
+	bitangent = Quaternion::RotationQuat(xAxisRot, Quaternion::VectorToPure(bitangent.GetIJK()));
 
 	// Z Axis rotation
 	zAxisRot.Conjugate();
 	point = Quaternion::RotationQuat(zAxisRot, Quaternion::VectorToPure(point.GetIJK()));
 	normal = Quaternion::RotationQuat(zAxisRot, Quaternion::VectorToPure(normal.GetIJK()));
 	tangent = Quaternion::RotationQuat(zAxisRot, Quaternion::VectorToPure(tangent.GetIJK()));
+	bitangent = Quaternion::RotationQuat(zAxisRot, Quaternion::VectorToPure(bitangent.GetIJK()));
 
 	rec.SetPoint(point.GetIJK());
 	rec.SetNormal(normal.GetIJK());
-	rec.SetTangents(tangent.GetIJK());
+	rec.SetTangent(tangent.GetIJK());
+	rec.SetBitangent(bitangent.GetIJK());
 	
 	return true;
 }
@@ -221,9 +234,9 @@ bool TransformedObject::TranslationHit(Ray& ray, const float t_min, const float 
 
 	Ray localRay(ray.GetOrig() - m_translation, ray.GetDir());
 
-	//if (!RotationHitV1(localRay, t_min, t_max, rec)) return false;
+	if (!RotationHitV1(localRay, t_min, t_max, rec)) return false;
 	//if (!RotationHitV2(localRay, t_min, t_max, rec)) return false;
-	if (!RotationHitV3(localRay, t_min, t_max, rec)) return false;
+	//if (!RotationHitV3(localRay, t_min, t_max, rec)) return false;
 
 	rec.SetPoint(rec.GetPoint() + m_translation);
 

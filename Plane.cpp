@@ -78,17 +78,23 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 				if (m_type == Plane::Type::XPlus) {
 					bottomLeft = Vector3D(max.GetZ(), min.GetY());
 					topRight = Vector3D(min.GetZ(), max.GetY());
-					rec.SetTangents(Vector3D(0.f, 0.f, -1.f));
+
+					rec.SetTangent(Vector3D(0.f, 0.f, -1.f));
+					rec.SetBitangent(Vector3D(0.f, -1.f, 0.f));
 				}
 				else {
 					bottomLeft = Vector3D(min.GetZ(), min.GetY());
 					topRight = Vector3D(max.GetZ(), max.GetY());
-					rec.SetTangents(Vector3D(0.f, 0.f, 1.f));
+
+					rec.SetTangent(Vector3D(0.f, 0.f, 1.f));
+					rec.SetBitangent(Vector3D(0.f, -1.f, 0.f));
 				}
 
 				Vector3D uv = Vector3D(p.GetZ(), p.GetY());
-				divide += Vector3D(0.f, 0.f, 1.f); // prevent divide by zero
-				uv = (uv - bottomLeft) / divide;
+				uv = (uv - bottomLeft);
+				uv.Abs();
+				uv /= divide;
+
 				rec.SetUV(uv * m_uvScale);
 
 				return true;
@@ -109,20 +115,26 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 				rec.SetFaceNormal(ray, n);
 
 				Vector3D bottomLeft, topRight;
-				if (m_type == Plane::Type::ZPlus) {
+				if (m_type == Plane::Type::YPlus) {
 					bottomLeft = Vector3D(min.GetX(), max.GetZ());
 					topRight = Vector3D(max.GetX(), min.GetZ());
-					rec.SetTangents(Vector3D(1.f, 0.f, 0.f));
+					
+					rec.SetTangent(Vector3D(1.f, 0.f, 0.f));
+					rec.SetBitangent(Vector3D(0.f, 0.f, 1.f));
 				}
 				else {
 					bottomLeft = Vector3D(max.GetX(), min.GetZ());
 					topRight = Vector3D(min.GetX(), max.GetZ());
-					rec.SetTangents(Vector3D(-1.f, 0.f, 0.f));
+
+					rec.SetTangent(Vector3D(-1.f, 0.f, 0.f));
+					rec.SetBitangent(Vector3D(0.f, 0.f, -1.f));
 				}
 
 				Vector3D uv = Vector3D(p.GetX(), p.GetZ());
-				divide += Vector3D(0.f, 0.f, 1.f); // prevent divide by zero
-				uv = (uv - bottomLeft) / divide;
+				uv = (uv - bottomLeft);
+				uv.Abs();
+				uv /= divide;
+
 				rec.SetUV(uv * m_uvScale);
 
 				return true;
@@ -146,17 +158,26 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 				if (m_type == Plane::Type::ZPlus) {
 					bottomLeft = Vector3D(min.GetX(), min.GetY());
 					topRight = Vector3D(max.GetX(), max.GetY());
-					rec.SetTangents(Vector3D(1.f, 0.f, 0.f));
+					//rec.SetTangents(Vector3D(1.f, 0.f, 0.f), true);
+
+					rec.SetTangent(Vector3D(1.f, 0.f, 0.f));
+					rec.SetBitangent(Vector3D(0.f, 1.f, 0.f));
 				}
 				else {
 					bottomLeft = Vector3D(max.GetX(), min.GetY());
 					topRight = Vector3D(min.GetX(), max.GetY());
-					rec.SetTangents(Vector3D(-1.f, 0.f, 0.f));
+					//rec.SetTangents(Vector3D(-1.f, 0.f, 0.f), true);
+
+					rec.SetTangent(Vector3D(-1.f, 0.f, 0.f));
+					rec.SetBitangent(Vector3D(0.f, 1.f, 0.f));
 				}
 
 				Vector3D uv = Vector3D(p.GetX(), p.GetY());
-				divide += Vector3D(0.f, 0.f, 1.f); // prevent divide by zero
-				uv = (uv - bottomLeft) / divide;
+				uv = (uv - bottomLeft);
+				uv.Abs();
+				uv /= divide;
+
+				uv *= Vector3D(1.f, -1.f);
 				rec.SetUV(uv * m_uvScale);
 
 				return true;

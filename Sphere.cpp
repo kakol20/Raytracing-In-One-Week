@@ -51,7 +51,12 @@ bool Sphere::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	rec.SetFaceNormal(ray, outwardNormal);
 
 	rec.SetUV(CalculateUV(rec.GetPoint()) * m_uvScale);
-	rec.SetTangents(CalculateTangent(rec));
+
+	Vector3D tangent = CalculateTangent(rec);
+	Vector3D bitangent = Vector3D::CrossProduct(rec.GetNormal(), tangent);
+
+	rec.SetTangent(tangent);
+	rec.SetBitangent(bitangent);
 	return true;
 }
 

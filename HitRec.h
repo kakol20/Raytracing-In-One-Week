@@ -46,7 +46,11 @@ public:
 
 	//const Vector3D GetTangent() const { return m_tangent; };
 	const Vector3D GetTangent() const { return m_tangent; };
+	void SetTangent(const Vector3D tangent) { m_tangent = tangent; };
+
+	const Vector3D GetBitangent() const { return m_bitangent; };
+	void SetBitangent(const Vector3D bitangent) { m_bitangent = bitangent; };
+
 	const Vector3D TangentToWorld(const Vector3D tangentSpace);
-	void SetTangents(const Vector3D tangent);
 };
 

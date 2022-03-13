@@ -43,7 +43,8 @@ bool Ground::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	rec.SetMat(m_mat);
 	rec.SetFaceNormal(ray, n);
 	rec.SetUV(Vector3D(p.GetX(), p.GetZ(), 0.f) * m_uvScale);
-	rec.SetTangents(Vector3D(1.f, 0.f, 0.f));
+	rec.SetTangent(Vector3D(1.f, 0.f, 0.f));
+	rec.SetBitangent(Vector3D(0.f, 0.f, -1.f));
 
 	return true;
 }
