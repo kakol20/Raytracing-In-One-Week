@@ -1253,9 +1253,9 @@ const bool Raytracing::RayHitObject(Ray& ray, const float t_min, const float t_m
 Vector3D Raytracing::EmissionColor(HitRec& rec) {
 	// ----- EMISSIVE OBJECT -----
 	Vector3D emission;
-	rec.GetMat()->Emission(rec, emission);
+	if (rec.GetMat()->Emission(rec, emission)) return emission;
 
-	return emission;
+	return Vector3D(0.f);
 }
 
 Vector3D Raytracing::ObjectColor(Ray& ray, HitRec& rec, Ray& scattered, bool& continueRay, bool& alpha) {

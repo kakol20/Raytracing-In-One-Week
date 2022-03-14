@@ -21,14 +21,14 @@ bool Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	// ----- FRESNEL -----
 	float sqrRoughness = m_roughness/* * m_roughness*/;
 
-	bool roughnessRand = Random::RandFloat() <= sqrRoughness;
+	bool roughnessRand = Random::RandFloat() < sqrRoughness;
 
 	Vector3D fresnelNormal = roughnessRand ? incoming : normal;
 
 	float refractionRatio = rec.GetFrontFace() ? 1.f / m_ior : m_ior;
 	float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
 
-	bool fresnelRand = Random::RandFloat() <= fresnel;
+	bool fresnelRand = Random::RandFloat() < fresnel;
 
 	attentuation = Vector3D::Lerp(m_albedo, Vector3D(1.f, 1.f, 1.f), fresnel);
 	//attentuation = m_albedo;

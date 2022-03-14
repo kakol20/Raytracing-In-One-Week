@@ -37,10 +37,10 @@ bool Textured::Emission(HitRec& rec, Vector3D& emission) {
 	//float emissionModified = l_emission * m_emissionStrength;
 	//l_emission = roundf(l_emission);
 
-	bool emissionRand = Random::RandFloat() <= l_emission;
+	//bool emissionRand = Random::RandFloat() < l_emission;
 
-	if (emissionRand) {
-		emission = albedo * m_emissionStrength;
+	if (round(l_emission) >= 1.f) {
+		emission = albedo * m_emissionStrength * l_emission;
 		return true;
 	}
 	else {
@@ -77,8 +77,8 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 	b /= 255.f;
 	Vector3D albedo(r, g, b);
 
-	bool emissionRand = Random::RandFloat() <= emission;
-	if (emissionRand) {
+	//bool emissionRand = Random::RandFloat() < emission;
+	if (round(emission) >= 1.f) {
 		// ----- EMISSIVE -----
 		attentuation = Vector3D();
 		return false;
@@ -93,14 +93,14 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 		// ----- FRESNEL -----
 		float sqrRoughness = roughness/* * roughness*/;
 
-		bool roughnessRand = Random::RandFloat() <= sqrRoughness;
+		bool roughnessRand = Random::RandFloat() < sqrRoughness;
 
 		Vector3D fresnelNormal = roughnessRand ? incoming : normal;
 
 		float refractionRatio = rec.GetFrontFace() ? 1.f / m_ior : m_ior;
 		float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
 
-		bool metalnessRand = Random::RandFloat() <= metalness;
+		bool metalnessRand = Random::RandFloat() < metalness;
 
 		float nearZero = 1e-4f;
 
@@ -133,7 +133,7 @@ bool Textured::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 			// ----- DIELECTRIC -----
 			attentuation = Vector3D::Lerp(albedo, Vector3D(1.f, 1.f, 1.f), fresnel);
 
-			bool fresnelRand = Random::RandFloat() <= fresnel;
+			bool fresnelRand = Random::RandFloat() < fresnel;
 			Vector3D scatterDir;
 			if (fresnelRand) {
 				scatterDir = reflect;
