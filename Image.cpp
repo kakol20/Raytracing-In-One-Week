@@ -175,7 +175,7 @@ bool Image::Write(const char* file, Image::ColorMode colorMode) {
 		system("pause");
 	}
 
-	return success != 0;;
+	return success != 0;
 }
 
 void Image::BiLerp(const float x, const float y, float& r, float& g, float& b) {

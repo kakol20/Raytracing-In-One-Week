@@ -856,6 +856,7 @@ void Raytracing::TexturedScene() {
 	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(0.f), Vector3D(2.5f, 1.f, 0.f), m_unrenderedObjects["ornament"]));
 
 	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(45.f, 45.f, 45.f), Vector3D(-1.25f, 0.5f, 1.5f), m_unrenderedObjects["facade"]));
+	//m_renderedObjects.push_back(new TransformedObject(false, Vector3D(45.f, 0.f, 0.f), Vector3D(-1.25f, 0.5f, 1.5f), m_unrenderedObjects["facade"]));
 	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(0.f), Vector3D(1.25f, 0.5f, 1.5f), m_unrenderedObjects["terracotta"]));
 }
 

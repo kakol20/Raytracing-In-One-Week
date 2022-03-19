@@ -87,7 +87,7 @@ bool Plane::Hit(Ray& ray, const float t_min, const float t_max, HitRec& rec) {
 	Vector3D divide(fminf(m_width, m_height), fminf(m_width, m_height), 1.f);
 	uvPoint -= minPoint;
 	uvPoint /= divide;
-	uvPoint = Vector3D(uvPoint.GetX(), 1.f - uvPoint.GetY());
+	uvPoint = Vector3D(uvPoint.GetX(), -uvPoint.GetY());
 	uvPoint *= m_uvScale;
 
 	rec.SetUV(uvPoint);

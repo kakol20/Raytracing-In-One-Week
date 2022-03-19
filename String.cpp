@@ -155,13 +155,7 @@ float String::ToFloat(const std::string number) {
 }
 
 int String::ToInt(const char* number) {
-	char* end;
-	int out = (int)strtol(number, &end, 10);
-
-	//delete end;
-	end = nullptr;
-
-	return out;
+	return std::stoi(number);
 }
 
 int String::ToInt(const std::string number) {
