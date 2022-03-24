@@ -667,6 +667,10 @@ void Raytracing::FinalScene() {
 	m_textures["terracotta_rme"] = new Image("images/textures/terracotta/terracotta_rme.png");
 
 	// ----- OBJECT CREATION -----
+	
+	m_renderedObjects.reserve(533);
+	m_matVec.reserve(429);
+
 	// materials
 	m_matMap["ground"] = new Diffuse(Vector3D(0.5f, 0.5f, 0.5f));
 	m_matMap["back"] = new Dielectric(Vector3D(0.4f, 0.2f, 0.1f), 0.1f, 1.46f);
