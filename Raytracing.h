@@ -66,6 +66,7 @@ private:
 	void CornellBox();
 	void DebugScene();
 	void FinalScene();
+	void OriginalScene();
 	void TexturedScene();
 
 	// ----- RENDERING -----

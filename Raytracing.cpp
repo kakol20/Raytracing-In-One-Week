@@ -194,7 +194,7 @@ bool Raytracing::Init() {
 			<< "tileSize=" << m_tileSize << "\n"
 			<< "## color, normal, albedo, emission or all\n"
 			<< "renderMode=" << m_renderMode << "\n"
-			<< "## final, textured, cornell or debug\n"
+			<< "## full, textured, cornell, original or debug\n"
 			<< "scene=" << m_renderScene << "\n#\n"
 			<< "# Camera Settings\n"
 			<< "aperture=" << m_aperture << "\n"
@@ -330,6 +330,10 @@ bool Raytracing::Init() {
 	else if (m_renderScene == "cornell") {
 		m_fileFolder = "renders/cornell/";
 		CornellBox();
+	}
+	else if (m_renderScene == "original") {
+		m_fileFolder = "renders/original/";
+		OriginalScene();
 	}
 	else {
 		m_fileFolder = "renders/full/";
@@ -796,6 +800,83 @@ void Raytracing::FinalScene() {
 	}
 }
 
+void Raytracing::OriginalScene() {
+	// ----- BACKGROUND -----
+
+	// ----- CAMERA -----
+	Vector3D lookFrom(13.f, 2.f, 3.f);
+	Vector3D lookAt(0.f, 0.f, 0.f);
+	Vector3D up(0.f, 1.f, 0.f);
+	m_clipEnd = 100.f;
+
+	const float aspectRatio = m_imageWidth / (float)m_imageHeight;
+	m_camera = Camera(aspectRatio, m_aperture, 10.0, m_verticalFOV, lookFrom, lookAt, up);
+
+	// ----- MATERIALS -----
+
+	m_matMap["ground"] = new Diffuse(Vector3D(0.5f));
+	m_matMap["metal"] = new Metal(Vector3D(0.7f, 0.6f, 0.5f), 0.f, 1.45f);
+	m_matMap["glass"] = new Glass(Vector3D(1.f), 0.f, 1.5f);
+	m_matMap["dielectric"] = new Dielectric(Vector3D(0.4f, 0.2f, 0.1f), 0.f, 1.45f);
+
+	// ----- OBJECTS -----
+	m_renderedObjects.reserve(533);
+	m_matVec.reserve(429);
+
+	m_renderedObjects.push_back(new Ground(0.f, m_matMap["ground"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(4.f, 1.f, 0.f), 1.f, m_matMap["metal"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(0.f, 1.f, 0.f), 1.f, m_matMap["glass"]));
+	m_renderedObjects.push_back(new Sphere(Vector3D(-4.f, 1.f, 0.f), 1.f, m_matMap["dielectric"]));
+
+	// procedural
+	std::vector<Vector3D> position;
+	for (int x = -11; x <= 11; x++) {
+		for (int y = -11; y <= 11; y++) {
+			Vector3D center((float)x, 0.2f, (float)y);
+			Vector3D randPos(Random::RandFloatRange(0.f, 0.9f), 0.f, Random::RandFloatRange(0.f, 0.9f));
+
+			center += randPos;
+
+			position.push_back(center);
+		}
+	}
+	for (auto it = position.begin(); it != position.end(); it++) {
+		Vector3D position = (*it);
+
+		bool intersect = false;
+
+		for (auto it2 = m_renderedObjects.begin(); it2 != m_renderedObjects.end(); it2++) {
+			if ((*it2)->SphereIntersectSphere(position, 0.2f)) {
+				intersect = true;
+				break;
+			}
+		}
+
+		if (!intersect) {
+			float chooseMat = Random::RandFloat();
+
+			if (chooseMat < 0.8f) {
+				Vector3D albedo = Vector3D::Random() * Vector3D::Random();
+				float roughness = Random::RandFloat();
+
+				m_matVec.push_back(new Dielectric(albedo, roughness, 1.45f));
+				m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
+			}
+			else if (chooseMat < 0.95f) {
+				Vector3D albedo = Vector3D::Random(0.5f, 1.f);
+				float roughness = Random::RandFloat() * 0.5f;
+
+				m_matVec.push_back(new Metal(albedo, roughness, 1.45f));
+				m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matVec.back()));
+			}
+			else {
+				m_renderedObjects.push_back(new Sphere(position, 0.2f, m_matMap["glass"]));
+			}
+
+		}
+	}
+}
+
 void Raytracing::TexturedScene() {
 	m_hdri.Read("images/hdri/spruit_sunrise_2k.png", Image::ColorMode::sRGB);
 	m_hdriStrength = 0.1f;
@@ -1217,22 +1298,28 @@ Vector3D Raytracing::RayColor(Ray& ray, const int depth, bool& isBackground) {
 		return Vector3D();
 	}
 	else {
-		float u, v;
-		unitDir.UVSphere(u, v);
-		//u = 1.f - u;
-		u -= 1.f;
+		if (m_renderScene == "original") {
+			float t = 0.5f * (unitDir.GetY() + 1.f);
+			return (1.f - t) * Vector3D(1.f) + t * Vector3D(0.5f, 0.7f, 1.f);
+		}
+		else {
+			float u, v;
+			unitDir.UVSphere(u, v);
+			//u = 1.f - u;
+			u -= 1.f;
 
-		u *= (float)(m_hdri.GetWidth());
-		v *= (float)(m_hdri.GetHeight());
+			u *= (float)(m_hdri.GetWidth());
+			v *= (float)(m_hdri.GetHeight());
 
-		float r, g, b;
-		m_hdri.BiLerp(u, v, r, g, b);
+			float r, g, b;
+			m_hdri.BiLerp(u, v, r, g, b);
 
-		Vector3D rgb(r, g, b);
-		rgb /= 255.f;
+			Vector3D rgb(r, g, b);
+			rgb /= 255.f;
 
-		//m_hdriStrength = 0.1f;
-		return rgb * m_hdriStrength;
+			//m_hdriStrength = 0.1f;
+			return rgb * m_hdriStrength;
+		}
 	}
 }
 

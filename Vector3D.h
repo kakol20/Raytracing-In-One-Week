@@ -94,7 +94,7 @@ public:
 
 public: // ----- STATIC RANDOM FUNCTIONS -----
 
-	static Vector3D Random(const float min, const float max);
+	static Vector3D Random(const float min = 0.f, const float max = 1.f);
 	static Vector3D RandomInHemisphere(const Vector3D& normal);
 	static Vector3D RandomInUnitDisk();
 	static Vector3D RandomInUnitSphere();
@@ -119,6 +119,8 @@ public: // ----- OPERATOR OVERLOADING -----
 	Vector3D operator*(const Vector3D& otherVector) const;
 	Vector3D& operator*=(const float scalar);
 	Vector3D& operator*=(const Vector3D& otherVector);
+
+	friend Vector3D operator*(const float& scalar, const Vector3D& vector);
 
 	// ----- ADDITION -----
 

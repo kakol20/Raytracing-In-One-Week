@@ -386,7 +386,11 @@ Vector3D Vector3D::operator+(const Vector3D& otherVector) const {
 }
 
 Vector3D Vector3D::operator++(int i) {
-	return Vector3D(m_x + i, m_y + i, m_z + i);
+	Vector3D orig(m_x + i, m_y + i, m_z + i);
+	m_x += i;
+	m_y += i;
+	m_z += i;
+	return orig;
 }
 
 Vector3D& Vector3D::operator++() {
@@ -438,4 +442,8 @@ bool Vector3D::operator!=(const Vector3D& otherVector) const {
 
 Vector3D Vector3D::operator-() const {
 	return Vector3D(m_x, m_y, m_z) * -1.f;
+}
+
+Vector3D operator*(const float& scalar, const Vector3D& vector) {
+	return Vector3D(vector.m_x, vector.m_y, vector.m_z) * scalar;
 }
