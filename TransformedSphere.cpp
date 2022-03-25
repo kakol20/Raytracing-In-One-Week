@@ -8,6 +8,7 @@ TransformedSphere::TransformedSphere(const float& radius, Material* mat, const V
 
 	Vector3D rotationRadians = (rotation * Vector3D::PI) / 180.f;
 
+#ifdef MULTI_ROTATION
 	m_rotation.reserve(3);
 	m_rotation.push_back(Quaternion::AxisToRotation(Vector3D::XDir, rotationRadians.GetX()));
 	m_rotation.push_back(Quaternion::AxisToRotation(Vector3D::YDir, rotationRadians.GetY()));
@@ -16,6 +17,25 @@ TransformedSphere::TransformedSphere(const float& radius, Material* mat, const V
 	for (auto it = m_rotation.begin(); it != m_rotation.end(); it++) {
 		(*it).Normalize();
 	}
+#else
+	std::vector<Quaternion> rotationVec;
+	rotationVec.reserve(3);
+	rotationVec.push_back(Quaternion::AxisToRotation(Vector3D::XDir, rotationRadians.GetX()));
+	rotationVec.push_back(Quaternion::AxisToRotation(Vector3D::YDir, rotationRadians.GetY()));
+	rotationVec.push_back(Quaternion::AxisToRotation(Vector3D::ZDir, rotationRadians.GetZ()));
+
+	Vector3D v1(1.f);
+	v1.Normalize();
+
+	Vector3D v2 = v1;
+	for (auto it = rotationVec.begin(); it != rotationVec.end(); it++) {
+		v2 = Quaternion::RotationVec((*it), v2);
+	}
+	v2.Normalize();
+
+	m_rotation = Quaternion::FromTwoPoints(v1, v2);
+	m_rotationInv = Quaternion::FromTwoPoints(v2, v1);
+#endif
 }
 
 TransformedSphere::~TransformedSphere() {
@@ -28,9 +48,14 @@ bool TransformedSphere::Hit(Ray& ray, const float t_min, const float t_max, HitR
 
 bool TransformedSphere::SphereIntersectSphere(const Vector3D pos, const float radius) {
 	Vector3D newPos = pos - m_pos;
+
+#ifdef MULTI_ROTATION
 	for (auto it = m_rotation.rbegin(); it != m_rotation.rend(); it++) {
 		newPos = Quaternion::RotationVec(-(*it), newPos);
 	}
+#else
+	newPos = Quaternion::RotationVec(m_rotationInv, newPos);
+#endif	
 
 	Vector3D sphereEdge = Vector3D(0.f) - newPos;
 	sphereEdge.Normalize();
@@ -61,11 +86,16 @@ bool TransformedSphere::RotationHit(Ray& ray, const float t_min, const float t_m
 	Vector3D rayOrig = ray.GetOrig();
 	Vector3D rayDir = ray.GetDir();
 
+#ifdef MULTI_ROTATION
 	for (auto it = m_rotation.rbegin(); it != m_rotation.rend(); it++) {
 		rayOrig = Quaternion::RotationVec(-(*it), rayOrig);
 		rayDir = Quaternion::RotationVec(-(*it), rayDir);
 	}
-	//rayDir.Normalize();
+#else
+	rayOrig = Quaternion::RotationVec(m_rotationInv, rayOrig);
+	rayDir = Quaternion::RotationVec(m_rotationInv, rayDir);
+	rayDir.Normalize();
+#endif
 
 	Ray localRay = Ray(rayOrig, rayDir);
 	if (!LocalHit(localRay, t_min, t_max, rec)) return false;
@@ -75,16 +105,23 @@ bool TransformedSphere::RotationHit(Ray& ray, const float t_min, const float t_m
 	Vector3D tangent = rec.GetTangent();
 	Vector3D bitangent = rec.GetBitangent();
 
+#ifdef MULTI_ROTATION
 	for (auto it = m_rotation.begin(); it != m_rotation.end(); it++) {
 		point = Quaternion::RotationVec((*it), point);
 		normal = Quaternion::RotationVec((*it), normal);
 		tangent = Quaternion::RotationVec((*it), tangent);
 		bitangent = Quaternion::RotationVec((*it), bitangent);
 	}
+#else
+	point = Quaternion::RotationVec(m_rotation, point);
+	normal = Quaternion::RotationVec(m_rotation, normal);
+	tangent = Quaternion::RotationVec(m_rotation, tangent);
+	bitangent = Quaternion::RotationVec(m_rotation, bitangent);
 
-	//normal.Normalize();
-	//tangent.Normalize();
-	//bitangent.Normalize();
+	normal.Normalize();
+	tangent.Normalize();
+	bitangent.Normalize();
+#endif
 
 	rec.SetPoint(point);
 	rec.SetNormal(normal);

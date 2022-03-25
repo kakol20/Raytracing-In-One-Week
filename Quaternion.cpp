@@ -34,6 +34,27 @@ Quaternion Quaternion::HamProduct(const Quaternion& q1, const Quaternion& q2) {
 	return Quaternion(w, i, j, k);
 }
 
+Quaternion& Quaternion::operator*=(const Quaternion& other) {
+	float w = (m_w * other.m_w) - (m_i * other.m_i) - (m_j * other.m_j) - (m_k * other.m_k);
+	float i = (m_w * other.m_i) + (m_i * other.m_w) + (m_j * other.m_k) - (m_k * other.m_j);
+	float j = (m_w * other.m_j) - (m_i * other.m_k) + (m_j * other.m_w) + (m_k * other.m_i);
+	float k = (m_w * other.m_k) + (m_i * other.m_j) - (m_j * other.m_i) + (m_k * other.m_w);
+
+	m_w = w;
+	m_i = i;
+	m_j = j;
+	m_k = k;
+	return *this;
+}
+
+Quaternion Quaternion::FromTwoPoints(Vector3D& v1, Vector3D& v2) {
+	Quaternion q;
+	Vector3D a = Vector3D::CrossProduct(v1, v2);
+	q = Quaternion(sqrtf(v1.SqrMagnitude() * v2.SqrMagnitude()) + Vector3D::DotProduct(v1, v2), a.GetX(), a.GetY(), a.GetZ());
+	q.Normalize();
+	return q;
+}
+
 Quaternion Quaternion::RotationQuat(const Quaternion& rotation, const Quaternion& point) {
 	Quaternion rInv = -rotation;
 
@@ -45,7 +66,10 @@ Quaternion Quaternion::RotationQuat(const Quaternion& rotation, const Vector3D& 
 }
 
 Vector3D Quaternion::RotationVec(const Quaternion& rotation, const Vector3D& v) {
-	Quaternion result = Quaternion::RotationQuat(rotation, v);
+	Quaternion pureV = Quaternion::VectorToPure(v);
+	Quaternion result = rotation;
+	result *= pureV;
+	result *= -rotation;
 	return result.GetIJK();
 }
 

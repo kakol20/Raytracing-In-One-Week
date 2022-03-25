@@ -938,7 +938,7 @@ void Raytracing::TexturedScene() {
 
 	// ----- OBJECTS -----
 	m_unrenderedObjects["bricks"] = new Sphere(Vector3D(0.f), 1.f, m_matMap["bricks"], Vector3D(2.f, 1.f));
-	m_unrenderedObjects["carbon"] = new Sphere(Vector3D(0.f), 1.f, m_matMap["carbon"], Vector3D(2.f, 1.f));
+	//m_unrenderedObjects["carbon"] = new Sphere(Vector3D(0.f), 1.f, m_matMap["carbon"], Vector3D(2.f, 1.f));
 	m_unrenderedObjects["facade"] = new Box(Vector3D(sqrt(1.f / 3.f)), m_matMap["facade"], Vector3D(1.f));
 	m_unrenderedObjects["ornament"] = new Sphere(Vector3D(0.f), 1.f, m_matMap["ornament"]);
 	m_unrenderedObjects["terracotta"] = new Sphere(Vector3D(0.f), 0.5f, m_matMap["terracotta"], Vector3D(2.f, 1.f));
@@ -949,7 +949,8 @@ void Raytracing::TexturedScene() {
 	m_renderedObjects.push_back(new Sphere(Vector3D(-20.f, 15.f, -15.f), 5.f, m_matMap["light1"]));
 
 	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(0.f), Vector3D(-2.5f, 1.f, 0.f), m_unrenderedObjects["bricks"]));
-	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(0.f), Vector3D(0.f, 1.f, 0.f), m_unrenderedObjects["carbon"]));
+	//m_renderedObjects.push_back(new TransformedObject(false, Vector3D(0.f), Vector3D(0.f, 1.f, 0.f), m_unrenderedObjects["carbon"]));
+	m_renderedObjects.push_back(new TransformedSphere(1.f, m_matMap["carbon"], Vector3D(45.f), Vector3D(0.f, 1.f, 0.f), false, Vector3D(2.f, 1.f)));
 	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(0.f), Vector3D(2.5f, 1.f, 0.f), m_unrenderedObjects["ornament"]));
 
 	m_renderedObjects.push_back(new TransformedObject(false, Vector3D(45.f, 45.f, 45.f), Vector3D(-1.25f, 0.5f, 1.5f), m_unrenderedObjects["facade"]));

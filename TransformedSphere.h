@@ -3,6 +3,8 @@
 
 #include "Quaternion.h"
 
+//#define MULTI_ROTATION
+
 #include "Object.h"
 class TransformedSphere :
     public Object {
@@ -27,10 +29,15 @@ public:
     virtual bool SphereIntersectSphere(const Vector3D pos, const float radius);
 
 private:
+#ifdef MULTI_ROTATION
     /// <summary>
     /// In XYZ Rotation order
     /// </summary>
     std::vector<Quaternion> m_rotation;
+#else
+    Quaternion m_rotation;
+    Quaternion m_rotationInv;
+#endif // TRANSFORMED_SPHERE_REPEAT
 
     bool m_flipNormals;
     float m_radius;

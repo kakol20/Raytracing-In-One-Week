@@ -29,6 +29,9 @@ public:
 	// Hamilton product
 	static Quaternion HamProduct(const Quaternion& q1, const Quaternion& q2);
 
+	Quaternion& operator*=(const Quaternion& other);
+
+	static Quaternion FromTwoPoints(Vector3D& v1, Vector3D& v2);
 	static Quaternion RotationQuat(const Quaternion& rotation, const Quaternion& point);
 	static Quaternion RotationQuat(const Quaternion& rotation, const Vector3D& point);
 	static Vector3D RotationVec(const Quaternion& rotation, const Vector3D& v);
