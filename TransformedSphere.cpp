@@ -24,8 +24,11 @@ TransformedSphere::TransformedSphere(const float& radius, Material* mat, const V
 	rotationVec.push_back(Quaternion::AxisToRotation(Vector3D::YDir, rotationRadians.GetY()));
 	rotationVec.push_back(Quaternion::AxisToRotation(Vector3D::ZDir, rotationRadians.GetZ()));
 
-	Vector3D v1(1.f);
-	v1.Normalize();
+	Vector3D v1 = Vector3D::XDir;
+	float minAngle = fminf(fminf(abs(rotationRadians.GetX()), abs(rotationRadians.GetY())), abs(rotationRadians.GetZ()));
+
+	if (abs(rotationRadians.GetY()) <= minAngle) v1 = Vector3D::YDir;
+	if (abs(rotationRadians.GetZ()) <= minAngle) v1 = Vector3D::ZDir;
 
 	Vector3D v2 = v1;
 	for (auto it = rotationVec.begin(); it != rotationVec.end(); it++) {

@@ -2,6 +2,7 @@
 #include <iostream>
 
 #define OOF_IMPL
+
 #include "oof/oof.h"
 
 #include "Quaternion.h"
