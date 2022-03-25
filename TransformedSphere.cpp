@@ -6,7 +6,7 @@ TransformedSphere::TransformedSphere(const float& radius, Material* mat, const V
 	m_flipNormals = flipNormals;
 	m_pos = translation;
 
-	Vector3D rotationRadians = rotation * Quaternion::ToRadians;
+	Vector3D rotationRadians = (rotation * Vector3D::PI) / 180.f;
 
 	m_rotation.reserve(3);
 	m_rotation.push_back(Quaternion::AxisToRotation(Vector3D::XDir, rotationRadians.GetX()));
@@ -65,7 +65,7 @@ bool TransformedSphere::RotationHit(Ray& ray, const float t_min, const float t_m
 		rayOrig = Quaternion::RotationVec(-(*it), rayOrig);
 		rayDir = Quaternion::RotationVec(-(*it), rayDir);
 	}
-	rayDir.Normalize();
+	//rayDir.Normalize();
 
 	Ray localRay = Ray(rayOrig, rayDir);
 	if (!LocalHit(localRay, t_min, t_max, rec)) return false;
@@ -82,9 +82,9 @@ bool TransformedSphere::RotationHit(Ray& ray, const float t_min, const float t_m
 		bitangent = Quaternion::RotationVec((*it), bitangent);
 	}
 
-	normal.Normalize();
-	tangent.Normalize();
-	bitangent.Normalize();
+	//normal.Normalize();
+	//tangent.Normalize();
+	//bitangent.Normalize();
 
 	rec.SetPoint(point);
 	rec.SetNormal(normal);
@@ -110,11 +110,11 @@ bool TransformedSphere::LocalHit(Ray& ray, const float t_min, const float t_max,
 	float root = (-half_b - sqrtd) / a;
 
 	Vector3D dist = ray.GetOrig() - ray.At(root);
-	if (root < t_min || t_max < root || dist.Threshold(t_min)) {
+	if (root < t_min || t_max < root/* || dist.Threshold(t_min)*/) {
 		root = (-half_b + sqrtd) / a;
 
 		dist = ray.GetOrig() - ray.At(root);
-		if (root < t_min || t_max < root || dist.Threshold(t_min)) return false;
+		if (root < t_min || t_max < root/* || dist.Threshold(t_min)*/) return false;
 	}
 
 	rec.SetT(root);
@@ -142,8 +142,7 @@ Vector3D TransformedSphere::CalculateTangent(HitRec& rec) {
 }
 
 Vector3D TransformedSphere::CalculateUV(const Vector3D point) {
-	Vector3D dir = point;
-	dir.Normalize();
+	Vector3D dir = point / m_radius;
 
 	float u, v;
 	dir.UVSphere(u, v);
