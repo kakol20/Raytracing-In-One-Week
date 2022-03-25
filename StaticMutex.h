@@ -9,5 +9,5 @@ public:
 
 	static std::mutex s_mtx;
 
-	static thread_local String s_output;
+	//static thread_local String s_output;
 };

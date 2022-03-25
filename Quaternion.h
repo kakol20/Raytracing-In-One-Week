@@ -24,6 +24,8 @@ public:
 
 	// ----- OTHER -----
 
+	static const float ToRadians;
+
 	// Hamilton product
 	static Quaternion HamProduct(const Quaternion& q1, const Quaternion& q2);
 

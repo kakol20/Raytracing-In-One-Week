@@ -33,7 +33,7 @@ TransformedObject::TransformedObject(const bool flipNormals, const Vector3D rota
 	m_rotation = rotation * Vector3D(3.14159265f / 180.f);
 	m_rotation *= Vector3D(1.f, 1.f, -1.f);
 	m_translation = translation;
-	m_flipNormals = false;
+	m_flipNormals = flipNormals;
 
 	m_xAxisRotation = Quaternion::AxisToRotation(Vector3D(1.f, 0.f, 0.f), m_rotation.GetX());
 	m_xAxisRotation.Normalize();

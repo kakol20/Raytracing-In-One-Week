@@ -18,6 +18,7 @@
 #include "StaticMutex.h"
 #include "Textured.h"
 #include "TransformedObject.h"
+#include "TransformedSphere.h"
 #include "TranslatedObj.h"
 
 #include "Raytracing.h"
@@ -687,11 +688,11 @@ void Raytracing::FinalScene() {
 	m_matMap["terracotta"] = new Textured(m_textures["terracotta_d"], m_textures["terracotta_rme"], m_textures["terracotta_n"], 1.45f);
 
 	// objects
-	m_unrenderedObjects["bricks"] = new Sphere(Vector3D(), 0.2f, m_matMap["bricks"], Vector3D(2.f, 1.f));
-	m_unrenderedObjects["carbon"] = new Sphere(Vector3D(), 0.2f, m_matMap["carbon"], Vector3D(2.f, 1.f));
-	m_unrenderedObjects["facade"] = new Sphere(Vector3D(), 0.2f, m_matMap["facade"], Vector3D(2.f, 1.f));
-	m_unrenderedObjects["ornament"] = new Sphere(Vector3D(), 0.2f, m_matMap["ornament"]);
-	m_unrenderedObjects["terracotta"] = new Sphere(Vector3D(), 0.2f, m_matMap["terracotta"], Vector3D(2.f, 1.f));
+	//m_unrenderedObjects["bricks"] = new Sphere(Vector3D(), 0.2f, m_matMap["bricks"], Vector3D(2.f, 1.f));
+	//m_unrenderedObjects["carbon"] = new Sphere(Vector3D(), 0.2f, m_matMap["carbon"], Vector3D(2.f, 1.f));
+	//m_unrenderedObjects["facade"] = new Sphere(Vector3D(), 0.2f, m_matMap["facade"], Vector3D(2.f, 1.f));
+	//m_unrenderedObjects["ornament"] = new Sphere(Vector3D(), 0.2f, m_matMap["ornament"]);
+	//m_unrenderedObjects["terracotta"] = new Sphere(Vector3D(), 0.2f, m_matMap["terracotta"], Vector3D(2.f, 1.f));
 
 	m_renderedObjects.push_back(new Ground(0.f, m_matMap["ground"]));
 	m_renderedObjects.push_back(new Sphere(Vector3D(-4.f, 1.f, 0.f), 1.f, m_matMap["back"]));
@@ -784,20 +785,31 @@ void Raytracing::FinalScene() {
 
 				Vector3D randomRotation = Vector3D::Random(0.f, 360.f);
 
+				//m_unrenderedObjects["bricks"] = new Sphere(Vector3D(), 0.2f, m_matMap["bricks"], Vector3D(2.f, 1.f));
+				//m_unrenderedObjects["carbon"] = new Sphere(Vector3D(), 0.2f, m_matMap["carbon"], Vector3D(2.f, 1.f));
+				//m_unrenderedObjects["facade"] = new Sphere(Vector3D(), 0.2f, m_matMap["facade"], Vector3D(2.f, 1.f));
+				//m_unrenderedObjects["ornament"] = new Sphere(Vector3D(), 0.2f, m_matMap["ornament"]);
+				//m_unrenderedObjects["terracotta"] = new Sphere(Vector3D(), 0.2f, m_matMap["terracotta"], Vector3D(2.f, 1.f));
+
 				if (chooseMat <= 4.5f * gap) {
-					m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["carbon"]));
+					//m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["carbon"]));
+					m_renderedObjects.push_back(new TransformedSphere(0.2f, m_matMap["carbon"], randomRotation, position, false, Vector3D(2.f, 1.f)));
 				}
 				else if (chooseMat <= 5.f * gap) {
-					m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["facade"]));
+					//m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["facade"]));
+					m_renderedObjects.push_back(new TransformedSphere(0.2f, m_matMap["facade"], randomRotation, position, false, Vector3D(2.f, 1.f)));
 				}
 				else if (chooseMat <= 6.5f * gap) {
-					m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["ornament"]));
+					//m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["ornament"]));
+					m_renderedObjects.push_back(new TransformedSphere(0.2f, m_matMap["ornament"], randomRotation, position));
 				}
 				else if (chooseMat <= 7.f * gap) {
-					m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["bricks"]));
+					//m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["bricks"]));
+					m_renderedObjects.push_back(new TransformedSphere(0.2f, m_matMap["bricks"], randomRotation, position, false, Vector3D(2.f, 1.f)));
 				}
 				else {
-					m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["terracotta"]));
+					//m_renderedObjects.push_back(new TransformedObject(false, randomRotation, position, m_unrenderedObjects["terracotta"]));
+					m_renderedObjects.push_back(new TransformedSphere(0.2f, m_matMap["terracotta"], randomRotation, position, false, Vector3D(2.f, 1.f)));
 				}
 			}
 		}
@@ -1016,7 +1028,12 @@ void Raytracing::RenderTile(const size_t startIndex) {
 	ShowProgress();
 
 	// ----- LOGGING -----
-	m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << "\n";
+	if (m_useThreads > 1) {
+		m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << '\n';
+	}
+	else {
+		m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
+	}
 
 	size_t next = m_nextAvailable;
 	m_nextAvailable++;

@@ -78,6 +78,11 @@ public:
 
 	void UVSphere(float& u, float& v);
 
+	static const float PI;
+	static const Vector3D XDir;
+	static const Vector3D YDir;
+	static const Vector3D ZDir;
+
 	// ----- COLOR FUNCTIONS -----
 
 	/// <summary>

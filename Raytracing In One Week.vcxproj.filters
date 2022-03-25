@@ -126,6 +126,9 @@
     <ClCompile Include="Quaternion.cpp">
       <Filter>Source Files\Maths</Filter>
     </ClCompile>
+    <ClCompile Include="TransformedSphere.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb\stb_image.h">
@@ -220,6 +223,9 @@
     </ClInclude>
     <ClInclude Include="Quaternion.h">
       <Filter>Header Files\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformedSphere.h">
+      <Filter>Header Files\Objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

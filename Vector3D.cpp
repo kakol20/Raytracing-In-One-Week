@@ -386,7 +386,7 @@ Vector3D Vector3D::operator+(const Vector3D& otherVector) const {
 }
 
 Vector3D Vector3D::operator++(int i) {
-	Vector3D orig(m_x + i, m_y + i, m_z + i);
+	Vector3D orig(m_x, m_y, m_z);
 	m_x += i;
 	m_y += i;
 	m_z += i;
