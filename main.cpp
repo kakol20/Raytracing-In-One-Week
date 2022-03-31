@@ -23,6 +23,7 @@ thread_local unsigned int Random::Seed = 1;
 
 const float Vector3D::PI = 3.1415926535f;
 const float Quaternion::ToRadians = 0.01745329519f;
+const Quaternion Quaternion::UnitQuaternion = Quaternion(1.f, 0.f, 0.f, 0.f);
 
 const Vector3D Vector3D::XDir = Vector3D(1.f, 0.f, 0.f);
 const Vector3D Vector3D::YDir = Vector3D(0.f, 1.f, 0.f);

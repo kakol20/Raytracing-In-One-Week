@@ -18,26 +18,15 @@ TransformedSphere::TransformedSphere(const float& radius, Material* mat, const V
 		(*it).Normalize();
 	}
 #else
-	std::vector<Quaternion> rotationVec;
-	rotationVec.reserve(3);
-	rotationVec.push_back(Quaternion::AxisToRotation(Vector3D::XDir, rotationRadians.GetX()));
-	rotationVec.push_back(Quaternion::AxisToRotation(Vector3D::YDir, rotationRadians.GetY()));
-	rotationVec.push_back(Quaternion::AxisToRotation(Vector3D::ZDir, rotationRadians.GetZ()));
+	m_rotation = Quaternion::AxisToRotation(Vector3D::ZDir, rotationRadians.GetZ());
+	m_rotation *= Quaternion::AxisToRotation(Vector3D::YDir, rotationRadians.GetY());
+	m_rotation *= Quaternion::AxisToRotation(Vector3D::XDir, rotationRadians.GetX());
+	m_rotation.Normalize();
 
-	Vector3D v1 = Vector3D::XDir;
-	float minAngle = fminf(fminf(abs(rotationRadians.GetX()), abs(rotationRadians.GetY())), abs(rotationRadians.GetZ()));
-
-	if (abs(rotationRadians.GetY()) <= minAngle) v1 = Vector3D::YDir;
-	if (abs(rotationRadians.GetZ()) <= minAngle) v1 = Vector3D::ZDir;
-
-	Vector3D v2 = v1;
-	for (auto it = rotationVec.begin(); it != rotationVec.end(); it++) {
-		v2 = Quaternion::RotationVec((*it), v2);
-	}
-	v2.Normalize();
-
-	m_rotation = Quaternion::FromTwoPoints(v1, v2);
-	m_rotationInv = Quaternion::FromTwoPoints(v2, v1);
+	m_rotationInv = Quaternion::AxisToRotation(Vector3D::XDir, -rotationRadians.GetX());
+	m_rotationInv *= Quaternion::AxisToRotation(Vector3D::YDir, -rotationRadians.GetY());
+	m_rotationInv *= Quaternion::AxisToRotation(Vector3D::ZDir, -rotationRadians.GetZ());
+	m_rotationInv.Normalize();
 #endif
 }
 

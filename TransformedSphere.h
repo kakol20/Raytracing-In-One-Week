@@ -18,6 +18,7 @@ public:
     /// <param name="mat"></param>
     /// <param name="rotation">in degrees</param>
     /// <param name="translation"></param>
+    /// <param name="flipNormals"></param>
     /// <param name="uvScale"></param>
     TransformedSphere(const float& radius, Material* mat, const Vector3D& rotation, const Vector3D& translation, bool flipNormals = false, const Vector3D uvScale = Vector3D(1.f));
 
