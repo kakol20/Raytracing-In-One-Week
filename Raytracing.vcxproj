@@ -167,11 +167,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\maths\Quaternion.cpp" />
     <ClCompile Include="src\maths\Vector3D.cpp" />
     <ClCompile Include="src\misc\Random.cpp" />
     <ClCompile Include="src\wrapper\Float.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\maths\Quaternion.h" />
     <ClInclude Include="src\maths\Vector3D.h" />
     <ClInclude Include="src\misc\Random.h" />
     <ClInclude Include="src\wrapper\Float.h" />

@@ -27,13 +27,13 @@ const Vector3D Vector3D::Forward = Vector3D(0, 0, -1);
 const Vector3D Vector3D::One = Vector3D(1, true);
 const Vector3D Vector3D::Right = Vector3D(1, 0, 0);
 const Vector3D Vector3D::Up = Vector3D(0, 1, 0);
-const Vector3D Vector3D::Zero = Vector3D(0, 0, 0);
+const Vector3D Vector3D::Zero = Vector3D(0, true);
 
 int main() {
 	std::cout << std::setprecision(10);
 
 #ifdef TEST
-	std::cout << "Test\n\a";
+	//std::cout << "Test\n\a";
 	std::cout << "PI: " << Float::PI << '\n';
 	std::cout << "TAU: " << Float::TAU << '\n';
 	std::cout << "To Radians: " << Float::ToRadians << '\n';
@@ -47,6 +47,8 @@ int main() {
 #endif // WIN32
 
 	std::cout << "Random Float: " << Random::RandomFloat() << '\n';
+	std::cout << "Sizeof Float: " << sizeof(Float) << " vs Sizeof double: " << sizeof(double) << '\n';
+	std::cout << "Sizeof Vector3D: " << sizeof(Vector3D) << '\n';
 
 	std::cin.ignore();
 #endif // TEST
