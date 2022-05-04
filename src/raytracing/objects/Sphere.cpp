@@ -67,10 +67,19 @@ bool Sphere::RotationHit(Ray& ray, const Float& t_min, const Float& t_max, HitRe
 	Ray localRay = Ray(rayOrig, rayDir);
 	if (!LocalHit(localRay, t_min, t_max, rec)) return false;
 
-	rec.SetPoint(m_rotation.RotateVector(rec.GetPoint(), true));
-	rec.SetNormal(m_rotation.RotateVector(rec.GetNormal(), true));
-	rec.SetTangent(m_rotation.RotateVector(rec.GetTangent(), true));
-	rec.SetBitangent(m_rotation.RotateVector(rec.GetBitangent(), true));
+	Vector3D point = m_rotation.RotateVector(rec.GetPoint());
+	Vector3D normal = m_rotation.RotateVector(rec.GetNormal());
+	Vector3D tangent = m_rotation.RotateVector(rec.GetTangent());
+	Vector3D bitangent = m_rotation.RotateVector(rec.GetBitangent());
+
+	/*normal.Normalize();
+	tangent.Normalize();
+	bitangent.Normalize();*/
+
+	rec.SetPoint(point);
+	rec.SetNormal(normal);
+	rec.SetTangent(tangent);
+	rec.SetBitangent(bitangent);
 	return true;
 }
 
@@ -90,30 +99,11 @@ bool Sphere::LocalHit(Ray& ray, const Float& t_min, const Float& t_max, HitRec& 
 
 	Float root = 0;
 
-#define SPHERE_H_ROOT1
-
-#ifdef SPHERE_H_ROOT1
 	if (root < t_min || t_max < root) {
 		root = (-half_b + sqrtd) / a;
 
 		if (root < t_min || t_max < root) return false;
 	}
-#else
-	Float root1 = (-half_b - sqrtd) / a;
-	Float root2 = (-half_b + sqrtd) / a;
-
-	if (root1 < 0) {
-		root = root2;
-	}
-	else if (root1 < 0) {
-		root = root1;
-	}
-	else {
-		root = Float::Min(root1, root2);
-	}
-
-	if (root < t_min || t_max < root) return false;
-#endif // SPHERE_H_ROOT1
 
 	rec.SetT(root);
 	rec.SetPoint(ray.At(root));

@@ -103,9 +103,15 @@ void Quaternion::XYZRotation(const Vector3D& radians) {
 	yRotation.AxisRotation(Vector3D::Up, radians.GetY());
 	zRotation.AxisRotation(Vector3D::Forward, radians.GetZ());
 
-	this->operator=(zRotation);
-	this->operator*=(yRotation);
-	this->operator*=(xRotation);
+	Quaternion rotation = zRotation;
+	rotation *= yRotation;
+	rotation *= xRotation;
+
+	m_w = rotation.m_w;
+	m_i = rotation.m_i;
+	m_j = rotation.m_j;
+	m_k = rotation.m_k;
+
 	Normalize();
 }
 
@@ -118,9 +124,15 @@ void Quaternion::ZYXRotation(const Vector3D& radians) {
 	yRotation.AxisRotation(Vector3D::Up, radians.GetY());
 	zRotation.AxisRotation(Vector3D::Forward, radians.GetZ());
 
-	this->operator=(xRotation);
-	this->operator*=(yRotation);
-	this->operator*=(zRotation);
+	Quaternion rotation = xRotation;
+	rotation *= yRotation;
+	rotation *= zRotation;
+
+	m_w = rotation.m_w;
+	m_i = rotation.m_i;
+	m_j = rotation.m_j;
+	m_k = rotation.m_k;
+
 	Normalize();
 }
 

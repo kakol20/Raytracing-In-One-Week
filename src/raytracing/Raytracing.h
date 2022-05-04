@@ -82,6 +82,5 @@ private:
 
 	void ShowProgress();
 	void ShuffleTiles();
-
 };
 #endif // !RAYTRACING_H

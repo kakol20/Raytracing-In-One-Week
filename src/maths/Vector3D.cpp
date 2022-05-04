@@ -5,7 +5,7 @@
 Vector3D::Vector3D(const Float& scalar, const bool& includeZAxis) {
 	m_x = scalar;
 	m_y = scalar;
-	m_z = scalar;
+	m_z = includeZAxis ? scalar : 0;
 	m_includeZAxis = includeZAxis;
 }
 
@@ -115,7 +115,9 @@ Vector3D Vector3D::operator-(const Vector3D& otherVector) const {
 	Float y = m_y - otherVector.m_y;
 	Float z = m_z - otherVector.m_z;
 
-	if (m_includeZAxis || otherVector.m_includeZAxis) return Vector3D(x, y, z);
+	if (m_includeZAxis || otherVector.m_includeZAxis) {
+		return Vector3D(x, y, z);
+	}
 	return Vector3D(x, y);
 }
 
@@ -124,16 +126,20 @@ Vector3D Vector3D::operator*(const Vector3D& otherVector) const {
 	Float y = m_y * otherVector.m_y;
 	Float z = m_z * otherVector.m_z;
 
-	if (m_includeZAxis || otherVector.m_includeZAxis) return Vector3D(x, y, z);
+	if (m_includeZAxis || otherVector.m_includeZAxis) {
+		return Vector3D(x, y, z);
+	}
 	return Vector3D(x, y);
 }
 
 Vector3D Vector3D::operator/(const Vector3D& otherVector) const {
 	Float x = m_x / otherVector.m_x;
 	Float y = m_y / otherVector.m_y;
-	Float z = m_includeZAxis ? m_z / otherVector.m_z : 0;
+	Float z = otherVector.m_includeZAxis ? m_z / otherVector.m_z : 0;
 
-	if (otherVector.m_includeZAxis) return Vector3D(x, y, z);
+	if (otherVector.m_includeZAxis) {
+		return Vector3D(x, y, z);
+	}
 	return Vector3D(x, y);
 }
 
@@ -142,7 +148,9 @@ Vector3D Vector3D::operator+(const Vector3D& otherVector) const {
 	Float y = m_y + otherVector.m_y;
 	Float z = m_z + otherVector.m_z;
 
-	if (m_includeZAxis || otherVector.m_includeZAxis) return Vector3D(x, y, z);
+	if (m_includeZAxis || otherVector.m_includeZAxis) {
+		return Vector3D(x, y, z);
+	}
 	return Vector3D(x, y);
 }
 
@@ -156,9 +164,9 @@ Vector3D Vector3D::operator*(const Float& scalar) const {
 }
 
 Vector3D Vector3D::operator/(const Float& scalar) const {
-	Float x = m_x * scalar;
-	Float y = m_y * scalar;
-	Float z = m_includeZAxis ? m_z * scalar : 0;
+	Float x = m_x / scalar;
+	Float y = m_y / scalar;
+	Float z = m_includeZAxis ? m_z / scalar : 0;
 
 	if (m_includeZAxis) return Vector3D(x, y, z);
 	return Vector3D(x, y);

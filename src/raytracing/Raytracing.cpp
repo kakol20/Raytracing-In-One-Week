@@ -544,10 +544,11 @@ void Raytracing::OriginalScene() {
 	int imageHeight = std::stoi(m_settings["imageHeight"]);
 
 	Vector3D lookFrom(13, 2, 3);
+
 	const Float aspectRatio = Float(imageWidth) / imageHeight;
 	m_camera = Camera(aspectRatio, Float::FromString(m_settings["blurStrength"]), 10, Float::FromString(m_settings["verticalFOV"]), lookFrom, Vector3D::Zero, Vector3D::Up);
 
-	m_clipStart = 1e-2;
+	m_clipStart = 1e-4;
 	m_clipEnd = 1000;
 
 	// ----- OBJECTS -----
