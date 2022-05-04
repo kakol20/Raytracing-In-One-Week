@@ -112,6 +112,9 @@ public:
 	static Float Pow(const Float& base, const Float& exponent);
 	static Float Round(const Float& v);
 	static Float Sqrt(const Float& v);
+	
+	static Float Max(const Float& a, const Float& b);
+	static Float Min(const Float& a, const Float& b);
 
 	// -- Interpolation --
 

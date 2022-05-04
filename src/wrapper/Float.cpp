@@ -186,6 +186,14 @@ Float Float::Sqrt(const Float& v) {
 	return v == 1 ? Float(1) : Float(std::sqrt(v.m_num));
 }
 
+Float Float::Max(const Float& a, const Float& b) {
+	return a >= b ? a : b;
+}
+
+Float Float::Min(const Float& a, const Float& b) {
+	return a <= b ? a : b;
+}
+
 Float Float::Lerp(const Float& from, const Float& to, const Float& factor, bool clamp) {
 	Float out = ((to - from) * factor) + from;
 
