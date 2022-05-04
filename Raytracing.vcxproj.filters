@@ -24,9 +24,15 @@
     <ClCompile Include="src\wrapper\Float.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\misc\Random.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\wrapper\Float.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\misc\Random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

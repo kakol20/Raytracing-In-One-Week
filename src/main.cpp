@@ -3,8 +3,17 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <stdint.h>
 
+#include "misc/Random.h"
 #include "wrapper/Float.h"
+
+//thread_local Random::SeedType Seed = 0xACE1u;
+#ifdef WIN32
+thread_local uint32_t Random::Seed = 0xACE1u;
+#else
+thread_local uint64_t Random::Seed = 0xACE1u;
+#endif // WIN32
 
 const Float Float::PI = 3.1415926535897932384626433832795;
 const Float Float::TAU = Float::PI * 2;
@@ -29,6 +38,8 @@ int main() {
 #else
 	std::cout << "Sin Close to Zero: " << Float::Sin(1e-8) << '\n';
 #endif // WIN32
+
+	std::cout << "Random Float: " << Random::RandomFloat() << '\n';
 
 	std::cin.ignore();
 #endif // TEST
