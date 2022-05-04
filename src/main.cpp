@@ -7,6 +7,7 @@
 
 #include "misc/Random.h"
 #include "wrapper/Float.h"
+#include "maths/Vector3D.h"
 
 //thread_local Random::SeedType Seed = 0xACE1u;
 #ifdef WIN32
@@ -21,6 +22,12 @@ const Float Float::ToRadians = Float::PI / 180;
 
 const Float Float::MaxVal = std::numeric_limits<Float::ForD>::max();
 const Float Float::MinVal = std::numeric_limits<Float::ForD>::min();
+
+const Vector3D Vector3D::Forward = Vector3D(0, 0, -1);
+const Vector3D Vector3D::One = Vector3D(1, true);
+const Vector3D Vector3D::Right = Vector3D(1, 0, 0);
+const Vector3D Vector3D::Up = Vector3D(0, 1, 0);
+const Vector3D Vector3D::Zero = Vector3D(0, 0, 0);
 
 int main() {
 	std::cout << std::setprecision(10);
