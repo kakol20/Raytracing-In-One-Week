@@ -96,8 +96,8 @@ Vector3D& Vector3D::operator*=(const Float& scalar) {
 }
 
 Vector3D& Vector3D::operator/=(const Float& scalar) {
-	m_x *= scalar;
-	m_y *= scalar;
+	m_x /= scalar;
+	m_y /= scalar;
 	m_z = m_includeZAxis ? m_z / scalar : 0;
 	return *this;
 }
@@ -111,27 +111,57 @@ Vector3D& Vector3D::operator=(const Float& scalar) {
 }
 
 Vector3D Vector3D::operator-(const Vector3D& otherVector) const {
-	return m_includeZAxis ? Vector3D(m_x, m_y, m_z).operator-=(otherVector) : Vector3D(m_x, m_y).operator-=(otherVector);
+	Float x = m_x - otherVector.m_x;
+	Float y = m_y - otherVector.m_y;
+	Float z = m_z - otherVector.m_z;
+
+	if (m_includeZAxis || otherVector.m_includeZAxis) return Vector3D(x, y, z);
+	return Vector3D(x, y);
 }
 
 Vector3D Vector3D::operator*(const Vector3D& otherVector) const {
-	return m_includeZAxis ? Vector3D(m_x, m_y, m_z).operator*=(otherVector) : Vector3D(m_x, m_y).operator*=(otherVector);
+	Float x = m_x * otherVector.m_x;
+	Float y = m_y * otherVector.m_y;
+	Float z = m_z * otherVector.m_z;
+
+	if (m_includeZAxis || otherVector.m_includeZAxis) return Vector3D(x, y, z);
+	return Vector3D(x, y);
 }
 
 Vector3D Vector3D::operator/(const Vector3D& otherVector) const {
-	return m_includeZAxis ? Vector3D(m_x, m_y, m_z).operator/=(otherVector) : Vector3D(m_x, m_y).operator/=(otherVector);
+	Float x = m_x / otherVector.m_x;
+	Float y = m_y / otherVector.m_y;
+	Float z = m_includeZAxis ? m_z / otherVector.m_z : 0;
+
+	if (otherVector.m_includeZAxis) return Vector3D(x, y, z);
+	return Vector3D(x, y);
 }
 
 Vector3D Vector3D::operator+(const Vector3D& otherVector) const {
-	return m_includeZAxis ? Vector3D(m_x, m_y, m_z).operator+=(otherVector) : Vector3D(m_x, m_y).operator+=(otherVector);
+	Float x = m_x + otherVector.m_x;
+	Float y = m_y + otherVector.m_y;
+	Float z = m_z + otherVector.m_z;
+
+	if (m_includeZAxis || otherVector.m_includeZAxis) return Vector3D(x, y, z);
+	return Vector3D(x, y);
 }
 
 Vector3D Vector3D::operator*(const Float& scalar) const {
-	return m_includeZAxis ? Vector3D(m_x, m_y, m_z).operator*=(scalar) : Vector3D(m_x, m_y).operator*=(scalar);
+	Float x = m_x * scalar;
+	Float y = m_y * scalar;
+	Float z = m_z * scalar;
+
+	if (m_includeZAxis) return Vector3D(x, y, z);
+	return Vector3D(x, y);
 }
 
 Vector3D Vector3D::operator/(const Float& scalar) const {
-	return m_includeZAxis ? Vector3D(m_x, m_y, m_z).operator/=(scalar) : Vector3D(m_x, m_y).operator/=(scalar);
+	Float x = m_x * scalar;
+	Float y = m_y * scalar;
+	Float z = m_includeZAxis ? m_z * scalar : 0;
+
+	if (m_includeZAxis) return Vector3D(x, y, z);
+	return Vector3D(x, y);
 }
 
 Float Vector3D::DotProduct(const Vector3D& v1, const Vector3D& v2) {
@@ -224,5 +254,9 @@ Vector3D Vector3D::UVSphere() const {
 }
 
 void Vector3D::Normalize() {
-	this->operator/=(Magnitude());
+	Float magnitude = Magnitude();
+	m_x /= magnitude;
+	m_y /= magnitude;
+
+	m_z = m_includeZAxis ? m_z / magnitude : 0;
 }

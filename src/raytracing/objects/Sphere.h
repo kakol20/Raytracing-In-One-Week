@@ -13,6 +13,7 @@ public:
 
 	virtual bool Hit(Ray& ray, const Float& t_min, const Float& t_max, HitRec& rec);
 
+	virtual bool SphereIntersectGround(const Vector3D& pos, const Float& radius) { return false; };
 	virtual bool SphereIntersectSphere(const Vector3D& pos, const Float& radius);
 
 private:
