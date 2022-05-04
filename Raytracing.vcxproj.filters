@@ -57,6 +57,9 @@
     <ClCompile Include="src\raytracing\objects\Sphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\raytracing\Raytracing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\wrapper\Float.h">
@@ -108,6 +111,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\raytracing\objects\Sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\raytracing\Raytracing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

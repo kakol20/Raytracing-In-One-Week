@@ -13,6 +13,7 @@
 #include "wrapper/Fastwrite.h"
 #include "wrapper/Float.h"
 #include "wrapper/Image.h"
+#include "raytracing/Raytracing.h"
 
 //thread_local Random::SeedType Seed = 0xACE1u;
 #ifdef WIN32
@@ -81,6 +82,24 @@ int main() {
 
 	std::cin.ignore();
 #endif // TEST
+
+	Raytracing RT;
+
+	if (!RT.Init()) {
+		FastWrite::Write("Failed to initialize raytracer\n");
+		//std::clog << "Failed to initialize raytracer\n";
+
+		std::cin.ignore();
+		return -1;
+	}
+
+	if (!RT.Run()) {
+		FastWrite::Write("Failed to run raytracer\n");
+		//std::clog << "Failed to initialize raytracer\n";
+
+		std::cin.ignore();
+		return -1;
+	}
 
 	return 0;
 }

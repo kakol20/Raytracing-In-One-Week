@@ -35,17 +35,6 @@ Camera::Camera(const Float& aspectRatio, const Float& blurStrength, const Float&
 	m_lowerLeftCorner = m_origin - (m_horizontal / 2) - (m_vertical / 2) - (m_w * focusDist);
 
 	m_lensRadius = blurStrength / 2;
-
-#ifdef _DEBUG
-	Float::FlOrDo l_theta = theta.ToFloat();
-	Float::FlOrDo l_h = h.ToFloat();
-	Float::FlOrDo l_vHeight = vHeight.ToFloat();
-	Float::FlOrDo l_vWidth = vWidth.ToFloat();
-
-	{
-		bool temp = false;
-	}
-#endif // _DEBUG
 }
 
 Camera& Camera::operator=(const Camera& copyCamera) {

@@ -121,7 +121,7 @@ bool Image::Read(const char* file) {
 		}
 
 		m_dataF[i] = val;
-		m_data[i] = Float::Round(Float::Clamp(val, 0, 255)).ToUInt();
+		m_data[i] = (uint8_t)Float::Round(Float::Clamp(val, 0, 255)).ToUInt();
 	}
 
 #ifdef _DEBUG
@@ -145,7 +145,7 @@ bool Image::Write(const char* file) {
 			val = Image::LinearToSRGB(val);
 		}
 
-		m_data[i] = Float::Round(Float::Clamp(val, 0, 255)).ToUInt();
+		m_data[i] = (uint8_t)Float::Round(Float::Clamp(val, 0, 255)).ToUInt();
 
 		//m_data[i] = Float::Round(Float::Clamp(m_dataF[i], 0, 255)).ToUInt();
 	}
@@ -230,15 +230,15 @@ void Image::SetColor(const int& x, const int& y, const Float& r, const Float& g,
 		l_g = Float::Round(l_g);
 		l_b = Float::Round(l_b);
 
-		m_data[index + 0] = l_r.ToUInt();
-		m_data[index + 1] = l_g.ToUInt();
-		m_data[index + 2] = l_b.ToUInt();
+		m_data[index + 0] = (uint8_t)l_r.ToUInt();
+		m_data[index + 1] = (uint8_t)l_g.ToUInt();
+		m_data[index + 2] = (uint8_t)l_b.ToUInt();
 	}
 	else {
 		m_dataF[index] = (r * 0.299) + (g * 0.587) + (b * 0.114);
 		m_dataF[index] = Float::Clamp(m_dataF[index], 0, 255);
 
-		m_data[index] = Float::Round(m_dataF[index]).ToUInt();
+		m_data[index] = (uint8_t)Float::Round(m_dataF[index]).ToUInt();
 	}
 }
 
@@ -257,7 +257,7 @@ void Image::Dither(const int& factor) {
 		v *= 255;
 
 		m_dataF[i] = v;
-		m_data[i] = Float::Round(v).ToUInt();
+		m_data[i] = (uint8_t)Float::Round(v).ToUInt();
 	}
 }
 
@@ -272,28 +272,11 @@ Float Image::LinearToSRGB(const Float& color) {
 #ifdef METHOD1
 		Float out = Float(1) / 2.4;
 
-#ifdef _DEBUG
-		Float::FlOrDo colorDebug = l_color.ToFloat();
-		Float::FlOrDo outDebug = out.ToFloat();
-#endif // _DEBUG
-
 		out = Float::Pow(l_color, out);
-
-#ifdef _DEBUG
-		outDebug = out.ToFloat();
-#endif // _DEBUG
 
 		out = out * 1.055;
 
-#ifdef _DEBUG
-		outDebug = out.ToFloat();
-#endif // _DEBUG
-
 		out = out - 0.055;
-
-#ifdef _DEBUG
-		outDebug = out.ToFloat();
-#endif // _DEBUG
 
 		return out * 255;
 #else
@@ -415,14 +398,14 @@ void Image::FromColorSpace() {
 						m_dataF[index + i] = Image::sRGBToLinear(m_dataF[index + i]);
 						m_dataF[index + i] = Float::Clamp(m_dataF[index + i], 0, 255);
 
-						m_data[index + i] = Float::Round(m_dataF[index + i]).ToUInt();
+						m_data[index + i] = (uint8_t)Float::Round(m_dataF[index + i]).ToUInt();
 					}
 				}
 				else {
 					m_dataF[index] = Image::sRGBToLinear(m_dataF[index]);
 					m_dataF[index] = Float::Clamp(m_dataF[index], 0, 255);
 
-					m_data[index] = Float::Round(m_dataF[index]).ToUInt();
+					m_data[index] = (uint8_t)Float::Round(m_dataF[index]).ToUInt();
 				}
 			}
 		}
@@ -439,14 +422,14 @@ void Image::ToColorSpace() {
 						m_dataF[index + i] = Image::LinearToSRGB(m_dataF[index + i]);
 						m_dataF[index + i] = Float::Clamp(m_dataF[index + i], 0, 255);
 
-						m_data[index + i] = Float::Round(m_dataF[index + i]).ToUInt();
+						m_data[index + i] = (uint8_t)Float::Round(m_dataF[index + i]).ToUInt();
 					}
 				}
 				else {
 					m_dataF[index] = Image::LinearToSRGB(m_dataF[index]);
 					m_dataF[index] = Float::Clamp(m_dataF[index], 0, 255);
 
-					m_data[index] = Float::Round(m_dataF[index]).ToUInt();
+					m_data[index] = (uint8_t)Float::Round(m_dataF[index]).ToUInt();
 				}
 			}
 		}
