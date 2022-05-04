@@ -1,12 +1,16 @@
-#define TEST
+#define OOF_IMPL
+//#define TEST
 
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <stdint.h>
 
+#include "../ext/oof/oof.h"
+
 #include "maths/Vector3D.h"
 #include "misc/Random.h"
+#include "wrapper/Fastwrite.h"
 #include "wrapper/Float.h"
 #include "wrapper/Image.h"
 
@@ -50,9 +54,12 @@ const unsigned int Image::Threshold[] = {
 	170, 106, 154,  90, 166, 102, 150,  86, 169, 105, 153,  89, 165, 101, 149,  85
 };
 
-
 int main() {
+	FastWrite::EnableVTMode();
+
 	std::cout << std::setprecision(10);
+
+	FastWrite::Reset();
 
 #ifdef TEST
 	//std::cout << "Test\n\a";

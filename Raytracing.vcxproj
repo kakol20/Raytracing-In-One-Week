@@ -166,6 +166,7 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\wrapper\Fastwrite.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\maths\Quaternion.cpp" />
     <ClCompile Include="src\maths\Vector3D.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="ext\oof\oof.h" />
     <ClInclude Include="ext\stb\stb_image.h" />
     <ClInclude Include="ext\stb\stb_image_write.h" />
+    <ClInclude Include="src\wrapper\Fastwrite.h" />
     <ClInclude Include="src\maths\Quaternion.h" />
     <ClInclude Include="src\maths\Vector3D.h" />
     <ClInclude Include="src\misc\Random.h" />
