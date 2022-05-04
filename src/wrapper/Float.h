@@ -91,7 +91,7 @@ public:
 
 	Float::ForD GetValue() const { return m_num; };
 	int ToInt() const { return (int)m_num; };
-	unsigned int ToUint() const { return (unsigned int)m_num; };
+	unsigned int ToUInt() const { return (unsigned int)m_num; };
 
 	static Float FromString(const std::string& value);
 

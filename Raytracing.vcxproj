@@ -171,12 +171,17 @@
     <ClCompile Include="src\maths\Vector3D.cpp" />
     <ClCompile Include="src\misc\Random.cpp" />
     <ClCompile Include="src\wrapper\Float.cpp" />
+    <ClCompile Include="src\wrapper\Image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ext\oof\oof.h" />
+    <ClInclude Include="ext\stb\stb_image.h" />
+    <ClInclude Include="ext\stb\stb_image_write.h" />
     <ClInclude Include="src\maths\Quaternion.h" />
     <ClInclude Include="src\maths\Vector3D.h" />
     <ClInclude Include="src\misc\Random.h" />
     <ClInclude Include="src\wrapper\Float.h" />
+    <ClInclude Include="src\wrapper\Image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
