@@ -168,6 +168,8 @@
   <ItemGroup>
     <ClCompile Include="src\raytracing\Camera.cpp" />
     <ClCompile Include="src\raytracing\HitRec.cpp" />
+    <ClCompile Include="src\raytracing\materials\Unshaded.cpp" />
+    <ClCompile Include="src\raytracing\objects\Sphere.cpp" />
     <ClCompile Include="src\raytracing\Ray.cpp" />
     <ClCompile Include="src\raytracing\Settings.cpp" />
     <ClCompile Include="src\wrapper\Fastwrite.cpp" />
@@ -184,6 +186,10 @@
     <ClInclude Include="ext\stb\stb_image.h" />
     <ClInclude Include="ext\stb\stb_image_write.h" />
     <ClInclude Include="src\raytracing\HitRec.h" />
+    <ClInclude Include="src\raytracing\materials\Material.h" />
+    <ClInclude Include="src\raytracing\materials\Unshaded.h" />
+    <ClInclude Include="src\raytracing\objects\Object.h" />
+    <ClInclude Include="src\raytracing\objects\Sphere.h" />
     <ClInclude Include="src\raytracing\Ray.h" />
     <ClInclude Include="src\raytracing\Settings.h" />
     <ClInclude Include="src\wrapper\Fastwrite.h" />
