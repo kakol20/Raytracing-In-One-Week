@@ -2,6 +2,7 @@
 
 #include "../misc/Random.h"
 #include "../wrapper/Fastwrite.h"
+#include "materials/Diffuse.h"
 #include "materials/Unshaded.h"
 #include "objects/Sphere.h"
 
@@ -138,6 +139,12 @@ bool Raytracing::Init() {
 	Random::SeedType blueNoiseSeed = (Random::SeedType)Random::RandomUInt();
 
 	// ----- INITIALISE SCENE -----
+
+#ifdef WIN32
+	m_clipStart = 1e-3f;
+#else
+	m_clipStart = 1e-16;
+#endif // WIN32
 
 	FastWrite::Write("Creating Scene \n");
 
@@ -605,20 +612,18 @@ void Raytracing::OriginalScene() {
 	const Float aspectRatio = Float(imageWidth) / imageHeight;
 	m_camera = Camera(aspectRatio, Float::FromString(m_settings["blurStrength"]), 10, Float::FromString(m_settings["verticalFOV"]), lookFrom, Vector3D::Zero, Vector3D::Up);
 
-	m_clipStart = 1e-4;
 	m_clipEnd = 1000;
 
 	// ----- OBJECTS -----
 
 	// materials
 
-	m_matMap["ground"] = new Unshaded(Vector3D(0.5, 0.5, 0.5));
+	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
 	m_matMap["rearSphere"] = new Unshaded(Vector3D(0.4, 0.2, 0.1));
 
 	// objects
 
 	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
-
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["rearSphere"], Vector3D::Zero, Vector3D(-4, 1, 0)));
 }
 
@@ -651,7 +656,6 @@ void Raytracing::DebugScene() {
 	int imageWidth = std::stoi(m_settings["imageWidth"]);
 	int imageHeight = std::stoi(m_settings["imageHeight"]);
 
-	m_clipStart = 1e-4f;
 	m_clipEnd = 1000;
 
 	Vector3D lookFrom(0, 2, 15);
@@ -664,10 +668,12 @@ void Raytracing::DebugScene() {
 
 	// ----- OBJECTS -----
 
+	m_matMap["diffuse"] = new Diffuse(Vector3D(0.01, 1, 0.01));
 	m_matMap["unshaded"] = new Unshaded(Vector3D(1, 0.01, 0.01));
 
 	// objects
 
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["diffuse"], Vector3D::Zero, Vector3D(-2.1, 1, 0)));
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["unshaded"], Vector3D::Zero, Vector3D(0, 1, 0)));
 }
 

@@ -63,6 +63,9 @@
     <ClCompile Include="src\misc\BlueNoise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\raytracing\materials\Diffuse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\wrapper\Float.h">
@@ -120,6 +123,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\misc\BlueNoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\raytracing\materials\Diffuse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -174,8 +174,7 @@ Vector3D Vector3D::operator/(const Float& scalar) const {
 }
 
 Float Vector3D::DotProduct(const Vector3D& v1, const Vector3D& v2) {
-	Float addZ = v1.m_includeZAxis || v2.m_includeZAxis ? v1.m_z * v2.m_z : 0;
-	return v1.m_x * v2.m_x + v1.m_y * v2.m_y + addZ;
+	return (v1.m_x * v2.m_x) + (v1.m_y * v2.m_y) + (v1.m_z * v2.m_z);
 }
 
 Float Vector3D::ToroidalDistance(const Vector3D& a, const Vector3D& b, const Vector3D& min, const Vector3D& max) {

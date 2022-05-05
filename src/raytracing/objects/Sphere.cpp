@@ -5,22 +5,7 @@ Sphere::~Sphere() {
 }
 
 bool Sphere::Hit(Ray& ray, const Float& t_min, const Float& t_max, HitRec& rec) {
-	if (TranslationHit(ray, t_min, t_max, rec)) {
-		Vector3D normal = rec.GetNormal();
-		Vector3D tangent = rec.GetTangent();
-		Vector3D bitangent = rec.GetBitangent();
-
-		normal.Normalize();
-		tangent.Normalize();
-		bitangent.Normalize();
-
-		rec.SetNormal(normal);
-		rec.SetTangent(tangent);
-		rec.SetBitangent(bitangent);
-
-		return true;
-	}
-	return false;
+	return TranslationHit(ray, t_min, t_max, rec);
 }
 
 Sphere::Sphere(const Float& radius, Material* mat, const Vector3D& rotation, const Vector3D& translation, bool flipNormals, const Vector3D uvScale) {
@@ -97,7 +82,7 @@ bool Sphere::LocalHit(Ray& ray, const Float& t_min, const Float& t_max, HitRec& 
 
 	// Find the nearest root that lies in the acceptable range.
 
-	Float root = 0;
+	Float root = (-half_b - sqrtd) / a;
 
 	if (root < t_min || t_max < root) {
 		root = (-half_b + sqrtd) / a;
