@@ -141,7 +141,7 @@ Float Float::FromString(const std::string& value) {
 
 std::string Float::ToString(const Float& num) {
 	std::stringstream ss("");
-	ss << std::setprecision(10);
+	ss << std::setprecision(6);
 	ss << num.m_num;
 
 	std::string out = "";

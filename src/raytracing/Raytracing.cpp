@@ -370,6 +370,30 @@ void Raytracing::RenderTile(const size_t& startIndex) {
 	getColor /= count;
 	m_tiles[startIndex].leftXTileColor = Vector3D::Clamp(getColor, Vector3D::Zero, Vector3D(255));
 
+	getColor = Vector3D::Zero;
+	count = 0.f;
+	for (int xImg = halfX; xImg < m_tiles[startIndex].maxX; xImg++) {
+		for (int yImg = m_tiles[startIndex].minY; yImg < m_tiles[startIndex].maxY; yImg++) {
+			count += 1.f;
+			int flippedY = (imageHeight - yImg) - 1;
+
+			Float r, g, b;
+			m_render.GetColor(xImg, flippedY, r, g, b);
+
+			/*r = std::lerp(12.f, 204.f, r / 255.f);
+			g = std::lerp(12.f, 204.f, g / 255.f);
+			b = std::lerp(12.f, 204.f, b / 255.f);*/
+
+			r = Image::LinearToSRGB(r);
+			g = Image::LinearToSRGB(g);
+			b = Image::LinearToSRGB(b);
+
+			getColor += Vector3D(r, g, b);
+		}
+	}
+	getColor /= count;
+	m_tiles[startIndex].rightXTileColor = Vector3D::Clamp(getColor, Vector3D::Zero, Vector3D(255));
+
 	m_mutex.lock();
 	m_tilesRendered++;
 
@@ -650,15 +674,104 @@ void Raytracing::DebugScene() {
 void Raytracing::ShowProgress() {
 	FastWrite::Reset();
 
-	std::string output = "Tiles Rendered: ";
-	output += std::to_string(m_tilesRendered);
-	output += " / ";
+	std::string output = "Render Mode: ";
+	output += m_settings["renderMode"];
+	output += "\nTotal Objects: ";
+	output += std::to_string(m_renderedObjects.size());
+	output += "\nThreads Used: ";
+	output += std::to_string(m_useThreads);
+	output += "\nTotal Tiles: ";
 	output += std::to_string(m_tiles.size());
-	output += '\n';
+	output += "\nProgress: ";
+	output += std::to_string(m_tilesRendered);
+
+	Float progressF = m_tilesRendered / Float((int)m_tiles.size());
+	int total = 23;
+	int progressI = Float::Floor(progressF * total).ToInt();
+
+	progressF *= 100;
+
+	int starPos = 1;
+	output += oof::position(6, 0);
+	output += '[';
+
+	for (int x = 0; x < total; x++) {
+		Float between = (progressF / 100) * total;
+		//between += (float)startPos;
+
+		if (x < progressI) {
+			//std::cout << oof::fg_color({ 255, 255, 255 });
+			output += oof::reset_formatting();
+		}
+		else if (Float(x) < between && between < Float(x + 1)) {
+			between = between - x;
+			between = Float::Lerp(12, 204, between);
+			between = Float::Floor(between);
+			output += oof::fg_color({ between.ToInt(), between.ToInt(), between.ToInt() });
+		}
+		else {
+			//std::cout << oof::fg_color({ 0, 0, 0 });
+			output += oof::fg_color({ 12, 12, 12 });
+		}
+		// https://www.asciitable.com
+		output += (char)254u;
+	}
+
+	output += oof::reset_formatting();
+	output += "] ";
+	output += Float::ToString(progressF);
+	output += '%';
+
+	output += oof::position(6, 0);
+
+	for (auto it = m_tiles.begin(); it != m_tiles.end(); it++) {
+		int x = (*it).tileX;
+		int y = (*it).tileY;
+
+		for (int i = 0; i < 2; i++) {
+			output += oof::position((m_yTileCount - y) + 7, 2 * x + i);
+
+			if ((*it).tileComplete) {
+				Vector3D col;
+				if (i == 0) {
+					col = (*it).leftXTileColor;
+				}
+				else {
+					col = (*it).rightXTileColor;
+				}
+
+				/*col /= 255;
+				col *= 255;*/
+
+				//int r = std::clamp((int)round(col.GetX()), 0, 255);
+				//int g = std::clamp((int)round(col.GetY()), 0, 255);
+				//int b = std::clamp((int)round(col.GetZ()), 0, 255);
+
+				int r = Float::Clamp(Float::Round(col.GetX()), 0, 255).ToInt();
+				int g = Float::Clamp(Float::Round(col.GetY()), 0, 255).ToInt();
+				int b = Float::Clamp(Float::Round(col.GetZ()), 0, 255).ToInt();
+
+				output += oof::fg_color({ r, g, b });
+				//output += (char)219u;
+				output += (char)178u;
+			}
+			else {
+				if ((*it).activeTile) {
+					//output += oof::reset_formatting();
+					output += oof::fg_color({ 204, 12, 12 });
+					output += (char)177u;
+				}
+				else {
+					output += oof::reset_formatting();
+					output += (char)176u;
+				}
+			}
+		}
+	}
 
 	FastWrite::Write(output);
 }
 
 void Raytracing::ShuffleTiles() {
-	// do nothing for now
+	
 }

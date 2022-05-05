@@ -58,7 +58,7 @@ const unsigned int Image::Threshold[] = {
 int main() {
 	FastWrite::EnableVTMode();
 
-	std::cout << std::setprecision(10);
+	std::cout << std::setprecision(6);
 
 	FastWrite::Reset();
 
@@ -86,6 +86,8 @@ int main() {
 #else
 	Raytracing RT;
 
+	FastWrite::Write("Initializing\n");
+
 	if (!RT.Init()) {
 		FastWrite::Write("Failed to initialize raytracer\n");
 		//std::clog << "Failed to initialize raytracer\n";
@@ -93,6 +95,9 @@ int main() {
 		std::cin.ignore();
 		return -1;
 	}
+
+	FastWrite::Write("\nPress enter to coninue\n");
+	std::cin.ignore();
 
 	if (!RT.Run()) {
 		FastWrite::Write("Failed to run raytracer\n");
