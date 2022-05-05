@@ -27,6 +27,17 @@ auto FastWrite::EnableVTMode() -> void {
 	}
 }
 
+std::string FastWrite::ResetString() {
+	std::string output = "";
+	output += oof::clear_screen();
+	output += oof::cursor_visibility(false);
+	output += oof::reset_formatting();
+	output += oof::bg_color({ 12, 12, 12 });
+	output += oof::position(0, 0);
+
+	return output;
+}
+
 void FastWrite::Reset() {
 	std::string output = "";
 	output += oof::clear_screen();

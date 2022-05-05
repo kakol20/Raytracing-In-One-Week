@@ -678,9 +678,11 @@ void Raytracing::DebugScene() {
 }
 
 void Raytracing::ShowProgress() {
-	FastWrite::Reset();
+	//FastWrite::Reset();
 
-	std::string output = "Render Mode: ";
+	std::string output = FastWrite::ResetString();
+
+	output += "Render Mode: ";
 	output += m_settings["renderMode"];
 	output += "\nTotal Objects: ";
 	output += std::to_string(m_renderedObjects.size());

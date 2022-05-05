@@ -12,7 +12,9 @@ public:
 
 	static auto EnableVTMode() -> void;
 
+	static std::string ResetString();
 	static void Reset();
+
 	static void Write(std::string output);
 };
 
