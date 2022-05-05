@@ -32,6 +32,12 @@ public:
 	Vector3D operator*(const Float& scalar) const;
 	Vector3D operator/(const Float& scalar) const;
 
+	/// <summary>
+	/// Shorthand for multiplying by -1
+	/// </summary>
+	/// <returns></returns>
+	Vector3D operator-() const;
+
 	// ----- GETTERS -----
 
 	Float GetX() const { return m_x; };
@@ -46,6 +52,9 @@ public:
 	static Vector3D Clamp(const Vector3D& val, const Vector3D& min, const Vector3D& max);
 	static Vector3D CrossProduct(const Vector3D& v1, const Vector3D& v2);
 
+	static Vector3D Reflect(const Vector3D& vector, const Vector3D& normal);
+	static Vector3D Refract(const Vector3D& vector, const Vector3D& normal, const Float& refractionRatio);
+
 	// -- Random --
 
 	static Vector3D RandomInHemisphere(const Vector3D& normal);
@@ -54,6 +63,7 @@ public:
 	static Vector3D RandomUnitVector();
 	static Vector3D RandomVector(const Float& min = 0, const Float& max = 1, bool includeZAxis = true);
 
+	bool NearZero() const;
 	Float Magnitude() const;
 	Float SqrMagnitude() const;
 	Vector3D UVSphere() const;

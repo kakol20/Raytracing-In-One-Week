@@ -173,6 +173,10 @@ Vector3D Vector3D::operator/(const Float& scalar) const {
 	return Vector3D(x, y);
 }
 
+Vector3D Vector3D::operator-() const {
+	return (m_includeZAxis ? Vector3D(m_x, m_y, m_z) : Vector3D(m_x, m_y)) * -1;
+}
+
 Float Vector3D::DotProduct(const Vector3D& v1, const Vector3D& v2) {
 	return (v1.m_x * v2.m_x) + (v1.m_y * v2.m_y) + (v1.m_z * v2.m_z);
 }
@@ -196,8 +200,8 @@ Float Vector3D::ToroidalDistance(const Vector3D& a, const Vector3D& b, const Vec
 }
 
 Vector3D Vector3D::Abs(const Vector3D& v) {
-	return v.m_includeZAxis ? 
-		Vector3D(Float::Abs(v.m_x), Float::Abs(v.m_y), Float::Abs(v.m_z)) : 
+	return v.m_includeZAxis ?
+		Vector3D(Float::Abs(v.m_x), Float::Abs(v.m_y), Float::Abs(v.m_z)) :
 		Vector3D(Float::Abs(v.m_x), Float::Abs(v.m_y));
 }
 
@@ -211,6 +215,33 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 	return Vector3D(v1.m_y * v2.m_z - v1.m_z * v2.m_y,
 		v1.m_z * v2.m_x - v1.m_x * v2.m_z,
 		v1.m_x * v2.m_y - v1.m_y * v2.m_x);
+}
+
+Vector3D Vector3D::Reflect(const Vector3D& vector, const Vector3D& normal) {
+	Vector3D t = Vector3D::DotProduct(normal, vector);
+	t *= normal * 2;
+	t = vector - t;
+
+	if (t.NearZero()) t = normal;
+	t.Normalize();
+	return t;
+}
+
+Vector3D Vector3D::Refract(const Vector3D& vector, const Vector3D& normal, const Float& refractionRatio) {
+	Vector3D vectorInv = -vector;
+
+	Float cosTheta = Float::Min(Vector3D::DotProduct(vectorInv, normal), 1);
+	Vector3D rOutPerp = (vector + (normal * cosTheta)) * refractionRatio;
+	Vector3D rOutPara = normal * Float::Sqrt(Float::Abs(1 - rOutPerp.SqrMagnitude()));
+
+	Float sinTheta = Float::Sqrt(1 - cosTheta * cosTheta);
+
+	bool cannotRefract = refractionRatio * sinTheta > 1;
+
+	Vector3D refract = rOutPerp + rOutPara;
+	if (!cannotRefract) refract.Normalize();
+
+	return cannotRefract ? Vector3D::Reflect(vector, normal) : refract;
 }
 
 Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
@@ -247,6 +278,13 @@ Vector3D Vector3D::RandomVector(const Float& min, const Float& max, bool include
 	return includeZAxis ?
 		Vector3D(Random::RandomFloat(min, max), Random::RandomFloat(min, max), Random::RandomFloat(min, max)) :
 		Vector3D(Random::RandomFloat(min, max), Random::RandomFloat(min, max));
+}
+
+bool Vector3D::NearZero() const {
+	bool xNearZero = Float::Abs(m_x) < Float::NearZero;
+	bool yNearZero = Float::Abs(m_y) < Float::NearZero;
+	bool zNearZero = Float::Abs(m_z) < Float::NearZero;
+	return m_includeZAxis ? (xNearZero && yNearZero && zNearZero) : (xNearZero && yNearZero);
 }
 
 Float Vector3D::Magnitude() const {
