@@ -4,6 +4,7 @@
 #include "../wrapper/Fastwrite.h"
 #include "materials/Diffuse.h"
 #include "materials/Glass.h"
+#include "materials/Metal.h"
 #include "materials/Unshaded.h"
 #include "objects/Sphere.h"
 
@@ -651,11 +652,11 @@ void Raytracing::OriginalScene() {
 	Float bottomY = m_background.GetHeight() / 2;
 	Float topY = m_background.GetHeight();
 
+	Vector3D bottom = Vector3D(127.5, Float(0.7) * 255, 255);
+	Vector3D top = Vector3D(255);
+
 	for (int x = 0; x < m_background.GetWidth(); x++) {
 		for (int y = 0; y < m_background.GetHeight(); y++) {
-			Vector3D bottom = Vector3D(128, Float(0.7) * 255, 255);
-			Vector3D top = Vector3D(255);
-
 			Float r = Float::Map(y, bottomY, topY, bottom.GetX(), top.GetX(), true);
 			Float g = Float::Map(y, bottomY, topY, bottom.GetY(), top.GetY(), true);
 			Float b = Float::Map(y, bottomY, topY, bottom.GetZ(), top.GetZ(), true);
@@ -681,14 +682,16 @@ void Raytracing::OriginalScene() {
 
 	// materials
 
+	m_matMap["frontSphere"] = new Metal(Vector3D(0.7, 0.6, 0.5), 0, 1.45);
 	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
 	m_matMap["middleSphere"] = new Glass(Vector3D::One, 0, 1.5);
-	m_matMap["rearSphere"] = new Unshaded(Vector3D(0.4, 0.2, 0.1));
+	m_matMap["rearSphere"] = new Diffuse(Vector3D(0.4, 0.2, 0.1));
 
 	// objects
 
 	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
 
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["frontSphere"], Vector3D::Zero, Vector3D(4, 1, 0)));
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["middleSphere"], Vector3D::Zero, Vector3D(0, 1, 0)));
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["rearSphere"], Vector3D::Zero, Vector3D(-4, 1, 0)));
 }
@@ -697,16 +700,15 @@ void Raytracing::DebugScene() {
 	// ----- BACKGROUND -----
 
 	m_background = Image(256, 256, 3, Image::Interpolation::Linear, Image::Extrapolation::Extend);
-	/*m_background.SetColor(0, 0, 128, Float(0.7) * 255, 255);
-	m_background.SetColor(0, 1, 255, 255, 255);*/
 
 	Float bottomY = m_background.GetHeight() / 2;
 	Float topY = m_background.GetHeight();
 
+	Vector3D bottom = Vector3D(127.5, Float(0.7) * 255, 255);
+	Vector3D top = Vector3D(255);
+
 	for (int x = 0; x < m_background.GetWidth(); x++) {
 		for (int y = 0; y < m_background.GetHeight(); y++) {
-			Vector3D bottom = Vector3D(128, Float(0.7) * 255, 255);
-			Vector3D top = Vector3D(255);
 
 			Float r = Float::Map(y, bottomY, topY, bottom.GetX(), top.GetX(), true);
 			Float g = Float::Map(y, bottomY, topY, bottom.GetY(), top.GetY(), true);

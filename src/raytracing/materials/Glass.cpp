@@ -11,16 +11,13 @@ Glass::Glass(const Vector3D& albedo, const Float& roughness, const Float& ior) {
 void Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) {
 	// ----- NORMAL -----
 
-	Vector3D unitDir = rayIn.GetDir();
-	Vector3D incoming = -unitDir;
+	Vector3D incoming = -rayIn.GetDir();
 
 	normal = rec.GetNormal();
 
 	// ----- FRESNEL -----
 
-	Float sqrRoughness = m_roughness/* * m_roughness*/;
-
-	bool roughnessRand = Random::RandomFloat() < sqrRoughness;
+	bool roughnessRand = Random::RandomFloat() < m_roughness;
 
 	Vector3D fresnelNormal = roughnessRand ? incoming : normal;
 
@@ -29,13 +26,13 @@ void Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	// ----- MAIN VECTORS -----
 
-	Vector3D refract = Vector3D::Refract(unitDir, normal, refractionRatio);
+	Vector3D refract = Vector3D::Refract(rayIn.GetDir(), normal, refractionRatio);
 
-	Vector3D refractRough = refract + (Vector3D::RandomInUnitSphere() * sqrRoughness);
+	Vector3D refractRough = refract + (Vector3D::RandomInUnitSphere() * m_roughness);
 	if (refractRough.NearZero()) refractRough = refract;
 	refractRough.Normalize();
 
-	Vector3D reflect = Vector3D::Reflect(unitDir, normal);
+	Vector3D reflect = Vector3D::Reflect(rayIn.GetDir(), normal);
 
 	// ----- APPLY MATERIAL -----
 
@@ -47,12 +44,6 @@ void Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	scattered = Ray(rec.GetPoint(), scatterDir);
 
-	/*if (Vector3D::DotProduct(scatterDir, normal) < 0) {
-		absorb = true;
-	}
-	else {
-		absorb = false;
-	}*/
 	absorb = false;
 	transparent = false;
 	emission = false;
