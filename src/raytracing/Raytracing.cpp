@@ -143,7 +143,7 @@ bool Raytracing::Init() {
 #ifdef WIN32
 	m_clipStart = 1e-3f;
 #else
-	m_clipStart = 1e-16;
+	m_clipStart = 1e-12;
 #endif // WIN32
 
 	FastWrite::Write("Creating Scene \n");
