@@ -86,6 +86,7 @@ public:
 	static const Float PI;
 	static const Float TAU;
 	static const Float ToRadians;
+	static const ForD NearZero;
 
 	// -- Conversion --
 

@@ -140,11 +140,7 @@ bool Raytracing::Init() {
 
 	// ----- INITIALISE SCENE -----
 
-#ifdef WIN32
-	m_clipStart = 1e-3f;
-#else
-	m_clipStart = 1e-12;
-#endif // WIN32
+	m_clipStart = Float::NearZero;
 
 	FastWrite::Write("Creating Scene \n");
 
@@ -678,7 +674,7 @@ void Raytracing::OriginalScene() {
 	const Float aspectRatio = Float(imageWidth) / imageHeight;
 	m_camera = Camera(aspectRatio, Float::FromString(m_settings["blurStrength"]), 10, Float::FromString(m_settings["verticalFOV"]), lookFrom, Vector3D::Zero, Vector3D::Up);
 
-	m_clipEnd = 1000;
+	m_clipEnd = Float::MaxVal;
 
 	// ----- OBJECTS -----
 

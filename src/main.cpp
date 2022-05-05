@@ -29,6 +29,12 @@ const Float Float::ToRadians = Float::PI / 180;
 const Float Float::MaxVal = std::numeric_limits<Float::ForD>::max();
 const Float Float::MinVal = std::numeric_limits<Float::ForD>::min();
 
+#ifdef WIN32
+const Float::ForD Float::NearZero = 1e-3f;
+#else
+const Float::ForD Float::NearZero = 1e-12;
+#endif // WIN32
+
 const Vector3D Vector3D::Forward = Vector3D(0, 0, -1);
 const Vector3D Vector3D::One = Vector3D(1, true);
 const Vector3D Vector3D::Right = Vector3D(1, 0, 0);
