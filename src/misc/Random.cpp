@@ -6,6 +6,8 @@ unsigned int Random::RandomUInt(const unsigned int& bitCount) {
 	unsigned int count = bitCount > 32 ? 32 : bitCount;
 	unsigned int out = 0;
 
+	if (Random::Seed == 0) Random::Seed = 0b1;
+
 	for (int i = (int)count - 1; i >= 0; i--) {
 		out = out | ((Random::Seed & 0b1) << i);
 

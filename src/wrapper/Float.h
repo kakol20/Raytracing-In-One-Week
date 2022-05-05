@@ -94,6 +94,7 @@ public:
 	unsigned int ToUInt() const { return (unsigned int)m_num; };
 
 	static Float FromString(const std::string& value);
+	static std::string ToString(const Float& num);
 
 	// -- Trigonometry --
 

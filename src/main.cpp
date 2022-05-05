@@ -79,10 +79,11 @@ int main() {
 	std::cout << "Random Float: " << Random::RandomFloat() << '\n';
 	std::cout << "Sizeof Float: " << sizeof(Float) << " vs Sizeof double: " << sizeof(double) << '\n';
 	std::cout << "Sizeof Vector3D: " << sizeof(Vector3D) << '\n';
+	std::cout << "PI to String: " << Float::ToString(Float::PI) << '\n';
 
 	std::cin.ignore();
-#endif // TEST
 
+#else
 	Raytracing RT;
 
 	if (!RT.Init()) {
@@ -100,6 +101,7 @@ int main() {
 		std::cin.ignore();
 		return -1;
 	}
+#endif // TEST
 
 	return 0;
 }

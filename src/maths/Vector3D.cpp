@@ -46,6 +46,7 @@ Vector3D& Vector3D::operator/=(const Vector3D& otherVector) {
 		m_z /= otherVector.m_z;
 	}
 	else {
+		m_includeZAxis = false;
 		m_z = 0;
 	}
 	return *this;
@@ -187,6 +188,9 @@ Float Vector3D::ToroidalDistance(const Vector3D& a, const Vector3D& b, const Vec
 
 	if (delta.m_includeZAxis) {
 		if (delta.m_z > mid.m_z) delta.m_z = minMaxDelta.m_z - delta.m_z;
+	}
+	else {
+		delta.m_z = 0;
 	}
 
 	return Float::Abs(delta.SqrMagnitude());

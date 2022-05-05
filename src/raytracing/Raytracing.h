@@ -7,6 +7,7 @@
 #include <thread>
 #include <vector>
 
+#include "../misc/BlueNoise.h"
 #include "../wrapper/Image.h"
 #include "Camera.h"
 #include "materials/Material.h"
@@ -42,6 +43,7 @@ private:
 	Image m_background;
 	Image m_render;
 
+	BlueNoise m_blueNoise;
 	Float m_bgStrength;
 	Float m_clipEnd;
 	Float m_clipStart;

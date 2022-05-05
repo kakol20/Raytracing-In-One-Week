@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <sstream>
+#include <iomanip>
 
 #include "Float.h"
 
@@ -134,6 +135,16 @@ bool Float::operator>=(const Float& n) const {
 Float Float::FromString(const std::string& value) {
 	std::stringstream ss(value);
 	Float out = 0;
+	ss >> out;
+	return out;
+}
+
+std::string Float::ToString(const Float& num) {
+	std::stringstream ss("");
+	ss << std::setprecision(10);
+	ss << num.m_num;
+
+	std::string out = "";
 	ss >> out;
 	return out;
 }

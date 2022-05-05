@@ -134,9 +134,12 @@ bool Raytracing::Init() {
 	std::reverse(m_tiles.begin(), m_tiles.end());
 
 	// Assign set seed for running raytracing regardless of scene generation - for consistent rendering of samples
-	unsigned int runSeed = Random::RandomUInt();
+	Random::SeedType runSeed = Random::Seed;
+	Random::SeedType blueNoiseSeed = (Random::SeedType)Random::RandomUInt();
 
 	// ----- INITIALISE SCENE -----
+
+	FastWrite::Write("Creating Scene \n");
 
 	if (m_settings["scene"] == "original") {
 		m_fileFolder = "renders/original/";
@@ -149,6 +152,17 @@ bool Raytracing::Init() {
 	else {
 		m_fileFolder = "renders/original/";
 		OriginalScene();
+	}
+
+	// ----- GENERATE BLUE NOISE -----
+
+	Random::Seed = blueNoiseSeed;
+	int minSamples = std::stoi(m_settings["minSamples"]);
+	int maxSamples = std::stoi(m_settings["maxSamples"]);
+
+	if (minSamples < 256) {
+		int sampleCount = maxSamples < 256 ? maxSamples : 256;
+		m_blueNoise.Generate(sampleCount, 10);
 	}
 
 	Random::Seed = runSeed;
@@ -390,7 +404,7 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 	int imageHeight = std::stoi(m_settings["imageHeight"]);
 	int imageWidth = std::stoi(m_settings["imageWidth"]);
 	int maxDepth = std::stoi(m_settings["rayDepth"]);
-	int maxSamples = 1; // temporarily set to 1
+	int maxSamples = std::stoi(m_settings["maxSamples"]);
 	int minSamples = std::stoi(m_settings["minSamples"]);
 
 	if (minSamples > maxSamples) minSamples = maxSamples;
@@ -405,9 +419,28 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 			Vector3D previous(0);
 			Vector3D totalDiff(0);
 
+			size_t samplesOffset = (size_t)Float::Round(Random::RandomFloat(0, (int)m_blueNoise.Size())).ToInt();
+
 			for (int s = 0; s < maxSamples; s++) {
-				Float u = x / Float(imageWidth - 1);
-				Float v = y / Float(imageHeight - 1);
+				//Float u = x / Float(imageWidth - 1);
+				//Float v = y / Float(imageHeight - 1);
+
+				Float u = x;
+				Float v = y;
+
+				if (s < (int)m_blueNoise.Size()) {
+					size_t index = s + samplesOffset;
+					Vector3D sample = m_blueNoise[index];
+					u += sample.GetX();
+					v += sample.GetY();
+				}
+				else {
+					u += Random::RandomFloat();
+					v += Random::RandomFloat();
+				}
+
+				u /= Float(imageWidth - 1);
+				v /= Float(imageHeight - 1);
 
 				Ray ray = m_camera.GetRay(u, v);
 				Vector3D rayColor = RayColor(ray, maxDepth);
