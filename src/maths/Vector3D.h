@@ -51,6 +51,7 @@ public:
 	static Vector3D Abs(const Vector3D& v);
 	static Vector3D Clamp(const Vector3D& val, const Vector3D& min, const Vector3D& max);
 	static Vector3D CrossProduct(const Vector3D& v1, const Vector3D& v2);
+	static Vector3D Lerp(const Vector3D& min, const Vector3D& max, const Float& factor, const bool& clamp = false);
 
 	static Vector3D Reflect(const Vector3D& vector, const Vector3D& normal);
 	static Vector3D Refract(const Vector3D& vector, const Vector3D& normal, const Float& refractionRatio);

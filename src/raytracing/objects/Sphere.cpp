@@ -98,12 +98,12 @@ bool Sphere::LocalHit(Ray& ray, const Float& t_min, const Float& t_max, HitRec& 
 	outwardNormal.Normalize();
 	rec.SetFaceNormal(ray, outwardNormal);
 
-	rec.SetFrontFace(m_flipNormals ? !rec.GetFrontFace() : rec.GetFrontFace());
+	//rec.SetFrontFace(m_flipNormals ? !rec.GetFrontFace() : rec.GetFrontFace());
 
 	rec.SetUV(CalculateUV(rec.GetPoint()) * m_uvScale);
 
 	Vector3D tangent = CalculateTangent(rec);
-	Vector3D bitangent = Vector3D::CrossProduct(rec.GetNormal(), tangent);
+	Vector3D bitangent = Vector3D::CrossProduct(outwardNormal, tangent);
 
 	rec.SetTangent(tangent);
 	rec.SetBitangent(bitangent);

@@ -3,6 +3,7 @@
 #include "../misc/Random.h"
 #include "../wrapper/Fastwrite.h"
 #include "materials/Diffuse.h"
+#include "materials/Glass.h"
 #include "materials/Unshaded.h"
 #include "objects/Sphere.h"
 
@@ -681,11 +682,14 @@ void Raytracing::OriginalScene() {
 	// materials
 
 	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
+	m_matMap["middleSphere"] = new Glass(Vector3D::One, 0, 1.5);
 	m_matMap["rearSphere"] = new Unshaded(Vector3D(0.4, 0.2, 0.1));
 
 	// objects
 
 	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
+
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["middleSphere"], Vector3D::Zero, Vector3D(0, 1, 0)));
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["rearSphere"], Vector3D::Zero, Vector3D(-4, 1, 0)));
 }
 

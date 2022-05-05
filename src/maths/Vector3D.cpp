@@ -217,6 +217,19 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 		v1.m_x * v2.m_y - v1.m_y * v2.m_x);
 }
 
+Vector3D Vector3D::Lerp(const Vector3D& min, const Vector3D& max, const Float& factor, const bool& clamp) {
+	Float x = Float::Lerp(min.m_x, max.m_x, factor, clamp);
+	Float y = Float::Lerp(min.m_y, max.m_y, factor, clamp);
+	Float z = Float::Lerp(min.m_z, max.m_z, factor, clamp);
+
+	if (min.m_includeZAxis || max.m_includeZAxis) {
+		return Vector3D(x, y, z);
+	}
+	else {
+		return Vector3D(x, y);
+	}
+}
+
 Vector3D Vector3D::Reflect(const Vector3D& vector, const Vector3D& normal) {
 	Vector3D t = Vector3D::DotProduct(normal, vector);
 	t *= normal * 2;
@@ -232,7 +245,7 @@ Vector3D Vector3D::Refract(const Vector3D& vector, const Vector3D& normal, const
 
 	Float cosTheta = Float::Min(Vector3D::DotProduct(vectorInv, normal), 1);
 	Vector3D rOutPerp = (vector + (normal * cosTheta)) * refractionRatio;
-	Vector3D rOutPara = normal * Float::Sqrt(Float::Abs(1 - rOutPerp.SqrMagnitude()));
+	Vector3D rOutPara = normal * -Float::Sqrt(Float::Abs(1 - rOutPerp.SqrMagnitude()));
 
 	Float sinTheta = Float::Sqrt(1 - cosTheta * cosTheta);
 
