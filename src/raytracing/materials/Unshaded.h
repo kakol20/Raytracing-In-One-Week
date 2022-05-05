@@ -9,7 +9,7 @@ public:
 	Unshaded(const Vector3D& albedo);
 	virtual ~Unshaded();
 
-	virtual void Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, bool& absorb, bool& transparent, bool& emission);
+	virtual void Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission);
 };
 
 #endif // !UNSHADED_H

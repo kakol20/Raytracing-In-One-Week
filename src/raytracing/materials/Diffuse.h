@@ -9,7 +9,7 @@ public:
 	Diffuse(const Vector3D& albedo);
 	virtual ~Diffuse() {};
 
-	virtual void Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, bool& absorb, bool& transparent, bool& emission);
+	virtual void Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission);
 };
 
 #endif // DIFFUSE_H

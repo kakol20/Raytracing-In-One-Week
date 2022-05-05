@@ -6,7 +6,7 @@ Diffuse::Diffuse(const Vector3D& albedo) {
 	m_ior = 1.5;
 }
 
-void Diffuse::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, bool& absorb, bool& transparent, bool& emission) {
+void Diffuse::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) {
 	Vector3D unitDir = rayIn.GetDir();
 
 	Vector3D scatterDir = Vector3D::RandomInHemisphere(rec.GetNormal());
@@ -22,6 +22,7 @@ void Diffuse::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scat
 	dotProduct = Vector3D::DotProduct(rec.GetNormal(), scatterDir);
 
 	absorb = false;
-	transparent = false;
 	emission = false;
+	normal = rec.GetNormal();
+	transparent = false;
 }

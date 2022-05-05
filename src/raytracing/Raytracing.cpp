@@ -193,7 +193,19 @@ bool Raytracing::Run() {
 
 	auto start = std::chrono::high_resolution_clock::now();
 
-	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "colour") {
+	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "emission" || m_settings["renderMode"] == "normal" || m_settings["renderMode"] == "albedo") {
+		RunMode();
+	}
+	else if (m_settings["renderMode"] == "all") {
+		m_settings["renderMode"] = "normal";
+		RunMode();
+
+		m_settings["renderMode"] = "emission";
+		RunMode();
+
+		m_settings["renderMode"] = "albedo";
+		RunMode();
+
 		m_settings["renderMode"] = "color";
 		RunMode();
 	}
@@ -229,8 +241,11 @@ bool Raytracing::RunMode() {
 
 	// reset tiles
 
-	if (m_settings["renderMode"] == "color") {
+	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "albedo" || m_settings["renderMode"] == "emission") {
 		m_render.SetColorSpace(Image::ColorSpace::sRGB);
+	}
+	else {
+		m_render.SetColorSpace(Image::ColorSpace::Non_Color);
 	}
 
 	for (auto it = m_tiles.begin(); it != m_tiles.end(); it++) {
@@ -253,6 +268,15 @@ bool Raytracing::RunMode() {
 
 	if (m_settings["renderMode"] == "color") {
 		output += "log_color.txt";
+	}
+	else if (m_settings["renderMode"] == "emission") {
+		output += "log_emission.txt";
+	}
+	else if (m_settings["renderMode"] == "normal") {
+		output += "log_normal.txt";
+	}
+	else if (m_settings["renderMode"] == "albedo") {
+		output += "log_albedo.txt";
 	}
 	else {
 		output += "log_color.txt";
@@ -290,6 +314,18 @@ bool Raytracing::RunMode() {
 
 	output = m_fileFolder;
 	if (m_settings["renderMode"] == "color") {
+		output += "render_c.png";
+	}
+	else if (m_settings["renderMode"] == "emission") {
+		output += "render_e.png";
+	}
+	else if (m_settings["renderMode"] == "normal") {
+		output += "render_n.png";
+	}
+	else if (m_settings["renderMode"] == "albedo") {
+		output += "render_a.png";
+	}
+	else {
 		output += "render_c.png";
 	}
 
@@ -362,9 +398,11 @@ void Raytracing::RenderTile(const size_t& startIndex) {
 			Float r, g, b;
 			m_render.GetColor(xImg, flippedY, r, g, b);
 
-			r = Image::LinearToSRGB(r);
-			g = Image::LinearToSRGB(g);
-			b = Image::LinearToSRGB(b);
+			if (m_settings["renderMode"] != "normal") {
+				r = Image::LinearToSRGB(r);
+				g = Image::LinearToSRGB(g);
+				b = Image::LinearToSRGB(b);
+			}
 
 			/*r = std::lerp(12.f, 204.f, r / 255.f);
 			g = std::lerp(12.f, 204.f, g / 255.f);
@@ -391,9 +429,11 @@ void Raytracing::RenderTile(const size_t& startIndex) {
 			g = std::lerp(12.f, 204.f, g / 255.f);
 			b = std::lerp(12.f, 204.f, b / 255.f);*/
 
-			r = Image::LinearToSRGB(r);
-			g = Image::LinearToSRGB(g);
-			b = Image::LinearToSRGB(b);
+			if (m_settings["renderMode"] != "normal") {
+				r = Image::LinearToSRGB(r);
+				g = Image::LinearToSRGB(g);
+				b = Image::LinearToSRGB(b);
+			}
 
 			getColor += Vector3D(r, g, b);
 		}
@@ -520,10 +560,10 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth) {
 	if (RayHitObject(ray, m_clipStart, m_clipEnd, rec)) {
 		Ray scattered;
 		Vector3D attentuation;
-
+		Vector3D normal;
 		bool absorb, transparent, emission;
 
-		rec.GetMat()->Scatter(ray, rec, attentuation, scattered, absorb, transparent, emission);
+		rec.GetMat()->Scatter(ray, rec, attentuation, scattered, normal, absorb, transparent, emission);
 
 		if (m_settings["renderMode"] == "color") {
 			if (absorb || emission) {
@@ -537,13 +577,33 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth) {
 				return attentuation * RayColor(scattered, depth - 1);
 			}
 		}
+		else if (m_settings["renderMode"] == "normal") {
+			if (transparent) {
+				Ray continueRay(rec.GetPoint(), ray.GetDir());
+				return RayColor(continueRay, depth - 1);
+			}
+			else {
+				return (normal + Vector3D::One) / 2;
+			}
+		}
+		else if (m_settings["renderMode"] == "albedo") {
+			return attentuation;
+		}
+		else if (m_settings["renderMode"] == "emission") {
+			if (emission) {
+				return attentuation;
+			}
+			else {
+				return Vector3D::Zero;
+			}
+		}
 	}
 
 	// draw background instead if no hit
 
 	Vector3D unitDir = ray.GetDir();
 	unitDir.Normalize();
-	if (m_settings["renderMode"] == "color") {
+	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "albedo") {
 		Vector3D uv = unitDir.UVSphere();
 		uv -= Vector3D(1, 0, 0);
 
@@ -557,6 +617,12 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth) {
 		rgb /= 255;
 
 		return rgb * m_bgStrength;
+	}
+	else if (m_settings["renderMode"] == "normal") {
+		return ((unitDir * -1) + Vector3D::One) / 2;
+	}
+	else if (m_settings["renderMode"] == "emission") {
+		return Vector3D::Zero;
 	}
 
 	return Vector3D::Zero;

@@ -71,7 +71,7 @@ void Settings::Write(const std::string& fileLocation) {
 	m_file << "noiseThreshold=" << m_settings["noiseThreshold"] << '\n';
 	m_file << "tileSize=" << m_settings["tileSize"] << '\n';
 
-	m_file << "# color for now\n";
+	m_file << "# color, normal, albedo, emission or all\n";
 	m_file << "renderMode=" << m_settings["renderMode"] << '\n';
 
 	m_file << "# original or debug\n";

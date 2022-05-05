@@ -17,7 +17,7 @@ public:
 		return rec.GetNormal();
 	}
 
-	virtual void Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, bool& absorb, bool& transparent, bool& emission) = 0;
+	virtual void Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) = 0;
 
 protected:
 	Float Fresnel(const Vector3D& dir, const Vector3D& normal, const Float& refIndex) const {
