@@ -20,7 +20,7 @@ Sphere::Sphere(const Float& radius, Material* mat, const Vector3D& rotation, con
 }
 
 bool Sphere::SphereIntersectSphere(const Vector3D& pos, const Float& radius) {
-	Vector3D newPos = pos;
+	Vector3D newPos = pos - m_pos;
 	newPos = m_rotationInv.RotateVector(newPos);
 
 	Vector3D sphereEdge = Vector3D::Zero - newPos;

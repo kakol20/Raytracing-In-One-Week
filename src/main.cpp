@@ -32,7 +32,7 @@ const Float Float::MinVal = std::numeric_limits<Float::ForD>::min();
 #ifdef WIN32
 const Float::ForD Float::NearZero = 1e-3f;
 #else
-const Float::ForD Float::NearZero = 1e-12;
+const Float::ForD Float::NearZero = 1e-6;
 //const Float::ForD Float::NearZero = 1e-16;
 #endif // WIN32
 
@@ -61,6 +61,8 @@ const unsigned int Image::Threshold[] = {
 	 42, 234,  26, 218,  38, 230,  22, 214,  41, 233,  25, 217,  37, 229,  21, 213,
 	170, 106, 154,  90, 166, 102, 150,  86, 169, 105, 153,  89, 165, 101, 149,  85
 };
+
+Raytracing RT;
 
 int main() {
 	FastWrite::EnableVTMode();
@@ -91,7 +93,8 @@ int main() {
 	std::cin.ignore();
 
 #else
-	Raytracing RT;
+	FastWrite::Write("Press enter to start\n");
+	std::cin.ignore();
 
 	FastWrite::Write("Initializing\n");
 
@@ -103,7 +106,7 @@ int main() {
 		return -1;
 	}
 
-	FastWrite::Write("\nPress enter to coninue\n");
+	FastWrite::Write("\nPress enter to run\n");
 	std::cin.ignore();
 
 	if (!RT.Run()) {

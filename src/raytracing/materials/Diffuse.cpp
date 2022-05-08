@@ -9,10 +9,12 @@ Diffuse::Diffuse(const Vector3D& albedo) {
 void Diffuse::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) {
 	Vector3D unitDir = rayIn.GetDir();
 
+	normal = rec.GetNormal();
+
 	Vector3D scatterDir = Vector3D::RandomInHemisphere(rec.GetNormal());
 	scatterDir.Normalize();
 
-	Float dotProduct = Vector3D::DotProduct(rec.GetNormal(), scatterDir);
+	Float dotProduct = Vector3D::DotProduct(normal, scatterDir);
 
 	if (dotProduct < 0) scatterDir = unitDir * -1;
 
@@ -21,8 +23,12 @@ void Diffuse::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scat
 
 	dotProduct = Vector3D::DotProduct(rec.GetNormal(), scatterDir);
 
-	absorb = false;
+	if (Vector3D::DotProduct(normal, scatterDir) < Float::NearZero) {
+		absorb = true;
+	}
+	else {
+		absorb = false;
+	}
 	emission = false;
-	normal = rec.GetNormal();
 	transparent = false;
 }
