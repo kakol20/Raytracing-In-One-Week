@@ -1,6 +1,8 @@
 #ifndef FLOAT_H
 #define FLOAT_H
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <string>
 
@@ -24,58 +26,62 @@ public:
 
 	// ----- ASSIGNMENT -----
 
-	Float& operator=(const double& num);
-	Float& operator=(const float& num);
-	Float& operator=(const Float& num);
-	Float& operator=(const int& num);
-	Float& operator=(const unsigned int& num);
+	inline Float& operator=(const double& num) { m_num = (ForD)num; return *this; };
+	inline Float& operator=(const float& num) { m_num = (ForD)num; return *this; };
+	inline Float& operator=(const Float& num) {
+		if (this == &num) return *this;
+		m_num = num.m_num;
+		return *this;
+	}
+	inline Float& operator=(const int& num) { m_num = (ForD)num; return *this; };
+	inline Float& operator=(const unsigned int& num) { m_num = (ForD)num;  return *this; };
 
-	Float& operator%=(const Float& n);
-	Float& operator*=(const Float& n);
-	Float& operator/=(const Float& n);
-	Float& operator+=(const Float& n);
-	Float& operator-=(const Float& n);
+	inline Float& operator%=(const Float& n) { m_num = std::fmod(m_num, n.m_num); return *this; };
+	inline Float& operator*=(const Float& n) { m_num *= n.m_num; return *this; };
+	inline Float& operator/=(const Float& n) { m_num /= n.m_num; return *this; };
+	inline Float& operator+=(const Float& n) { m_num += n.m_num; return *this; };
+	inline Float& operator-=(const Float& n) { m_num -= n.m_num; return *this; };
 
 	// ----- ARITHMETIC -----
 
-	Float operator%(const Float& n) const;
-	Float operator-(const Float& n) const;
-	Float operator*(const Float& n) const;
-	Float operator/(const Float& n) const;
-	Float operator+(const Float& n) const;
+	inline Float operator%(const Float& n) const { return Float(std::fmod(m_num, n.m_num)); };
+	inline Float operator-(const Float& n) const { return Float(m_num - n.m_num); };
+	inline Float operator*(const Float& n) const { return Float(m_num * n.m_num); };
+	inline Float operator/(const Float& n) const { return Float(m_num / n.m_num); };
+	inline Float operator+(const Float& n) const { return Float(m_num + n.m_num); };
 
-	friend Float operator-(const double& left, const Float& right);
-	friend Float operator-(const float& left, const Float& right);
-	friend Float operator-(const int& left, const Float& right);
-	friend Float operator*(const double& left, const Float& right);
-	friend Float operator*(const float& left, const Float& right);
-	friend Float operator*(const int& left, const Float& right);
-	friend Float operator/(const double& left, const Float& right);
-	friend Float operator/(const float& left, const Float& right);
-	friend Float operator/(const int& left, const Float& right);
-	friend Float operator+(const double& left, const Float& right);
-	friend Float operator+(const float& left, const Float& right);
-	friend Float operator+(const int& left, const Float& right);
+	inline friend Float operator-(const double& left, const Float& right) { return Float(left) - right; };
+	inline friend Float operator-(const float& left, const Float& right) { return Float(left) - right; };
+	inline friend Float operator-(const int& left, const Float& right) { return Float(left) - right; };
+	inline friend Float operator*(const double& left, const Float& right) { return Float(left) * right; };
+	inline friend Float operator*(const float& left, const Float& right) { return Float(left) * right; };
+	inline friend Float operator*(const int& left, const Float& right) { return Float(left) * right; };
+	inline friend Float operator/(const double& left, const Float& right) { return Float(left) / right; };
+	inline friend Float operator/(const float& left, const Float& right) { return Float(left) / right; };
+	inline friend Float operator/(const int& left, const Float& right) { return Float(left) / right; };
+	inline friend Float operator+(const double& left, const Float& right) { return Float(left) + right; };
+	inline friend Float operator+(const float& left, const Float& right) { return Float(left) + right; };
+	inline friend Float operator+(const int& left, const Float& right) { return Float(left) + right; };
 
 	/// <summary>
 	/// Shorthand for multiplying by -1;
 	/// </summary>
 	/// <returns></returns>
-	Float operator-() const;
+	inline Float operator-() const { return Float(m_num) * -1; };
 
 	// ----- COMPARISON OPERATORS -----
 
-	bool operator!=(const Float& n) const;
-	bool operator<(const Float& n) const;
-	bool operator<=(const Float& n) const;
-	bool operator==(const Float& n) const;
-	bool operator>(const Float& n) const;
-	bool operator>=(const Float& n) const;
+	inline bool operator!=(const Float& n) const { return m_num != n.m_num; };
+	inline bool operator<(const Float& n) const { return m_num < n.m_num; };
+	inline bool operator<=(const Float& n) const { return m_num <= n.m_num; };
+	inline bool operator==(const Float& n) const { return m_num == n.m_num; };
+	inline bool operator>(const Float& n) const { return m_num > n.m_num; };
+	inline bool operator>=(const Float& n) const { return m_num >= n.m_num; };
 
 	// ----- IOSTREAM -----
 
-	friend std::istream& operator>>(std::istream& is, Float& num);
-	friend std::ostream& operator<<(std::ostream& os, const Float& num);
+	inline friend std::istream& operator>>(std::istream& is, Float& num) { is >> num.m_num; return is; };
+	inline friend std::ostream& operator<<(std::ostream& os, const Float& num) { os << num.m_num; return os; };
 
 	// ----- OTHER -----
 
@@ -90,9 +96,9 @@ public:
 
 	// -- Conversion --
 
-	Float::ForD GetValue() const { return m_num; };
-	int ToInt() const { return (int)m_num; };
-	unsigned int ToUInt() const { return (unsigned int)m_num; };
+	inline Float::ForD GetValue() const { return m_num; };
+	inline int ToInt() const { return (int)m_num; };
+	inline unsigned int ToUInt() const { return (unsigned int)m_num; };
 
 	static Float FromString(const std::string& value);
 	static std::string ToString(const Float& num);
@@ -114,7 +120,7 @@ public:
 	static Float Pow(const Float& base, const Float& exponent);
 	static Float Round(const Float& v);
 	static Float Sqrt(const Float& v);
-	
+
 	static Float Max(const Float& a, const Float& b);
 	static Float Min(const Float& a, const Float& b);
 

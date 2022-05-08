@@ -182,7 +182,7 @@
     <ClCompile Include="src\maths\Quaternion.cpp" />
     <ClCompile Include="src\maths\Vector3D.cpp" />
     <ClCompile Include="src\misc\Random.cpp" />
-    <ClCompile Include="src\wrapper\Float.cpp" />
+    <ClCompile Include="SRC\WRAPPER\Float.cpp" />
     <ClCompile Include="src\wrapper\Image.cpp" />
   </ItemGroup>
   <ItemGroup>

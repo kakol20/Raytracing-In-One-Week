@@ -1,135 +1,22 @@
-#include <algorithm>
-#include <cmath>
 #include <sstream>
 #include <iomanip>
 
 #include "Float.h"
 
 Float::Float(const double& num) {
-	m_num = (ForD)num;
+	m_num = Float::ForD(num);
 }
 
 Float::Float(const float& num) {
-	m_num = (ForD)num;
+	m_num = Float::ForD(num);
 }
 
 Float::Float(const int& num) {
-	m_num = (ForD)num;
+	m_num = Float::ForD(num);
 }
 
 Float::Float(const unsigned int& num) {
-	m_num = (ForD)num;
-}
-
-Float& Float::operator=(const double& num) {
-	m_num = (ForD)num;
-	return *this;
-}
-
-Float& Float::operator=(const float& num) {
-	m_num = (ForD)num;
-	return *this;
-}
-
-Float& Float::operator=(const Float& num) {
-	if (this == &num) return *this;
-	m_num = num.m_num;
-	return *this;
-}
-
-Float& Float::operator=(const int& num) {
-	m_num = (ForD)num;
-	return *this;
-}
-
-Float& Float::operator=(const unsigned int& num) {
-	m_num = (ForD)num;
-	return *this;
-}
-
-Float& Float::operator%=(const Float& n) {
-	m_num = std::fmod(m_num, n.m_num);
-	return *this;
-}
-
-Float& Float::operator*=(const Float& n) {
-	m_num *= n.m_num;
-	return *this;
-}
-
-Float& Float::operator/=(const Float& n) {
-	m_num /= n.m_num;
-	return *this;
-}
-
-Float& Float::operator+=(const Float& n) {
-	m_num += n.m_num;
-	return *this;
-}
-
-Float& Float::operator-=(const Float& n) {
-	m_num -= n.m_num;
-	return *this;
-}
-
-Float  Float::operator%(const Float& n) const {
-	Float out = m_num;
-	out %= n;
-	return out;
-}
-
-Float  Float::operator-(const Float& n) const {
-	Float out = m_num;
-	out -= n;
-	return out;
-}
-
-Float  Float::operator*(const Float& n) const {
-	Float out = m_num;
-	out *= n;
-	return out;
-}
-
-Float  Float::operator/(const Float& n) const {
-	Float out = m_num;
-	out /= n;
-	return out;
-}
-
-Float  Float::operator+(const Float& n) const {
-	Float out = m_num;
-	out += n;
-	return out;
-}
-
-Float  Float::operator-() const {
-	Float out = m_num;
-	out *= -1;
-	return out;
-}
-
-bool Float::operator!=(const Float& n) const {
-	return m_num != n.m_num;
-}
-
-bool Float::operator<(const Float& n) const {
-	return m_num < n.m_num;
-}
-
-bool Float::operator<=(const Float& n) const {
-	return m_num <= n.m_num;
-}
-
-bool Float::operator==(const Float& n) const {
-	return m_num == n.m_num;
-}
-
-bool Float::operator>(const Float& n) const {
-	return m_num > n.m_num;
-}
-
-bool Float::operator>=(const Float& n) const {
-	return m_num >= n.m_num;
+	m_num = Float::ForD(num);
 }
 
 Float Float::FromString(const std::string& value) {
@@ -219,86 +106,4 @@ Float Float::Map(const Float& v, const Float& fromMin, const Float& fromMax, con
 
 Float Float::Cubic(const Float& a, const Float& b, const Float& c, const Float& d, const Float& factor) {
 	return b + 0.5 * factor * (c - a + factor * (2 * a - 5 * b + 4 * c - d + factor * (3 * (b - c) + d - a)));
-}
-
-Float operator-(const double& left, const Float& right) {
-	Float out = left;
-	out -= right;
-	return out;
-}
-
-Float operator-(const float& left, const Float& right) {
-	Float out = left;
-	out -= right;
-	return out;
-}
-
-Float operator-(const int& left, const Float& right) {
-	Float out = left;
-	out -= right;
-	return out;
-}
-
-Float operator*(const double& left, const Float& right) {
-	Float out = left;
-	out *= right;
-	return out;
-}
-
-Float operator*(const float& left, const Float& right) {
-	Float out = left;
-	out *= right;
-	return out;
-}
-
-Float operator*(const int& left, const Float& right) {
-	Float out = left;
-	out *= right;
-	return out;
-}
-
-Float operator/(const double& left, const Float& right) {
-	Float out = left;
-	out /= right;
-	return out;
-}
-
-Float operator/(const float& left, const Float& right) {
-	Float out = left;
-	out /= right;
-	return out;
-}
-
-Float operator/(const int& left, const Float& right) {
-	Float out = left;
-	out /= right;
-	return out;
-}
-
-Float operator+(const double& left, const Float& right) {
-	Float out = left;
-	out += right;
-	return out;
-}
-
-Float operator+(const float& left, const Float& right) {
-	Float out = left;
-	out += right;
-	return out;
-}
-
-Float operator+(const int& left, const Float& right) {
-	Float out = left;
-	out += right;
-	return out;
-}
-
-std::istream& operator>>(std::istream& is, Float& num) {
-	is >> num.m_num;
-	return is;
-}
-
-std::ostream& operator<<(std::ostream& os, const Float& num) {
-	os << num.m_num;
-	return os;
 }
