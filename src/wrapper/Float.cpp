@@ -3,22 +3,6 @@
 
 #include "Float.h"
 
-Float::Float(const double& num) {
-	m_num = Float::ForD(num);
-}
-
-Float::Float(const float& num) {
-	m_num = Float::ForD(num);
-}
-
-Float::Float(const int& num) {
-	m_num = Float::ForD(num);
-}
-
-Float::Float(const unsigned int& num) {
-	m_num = Float::ForD(num);
-}
-
 Float Float::FromString(const std::string& value) {
 	std::stringstream ss(value);
 	Float out = 0;
