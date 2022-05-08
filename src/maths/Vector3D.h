@@ -137,11 +137,27 @@ public:
 	static Vector3D RandomUnitVector();
 	static Vector3D RandomVector(const Float& min = 0, const Float& max = 1, bool includeZAxis = true);
 
-	bool NearZero() const;
-	Float Magnitude() const;
-	Float SqrMagnitude() const;
-	Vector3D UVSphere() const;
-	void Normalize();
+	inline bool NearZero() const {
+		bool xNearZero = Float::Abs(m_x) < Float::NearZero;
+		bool yNearZero = Float::Abs(m_y) < Float::NearZero;
+		bool zNearZero = Float::Abs(m_z) < Float::NearZero;
+		return m_includeZAxis ? (xNearZero && yNearZero && zNearZero) : (xNearZero && yNearZero);
+	};
+	inline Float Magnitude() const {
+		Float sqrMag = SqrMagnitude();
+		return sqrMag == 1 ? 1 : Float::Sqrt(sqrMag);
+	};
+	inline Float SqrMagnitude() const {
+		Float addZ = m_includeZAxis ? m_z * m_z : 0;
+		return (m_x * m_x) + (m_y * m_y) + addZ;
+	};
+	inline Vector3D UVSphere() const { return Vector3D(0.5 + (Float::Atan2(m_x, m_z) / Float::TAU), 0.5 - (Float::Asin(m_y) / Float::PI)); };
+	inline void Normalize() {
+		Float magnitude = Magnitude();
+		m_x /= magnitude;
+		m_y /= magnitude;
+		m_z = m_includeZAxis ? m_z / magnitude : 0;
+	};
 
 	// ----- STATIC VARIABLES -----
 

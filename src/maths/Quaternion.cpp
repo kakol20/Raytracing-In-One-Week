@@ -14,62 +14,6 @@ Quaternion::Quaternion(const Vector3D& vec) {
 	m_k = vec.GetZ();
 }
 
-Quaternion& Quaternion::operator*=(const Quaternion& otherQuaternion) {
-	Float w = (m_w * otherQuaternion.m_w) - (m_i * otherQuaternion.m_i) - (m_j * otherQuaternion.m_j) - (m_k * otherQuaternion.m_k);
-	Float i = (m_w * otherQuaternion.m_i) + (m_i * otherQuaternion.m_w) + (m_j * otherQuaternion.m_k) - (m_k * otherQuaternion.m_j);
-	Float j = (m_w * otherQuaternion.m_j) - (m_i * otherQuaternion.m_k) + (m_j * otherQuaternion.m_w) + (m_k * otherQuaternion.m_i);
-	Float k = (m_w * otherQuaternion.m_k) + (m_i * otherQuaternion.m_j) - (m_j * otherQuaternion.m_i) + (m_k * otherQuaternion.m_w);
-
-	m_w = w;
-	m_i = i;
-	m_j = j;
-	m_k = k;
-	return *this;
-}
-
-Quaternion& Quaternion::operator=(const Quaternion& otherQuaternion) {
-	if (this == &otherQuaternion) return *this;
-	m_w = otherQuaternion.m_w;
-	m_i = otherQuaternion.m_i;
-	m_j = otherQuaternion.m_j;
-	m_k = otherQuaternion.m_k;
-	return *this;
-}
-
-Quaternion& Quaternion::operator=(const Vector3D& otherVector) {
-	Vector3D copyVector = otherVector;
-	m_w = 0;
-	m_i = copyVector.GetX();
-	m_j = copyVector.GetY();
-	m_k = copyVector.GetZ();
-	return *this;
-}
-
-Quaternion Quaternion::operator*(const Quaternion& otherQuaternion) const {
-	Quaternion out(m_w, m_i, m_j, m_k);
-	out *= otherQuaternion;
-	return out;
-}
-
-Vector3D Quaternion::ToVector() {
-	return Vector3D(m_i, m_j, m_k);
-}
-
-void Quaternion::Conjugate() {
-	m_i *= -1;
-	m_j *= -1;
-	m_k *= -1;
-}
-
-void Quaternion::Normalize() {
-	Float mag = (m_w * m_w) + (m_i * m_i) + (m_j * m_j) + (m_k * m_k);
-	mag = Float::Sqrt(mag);
-	m_w /= mag;
-	m_i /= mag;
-	m_j /= mag;
-	m_k /= mag;
-}
-
 void Quaternion::AxisRotation(const Vector3D& axis, const Float& radians) {
 	Float sinTheta = Float::Sin(radians / 2);
 	Float cosTheta = Float::Cos(radians / 2);

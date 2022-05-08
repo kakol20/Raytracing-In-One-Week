@@ -138,33 +138,3 @@ Vector3D Vector3D::RandomVector(const Float& min, const Float& max, bool include
 		Vector3D(Random::RandomFloat(min, max), Random::RandomFloat(min, max), Random::RandomFloat(min, max)) :
 		Vector3D(Random::RandomFloat(min, max), Random::RandomFloat(min, max));
 }
-
-bool Vector3D::NearZero() const {
-	bool xNearZero = Float::Abs(m_x) < Float::NearZero;
-	bool yNearZero = Float::Abs(m_y) < Float::NearZero;
-	bool zNearZero = Float::Abs(m_z) < Float::NearZero;
-	return m_includeZAxis ? (xNearZero && yNearZero && zNearZero) : (xNearZero && yNearZero);
-}
-
-Float Vector3D::Magnitude() const {
-	Float sqrMag = SqrMagnitude();
-
-	return sqrMag == 1 ? 1 : Float::Sqrt(sqrMag);
-}
-
-Float Vector3D::SqrMagnitude() const {
-	Float addZ = m_includeZAxis ? m_z * m_z : 0;
-	return (m_x * m_x) + (m_y * m_y) + addZ;
-}
-
-Vector3D Vector3D::UVSphere() const {
-	return Vector3D(0.5 + (Float::Atan2(m_x, m_z) / Float::TAU), 0.5 - (Float::Asin(m_y) / Float::PI));
-}
-
-void Vector3D::Normalize() {
-	Float magnitude = Magnitude();
-	m_x /= magnitude;
-	m_y /= magnitude;
-
-	m_z = m_includeZAxis ? m_z / magnitude : 0;
-}
