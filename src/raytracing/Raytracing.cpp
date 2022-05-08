@@ -127,6 +127,8 @@ bool Raytracing::Init() {
 			x = maxX;
 			l_widthModulo--;
 			countX++;
+
+			FastWrite::Write(FastWrite::ResetString() + "x: " + std::to_string(x) + "\ny: " + std::to_string(y) + "\n");
 		}
 
 		m_xTileCount = xTileCount;

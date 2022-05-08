@@ -273,12 +273,11 @@ Float Image::LinearToSRGB(const Float& color) {
 		Float out = Float(1) / 2.4;
 
 		out = Float::Pow(l_color, out);
+		out *= 1.055;
+		out -= 0.055;
+		out *= 255;
 
-		out = out * 1.055;
-
-		out = out - 0.055;
-
-		return out * 255;
+		return out;
 #else
 		return ((Float::Pow(color, Float(1) / 2.4) * 1.055) - 0.055) * 255;
 
