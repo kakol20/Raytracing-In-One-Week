@@ -74,12 +74,13 @@ void Quaternion::AxisRotation(const Vector3D& axis, const Float& radians) {
 	Float sinTheta = Float::Sin(radians / 2);
 	Float cosTheta = Float::Cos(radians / 2);
 
-	Vector3D ijk = axis * sinTheta;
+	/*Vector3D ijk = axis;
+	ijk *= sinTheta;*/
 
 	m_w = cosTheta;
-	m_i = ijk.GetX();
-	m_j = ijk.GetY();
-	m_k = ijk.GetZ();
+	m_i = axis.GetX() * sinTheta;
+	m_j = axis.GetY() * sinTheta;
+	m_k = axis.GetZ() * sinTheta;
 
 	Normalize();
 }

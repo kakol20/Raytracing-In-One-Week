@@ -12,37 +12,110 @@ public:
 
 	// ----- ASSIGNMENT OPERATORS -----
 
-	Vector3D& operator*=(const Vector3D& otherVector);
-	Vector3D& operator/=(const Vector3D& otherVector);
-	Vector3D& operator+=(const Vector3D& otherVector);
-	Vector3D& operator=(const Vector3D& otherVector);
-	Vector3D& operator-=(const Vector3D& otherVector);
-
-	Vector3D& operator*=(const Float& scalar);
-	Vector3D& operator/=(const Float& scalar);
-	Vector3D& operator=(const Float& scalar);
+	inline Vector3D& operator*=(const Vector3D& otherVector) {
+		m_x *= otherVector.m_x;
+		m_y *= otherVector.m_y;
+		m_includeZAxis = m_includeZAxis || otherVector.m_includeZAxis;
+		m_z = m_includeZAxis ? m_z * otherVector.m_z : 0;
+		return *this;
+	};
+	inline Vector3D& operator/=(const Vector3D& otherVector) {
+		m_x /= otherVector.m_x;
+		m_y /= otherVector.m_y;
+		m_includeZAxis = otherVector.m_includeZAxis;
+		m_z = m_includeZAxis ? m_z / otherVector.m_z : 0;
+		return *this;
+	};
+	inline Vector3D& operator+=(const Vector3D& otherVector) {
+		m_x += otherVector.m_x;
+		m_y += otherVector.m_y;
+		m_includeZAxis = m_includeZAxis || otherVector.m_includeZAxis;
+		m_z = m_includeZAxis ? m_z + otherVector.m_z : 0;
+		return *this;
+	};
+	inline Vector3D& operator=(const Vector3D& otherVector) {
+		if (this == &otherVector) return *this;
+		m_x = otherVector.m_x;
+		m_y = otherVector.m_y;
+		m_includeZAxis = otherVector.m_includeZAxis;
+		m_z = m_includeZAxis ? otherVector.m_z : 0;
+		return *this;
+	};
+	inline Vector3D& operator-=(const Vector3D& otherVector) {
+		m_x -= otherVector.m_x;
+		m_y -= otherVector.m_y;
+		m_includeZAxis = m_includeZAxis || otherVector.m_includeZAxis;
+		m_z = m_includeZAxis ? m_z - otherVector.m_z : 0;
+		return *this;
+	};
+	inline Vector3D& operator*=(const Float& scalar) {
+		m_x *= scalar;
+		m_y *= scalar;
+		m_z = m_includeZAxis ? m_z * scalar : 0;
+		return *this;
+	};
+	inline Vector3D& operator/=(const Float& scalar) {
+		m_x /= scalar;
+		m_y /= scalar;
+		m_z = m_includeZAxis ? m_z / scalar : 0;
+		return *this;
+	};
+	inline Vector3D& operator=(const Float& scalar) {
+		m_x = scalar;
+		m_y = scalar;
+		m_z = m_includeZAxis ? scalar : 0;
+		return *this;
+	};
 
 	// ----- ARITHMETIC OPERATOR -----
 
-	Vector3D operator-(const Vector3D& otherVector) const;
-	Vector3D operator*(const Vector3D& otherVector) const;
-	Vector3D operator/(const Vector3D& otherVector) const;
-	Vector3D operator+(const Vector3D& otherVector) const;
+	inline Vector3D operator-(const Vector3D& otherVector) const {
+		return m_includeZAxis || otherVector.m_includeZAxis ?
+			Vector3D(m_x - otherVector.m_x, m_y - otherVector.m_y, m_z - otherVector.m_z) :
+			Vector3D(m_x - otherVector.m_x, m_y - otherVector.m_y);
+	};
+	inline Vector3D operator*(const Vector3D& otherVector) const {
+		return m_includeZAxis || otherVector.m_includeZAxis ?
+			Vector3D(m_x * otherVector.m_x, m_y * otherVector.m_y, m_z * otherVector.m_z) :
+			Vector3D(m_x * otherVector.m_x, m_y * otherVector.m_y);
+	};
+	inline Vector3D operator/(const Vector3D& otherVector) const {
+		return otherVector.m_includeZAxis ?
+			Vector3D(m_x / otherVector.m_x, m_y / otherVector.m_y, m_z / otherVector.m_z) :
+			Vector3D(m_x / otherVector.m_x, m_y / otherVector.m_y);
+	};
+	inline Vector3D operator+(const Vector3D& otherVector) const {
+		return m_includeZAxis || otherVector.m_includeZAxis ?
+			Vector3D(m_x + otherVector.m_x, m_y + otherVector.m_y, m_z + otherVector.m_z) :
+			Vector3D(m_x + otherVector.m_x, m_y + otherVector.m_y);
+	};
 
-	Vector3D operator*(const Float& scalar) const;
-	Vector3D operator/(const Float& scalar) const;
+	inline Vector3D operator*(const Float& scalar) const {
+		return m_includeZAxis ?
+			Vector3D(m_x * scalar, m_y * scalar, m_z * scalar) :
+			Vector3D(m_x * scalar, m_y * scalar);
+	};
+	inline Vector3D operator/(const Float& scalar) const {
+		return m_includeZAxis ?
+			Vector3D(m_x / scalar, m_y / scalar, m_z / scalar) :
+			Vector3D(m_x / scalar, m_y / scalar);
+	};
 
 	/// <summary>
 	/// Shorthand for multiplying by -1
 	/// </summary>
 	/// <returns></returns>
-	Vector3D operator-() const;
+	Vector3D operator-() const {
+		return m_includeZAxis ?
+			Vector3D(m_x * -1, m_y * -1, m_z * -1) :
+			Vector3D(m_x * -1, m_y * -1);
+	};
 
 	// ----- GETTERS -----
 
-	Float GetX() const { return m_x; };
-	Float GetY() const { return m_y; };
-	Float GetZ() const { return m_z; };
+	inline Float GetX() const { return m_x; };
+	inline Float GetY() const { return m_y; };
+	inline Float GetZ() const { return m_z; };
 
 	// ----- OTHER -----
 
