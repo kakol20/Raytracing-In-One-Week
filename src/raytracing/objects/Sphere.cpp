@@ -21,14 +21,14 @@ Sphere::Sphere(const Float& radius, Material* mat, const Vector3D& rotation, con
 
 bool Sphere::SphereIntersectSphere(const Vector3D& pos, const Float& radius) {
 	Vector3D newPos = pos - m_pos;
-	newPos = m_rotationInv.RotateVector(newPos);
+	//newPos = m_rotationInv.RotateVector(newPos);
 
 	Vector3D sphereEdge = Vector3D::Zero - newPos;
 	sphereEdge.Normalize();
 	sphereEdge *= radius;
 	sphereEdge = newPos + sphereEdge;
 
-	if (sphereEdge.SqrMagnitude() < radius * radius) return true;
+	if (sphereEdge.SqrMagnitude() < (m_radius * m_radius)) return true;
 	return false;
 }
 

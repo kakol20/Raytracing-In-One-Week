@@ -98,10 +98,6 @@ bool Raytracing::Init() {
 
 	m_clipStart = Float::NearZero;
 
-	{
-		Random::SeedType tmp = (Random::SeedType)Random::RandomUInt();
-	}
-
 	FastWrite::Write("Creating Scene \n");
 
 	if (m_settings["scene"] == "original") {
