@@ -3,6 +3,9 @@
 
 #include "Float.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 class Image {
 public:
 	enum class Interpolation { Linear, Closest, Cubic };

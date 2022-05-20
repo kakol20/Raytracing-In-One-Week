@@ -72,6 +72,9 @@
     <ClCompile Include="src\raytracing\materials\Metal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\wrapper\HDR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\wrapper\Float.h">
@@ -138,6 +141,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\raytracing\materials\Metal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wrapper\HDR.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

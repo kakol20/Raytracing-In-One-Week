@@ -10,7 +10,7 @@ Unshaded::~Unshaded() {
 void Unshaded::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) {
 	transparent = false;
 	absorb = true;
-	emission = false;
+	emission = true;
 	normal = rec.GetNormal();
 
 	attentuation = m_albedo;

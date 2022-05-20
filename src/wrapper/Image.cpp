@@ -2,13 +2,10 @@
 #include <string>
 #include <vector>
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "Image.h"
 
 #include "../../ext/stb/stb_image.h"
 #include "../../ext/stb/stb_image_write.h"
-
-#include "Image.h"
 
 Image::Image(const Image& copyImage) {
 	stbi_image_free(m_data);

@@ -337,6 +337,7 @@ bool Raytracing::RunMode() {
 	FastWrite::Write(FastWrite::ResetString() + "Rescaling Render..\n");
 	int renderWidth = m_render.GetWidth();
 	int renderHeight = m_render.GetHeight();
+
 	for (int x = 0; x < imageWidth; x++) {
 		Float x_f = Float(x * renderWidth) / imageWidth;
 
@@ -350,7 +351,7 @@ bool Raytracing::RunMode() {
 		}
 	}
 
-	rescaled.Dither();
+	//rescaled.Dither();
 
 	if (!rescaled.Write(output.c_str())) {
 		FastWrite::Reset();
@@ -685,7 +686,7 @@ bool Raytracing::RayHitObject(Ray& ray, const Float& t_min, const Float& t_max, 
 void Raytracing::OriginalScene() {
 	// ----- BACKGROUND -----
 
-	m_background = Image(0, 0);
+	m_background = HDR();
 	/*m_background.SetColor(0, 0, 128, Float(0.7) * 255, 255);
 	m_background.SetColor(0, 1, 255, 255, 255);*/
 
@@ -773,22 +774,32 @@ void Raytracing::OriginalScene() {
 void Raytracing::DebugScene() {
 	// ----- BACKGROUND -----
 
-	m_background = Image(256, 256, 3, Image::Interpolation::Linear, Image::Extrapolation::Extend);
+	m_background = HDR("images/hdr/lebombo_2k.hdr", HDR::Interpolation::Cubic, HDR::Extrapolation::Repeat, HDR::ColorSpace::Non_Color);
+	//m_background = HDR("images/hdr/studio_small_03_2k.hdr", HDR::Interpolation::Cubic, HDR::Extrapolation::Repeat, HDR::ColorSpace::Non_Color);
 
-	Float bottomY = m_background.GetHeight() / 2;
-	Float topY = m_background.GetHeight();
+#ifdef _DEBUG
+	{
+		std::vector<float> data;
+		data.reserve(m_background.GetSize());
+		float max = 0;
 
-	Vector3D bottom = Vector3D(127.5, Float(0.7) * 255, 255);
-	Vector3D top = Vector3D(255);
+		for (size_t i = 0; i < m_background.GetSize(); i++) {
+			data.push_back(m_background[i]);
 
-	for (int x = 0; x < m_background.GetWidth(); x++) {
-		for (int y = 0; y < m_background.GetHeight(); y++) {
-			Float r = Float::Map(y, bottomY, topY, bottom.GetX(), top.GetX(), true);
-			Float g = Float::Map(y, bottomY, topY, bottom.GetY(), top.GetY(), true);
-			Float b = Float::Map(y, bottomY, topY, bottom.GetZ(), top.GetZ(), true);
-			m_background.SetColor(x, y, r, g, b);
+			if (i == 0) {
+				max = m_background[i];
+			}
+			else {
+				if (m_background[i] > max) max = m_background[i];
+			}
 		}
+
+		Float r, g, b;
+		m_background.GetColor(0.5, 0.5, r, g, b);
+
+		int tmp = 1;
 	}
+#endif // _DEBUG
 
 	m_bgStrength = 1;
 
@@ -804,18 +815,25 @@ void Raytracing::DebugScene() {
 
 	Vector3D dist = lookAt - lookFrom;
 
+	m_settings["blurStrength"] = "0";
+
 	const Float aspectRatio = Float(imageWidth) / imageHeight;
 	m_camera = Camera(aspectRatio, 0, dist.Magnitude(), Float::FromString(m_settings["verticalFOV"]), lookFrom, lookAt, Vector3D::Up);
 
 	// ----- OBJECTS -----
 
 	m_matMap["diffuse"] = new Diffuse(Vector3D(0.01, 1, 0.01));
+	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
+	m_matMap["metallic"] = new Metal(Vector3D::One, 0, 1.45);
 	m_matMap["unshaded"] = new Unshaded(Vector3D(1, 0.01, 0.01));
 
 	// objects
 
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["diffuse"], Vector3D::Zero, Vector3D(-2.1, 1, 0)));
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["unshaded"], Vector3D::Zero, Vector3D(0, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["metallic"], Vector3D::Zero, Vector3D(2.1, 1, 0)));
+
+	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
 }
 
 void Raytracing::ShowProgress() {

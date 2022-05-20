@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../misc/BlueNoise.h"
+#include "../wrapper/HDR.h"
 #include "../wrapper/Image.h"
 #include "Camera.h"
 #include "materials/Material.h"
@@ -40,7 +41,7 @@ private:
 	Settings m_settings;
 
 	Camera m_camera;
-	Image m_background;
+	HDR m_background;
 	Image m_render;
 
 	BlueNoise m_blueNoise;
