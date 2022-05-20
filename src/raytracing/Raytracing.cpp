@@ -68,7 +68,7 @@ bool Raytracing::Init() {
 	Random::Seed = (unsigned int)std::stoul(m_settings["randomSeed"]);
 	if (Random::Seed == 0) Random::Seed = 0xACE1u;
 
-	if (Float::FromString(m_settings["verticalFOV"]) > 90) m_settings["verticalFOV"] = "90";
+	if (Float::FromString(m_settings["verticalFOV"]) > 180) m_settings["verticalFOV"] = "179";
 	if (Float::FromString(m_settings["verticalFOV"]) <= 0) m_settings["verticalFOV"] = "1";
 
 	// generate blue noise samples
@@ -78,18 +78,57 @@ bool Raytracing::Init() {
 	// generate tiles
 	// initialise scene
 
+	int imageWidth = std::stoi(m_settings["imageWidth"]);
+	int imageHeight = std::stoi(m_settings["imageHeight"]);
+	int tileSize = std::stoi(m_settings["tileSize"]);
+
+	Float renderScale = Float::FromString(m_settings["renderScale"]);
+	imageWidth = (renderScale * imageWidth).ToInt();
+	imageHeight = (renderScale * imageHeight).ToInt();
+	//tileSize = (renderScale * tileSize).ToInt();
+
+	m_render = Image(imageWidth, imageHeight, 3, Image::Interpolation::Cubic, Image::Extrapolation::Repeat, Image::ColorSpace::sRGB);
+
 	// ----- MULTI-THREADING -----
 
 	m_useThreads = std::stoi(m_settings["threads"]);
 	m_useThreads = m_useThreads <= 0 ? std::thread::hardware_concurrency() : m_useThreads;
 
+	// ----- INITIALISE SCENE -----
+
+	m_clipStart = Float::NearZero;
+
+	{
+		Random::SeedType tmp = (Random::SeedType)Random::RandomUInt();
+	}
+
+	FastWrite::Write("Creating Scene \n");
+
+	if (m_settings["scene"] == "original") {
+		m_fileFolder = "renders/original/";
+		OriginalScene();
+	}
+	else if (m_settings["scene"] == "debug") {
+		m_fileFolder = "renders/debugScene/";
+		DebugScene();
+	}
+	else {
+		m_fileFolder = "renders/original/";
+		OriginalScene();
+	}
+
+	// ----- GENERATE BLUE NOISE -----
+
+	//Random::Seed = blueNoiseSeed;
+	int minSamples = std::stoi(m_settings["minSamples"]);
+	int maxSamples = std::stoi(m_settings["maxSamples"]);
+
+	if (minSamples < 256) {
+		int sampleCount = maxSamples < 256 ? maxSamples : 256;
+		m_blueNoise.Generate(sampleCount, 10);
+	}
+
 	// ----- GENERATE TILES -----
-
-	int imageWidth = std::stoi(m_settings["imageWidth"]);
-	int imageHeight = std::stoi(m_settings["imageHeight"]);
-	int tileSize = std::stoi(m_settings["tileSize"]);
-
-	m_render = Image(imageWidth, imageHeight, 3, Image::Interpolation::Cubic, Image::Extrapolation::Extend, Image::ColorSpace::sRGB);
 
 	int maxXTiles = imageWidth < tileSize ? 1 : imageWidth / tileSize;
 	int maxYTiles = imageHeight < tileSize ? 1 : imageHeight / tileSize;
@@ -122,13 +161,13 @@ bool Raytracing::Init() {
 			int maxX = x + addX;
 			maxX = maxX > imageWidth ? imageWidth : maxX;
 
-			m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(1, 0, 0), Vector3D(1, 0, 0), countX, countY, 0 });
+			m_tiles.push_back({ x, y, maxX, maxY, false, false, Vector3D(1, 0, 0), Vector3D(1, 0, 0), countX, countY, Random::RandomUInt() });
 
 			x = maxX;
 			l_widthModulo--;
 			countX++;
 
-			FastWrite::Write(FastWrite::ResetString() + "x: " + std::to_string(x) + "\ny: " + std::to_string(y) + "\n");
+			//FastWrite::Write(FastWrite::ResetString() + "x: " + std::to_string(x) + "\ny: " + std::to_string(y) + "\n");
 		}
 
 		m_xTileCount = xTileCount;
@@ -139,45 +178,6 @@ bool Raytracing::Init() {
 	}
 
 	std::reverse(m_tiles.begin(), m_tiles.end());
-
-	// Assign set seed for running raytracing regardless of scene generation - for consistent rendering of samples
-	Random::SeedType runSeed = Random::Seed;
-	Random::SeedType blueNoiseSeed = (Random::SeedType)Random::RandomUInt();
-
-	// ----- INITIALISE SCENE -----
-
-	m_clipStart = Float::NearZero;
-
-	FastWrite::Write("Creating Scene \n");
-
-	if (m_settings["scene"] == "original") {
-		m_fileFolder = "renders/original/";
-		OriginalScene();
-	}
-	else if (m_settings["scene"] == "debug") {
-		m_fileFolder = "renders/debugScene/";
-		DebugScene();
-	}
-	else {
-		m_fileFolder = "renders/original/";
-		OriginalScene();
-	}
-
-	// ----- GENERATE BLUE NOISE -----
-
-	Random::Seed = blueNoiseSeed;
-	int minSamples = std::stoi(m_settings["minSamples"]);
-	int maxSamples = std::stoi(m_settings["maxSamples"]);
-
-	if (minSamples < 256) {
-		int sampleCount = maxSamples < 256 ? maxSamples : 256;
-		m_blueNoise.Generate(sampleCount, 10);
-	}
-
-	Random::Seed = runSeed;
-	for (auto it = m_tiles.begin(); it != m_tiles.end(); it++) {
-		(*it).seed = Random::RandomUInt();
-	}
 
 	return true;
 }
@@ -333,9 +333,29 @@ bool Raytracing::RunMode() {
 		output += "render_c.png";
 	}
 
-	m_render.Dither();
+	int imageWidth = std::stoi(m_settings["imageWidth"]);
+	int imageHeight = std::stoi(m_settings["imageHeight"]);
+	Image rescaled = Image(imageWidth, imageHeight, 3, Image::Interpolation::Cubic, Image::Extrapolation::Extend, Image::ColorSpace::sRGB);
 
-	if (!m_render.Write(output.c_str())) {
+	FastWrite::Write(FastWrite::ResetString() + "Rescaling Render..\n");
+	int renderWidth = m_render.GetWidth();
+	int renderHeight = m_render.GetHeight();
+	for (int x = 0; x < imageWidth; x++) {
+		Float x_f = Float(x * renderWidth) / imageWidth;
+
+		for (int y = 0; y < imageHeight; y++) {
+			Float y_f = Float(y * renderHeight) / imageHeight;
+
+			Float r, g, b;
+			m_render.GetColor(x_f, y_f, r, g, b);
+
+			rescaled.SetColor(x, y, r, g, b);
+		}
+	}
+
+	//rescaled.Dither();
+
+	if (!rescaled.Write(output.c_str())) {
 		FastWrite::Reset();
 		FastWrite::Write("Error saving : " + output + "\n");
 
@@ -375,96 +395,101 @@ void Raytracing::RenderTile(const size_t& startIndex) {
 	// Assign tile color
 	// Log time elapsed
 
-	m_tiles[startIndex].activeTile = true;
-	Random::Seed = m_tiles[startIndex].seed;
+	if (startIndex < m_tiles.size()) {
+		m_tiles[startIndex].activeTile = true;
+		Random::Seed = m_tiles[startIndex].seed;
 
-	auto start = std::chrono::high_resolution_clock::now();
-	Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
-	auto end = std::chrono::high_resolution_clock::now();
-	auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+		auto start = std::chrono::high_resolution_clock::now();
+		Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
+		auto end = std::chrono::high_resolution_clock::now();
+		auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-	m_tiles[startIndex].activeTile = false;
-	std::thread::id thisId = std::this_thread::get_id();
-	m_tiles[startIndex].tileComplete = true;
+		m_tiles[startIndex].activeTile = false;
+		std::thread::id thisId = std::this_thread::get_id();
+		m_tiles[startIndex].tileComplete = true;
 
-	Vector3D getColor = Vector3D::Zero;
-	Float count = 0;
-	int halfX = m_tiles[startIndex].maxX + m_tiles[startIndex].minX;
-	halfX /= 2;
+		Vector3D getColor = Vector3D::Zero;
+		Float count = 0;
+		int halfX = m_tiles[startIndex].maxX + m_tiles[startIndex].minX;
+		halfX /= 2;
 
-	int imageHeight = std::stoi(m_settings["imageHeight"]);
+		int imageHeight = std::stoi(m_settings["imageHeight"]);
 
-	for (int xImg = m_tiles[startIndex].minX; xImg < halfX; xImg++) {
-		for (int yImg = m_tiles[startIndex].minY; yImg < m_tiles[startIndex].maxY; yImg++) {
-			count += 1.f;
-			int flippedY = (imageHeight - yImg) - 1;
+		Float renderScale = Float::FromString(m_settings["renderScale"]);
+		imageHeight = (renderScale * imageHeight).ToInt();
 
-			Float r, g, b;
-			m_render.GetColor(xImg, flippedY, r, g, b);
+		for (int xImg = m_tiles[startIndex].minX; xImg < halfX; xImg++) {
+			for (int yImg = m_tiles[startIndex].minY; yImg < m_tiles[startIndex].maxY; yImg++) {
+				count += 1.f;
+				int flippedY = (imageHeight - yImg) - 1;
 
-			if (m_settings["renderMode"] != "normal") {
-				r = Image::LinearToSRGB(r);
-				g = Image::LinearToSRGB(g);
-				b = Image::LinearToSRGB(b);
+				Float r, g, b;
+				m_render.GetColor(xImg, flippedY, r, g, b);
+
+				if (m_settings["renderMode"] != "normal") {
+					r = Image::LinearToSRGB(r);
+					g = Image::LinearToSRGB(g);
+					b = Image::LinearToSRGB(b);
+				}
+
+				/*r = std::lerp(12.f, 204.f, r / 255.f);
+				g = std::lerp(12.f, 204.f, g / 255.f);
+				b = std::lerp(12.f, 204.f, b / 255.f);*/
+
+				getColor += Vector3D(r, g, b);
 			}
-
-			/*r = std::lerp(12.f, 204.f, r / 255.f);
-			g = std::lerp(12.f, 204.f, g / 255.f);
-			b = std::lerp(12.f, 204.f, b / 255.f);*/
-
-			getColor += Vector3D(r, g, b);
 		}
-	}
 
-	getColor /= count;
-	m_tiles[startIndex].leftXTileColor = Vector3D::Clamp(getColor, Vector3D::Zero, Vector3D(255));
+		getColor /= count;
+		m_tiles[startIndex].leftXTileColor = Vector3D::Clamp(getColor, Vector3D::Zero, Vector3D(255));
 
-	getColor = Vector3D::Zero;
-	count = 0.f;
-	for (int xImg = halfX; xImg < m_tiles[startIndex].maxX; xImg++) {
-		for (int yImg = m_tiles[startIndex].minY; yImg < m_tiles[startIndex].maxY; yImg++) {
-			count += 1.f;
-			int flippedY = (imageHeight - yImg) - 1;
+		getColor = Vector3D::Zero;
+		count = 0.f;
+		for (int xImg = halfX; xImg < m_tiles[startIndex].maxX; xImg++) {
+			for (int yImg = m_tiles[startIndex].minY; yImg < m_tiles[startIndex].maxY; yImg++) {
+				count += 1.f;
+				int flippedY = (imageHeight - yImg) - 1;
 
-			Float r, g, b;
-			m_render.GetColor(xImg, flippedY, r, g, b);
+				Float r, g, b;
+				m_render.GetColor(xImg, flippedY, r, g, b);
 
-			/*r = std::lerp(12.f, 204.f, r / 255.f);
-			g = std::lerp(12.f, 204.f, g / 255.f);
-			b = std::lerp(12.f, 204.f, b / 255.f);*/
+				/*r = std::lerp(12.f, 204.f, r / 255.f);
+				g = std::lerp(12.f, 204.f, g / 255.f);
+				b = std::lerp(12.f, 204.f, b / 255.f);*/
 
-			if (m_settings["renderMode"] != "normal") {
-				r = Image::LinearToSRGB(r);
-				g = Image::LinearToSRGB(g);
-				b = Image::LinearToSRGB(b);
+				if (m_settings["renderMode"] != "normal") {
+					r = Image::LinearToSRGB(r);
+					g = Image::LinearToSRGB(g);
+					b = Image::LinearToSRGB(b);
+				}
+
+				getColor += Vector3D(r, g, b);
 			}
-
-			getColor += Vector3D(r, g, b);
 		}
-	}
-	getColor /= count;
-	m_tiles[startIndex].rightXTileColor = Vector3D::Clamp(getColor, Vector3D::Zero, Vector3D(255));
+		getColor /= count;
+		m_tiles[startIndex].rightXTileColor = Vector3D::Clamp(getColor, Vector3D::Zero, Vector3D(255));
 
-	m_mutex.lock();
-	m_tilesRendered++;
+		m_mutex.lock();
+		m_tilesRendered++;
 
-	ShowProgress();
+		ShowProgress();
 
-	// ----- LOGGING -----
-	if (m_useThreads > 1) {
-		m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << '\n';
-	}
-	else {
-		m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
-	}
+		// ----- LOGGING -----
+		if (m_useThreads > 1) {
+			m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << '\n';
+		}
+		else {
+			m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
+		}
 
-	size_t next = m_nextAvailable;
-	m_nextAvailable++;
+		size_t next = m_nextAvailable;
+		m_nextAvailable++;
 
-	m_mutex.unlock();
+		m_mutex.unlock();
 
-	if (next < m_tiles.size()) {
-		RenderTile(next);
+		if (next < m_tiles.size()) {
+			RenderTile(next);
+		}
 	}
 }
 
@@ -481,6 +506,10 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 	int maxDepth = std::stoi(m_settings["rayDepth"]);
 	int maxSamples = std::stoi(m_settings["maxSamples"]);
 	int minSamples = std::stoi(m_settings["minSamples"]);
+
+	Float renderScale = Float::FromString(m_settings["renderScale"]);
+	imageWidth = (renderScale * imageWidth).ToInt();
+	imageHeight = (renderScale * imageHeight).ToInt();
 
 	if (minSamples > maxSamples) minSamples = maxSamples;
 
@@ -682,8 +711,8 @@ void Raytracing::OriginalScene() {
 
 	// ----- CAMERA -----
 
-	int imageWidth = std::stoi(m_settings["imageWidth"]);
-	int imageHeight = std::stoi(m_settings["imageHeight"]);
+	int imageWidth = m_render.GetWidth();;
+	int imageHeight = m_render.GetHeight();
 
 	Vector3D lookFrom(13, 2, 3);
 
@@ -768,8 +797,8 @@ void Raytracing::DebugScene() {
 
 	// ----- CAMERA -----
 
-	int imageWidth = std::stoi(m_settings["imageWidth"]);
-	int imageHeight = std::stoi(m_settings["imageHeight"]);
+	int imageWidth = m_render.GetWidth();;
+	int imageHeight = m_render.GetHeight();
 
 	m_clipEnd = 1000;
 
@@ -905,7 +934,7 @@ void Raytracing::ShowProgress() {
 		"\nProgress: " + std::to_string(m_tilesRendered));
 
 #endif // ENABLE_LOGGING
-}
+	}
 
 void Raytracing::ShuffleTiles() {
 }

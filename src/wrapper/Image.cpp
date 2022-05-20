@@ -150,6 +150,8 @@ bool Image::Write(const char* file) {
 		//m_data[i] = Float::Round(Float::Clamp(m_dataF[i], 0, 255)).ToUInt();
 	}
 
+	Dither(255);
+
 	switch (type) {
 	case Image::FileType::BMP:
 		success = stbi_write_bmp(file, m_w, m_h, m_channels, m_data);
@@ -196,8 +198,8 @@ void Image::GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& 
 		b = 0;
 	}
 	else {
-		Float l_x = m_extrapolation == Extrapolation::Extend ? Float::Clamp(x, 0, m_w) : x;
-		Float l_y = m_extrapolation == Extrapolation::Extend ? Float::Clamp(y, 0, m_h) : y;
+		Float l_x = m_extrapolation == Extrapolation::Clip ? Float::Clamp(x, 0, m_w) : x;
+		Float l_y = m_extrapolation == Extrapolation::Clip ? Float::Clamp(y, 0, m_h) : y;
 
 		if (m_interpolation == Interpolation::Linear) {
 			// bilinear interpolation

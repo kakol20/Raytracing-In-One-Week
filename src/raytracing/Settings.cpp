@@ -6,11 +6,12 @@
 Settings::Settings() {
 	m_settings["imageWidth"] = "1280";
 	m_settings["imageHeight"] = "720";
+	m_settings["renderScale"] = "1.25";
 
-	m_settings["rayDepth"] = "12";
+	m_settings["rayDepth"] = "8";
 	m_settings["threads"] = "12";
 	m_settings["maxSamples"] = "128";
-	m_settings["minSamples"] = "32";
+	m_settings["minSamples"] = "8";
 	m_settings["noiseThreshold"] = "0.01";
 	m_settings["tileSize"] = "32";
 	m_settings["renderMode"] = "color";
@@ -62,6 +63,7 @@ void Settings::Write(const std::string& fileLocation) {
 	m_file << "# ----- IMAGE SETTINGS -----\n";
 	m_file << "imageWidth=" << m_settings["imageWidth"] << '\n';
 	m_file << "imageHeight=" << m_settings["imageHeight"] << '\n';
+	m_file << "renderScale=" << m_settings["renderScale"] << '\n';
 
 	m_file << "\n# ----- RENDER SETTINGS -----\n";
 	m_file << "rayDepth=" << m_settings["rayDepth"] << '\n';
