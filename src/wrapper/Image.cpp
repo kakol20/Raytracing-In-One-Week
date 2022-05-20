@@ -145,12 +145,12 @@ bool Image::Write(const char* file) {
 			val = Image::LinearToSRGB(val);
 		}
 
-		m_data[i] = (uint8_t)Float::Round(Float::Clamp(val, 0, 255)).ToUInt();
+		m_data[i] = (uint8_t)Float::Clamp(val, 0, 255).ToUInt();
 
 		//m_data[i] = Float::Round(Float::Clamp(m_dataF[i], 0, 255)).ToUInt();
 	}
 
-	Dither(255);
+	//Dither(255);
 
 	switch (type) {
 	case Image::FileType::BMP:

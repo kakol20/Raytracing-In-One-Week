@@ -335,7 +335,8 @@ bool Raytracing::RunMode() {
 
 	int imageWidth = std::stoi(m_settings["imageWidth"]);
 	int imageHeight = std::stoi(m_settings["imageHeight"]);
-	Image rescaled = Image(imageWidth, imageHeight, 3, Image::Interpolation::Cubic, Image::Extrapolation::Extend, Image::ColorSpace::sRGB);
+	Image::ColorSpace colorSpace = m_settings["renderMode"] == "normal" ? Image::ColorSpace::Non_Color : Image::ColorSpace::sRGB;
+	Image rescaled = Image(imageWidth, imageHeight, 3, Image::Interpolation::Cubic, Image::Extrapolation::Extend, colorSpace);
 
 	FastWrite::Write(FastWrite::ResetString() + "Rescaling Render..\n");
 	int renderWidth = m_render.GetWidth();
@@ -353,7 +354,7 @@ bool Raytracing::RunMode() {
 		}
 	}
 
-	//rescaled.Dither();
+	rescaled.Dither();
 
 	if (!rescaled.Write(output.c_str())) {
 		FastWrite::Reset();
@@ -934,7 +935,7 @@ void Raytracing::ShowProgress() {
 		"\nProgress: " + std::to_string(m_tilesRendered));
 
 #endif // ENABLE_LOGGING
-	}
+}
 
 void Raytracing::ShuffleTiles() {
 }
