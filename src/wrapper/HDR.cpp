@@ -1,6 +1,5 @@
 #include "HDR.h"
 
-
 #include "../../ext/stb/stb_image.h"
 
 #include "Image.h"
@@ -79,46 +78,36 @@ void HDR::GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& b)
 			// nearest neighbour
 			NearestNeighbour(l_x, l_y, r, g, b);
 		}
-
-		if (m_extrapolation == Extrapolation::Clip) {
-			r = 0;
-			g = 0;
-			b = 0;
-		}
-
-		if (r < 0) r = 0;
-		if (g < 0) g = 0;
-		if (b < 0) b = 0;
 	}
 }
 
 bool HDR::Read(const char* file) {
-	m_data = stbi_loadf(file, &m_w, &m_h, &m_channels, 3);
+	m_data = stbi_loadf(file, &m_w, &m_h, &m_channels, 0);
+
+	uint8_t* dataI = stbi_load(file, &m_w, &m_h, &m_channels, 0);
+
+	if (m_data == NULL) return false;
 
 	m_size = (size_t)m_w * m_h * m_channels;
 
-	if (m_data == nullptr) return false;
-
-	stbi_uc* dataI = stbi_load(file, &m_w, &m_h, &m_channels, 3);
-
-	if (dataI == nullptr) return false;
-
 	for (size_t i = 0; i < m_size; i++) {
-		Float val = m_data[i];
+		float val = m_data[i];
+		val = val < 0 ? 0 : val;
 		val *= 255;
-		//Float val = 1;
 
-		if (val < 0) val = 0;
+		val = 0;
+		val += (float)dataI[i];
 
-		//val *= (int)dataI[i];
-		//val /= 2;
+		if (m_colorSpace == ColorSpace::sRGB) {
+			val = (float)Image::sRGBToLinear(val).GetValue();
+		}
 
-		if (val < 0) val = 0;
-
-		if (m_colorSpace == ColorSpace::sRGB) val = Image::sRGBToLinear(val);
-
-		m_data[i] = (float)val.GetValue();
+		m_data[i] = val;
 	}
+
+#ifdef _DEBUG
+	std::cout << "Read image successful: " << file << '\n';
+#endif // _DEBUG
 
 	stbi_image_free(dataI);
 	return true;

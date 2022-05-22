@@ -21,16 +21,16 @@ public:
 	/// </summary>
 	/// <param name="i"></param>
 	/// <returns></returns>
-	float& operator[](size_t i) { return m_data[i]; };
+	inline float& operator[](size_t i) { return m_data[i]; };
 
 	void GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& b);
 
-	int GetHeight() const { return m_h; };
-	int GetWidth() const { return m_w; };
-	size_t GetSize() const { return m_size; };
+	inline int GetHeight() const { return m_h; };
+	inline int GetWidth() const { return m_w; };
+	inline size_t GetSize() const { return m_size; };
 
 private:
-	float* m_data = nullptr;
+	float* m_data;
 	int m_channels;
 	int m_h;
 	int m_w;

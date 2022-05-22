@@ -195,8 +195,8 @@ void Image::GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& 
 		b = 0;
 	}
 	else {
-		Float l_x = m_extrapolation == Extrapolation::Clip ? Float::Clamp(x, 0, m_w) : x;
-		Float l_y = m_extrapolation == Extrapolation::Clip ? Float::Clamp(y, 0, m_h) : y;
+		Float l_x = m_extrapolation == Extrapolation::Extend ? Float::Clamp(x, 0, m_w) : x;
+		Float l_y = m_extrapolation == Extrapolation::Extend ? Float::Clamp(y, 0, m_h) : y;
 
 		if (m_interpolation == Interpolation::Linear) {
 			// bilinear interpolation

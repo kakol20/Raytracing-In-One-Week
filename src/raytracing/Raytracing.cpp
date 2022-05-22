@@ -686,7 +686,7 @@ bool Raytracing::RayHitObject(Ray& ray, const Float& t_min, const Float& t_max, 
 void Raytracing::OriginalScene() {
 	// ----- BACKGROUND -----
 
-	m_background = HDR();
+	//m_background;
 	/*m_background.SetColor(0, 0, 128, Float(0.7) * 255, 255);
 	m_background.SetColor(0, 1, 255, 255, 255);*/
 
@@ -773,8 +773,11 @@ void Raytracing::OriginalScene() {
 
 void Raytracing::DebugScene() {
 	// ----- BACKGROUND -----
-
-	m_background = HDR("images/hdr/lebombo_2k.hdr", HDR::Interpolation::Cubic, HDR::Extrapolation::Repeat, HDR::ColorSpace::Non_Color);
+#ifdef HDR_BACKGROUND
+	m_background = HDR("images/hdr/lebombo_2k.hdr", HDR::Interpolation::Closest, HDR::Extrapolation::Repeat, HDR::ColorSpace::sRGB);
+#else
+	m_background = Image("images/hdr/lebombo_2k.hdr", Image::Interpolation::Cubic, Image::Extrapolation::Repeat, Image::ColorSpace::sRGB);
+#endif // HDR_BACKGROUND
 	//m_background = HDR("images/hdr/studio_small_03_2k.hdr", HDR::Interpolation::Cubic, HDR::Extrapolation::Repeat, HDR::ColorSpace::Non_Color);
 
 #ifdef _DEBUG
@@ -782,15 +785,26 @@ void Raytracing::DebugScene() {
 		std::vector<float> data;
 		data.reserve(m_background.GetSize());
 		float max = 0;
+		float min = 0;
+		size_t maxIndex = 0;
+		size_t minIndex = 0;
 
 		for (size_t i = 0; i < m_background.GetSize(); i++) {
 			data.push_back(m_background[i]);
 
 			if (i == 0) {
-				max = m_background[i];
+				max = data[i];
+				max = data[i];
 			}
 			else {
-				if (m_background[i] > max) max = m_background[i];
+				if (data[i] > max) {
+					max = data[i];
+					maxIndex = i;
+				}
+				if (data[i] < min) {
+					min = data[i];
+					minIndex = i;
+				}
 			}
 		}
 
@@ -826,12 +840,14 @@ void Raytracing::DebugScene() {
 	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
 	m_matMap["metallic"] = new Metal(Vector3D::One, 0, 1.45);
 	m_matMap["unshaded"] = new Unshaded(Vector3D(1, 0.01, 0.01));
+	m_matMap["glass"] = new Glass(Vector3D(0.01, 0.01, 1), 0.1, 1.45);
 
 	// objects
 
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["diffuse"], Vector3D::Zero, Vector3D(-2.1, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["unshaded"], Vector3D::Zero, Vector3D(0, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["metallic"], Vector3D::Zero, Vector3D(2.1, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["diffuse"], Vector3D::Zero, Vector3D(-3.15, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["unshaded"], Vector3D::Zero, Vector3D(-1.05, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["glass"], Vector3D::Zero, Vector3D(1.05, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["metallic"], Vector3D::Zero, Vector3D(3.15, 1, 0)));
 
 	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
 }

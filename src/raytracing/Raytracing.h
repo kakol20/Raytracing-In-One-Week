@@ -1,6 +1,8 @@
 #ifndef RAYTRACING_H
 #define RAYTRACING_H
 
+#define HDR_BACKGROUND
+
 #include <fstream>
 #include <map>
 #include <mutex>
@@ -41,8 +43,13 @@ private:
 	Settings m_settings;
 
 	Camera m_camera;
-	HDR m_background;
 	Image m_render;
+
+#ifdef HDR_BACKGROUND
+	HDR m_background;
+#else
+	Image m_background;
+#endif // HDR_BACKGROUND
 
 	BlueNoise m_blueNoise;
 	Float m_bgStrength;
