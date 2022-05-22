@@ -338,30 +338,44 @@ bool Raytracing::RunMode() {
 	int renderWidth = m_render.GetWidth();
 	int renderHeight = m_render.GetHeight();
 
-	for (int x = 0; x < imageWidth; x++) {
-		Float x_f = Float(x * renderWidth) / imageWidth;
+	if (m_settings["renderScale"] == "1") {
+		if (!m_render.Write(output.c_str())) {
+			FastWrite::Reset();
+			FastWrite::Write("Error saving : " + output + "\n");
 
-		for (int y = 0; y < imageHeight; y++) {
-			Float y_f = Float(y * renderHeight) / imageHeight;
+			m_log.close();
 
-			Float r, g, b;
-			m_render.GetColor(x_f, y_f, r, g, b);
+			std::cin.ignore();
 
-			rescaled.SetColor(x, y, r, g, b);
+			return false;
 		}
 	}
+	else {
+		for (int x = 0; x < imageWidth; x++) {
+			Float x_f = Float(x * renderWidth) / imageWidth;
 
-	//rescaled.Dither();
+			for (int y = 0; y < imageHeight; y++) {
+				Float y_f = Float(y * renderHeight) / imageHeight;
 
-	if (!rescaled.Write(output.c_str())) {
-		FastWrite::Reset();
-		FastWrite::Write("Error saving : " + output + "\n");
+				Float r, g, b;
+				m_render.GetColor(x_f, y_f, r, g, b);
 
-		m_log.close();
+				rescaled.SetColor(x, y, r, g, b);
+			}
+		}
 
-		std::cin.ignore();
+		//rescaled.Dither();
 
-		return false;
+		if (!rescaled.Write(output.c_str())) {
+			FastWrite::Reset();
+			FastWrite::Write("Error saving : " + output + "\n");
+
+			m_log.close();
+
+			std::cin.ignore();
+
+			return false;
+		}
 	}
 
 	// ----- END -----
@@ -761,7 +775,7 @@ void Raytracing::OriginalScene() {
 				}
 				else {
 					m_matMap[matID] = new Glass(Vector3D::One, 0, 1.5);
-				}
+			}
 
 				m_renderedObjects.push_back(new Sphere(0.2, m_matMap[matID], Vector3D::One, center));
 			}
@@ -805,14 +819,14 @@ void Raytracing::DebugScene() {
 					min = data[i];
 					minIndex = i;
 				}
-			}
 		}
+	}
 
 		Float r, g, b;
 		m_background.GetColor(0.5, 0.5, r, g, b);
 
 		int tmp = 1;
-	}
+}
 #endif // _DEBUG
 
 	m_bgStrength = 1;
@@ -836,11 +850,15 @@ void Raytracing::DebugScene() {
 
 	// ----- OBJECTS -----
 
-	m_matMap["diffuse"] = new Diffuse(Vector3D(0.01, 1, 0.01));
+
+
+	m_matMap["diffuse"] = new Diffuse(Vector3D(1, Float::NearZero, Float::NearZero));
+	m_matMap["unshaded"] = new Unshaded(Vector3D(1, 1, Float::NearZero));
+	m_matMap["metallic"] = new Metal(Vector3D(Float::NearZero, 1, Float::NearZero), 0.1, 1.45);
+	m_matMap["glass"] = new Glass(Vector3D(Float::NearZero, Float::NearZero, 1), 0.1, 1.45);
+
 	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
-	m_matMap["metallic"] = new Metal(Vector3D::One, 0, 1.45);
-	m_matMap["unshaded"] = new Unshaded(Vector3D(1, 0.01, 0.01));
-	m_matMap["glass"] = new Glass(Vector3D(0.01, 0.01, 1), 0.1, 1.45);
+
 
 	// objects
 
@@ -948,9 +966,9 @@ void Raytracing::ShowProgress() {
 				else {
 					output += oof::reset_formatting();
 					output += (char)176u;
-				}
-			}
 		}
+	}
+}
 	}
 
 	FastWrite::Write(output);
@@ -968,4 +986,17 @@ void Raytracing::ShowProgress() {
 }
 
 void Raytracing::ShuffleTiles() {
+	size_t i = m_tiles.size() - 1;
+	while (i >= 0) {
+		//size_t swap = (size_t)round(Random::RandomFloat(0.f, (float)i));
+		size_t swap = (size_t)Random::RandomUInt() % (i + 1);
+
+		if (swap < i) {
+			std::swap(m_tiles[i], m_tiles[swap]);
+		}
+
+		if (i == 0) break;
+
+		i--;
+	}
 }

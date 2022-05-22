@@ -1,7 +1,7 @@
 #ifndef RAYTRACING_H
 #define RAYTRACING_H
 
-#define HDR_BACKGROUND
+//#define HDR_BACKGROUND
 
 #include <fstream>
 #include <map>

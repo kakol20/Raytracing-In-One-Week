@@ -30,7 +30,6 @@ public:
 	inline size_t GetSize() const { return m_size; };
 
 private:
-	float* m_data;
 	int m_channels;
 	int m_h;
 	int m_w;
@@ -39,6 +38,9 @@ private:
 	Interpolation m_interpolation;
 	Extrapolation m_extrapolation;
 	ColorSpace m_colorSpace;
+
+	// ----- DATA -----
+	float* m_data;
 
 	bool Read(const char* file);
 

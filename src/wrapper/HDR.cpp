@@ -86,33 +86,38 @@ bool HDR::Read(const char* file) {
 	stbi_hdr_to_ldr_scale(1.0f);
 
 	m_data = stbi_loadf(file, &m_w, &m_h, &m_channels, 0);
-
-	uint8_t* dataI = stbi_load(file, &m_w, &m_h, &m_channels, 0);
+	//m_data = stbi_load(file, &m_w, &m_h, &m_channels, 0);
 
 	if (m_data == NULL) return false;
 
 	m_size = (size_t)m_w * m_h * m_channels;
 
 	for (size_t i = 0; i < m_size; i++) {
-		float val = m_data[i];
-		val = val < 0 ? 0 : val;
+		/*Float val = m_data[i];
+		val = Float::Max(0, val);
 		val *= 255;
 
-		//val = 0;
-		//val += (float)dataI[i];
+		val = 0;
+		val += (float)dataI[i];
 
 		if (m_colorSpace == ColorSpace::sRGB) {
 			val = (float)Image::sRGBToLinear(val).GetValue();
 		}
 
-		m_data[i] = val;
+		m_data[i] = val.GetValue();*/
+
+		//m_data[i] += 1.f;
+		//m_data[i] /= 2.f;
+
+		m_data[i] = std::fmax(0.f, m_data[i]);
+		m_data[i] *= 255.f;
+		//m_data[i] = (float)m_dataI[i];
 	}
 
 #ifdef _DEBUG
 	std::cout << "Read image successful: " << file << '\n';
 #endif // _DEBUG
 
-	stbi_image_free(dataI);
 	return true;
 }
 
@@ -301,11 +306,9 @@ void HDR::Bilinear(const Float& x, const Float& y, Float& r, Float& g, Float& b)
 
 	for (int i = 0; i < count; i++) {
 		Float q11 = m_data[index11 + i];
-
 		Float q12 = m_data[index12 + i];
 
 		Float q21 = m_data[index21 + i];
-
 		Float q22 = m_data[index22 + i];
 
 		Float r1 = Float::Lerp(q11, q21, x - lowerX);
