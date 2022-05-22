@@ -82,6 +82,9 @@ void HDR::GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& b)
 }
 
 bool HDR::Read(const char* file) {
+	stbi_hdr_to_ldr_gamma(2.2f);
+	stbi_hdr_to_ldr_scale(1.0f);
+
 	m_data = stbi_loadf(file, &m_w, &m_h, &m_channels, 0);
 
 	uint8_t* dataI = stbi_load(file, &m_w, &m_h, &m_channels, 0);
@@ -95,8 +98,8 @@ bool HDR::Read(const char* file) {
 		val = val < 0 ? 0 : val;
 		val *= 255;
 
-		val = 0;
-		val += (float)dataI[i];
+		//val = 0;
+		//val += (float)dataI[i];
 
 		if (m_colorSpace == ColorSpace::sRGB) {
 			val = (float)Image::sRGBToLinear(val).GetValue();
