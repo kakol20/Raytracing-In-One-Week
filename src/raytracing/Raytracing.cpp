@@ -535,35 +535,72 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 			Vector3D previous(0);
 			Vector3D totalDiff(0);
 
-			size_t samplesOffset = (size_t)Float::Round(Random::RandomFloat(0, (int)m_blueNoise.Size())).ToInt();
+			//size_t redOffset = (size_t)Float::Round(Random::RandomFloat(0, (int)m_blueNoise.Size())).ToInt();
+			size_t redOffset = (size_t)Random::RandomInt(0, (int)m_blueNoise.Size());
+			size_t greenOffset = (size_t)Random::RandomInt(0, (int)m_blueNoise.Size());
+			size_t blueOffset = (size_t)Random::RandomInt(0, (int)m_blueNoise.Size());
 
 			for (int s = 0; s < maxSamples; s++) {
 				//Float u = x / Float(imageWidth - 1);
 				//Float v = y / Float(imageHeight - 1);
 
-				Float u = x;
-				Float v = y;
+				Float redU = x;
+				Float redV = y;
+				Float greenU = x;
+				Float greenV = y;
+				Float blueU = x;
+				Float blueV = y;
 
 				if (s < (int)m_blueNoise.Size()) {
-					size_t index = s + samplesOffset;
-					Vector3D sample = m_blueNoise[index];
-					u += sample.GetX();
-					v += sample.GetY();
+					size_t index = s + redOffset;
+					Vector3D redSample = m_blueNoise[index];
+					redU += redSample.GetX();
+					redV += redSample.GetY();
+					
+					index = s + greenOffset;
+					Vector3D greenSample = m_blueNoise[index];
+					greenU += greenSample.GetX();
+					greenV += greenSample.GetY();
+
+					index = s + blueOffset;
+					Vector3D blueSample = m_blueNoise[index];
+					blueU += blueSample.GetX();
+					blueV += blueSample.GetY();
 				}
 				else {
-					u += Random::RandomFloat();
-					v += Random::RandomFloat();
+					redU += Random::RandomFloat();
+					redV += Random::RandomFloat();
+
+					greenU += Random::RandomFloat();
+					greenV += Random::RandomFloat();
+
+					blueU += Random::RandomFloat();
+					blueV += Random::RandomFloat();
 				}
 
-				u /= Float(imageWidth - 1);
-				v /= Float(imageHeight - 1);
+				redU /= Float(imageWidth - 1);
+				redV /= Float(imageHeight - 1);
 
-				Ray ray = m_camera.GetRay(u, v);
-				Vector3D rayColor = RayColor(ray, maxDepth);
+				greenU /= Float(imageWidth - 1);
+				greenV /= Float(imageHeight - 1);
+
+				blueU /= Float(imageWidth - 1);
+				blueV /= Float(imageHeight - 1);
+
+				Ray ray = m_camera.GetRay(redU, redV);
+				Vector3D redRayColor = RayColor(ray, maxDepth, Vector3D(1, 0, 0));
+
+				ray = m_camera.GetRay(greenU, greenV);
+				Vector3D greenRayColor = RayColor(ray, maxDepth, Vector3D(0, 1, 0));
+
+				ray = m_camera.GetRay(blueU, blueV);
+				Vector3D blueRayColor = RayColor(ray, maxDepth, Vector3D(0, 0, 1));
+
+				redRayColor += greenRayColor + blueRayColor;
 
 				if (count > 0) {
 					Vector3D difference;
-					difference = previous - (rayColor * 255);
+					difference = previous - (redRayColor * 255);
 					difference = Vector3D::Abs(difference);
 					totalDiff += difference;
 
@@ -576,16 +613,16 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 
 						if (belowThreshold) {
 							count++;
-							pixelCol += rayColor;
+							pixelCol += redRayColor;
 
 							break;
 						}
 					}
 				}
 
-				previous = rayColor * 255;
+				previous = redRayColor * 255;
 				count++;
-				pixelCol += rayColor;
+				pixelCol += redRayColor;
 			}
 
 			if (count <= 0) count = 1;
@@ -599,7 +636,7 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 	}
 }
 
-Vector3D Raytracing::RayColor(Ray& ray, const int& depth) {
+Vector3D Raytracing::RayColor(Ray& ray, const int& depth, const Vector3D& initialRayCol) {
 	if (depth <= 0) return Vector3D(Float::NearZero);
 
 	// check for object hit
@@ -612,25 +649,29 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth) {
 
 		rec.GetMat()->Scatter(ray, rec, attentuation, scattered, normal, absorb, transparent, emission);
 
+		attentuation *= initialRayCol;
+
 		if (m_settings["renderMode"] == "color") {
 			if (absorb || emission) {
 				return attentuation;
 			}
 			else if (transparent) {
 				Ray continueRay(rec.GetPoint(), ray.GetDir());
-				return RayColor(continueRay, depth - 1);
+				return RayColor(continueRay, depth - 1, initialRayCol);
 			}
 			else {
-				return attentuation * RayColor(scattered, depth - 1);
+				//return attentuation * RayColor(scattered, depth - 1);
+				if (attentuation.NearZero()) return attentuation;
+				return attentuation * RayColor(scattered, depth - 1, initialRayCol);
 			}
 		}
 		else if (m_settings["renderMode"] == "normal") {
 			if (transparent) {
 				Ray continueRay(rec.GetPoint(), ray.GetDir());
-				return RayColor(continueRay, depth - 1);
+				return RayColor(continueRay, depth - 1, initialRayCol);
 			}
 			else {
-				return (normal + Vector3D::One) / 2;
+				return ((normal + Vector3D::One) / 2) * initialRayCol;
 			}
 		}
 		else if (m_settings["renderMode"] == "albedo") {
@@ -667,12 +708,13 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth) {
 
 			Vector3D rgb(r, g, b);
 			rgb /= 255;
+			rgb *= initialRayCol;
 
 			return rgb * m_bgStrength;
 		}
 	}
 	else if (m_settings["renderMode"] == "normal") {
-		return ((unitDir * -1) + Vector3D::One) / 2;
+		return (((unitDir * -1) + Vector3D::One) / 2) * initialRayCol;
 	}
 	else if (m_settings["renderMode"] == "emission") {
 		return Vector3D::Zero;

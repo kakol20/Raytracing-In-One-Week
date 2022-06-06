@@ -31,6 +31,7 @@ public:
 	static unsigned int RandomUInt(const unsigned int& bitCount = 32);
 
 	static Float RandomFloat(const Float& min = 0, const Float& max = 1);
+	static int RandomInt(const int& min, const int& max);
 };
 
 #endif // !RANDOM_H

@@ -32,3 +32,8 @@ Float Random::RandomFloat(const Float& min, const Float& max) {
 	random /= std::numeric_limits<unsigned int>::max();
 	return (random * (max - min)) + min;
 }
+
+int Random::RandomInt(const int& min, const int& max) {
+	int distance = (max - min) + 1;
+	return (Random::RandomUInt() % distance) + min;
+}
