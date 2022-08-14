@@ -81,7 +81,7 @@ private:
 	void Render(const int& minX, const int& minY, const int& maxX, const int& maxY);
 
 	bool RayHitObject(Ray& ray, const Float& t_min, const Float& t_max, HitRec& rec);
-	Vector3D RayColor(Ray& ray, const int& depth);
+	Vector3D RayColor(Ray& ray, const int& depth, const Vector3D& initialRayCol = Vector3D::One);
 
 	// ----- INITIALISING SCENES -----
 
