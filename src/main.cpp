@@ -4,6 +4,8 @@
 #include <SFML/Main.hpp>
 #include <SFML/Graphics.hpp>
 
+#include "utility/Color.h"
+
 #ifdef _DEBUG
 int main() {
 #else
@@ -16,6 +18,12 @@ int WinMain() {
 	const sf::Uint32 style = sf::Style::Titlebar | sf::Style::Close;
 
 	sf::RenderWindow window(sf::VideoMode(width, height), windowName, style);
+
+	Color col1(1.f, 128.f, 64.f);
+	Color col2(64.f, 255.f, 128.f);
+	Color col3 = col1 / col2;
+	Color::RawValue col3Raw = col3.GetRawValue();
+	Color col4(col3Raw);
 
 	sf::CircleShape shape(100.f);
 	shape.setFillColor(sf::Color::Green);
