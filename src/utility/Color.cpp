@@ -64,3 +64,9 @@ Color::RawValue Color::GetRawValue() const {
 		(sf::Uint8)std::roundf(std::clamp(m_val.g, 0.f, 255.f)),
 		(sf::Uint8)std::roundf(std::clamp(m_val.b, 0.f, 255.f)) };
 }
+
+sf::Color Color::GetSFColor() const {
+	return sf::Color((sf::Uint8)std::roundf(std::clamp(m_val.r, 0.f, 255.f)),
+		(sf::Uint8)std::roundf(std::clamp(m_val.g, 0.f, 255.f)),
+		(sf::Uint8)std::roundf(std::clamp(m_val.b, 0.f, 255.f)));
+}

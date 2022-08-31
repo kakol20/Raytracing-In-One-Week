@@ -160,10 +160,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\render\PixelRender.cpp" />
     <ClCompile Include="src\utility\Color.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\render\PixelRender.h" />
     <ClInclude Include="src\utility\Color.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="TODO.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

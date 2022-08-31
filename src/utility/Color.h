@@ -1,4 +1,7 @@
+#pragma once
+
 #include <SFML/Main.hpp>
+#include <SFML/Graphics.hpp>
 
 class Color {
 public:
@@ -46,8 +49,9 @@ public:
 	// ----- GETTERS & SETTERS -----
 
 	Color::RawValue GetRawValue() const;
-	inline Color::FloatValue GetFloatValue() const { return m_val; };
+	sf::Color GetSFColor() const;
 
+	inline Color::FloatValue GetFloatValue() const { return m_val; };
 
 private:
 	Color::FloatValue m_val;
