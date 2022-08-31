@@ -24,12 +24,18 @@
     <ClCompile Include="src\render\PixelRender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\utility\Random.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utility\Color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\render\PixelRender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utility\Random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

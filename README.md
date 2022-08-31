@@ -3,8 +3,8 @@ Named after Raytracing in "One Weekend" tutorial
 ## Related
 [Raytracing In One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 
-# TODO (in order)
-- [ ] Custom random generator
+## TODO (in order)
+- [x] Custom random generator
 - [ ] More Vector3 functions using sf::Vector3f
 - [ ] Quaternion class
 - [ ] Settings class

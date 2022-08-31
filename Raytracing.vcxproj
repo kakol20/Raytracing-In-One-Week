@@ -162,10 +162,12 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\render\PixelRender.cpp" />
     <ClCompile Include="src\utility\Color.cpp" />
+    <ClCompile Include="src\utility\Random.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\render\PixelRender.h" />
     <ClInclude Include="src\utility\Color.h" />
+    <ClInclude Include="src\utility\Random.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="README.md" />
