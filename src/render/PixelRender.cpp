@@ -40,7 +40,7 @@ bool PixelRender::Draw() {
 				int l_x = std::clamp(mousePos.x + x, 0, (int)m_width - 1);
 				int l_y = std::clamp(mousePos.y + y, 0, (int)m_height - 1);
 
-				SetPixel(l_x, l_y, Color((sf::Uint8)255, 255, 255));
+				SetPixel(l_x, l_y, rt::Color((sf::Uint8)255, 255, 255));
 			}
 		}
 	}
@@ -58,7 +58,7 @@ bool PixelRender::Draw() {
 	return m_window.isOpen();
 }
 
-void PixelRender::SetPixel(const unsigned int& x, const unsigned int& y, const Color& color) {
+void PixelRender::SetPixel(const unsigned int& x, const unsigned int& y, const rt::Color& color) {
 	m_renderImage.setPixel(x, y, color.GetSFColor());
 
 	m_renderTexture.loadFromImage(m_renderImage);

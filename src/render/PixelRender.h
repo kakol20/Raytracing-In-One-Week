@@ -6,6 +6,8 @@
 #include <SFML/Main.hpp>
 #include <SFML/Graphics.hpp>
 
+#include "../utility/Color.h"
+
 class PixelRender {
 public:
 	PixelRender(const unsigned int& width = 1280, const unsigned int& height = 720, const std::string& name = "Pixel Renderer");
@@ -14,7 +16,7 @@ public:
 	bool Init();
 	bool Draw();
 
-	void SetPixel(const unsigned int& x, const unsigned int& y, const Color& color);
+	void SetPixel(const unsigned int& x, const unsigned int& y, const rt::Color& color);
 
 private:
 	sf::RenderWindow m_window;
