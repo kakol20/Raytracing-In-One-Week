@@ -18,6 +18,11 @@ public:
 
 	void SetPixel(const unsigned int& x, const unsigned int& y, const rt::Color& color);
 
+	void UpdateTexture() {
+		m_renderTexture.loadFromImage(m_renderImage);
+		m_renderSprite.setTexture(m_renderTexture, true);
+	};
+
 private:
 	sf::RenderWindow m_window;
 	unsigned int m_width, m_height;
