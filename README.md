@@ -5,7 +5,7 @@ Named after Raytracing in "One Weekend" tutorial
 
 ## TODO (in order)
 - [x] Custom random generator
-- [ ] More Vector3 functions using sf::Vector3f
+- [x] More Vector3 functions using sf::Vector3f
 - [ ] Quaternion class
 - [ ] Settings class
 - [ ] Ray class

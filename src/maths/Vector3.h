@@ -9,6 +9,10 @@ namespace rt {
 	namespace Vector3 {
 		// ----- CONSTANTS -----
 
+		const sf::Vector3f Forward = { 0.f, 0.f, -1.f };
+		const sf::Vector3f Up = { 0.f, 1.f, 0.f };
+		const sf::Vector3f Right = { 1.f, 0.f, 0.f };
+
 		// ----- OPERATOR OVERLOADS -----
 
 		sf::Vector3f& operator*=(sf::Vector3f& a, const sf::Vector3f& b);
@@ -45,5 +49,14 @@ namespace rt {
 		sf::Vector3f Refract(const sf::Vector3f& vector, const sf::Vector3f& normal, const float refractionRatio);
 
 		sf::Vector3f UVSphere(const sf::Vector3f& v);
+
+		// ----- RANDOM -----
+
+		sf::Vector3f RandomVector(const float& min, const float& max);
+
+		sf::Vector3f RandomInHemisphere(const sf::Vector3f& normal);
+		sf::Vector3f RandomInUnitDisk();
+		sf::Vector3f RandomInUnitSphere();
+		sf::Vector3f RandomUnitVector();
 	};
 };

@@ -1,4 +1,5 @@
 #include "Maths.h"
+#include "../utility/Random.h"
 
 #include "Vector3.h"
 
@@ -156,4 +157,32 @@ sf::Vector3f rt::Vector3::Refract(const sf::Vector3f& vector, const sf::Vector3f
 
 sf::Vector3f rt::Vector3::UVSphere(const sf::Vector3f& v) {
 	return sf::Vector3f(0.5f + (std::atan2f(v.x, v.z) / Maths::TAU), 0.5f - (std::asinf(v.y) / Maths::PI), 0.f);
+}
+
+sf::Vector3f rt::Vector3::RandomVector(const float& min, const float& max) {
+	return { Random::RandomFloat(min, max), Random::RandomFloat(min, max), Random::RandomFloat(min, max) };
+}
+
+sf::Vector3f rt::Vector3::RandomInHemisphere(const sf::Vector3f& normal) {
+	sf::Vector3f o = rt::Vector3::RandomInUnitSphere();
+	if (rt::Vector3::DotProduct(normal, o) < 0.f) o *= -1.f;
+	return o;
+}
+
+sf::Vector3f rt::Vector3::RandomInUnitDisk() {
+	sf::Vector3f o = { Random::RandomFloat(-1.f, 1.f), Random::RandomFloat(-1.f, 1.f), 0.f};
+	if (rt::Vector3::SqrMagnitude(o) > 1.f) o = rt::Vector3::Normalize(o);
+	return o;
+}
+
+sf::Vector3f rt::Vector3::RandomInUnitSphere() {
+	sf::Vector3f o = rt::Vector3::RandomVector(-1.f, 1.f);
+	if (rt::Vector3::SqrMagnitude(o) > 1.f) o = rt::Vector3::Normalize(o);
+	return o;
+}
+
+sf::Vector3f rt::Vector3::RandomUnitVector() {
+	sf::Vector3f o = rt::Vector3::RandomVector(-1.f, 1.f);
+	o = rt::Vector3::Normalize(o);
+	return o;
 }
