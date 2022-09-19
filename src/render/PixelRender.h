@@ -23,6 +23,8 @@ public:
 		m_renderSprite.setTexture(m_renderTexture, true);
 	};
 
+	void SaveRender(const char* fileLocation);
+
 private:
 	sf::RenderWindow m_window;
 	unsigned int m_width, m_height;

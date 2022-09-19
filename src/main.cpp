@@ -45,5 +45,7 @@ int WinMain() {
 
 	while (mainWindow.Draw());
 
+	mainWindow.SaveRender("render/render.png");
+
 	return 0;
 }

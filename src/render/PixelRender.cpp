@@ -14,9 +14,18 @@ PixelRender::PixelRender(const unsigned int& width, const unsigned int& height, 
 bool PixelRender::Init() {
 	m_renderImage.create(m_width, m_height, sf::Color::Black);
 
-	for (int x = 0; x < (int)m_width; x++) {
+	for (int x = 0; x < (int)m_width / 2; x++) {
 		for (int y = 0; y < (int)m_height; y++) {
 			rt::Color col({ (x / (float)m_width) * 255.f, (y / (float)m_height) * 255.f , 0.f });
+
+			SetPixel(x, y, col);
+		}
+	}
+
+	for (int x = (int)m_width / 2; x < (int)m_width; x++) {
+		for (int y = 0; y < (int)m_height; y++) {
+			float gradient = (y / (float)m_height) * 255.f;
+			rt::Color col({ gradient, gradient, gradient });
 
 			SetPixel(x, y, col);
 		}
@@ -71,6 +80,10 @@ bool PixelRender::Draw() {
 
 void PixelRender::SetPixel(const unsigned int& x, const unsigned int& y, const rt::Color& color) {
 	rt::Color col = color;
-	col.Dither(x, y, 7);
+	col.Dither(x, y, 255);
 	m_renderImage.setPixel(x, y, col.GetSFColor());
+}
+
+void PixelRender::SaveRender(const char* fileLocation) {
+	m_renderImage.saveToFile(fileLocation);
 }
