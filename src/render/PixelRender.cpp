@@ -14,17 +14,17 @@ PixelRender::PixelRender(const unsigned int& width, const unsigned int& height, 
 bool PixelRender::Init() {
 	m_renderImage.create(m_width, m_height, sf::Color::Black);
 
-	for (int x = 0; x < (int)m_width / 2; x++) {
-		for (int y = 0; y < (int)m_height; y++) {
-			rt::Color col({ (x / (float)m_width) * 255.f, (y / (float)m_height) * 255.f , 0.f });
+	for (int x = 0; x < static_cast<int>(m_width) / 2; x++) {
+		for (int y = 0; y < static_cast<int>(m_height); y++) {
+			rt::Color col({ (x / static_cast<float>(m_width)) * 255.f, (y / static_cast<float>(m_height)) * 255.f , 0.f });
 
 			SetPixel(x, y, col);
 		}
 	}
 
-	for (int x = (int)m_width / 2; x < (int)m_width; x++) {
-		for (int y = 0; y < (int)m_height; y++) {
-			float gradient = (y / (float)m_height) * 255.f;
+	for (int x = static_cast<int>(m_width) / 2; x < static_cast<int>(m_width); x++) {
+		for (int y = 0; y < static_cast<int>(m_height); y++) {
+			float gradient = (y / static_cast<float>(m_height)) * 64.f;
 			rt::Color col({ gradient, gradient, gradient });
 
 			SetPixel(x, y, col);
@@ -50,13 +50,13 @@ bool PixelRender::Draw() {
 	// for testing purposes
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
 		sf::Vector2i mousePos = sf::Mouse::getPosition(m_window);
-		/*mousePos.x = std::clamp(mousePos.x, 0, (int)m_width - 1);
-		mousePos.y = std::clamp(mousePos.y, 0, (int)m_height - 1);*/
+		/*mousePos.x = std::clamp(mousePos.x, 0, static_cast<int>(m_width) - 1);
+		mousePos.y = std::clamp(mousePos.y, 0, static_cast<int>(m_height) - 1);*/
 	
 		for (int x = -1; x <= 1; x++) {
 			for (int y = -1; y <= 1; y++) {
-				int l_x = std::clamp(mousePos.x + x, 0, (int)m_width - 1);
-				int l_y = std::clamp(mousePos.y + y, 0, (int)m_height - 1);
+				int l_x = std::clamp(mousePos.x + x, 0, static_cast<int>(m_width) - 1);
+				int l_y = std::clamp(mousePos.y + y, 0, static_cast<int>(m_height) - 1);
 
 				SetPixel(l_x, l_y, rt::Color((sf::Uint8)255, 255, 255));
 			}

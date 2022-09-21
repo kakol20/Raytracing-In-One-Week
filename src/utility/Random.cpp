@@ -28,7 +28,7 @@ unsigned int Random::RandomUInt(const unsigned int& bitCount) {
 }
 
 float Random::RandomFloat(const float& min, const float& max) {
-	float random = float(Random::RandomUInt());
+	float random = static_cast<float>(Random::RandomUInt());
 	random /= std::numeric_limits<unsigned int>::max();
 	return (random * (max - min)) + min;
 }

@@ -16,11 +16,11 @@ rt::Color::Color(const FloatValue& col) {
 }
 
 rt::Color::Color(const RawValue& col) {
-	m_val = { (float)col.r, (float)col.g, (float)col.b };
+	m_val = { static_cast<float>(col.r), static_cast<float>(col.g), static_cast<float>(col.b) };
 }
 
 rt::Color::Color(const sf::Uint8& r, const sf::Uint8& g, const sf::Uint8& b) {
-	m_val = { (float)r, (float)g, (float)b };
+	m_val = { static_cast<float>(r), static_cast<float>(g), static_cast<float>(b) };
 }
 
 rt::Color& rt::Color::operator=(const Color& other) {
@@ -92,17 +92,19 @@ void rt::Color::Clamp() {
 }
 
 void rt::Color::Dither(const int& x, const int& y, const int& factor) {
+	const float f_factor = static_cast<float>(factor);
+
 	float threshold = rt::Color::Threshold[(x % 16) + (y % 16) * 16] / 256.f;
-	rt::Color octet(1 / (float)factor, 1 / (float)factor, 1 / (float)factor);
+	rt::Color octet(1 / f_factor, 1 / f_factor, 1 / f_factor);
 
 	octet *= 255.f;
 	octet *= threshold - 0.5f;
 
 	this->operator+=(octet);
-	this->operator*=((float)factor);
+	this->operator*=(f_factor);
 
 	rt::Color::Round();
-	this->operator/=((float)factor);
+	this->operator/=(f_factor);
 
 	rt::Color::Clamp();
 }
