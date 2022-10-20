@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "../utility/Color.h"
+#include "../utility/Random.h"
 
 #include "PixelRender.h"
 
@@ -12,6 +13,25 @@ PixelRender::PixelRender(const unsigned int& width, const unsigned int& height, 
 }
 
 bool PixelRender::Init() {
+	// ----- SETTINGS -----
+
+	if (!m_settings.Read("settings.cfg")) m_settings.Write("settings.cfg");
+
+	Random::Seed = (unsigned int)std::stoul(m_settings["randomSeed"]);
+	if (Random::Seed == 0) Random::Seed = 0xACE1u;
+
+	//if (std::stof(m_settings["verticalFOV"]) > 180.f) m_settings["verticalFOV"] = "179";
+	//if (std::stof(m_settings["verticalFOV"]) <= 0.f) m_settings["verticalFOV"] = "1";
+
+	m_width = std::stoi(m_settings["imageWidth"]);
+	m_height = std::stoi(m_settings["imageHeight"]);
+
+	m_window.setSize({ m_width, m_height });
+	sf::FloatRect visibleArea(0, 0, m_width, m_height);
+	m_window.setView(sf::View(visibleArea));
+
+	// ----- INITIALISE SCENE -----
+
 	m_renderImage.create(m_width, m_height, sf::Color::Black);
 
 	for (int x = 0; x < static_cast<int>(m_width) / 2; x++) {

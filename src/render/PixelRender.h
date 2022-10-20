@@ -8,6 +8,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "../utility/Color.h"
+#include "Settings.h"
 
 class PixelRender {
 public:
@@ -34,4 +35,6 @@ private:
 	sf::Image m_renderImage;
 	sf::Texture m_renderTexture;
 	sf::Sprite m_renderSprite;
+
+	Settings m_settings;
 };

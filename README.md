@@ -7,7 +7,7 @@ Named after Raytracing in "One Weekend" tutorial
 - [x] Custom random generator
 - [x] More Vector3 functions using sf::Vector3f
 - [x] Quaternion class
-- [ ] Settings class
+- [x] Settings class
 - [ ] Blue noise sampling
 - [ ] Ray class
 - [ ] Camera and HitRec class
