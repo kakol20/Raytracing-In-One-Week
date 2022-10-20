@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -14,6 +15,7 @@ public:
 	~PixelRender() {};
 
 	bool Init();
+	void Update();
 	bool Draw();
 
 	void SetPixel(const unsigned int& x, const unsigned int& y, const rt::Color& color);

@@ -43,7 +43,9 @@ int WinMain() {
 		// error initialising
 	}
 
-	while (mainWindow.Draw());
+	while (mainWindow.Draw()) {
+		mainWindow.Update();
+	}
 
 	mainWindow.SaveRender("render/render.png");
 

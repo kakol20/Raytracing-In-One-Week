@@ -36,12 +36,12 @@ bool PixelRender::Init() {
 	return true;
 }
 
-bool PixelRender::Draw() {
+void PixelRender::Update() {
 	sf::Event event;
 	while (m_window.pollEvent(event)) {
 		if (event.type == sf::Event::Closed) {
 			m_window.close();
-			return false;
+			return;
 		}
 	}
 
@@ -52,7 +52,7 @@ bool PixelRender::Draw() {
 		sf::Vector2i mousePos = sf::Mouse::getPosition(m_window);
 		/*mousePos.x = std::clamp(mousePos.x, 0, static_cast<int>(m_width) - 1);
 		mousePos.y = std::clamp(mousePos.y, 0, static_cast<int>(m_height) - 1);*/
-	
+
 		for (int x = -1; x <= 1; x++) {
 			for (int y = -1; y <= 1; y++) {
 				int l_x = std::clamp(mousePos.x + x, 0, static_cast<int>(m_width) - 1);
@@ -63,6 +63,16 @@ bool PixelRender::Draw() {
 		}
 
 		UpdateTexture();
+	}
+}
+
+bool PixelRender::Draw() {
+	sf::Event event;
+	while (m_window.pollEvent(event)) {
+		if (event.type == sf::Event::Closed) {
+			m_window.close();
+			return false;
+		}
 	}
 
 	//if (sf::Mouse::)
