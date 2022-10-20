@@ -7,6 +7,7 @@
 #include <SFML/Main.hpp>
 #include <SFML/Graphics.hpp>
 
+#include "../utility/BlueNoise.h"
 #include "../utility/Color.h"
 #include "Settings.h"
 
@@ -37,4 +38,5 @@ private:
 	sf::Sprite m_renderSprite;
 
 	Settings m_settings;
+	BlueNoise m_blueNoise;
 };

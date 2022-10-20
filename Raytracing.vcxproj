@@ -165,6 +165,7 @@
     <ClCompile Include="src\maths\Vector3.cpp" />
     <ClCompile Include="src\render\PixelRender.cpp" />
     <ClCompile Include="src\render\Settings.cpp" />
+    <ClCompile Include="src\utility\BlueNoise.cpp" />
     <ClCompile Include="src\utility\Color.cpp" />
     <ClCompile Include="src\utility\Random.cpp" />
   </ItemGroup>
@@ -174,6 +175,7 @@
     <ClInclude Include="src\maths\Vector3.h" />
     <ClInclude Include="src\render\PixelRender.h" />
     <ClInclude Include="src\render\Settings.h" />
+    <ClInclude Include="src\utility\BlueNoise.h" />
     <ClInclude Include="src\utility\Color.h" />
     <ClInclude Include="src\utility\Random.h" />
   </ItemGroup>

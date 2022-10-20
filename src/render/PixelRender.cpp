@@ -27,8 +27,20 @@ bool PixelRender::Init() {
 	m_height = std::stoi(m_settings["imageHeight"]);
 
 	m_window.setSize({ m_width, m_height });
-	sf::FloatRect visibleArea(0, 0, m_width, m_height);
+	sf::FloatRect visibleArea(0.f, 0.f, static_cast<float>(m_width), static_cast<float>(m_height));
 	m_window.setView(sf::View(visibleArea));
+
+	// ----- GENERATE BLUE NOISE -----
+
+	int minSamples = std::stoi(m_settings["minSamples"]);
+	int maxSamples = std::stoi(m_settings["maxSamples"]);
+
+	if (minSamples < 256) {
+		int sampleCount = maxSamples < 256 ? maxSamples : 256;
+
+		maxSamples = sampleCount;
+		m_blueNoise.Generate(sampleCount, 10);
+	}
 
 	// ----- INITIALISE SCENE -----
 
@@ -51,6 +63,21 @@ bool PixelRender::Init() {
 		}
 	}
 
+	for (size_t i = 0; i < static_cast<size_t>(maxSamples); i++) {
+		sf::Vector2f pos = m_blueNoise[i];
+		pos.x *= static_cast<float>(m_width);
+		pos.y *= static_cast<float>(m_height);
+
+		for (int x = -1; x <= 1; x++) {
+			for (int y = -1; y <= 1; y++) {
+				int l_x = std::clamp(static_cast<int>(pos.x) + x, 0, static_cast<int>(m_width) - 1);
+				int l_y = std::clamp(static_cast<int>(pos.y) + y, 0, static_cast<int>(m_height) - 1);
+
+				SetPixel(l_x, l_y, rt::Color((sf::Uint8)255, 255, 255));
+			}
+		}
+	}
+
 	UpdateTexture();
 
 	return true;
@@ -68,22 +95,22 @@ void PixelRender::Update() {
 	// ----- MAIN LOOP -----
 
 	// for testing purposes
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-		sf::Vector2i mousePos = sf::Mouse::getPosition(m_window);
-		/*mousePos.x = std::clamp(mousePos.x, 0, static_cast<int>(m_width) - 1);
-		mousePos.y = std::clamp(mousePos.y, 0, static_cast<int>(m_height) - 1);*/
+	//if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+	//	sf::Vector2i mousePos = sf::Mouse::getPosition(m_window);
+	//	/*mousePos.x = std::clamp(mousePos.x, 0, static_cast<int>(m_width) - 1);
+	//	mousePos.y = std::clamp(mousePos.y, 0, static_cast<int>(m_height) - 1);*/
 
-		for (int x = -1; x <= 1; x++) {
-			for (int y = -1; y <= 1; y++) {
-				int l_x = std::clamp(mousePos.x + x, 0, static_cast<int>(m_width) - 1);
-				int l_y = std::clamp(mousePos.y + y, 0, static_cast<int>(m_height) - 1);
+	//	for (int x = -1; x <= 1; x++) {
+	//		for (int y = -1; y <= 1; y++) {
+	//			int l_x = std::clamp(mousePos.x + x, 0, static_cast<int>(m_width) - 1);
+	//			int l_y = std::clamp(mousePos.y + y, 0, static_cast<int>(m_height) - 1);
 
-				SetPixel(l_x, l_y, rt::Color((sf::Uint8)255, 255, 255));
-			}
-		}
+	//			SetPixel(l_x, l_y, rt::Color((sf::Uint8)255, 255, 255));
+	//		}
+	//	}
 
-		UpdateTexture();
-	}
+	//	UpdateTexture();
+	//}
 }
 
 bool PixelRender::Draw() {

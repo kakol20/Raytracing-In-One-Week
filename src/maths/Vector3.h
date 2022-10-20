@@ -13,6 +13,9 @@ namespace rt {
 		const sf::Vector3f Up = { 0.f, 1.f, 0.f };
 		const sf::Vector3f Right = { 1.f, 0.f, 0.f };
 
+		const sf::Vector3f Zero = { 0.f, 0.f, 0.f };
+		const sf::Vector3f One = { 1.f, 1.f, 1.f };
+
 		// ----- OPERATOR OVERLOADS -----
 
 		sf::Vector3f& operator*=(sf::Vector3f& a, const sf::Vector3f& b);
@@ -35,7 +38,7 @@ namespace rt {
 		float DotProduct(const sf::Vector3f& v1, const sf::Vector3f& v2);
 		sf::Vector3f CrossProduct(const sf::Vector3f& v1, const sf::Vector3f& v2);
 
-		float ToroidalDistance(const sf::Vector3f& a, const sf::Vector3f& b, const sf::Vector3f& min, const sf::Vector3f& max);
+		float SqrToroidalDistance(const sf::Vector3f& a, const sf::Vector3f& b, const sf::Vector3f& min, const sf::Vector3f& max);
 
 		sf::Vector3f Abs(const sf::Vector3f& v);
 		sf::Vector3f Clamp(const sf::Vector3f& val, const sf::Vector3f& min, const sf::Vector3f& max);

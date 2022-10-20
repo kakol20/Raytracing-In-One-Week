@@ -85,7 +85,7 @@ sf::Vector3f rt::Vector3::CrossProduct(const sf::Vector3f& v1, const sf::Vector3
 		v1.x * v2.y - v1.y * v2.x);
 }
 
-float rt::Vector3::ToroidalDistance(const sf::Vector3f& a, const sf::Vector3f& b, const sf::Vector3f& min, const sf::Vector3f& max) {
+float rt::Vector3::SqrToroidalDistance(const sf::Vector3f& a, const sf::Vector3f& b, const sf::Vector3f& min, const sf::Vector3f& max) {
 	sf::Vector3f delta = rt::Vector3::Abs(b - a);
 	sf::Vector3f minMaxDelta = rt::Vector3::Abs(max - min);
 	sf::Vector3f mid = minMaxDelta / 2.f;

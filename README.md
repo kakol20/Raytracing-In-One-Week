@@ -8,7 +8,7 @@ Named after Raytracing in "One Weekend" tutorial
 - [x] More Vector3 functions using sf::Vector3f
 - [x] Quaternion class
 - [x] Settings class
-- [ ] Blue noise sampling
+- [x] Blue noise sampling
 - [ ] Ray class
 - [ ] Camera and HitRec class
 - [ ] Materials and Object class
