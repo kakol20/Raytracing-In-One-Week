@@ -44,4 +44,15 @@ private:
 
 	Settings m_settings;
 	BlueNoise m_blueNoise;
+
+	struct Tile {
+		int minX, minY, maxX, maxY;
+		bool tileComplete;
+		bool activeTile;
+		int tileX, tileY;
+		unsigned int seed;
+	};
+
+	int m_xTileCount, m_yTileCount;
+	std::vector<Tile> m_tiles;
 };

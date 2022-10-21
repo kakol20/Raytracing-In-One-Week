@@ -26,8 +26,10 @@ bool PixelRender::Init() {
 	if (std::stof(m_settings["verticalFOV"]) > 180.f) m_settings["verticalFOV"] = "179";
 	if (std::stof(m_settings["verticalFOV"]) <= 0.f) m_settings["verticalFOV"] = "1";
 
-	m_width = std::stoi(m_settings["imageWidth"]);
-	m_height = std::stoi(m_settings["imageHeight"]);
+	m_width = std::stoi(m_settings["m_width"]);
+	m_height = std::stoi(m_settings["m_height"]);
+
+	int tileSize = std::stoi(m_settings["tileSize"]);
 
 	m_window.setSize({ m_width, m_height });
 	sf::FloatRect visibleArea(0.f, 0.f, static_cast<float>(m_width), static_cast<float>(m_height));
@@ -40,6 +42,7 @@ bool PixelRender::Init() {
 	}
 	else {
 		// -- DEBUG SCENE --
+
 		sf::Vector3f lookFrom = { 0.f, 2.f, 5.f };
 
 		const float aspectRatio = static_cast<float>(m_width) / m_height;
@@ -77,6 +80,55 @@ bool PixelRender::Init() {
 		maxSamples = sampleCount;
 		m_blueNoise.Generate(sampleCount, 10);
 	}
+
+	// ----- GENERATE TILES -----
+
+	int maxXTiles = m_width < tileSize ? 1 : m_width / tileSize;
+	int maxYTiles = m_height < tileSize ? 1 : m_height / tileSize;
+	int maxTiles = maxXTiles * maxYTiles;
+
+	int xTileSize = static_cast<int>(std::roundf(static_cast<float>(m_width) / maxXTiles));
+	int yTileSize = static_cast<int>(std::roundf(static_cast<float>(m_height) / maxYTiles));
+
+	int widthModulo = m_width % maxXTiles;
+	int heightModulo = m_height % maxYTiles;
+
+	int y = 0;
+	int countY = 0;
+	while (y < m_height) {
+		m_yTileCount++;
+
+		int addY = heightModulo > 0 ? yTileSize + 1 : yTileSize;
+		int maxY = y + addY;
+		maxY = maxY > m_height ? m_height : maxY;
+
+		int l_widthModulo = widthModulo;
+
+		int x = 0;
+		int xTileCount = 0;
+		int countX = 0;
+		while (x < m_width) {
+			xTileCount++;
+
+			int addX = l_widthModulo > 0 ? xTileSize + 1 : xTileSize;
+			int maxX = x + addX;
+			maxX = maxX > m_width ? m_width : maxX;
+
+			m_tiles.push_back({ x, y, maxX, maxY, false, false, countX, countY, Random::RandomUInt() });
+
+			x = maxX;
+			l_widthModulo--;
+			countX++;
+		}
+
+		m_xTileCount = xTileCount;
+
+		y = maxY;
+		heightModulo--;
+		countY++;
+	}
+
+	std::reverse(m_tiles.begin(), m_tiles.end());
 
 	UpdateTexture();
 
