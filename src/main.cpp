@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "render/PixelRender.h"
-#include "utility/Color.h"
+#include "utility/Colour.h"
 #include "utility/Random.h"
 
 #ifdef WIN32
@@ -13,7 +13,7 @@ thread_local uint32_t Random::Seed = 0xACE1u;
 thread_local uint64_t Random::Seed = 0xACE1u;
 #endif // WIN32
 
-const unsigned int rt::Color::Threshold[] = {
+const unsigned int rt::Colour::Threshold[] = {
 	  0, 192,  48, 240,  12, 204,  60, 252,   3, 195,  51, 243,  15, 207,  63, 255,
 	128,  64, 176, 112, 140,  76, 188, 124, 131,  67, 179, 115, 143,  79, 191, 127,
 	 32, 224,  16, 208,  44, 236,  28, 220,  35, 227,  19, 211,  47, 239,  31, 223,

@@ -1,8 +1,9 @@
 #include <algorithm>
 #include <chrono>
 
-#include "../utility/Color.h"
+#include "../utility/Colour.h"
 #include "../utility/Random.h"
+#include "../utility/ImageWrapper.h"
 
 #include "PixelRender.h"
 
@@ -20,7 +21,7 @@ PixelRender::PixelRender(const unsigned int& width, const unsigned int& height, 
 	m_nextAvailable = 0;
 	m_tilesRendered = 0;
 
-	m_renderColSpce = PixelRender::ColorSpace::Non_Color;
+	m_renderColSpce = rt::Image::ColorSpace::Non_Color;
 }
 
 bool PixelRender::Init() {
@@ -34,8 +35,9 @@ bool PixelRender::Init() {
 	if (std::stof(m_settings["verticalFOV"]) > 180.f) m_settings["verticalFOV"] = "179";
 	if (std::stof(m_settings["verticalFOV"]) <= 0.f) m_settings["verticalFOV"] = "1";
 
-	m_width = std::stoi(m_settings["m_width"]);
-	m_height = std::stoi(m_settings["m_height"]);
+	m_width = std::stoi(m_settings["imageWidth"]);
+	m_height = std::stoi(m_settings["imageHeight"]);
+	m_useThreads = std::stoi(m_settings["threads"]);
 
 	int tileSize = std::stoi(m_settings["tileSize"]);
 
@@ -63,20 +65,6 @@ bool PixelRender::Init() {
 		m_clipEnd = 1000.f;
 
 		m_renderImage.create(m_width, m_height, sf::Color::Black);
-	}
-
-	// -- temporary --
-	for (unsigned int x = 0; x < m_width; x++) {
-		for (unsigned int y = 0; y < m_height; y++) {
-			Ray rayDir = m_camera.GetRay(x / (m_width - 1.f), y / (m_height - 1.f));
-			sf::Vector3f dir = rayDir.GetDir() + sf::Vector3f(1.f, 1.f, 1.f);
-			dir /= 2.f;
-			dir *= 255.f;
-
-			rt::Color color(dir.x, dir.y, dir.z);
-
-			SetPixel(x, y, color);
-		}
 	}
 
 	// ----- GENERATE BLUE NOISE -----
@@ -223,12 +211,12 @@ bool PixelRender::Draw() {
 	return m_window.isOpen();
 }
 
-void PixelRender::SetPixel(const unsigned int& x, const unsigned int& y, const rt::Color& color) {
-	rt::Color col = color;
+void PixelRender::SetPixel(const unsigned int& x, const unsigned int& y, const rt::Colour& color) {
+	rt::Colour col = color;
 	col.Dither(x, y, 255);
 
 	m_mutex.lock();
-	m_renderImage.setPixel(x, y, col.GetSFColor());
+	m_renderImage.setPixel(x, y, col.GetSFColour());
 	m_mutex.unlock();
 }
 
@@ -245,10 +233,10 @@ void PixelRender::SaveRender(const char* fileLocation) {
 
 bool PixelRender::RunMode() {
 	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "albedo" || m_settings["renderMode"] == "emission") {
-		m_renderColSpce = PixelRender::ColorSpace::sRGB;
+		m_renderColSpce = rt::Image::ColorSpace::sRGB;
 	}
 	else {
-		m_renderColSpce = PixelRender::ColorSpace::Non_Color;
+		m_renderColSpce = rt::Image::ColorSpace::Non_Color;
 	}
 
 	for (auto it = m_tiles.begin(); it != m_tiles.end(); it++) {
@@ -346,6 +334,41 @@ bool PixelRender::RunMode() {
 }
 
 void PixelRender::RenderTile(const size_t& startIndex) {
+	if (startIndex < m_tiles.size()) {
+		m_tiles[startIndex].activeTile = true;
+		Random::Seed = m_tiles[startIndex].seed;
+
+		auto start = std::chrono::high_resolution_clock::now();
+		Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
+		auto end = std::chrono::high_resolution_clock::now();
+		auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+		m_tiles[startIndex].activeTile = false;
+		std::thread::id thisId = std::this_thread::get_id();
+		m_tiles[startIndex].tileComplete = true;
+
+		m_mutex.lock();
+		m_tilesRendered++;
+
+		ShowProgress();
+
+		// ----- LOGGING -----
+		if (m_useThreads > 1) {
+			m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << '\n';
+		}
+		else {
+			m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
+		}
+
+		size_t next = m_nextAvailable;
+		m_nextAvailable++;
+
+		m_mutex.unlock();
+
+		if (next < m_tiles.size()) {
+			RenderTile(next);
+		}
+	}
 }
 
 void PixelRender::Render(const int& minX, const int& minY, const int& maxX, const int& maxY) {

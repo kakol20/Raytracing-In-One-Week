@@ -10,14 +10,13 @@
 #include <SFML/Graphics.hpp>
 
 #include "../utility/BlueNoise.h"
-#include "../utility/Color.h"
+#include "../utility/Colour.h"
+#include "../utility/ImageWrapper.h"
 #include "raytracing/Camera.h"
 #include "raytracing/HitRec.h"
 #include "Settings.h"
 
 class PixelRender {
-private:
-	enum class ColorSpace { Non_Color, sRGB };
 
 public:
 	PixelRender(const unsigned int& width = 1280, const unsigned int& height = 720, const std::string& name = "Pixel Renderer");
@@ -27,7 +26,7 @@ public:
 	void Update();
 	bool Draw();
 
-	void SetPixel(const unsigned int& x, const unsigned int& y, const rt::Color& color);
+	void SetPixel(const unsigned int& x, const unsigned int& y, const rt::Colour& color);
 
 	void UpdateTexture();
 
@@ -40,7 +39,7 @@ private:
 	sf::Image m_renderImage;
 	sf::Texture m_renderTexture;
 	sf::Sprite m_renderSprite;
-	PixelRender::ColorSpace m_renderColSpce;
+	rt::Image::ColorSpace m_renderColSpce;
 
 	Camera m_camera;
 	float m_clipEnd;

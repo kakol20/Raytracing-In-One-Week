@@ -18,7 +18,7 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\utility\Color.cpp">
+    <ClCompile Include="src\utility\Colour.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\render\PixelRender.cpp">
@@ -51,9 +51,12 @@
     <ClCompile Include="src\render\raytracing\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\utility\ImageWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\utility\Color.h">
+    <ClInclude Include="src\utility\Colour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\render\PixelRender.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\render\raytracing\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utility\ImageWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

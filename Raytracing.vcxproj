@@ -169,7 +169,8 @@
     <ClCompile Include="src\render\raytracing\Ray.cpp" />
     <ClCompile Include="src\render\Settings.cpp" />
     <ClCompile Include="src\utility\BlueNoise.cpp" />
-    <ClCompile Include="src\utility\Color.cpp" />
+    <ClCompile Include="src\utility\Colour.cpp" />
+    <ClCompile Include="src\utility\ImageWrapper.cpp" />
     <ClCompile Include="src\utility\Random.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -182,7 +183,8 @@
     <ClInclude Include="src\render\raytracing\Ray.h" />
     <ClInclude Include="src\render\Settings.h" />
     <ClInclude Include="src\utility\BlueNoise.h" />
-    <ClInclude Include="src\utility\Color.h" />
+    <ClInclude Include="src\utility\Colour.h" />
+    <ClInclude Include="src\utility\ImageWrapper.h" />
     <ClInclude Include="src\utility\Random.h" />
   </ItemGroup>
   <ItemGroup>

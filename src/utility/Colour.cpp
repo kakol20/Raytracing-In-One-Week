@@ -1,29 +1,37 @@
 #include <cmath>
 #include <algorithm>
 
-#include "Color.h"
+#include "../maths/Maths.h"
 
-rt::Color::Color() {
+#include "Colour.h"
+
+rt::Colour::Colour() {
 	m_val = { 0.f, 0.f, 0.f };
 }
 
-rt::Color::Color(const float& r, const float& g, const float& b) {
+rt::Colour::Colour(const float& r, const float& g, const float& b) {
 	m_val = { r, g, b };
 }
 
-rt::Color::Color(const FloatValue& col) {
+rt::Colour::Colour(const FloatValue& col) {
 	m_val = col;
 }
 
-rt::Color::Color(const RawValue& col) {
+rt::Colour::Colour(const RawValue& col) {
 	m_val = { static_cast<float>(col.r), static_cast<float>(col.g), static_cast<float>(col.b) };
 }
 
-rt::Color::Color(const sf::Uint8& r, const sf::Uint8& g, const sf::Uint8& b) {
+rt::Colour::Colour(const sf::Color& col) {
+	m_val.r = static_cast<float>(col.r);
+	m_val.g = static_cast<float>(col.g);
+	m_val.b = static_cast<float>(col.b);
+}
+
+rt::Colour::Colour(const sf::Uint8& r, const sf::Uint8& g, const sf::Uint8& b) {
 	m_val = { static_cast<float>(r), static_cast<float>(g), static_cast<float>(b) };
 }
 
-rt::Color& rt::Color::operator=(const Color& other) {
+rt::Colour& rt::Colour::operator=(const Colour& other) {
 	if (this == &other) return  *this;
 
 	m_val = other.m_val;
@@ -31,71 +39,85 @@ rt::Color& rt::Color::operator=(const Color& other) {
 	return *this;
 }
 
-rt::Color& rt::Color::operator+=(const Color& other) {
+rt::Colour& rt::Colour::operator+=(const Colour& other) {
 	m_val.r += other.m_val.r;
 	m_val.g += other.m_val.g;
 	m_val.b += other.m_val.b;
 	return *this;
 }
 
-rt::Color& rt::Color::operator-=(const Color& other) {
+rt::Colour& rt::Colour::operator-=(const Colour& other) {
 	m_val.r -= other.m_val.r;
 	m_val.g -= other.m_val.g;
 	m_val.b -= other.m_val.b;
 	return *this;
 }
 
-rt::Color& rt::Color::operator*=(const Color& other) {
+rt::Colour& rt::Colour::operator*=(const Colour& other) {
 	m_val.r = (m_val.r * other.m_val.r) / 255.f;
 	m_val.g = (m_val.g * other.m_val.g) / 255.f;
 	m_val.b = (m_val.b * other.m_val.b) / 255.f;
 	return *this;
 }
 
-rt::Color& rt::Color::operator/=(const Color& other) {
+rt::Colour& rt::Colour::operator/=(const Colour& other) {
 	m_val.r = (255.f * m_val.r) / other.m_val.r;
 	m_val.g = (255.f * m_val.g) / other.m_val.g;
 	m_val.b = (255.f * m_val.b) / other.m_val.b;
 	return *this;
 }
 
-rt::Color& rt::Color::operator*=(const float& scalar) {
+rt::Colour& rt::Colour::operator*=(const float& scalar) {
 	m_val.r = m_val.r * scalar;
 	m_val.g = m_val.g * scalar;
 	m_val.b = m_val.b * scalar;
 	return *this;
 }
 
-rt::Color& rt::Color::operator/=(const float& scalar) {
+rt::Colour& rt::Colour::operator/=(const float& scalar) {
 	m_val.r = m_val.r / scalar;
 	m_val.g = m_val.g / scalar;
 	m_val.b = m_val.b / scalar;
 	return *this;
 }
 
-rt::Color::RawValue rt::Color::GetRawValue() const {
+rt::Colour& rt::Colour::operator=(const sf::Vector3f& vec) {
+	m_val.r = vec.x;
+	m_val.g = vec.y;
+	m_val.b = vec.z;
+	return *this;
+}
+
+rt::Colour& rt::Colour::operator=(const sf::Color& col) {
+	m_val.r = static_cast<float>(col.r);
+	m_val.g = static_cast<float>(col.g);
+	m_val.b = static_cast<float>(col.b);
+	return *this;
+}
+
+rt::Colour::RawValue rt::Colour::GetRawValue() const {
 	return { (sf::Uint8)std::roundf(std::clamp(m_val.r, 0.f, 255.f)),
 		(sf::Uint8)std::roundf(std::clamp(m_val.g, 0.f, 255.f)),
 		(sf::Uint8)std::roundf(std::clamp(m_val.b, 0.f, 255.f)) };
 }
 
-sf::Color rt::Color::GetSFColor() const {
+sf::Color rt::Colour::GetSFColour() const {
 	return sf::Color((sf::Uint8)std::roundf(std::clamp(m_val.r, 0.f, 255.f)),
 		(sf::Uint8)std::roundf(std::clamp(m_val.g, 0.f, 255.f)),
 		(sf::Uint8)std::roundf(std::clamp(m_val.b, 0.f, 255.f)));
 }
 
-void rt::Color::Clamp() {
+void rt::Colour::Clamp() {
 	m_val.r = std::clamp(m_val.r, 0.f, 255.f);
 	m_val.g = std::clamp(m_val.g, 0.f, 255.f);
 	m_val.b = std::clamp(m_val.b, 0.f, 255.f);
 }
 
-void rt::Color::Dither(const int& x, const int& y, const int& factor) {
+void rt::Colour::Dither(const int& x, const int& y, const int& factor) {
 	const float f_factor = static_cast<float>(factor);
 
-	float threshold = rt::Color::Threshold[(x % 16) + (y % 16) * 16] / 256.f;
-	rt::Color octet(1 / f_factor, 1 / f_factor, 1 / f_factor);
+	float threshold = rt::Colour::Threshold[(x % 16) + (y % 16) * 16] / 256.f;
+	rt::Colour octet(1 / f_factor, 1 / f_factor, 1 / f_factor);
 
 	octet *= 255.f;
 	octet *= threshold - 0.5f;
@@ -103,19 +125,19 @@ void rt::Color::Dither(const int& x, const int& y, const int& factor) {
 	this->operator+=(octet);
 	this->operator*=(f_factor);
 
-	rt::Color::Round();
+	rt::Colour::Round();
 	this->operator/=(f_factor);
 
-	rt::Color::Clamp();
+	rt::Colour::Clamp();
 }
 
-void rt::Color::Round() {
+void rt::Colour::Round() {
 	m_val.r = std::roundf(m_val.r / 255.f) * 255.f;
 	m_val.g = std::roundf(m_val.g / 255.f) * 255.f;
 	m_val.b = std::roundf(m_val.b / 255.f) * 255.f;
 }
 
-void rt::Color::LinearToSRGB() {
+void rt::Colour::LinearToSRGB() {
 	m_val.r /= 255.f;
 	m_val.g /= 255.f;
 	m_val.b /= 255.f;
@@ -146,7 +168,7 @@ void rt::Color::LinearToSRGB() {
 	m_val.b *= 255.f;
 }
 
-void rt::Color::SRGBtoLinear() {
+void rt::Colour::SRGBtoLinear() {
 	m_val.r /= 255.f;
 	m_val.g /= 255.f;
 	m_val.b /= 255.f;
@@ -175,4 +197,19 @@ void rt::Color::SRGBtoLinear() {
 	m_val.r *= 255.f;
 	m_val.g *= 255.f;
 	m_val.b *= 255.f;
+}
+
+rt::Colour rt::Colour::Cubic(const rt::Colour& a, const rt::Colour& b, const rt::Colour& c, const rt::Colour& d, const float& factor) {
+	float r = Maths::Cubic(a.m_val.r, b.m_val.r, c.m_val.r, d.m_val.r, factor);
+	float g = Maths::Cubic(a.m_val.g, b.m_val.g, c.m_val.g, d.m_val.g, factor);
+	float c_b = Maths::Cubic(a.m_val.b, b.m_val.b, c.m_val.b, d.m_val.b, factor);
+
+	return rt::Colour(r, g, c_b);
+}
+
+rt::Colour rt::Colour::Linear(const rt::Colour& a, const rt::Colour& b, const float& factor) {
+	float r = Maths::Map(factor, 0.f, 1.f, a.m_val.r, b.m_val.r);
+	float g = Maths::Map(factor, 0.f, 1.f, a.m_val.g, b.m_val.g);
+	float c_b = Maths::Map(factor, 0.f, 1.f, a.m_val.b, b.m_val.b);
+	return rt::Colour(r, g, c_b);
 }
