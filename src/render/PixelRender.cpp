@@ -9,7 +9,10 @@ PixelRender::PixelRender(const unsigned int& width, const unsigned int& height, 
 	m_width(width),
 	m_height(height),
 	m_window(sf::VideoMode(width, height), name, sf::Style::Titlebar | sf::Style::Close) {
-	// constructor
+	
+
+	m_clipEnd = 1000.f;
+	m_clipStart = 1e-6f;
 }
 
 bool PixelRender::Init() {
@@ -20,8 +23,8 @@ bool PixelRender::Init() {
 	Random::Seed = (unsigned int)std::stoul(m_settings["randomSeed"]);
 	if (Random::Seed == 0) Random::Seed = 0xACE1u;
 
-	//if (std::stof(m_settings["verticalFOV"]) > 180.f) m_settings["verticalFOV"] = "179";
-	//if (std::stof(m_settings["verticalFOV"]) <= 0.f) m_settings["verticalFOV"] = "1";
+	if (std::stof(m_settings["verticalFOV"]) > 180.f) m_settings["verticalFOV"] = "179";
+	if (std::stof(m_settings["verticalFOV"]) <= 0.f) m_settings["verticalFOV"] = "1";
 
 	m_width = std::stoi(m_settings["imageWidth"]);
 	m_height = std::stoi(m_settings["imageHeight"]);
@@ -29,6 +32,39 @@ bool PixelRender::Init() {
 	m_window.setSize({ m_width, m_height });
 	sf::FloatRect visibleArea(0.f, 0.f, static_cast<float>(m_width), static_cast<float>(m_height));
 	m_window.setView(sf::View(visibleArea));
+
+	// ----- INITIALISE SCENE -----
+
+	if (m_settings["scene"] == "none") {
+		// -- EMPTY FOR NOW --
+	}
+	else {
+		// -- DEBUG SCENE --
+		sf::Vector3f lookFrom = { 0.f, 2.f, 5.f };
+
+		const float aspectRatio = static_cast<float>(m_width) / m_height;
+
+		m_settings["blurStrength"] = "0";
+		m_camera = Camera(aspectRatio, std::stof(m_settings["blurStrength"]), 10.f, std::stof(m_settings["verticalFOV"]), lookFrom, rt::Vector3::Zero, rt::Vector3::Up);
+
+		m_clipEnd = 1000.f;
+
+		m_renderImage.create(m_width, m_height, sf::Color::Black);
+	}
+
+	// -- temporary --
+	for (unsigned int x = 0; x < m_width; x++) {
+		for (unsigned int y = 0; y < m_height; y++) {
+			Ray rayDir = m_camera.GetRay(x / (m_width - 1.f), y / (m_height - 1.f));
+			sf::Vector3f dir = rayDir.GetDir() + sf::Vector3f(1.f, 1.f, 1.f);
+			dir /= 2.f;
+			dir *= 255.f;
+
+			rt::Color color(dir.x, dir.y, dir.z);
+
+			SetPixel(x, y, color);
+		}
+	}
 
 	// ----- GENERATE BLUE NOISE -----
 
@@ -40,42 +76,6 @@ bool PixelRender::Init() {
 
 		maxSamples = sampleCount;
 		m_blueNoise.Generate(sampleCount, 10);
-	}
-
-	// ----- INITIALISE SCENE -----
-
-	m_renderImage.create(m_width, m_height, sf::Color::Black);
-
-	for (int x = 0; x < static_cast<int>(m_width) / 2; x++) {
-		for (int y = 0; y < static_cast<int>(m_height); y++) {
-			rt::Color col({ (x / static_cast<float>(m_width)) * 255.f, (y / static_cast<float>(m_height)) * 255.f , 0.f });
-
-			SetPixel(x, y, col);
-		}
-	}
-
-	for (int x = static_cast<int>(m_width) / 2; x < static_cast<int>(m_width); x++) {
-		for (int y = 0; y < static_cast<int>(m_height); y++) {
-			float gradient = (y / static_cast<float>(m_height)) * 64.f;
-			rt::Color col({ gradient, gradient, gradient });
-
-			SetPixel(x, y, col);
-		}
-	}
-
-	for (size_t i = 0; i < static_cast<size_t>(maxSamples); i++) {
-		sf::Vector2f pos = m_blueNoise[i];
-		pos.x *= static_cast<float>(m_width);
-		pos.y *= static_cast<float>(m_height);
-
-		for (int x = -1; x <= 1; x++) {
-			for (int y = -1; y <= 1; y++) {
-				int l_x = std::clamp(static_cast<int>(pos.x) + x, 0, static_cast<int>(m_width) - 1);
-				int l_y = std::clamp(static_cast<int>(pos.y) + y, 0, static_cast<int>(m_height) - 1);
-
-				SetPixel(l_x, l_y, rt::Color((sf::Uint8)255, 255, 255));
-			}
-		}
 	}
 
 	UpdateTexture();

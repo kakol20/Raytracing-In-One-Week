@@ -164,6 +164,9 @@
     <ClCompile Include="src\maths\Quaternion.cpp" />
     <ClCompile Include="src\maths\Vector3.cpp" />
     <ClCompile Include="src\render\PixelRender.cpp" />
+    <ClCompile Include="src\render\raytracing\Camera.cpp" />
+    <ClCompile Include="src\render\raytracing\HitRec.cpp" />
+    <ClCompile Include="src\render\raytracing\Ray.cpp" />
     <ClCompile Include="src\render\Settings.cpp" />
     <ClCompile Include="src\utility\BlueNoise.cpp" />
     <ClCompile Include="src\utility\Color.cpp" />
@@ -174,6 +177,9 @@
     <ClInclude Include="src\maths\Quaternion.h" />
     <ClInclude Include="src\maths\Vector3.h" />
     <ClInclude Include="src\render\PixelRender.h" />
+    <ClInclude Include="src\render\raytracing\Camera.h" />
+    <ClInclude Include="src\render\raytracing\HitRec.h" />
+    <ClInclude Include="src\render\raytracing\Ray.h" />
     <ClInclude Include="src\render\Settings.h" />
     <ClInclude Include="src\utility\BlueNoise.h" />
     <ClInclude Include="src\utility\Color.h" />

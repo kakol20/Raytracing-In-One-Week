@@ -9,7 +9,7 @@ Named after Raytracing in "One Weekend" tutorial
 - [x] Quaternion class
 - [x] Settings class
 - [x] Blue noise sampling
-- [ ] Ray class
-- [ ] Camera and HitRec class
+- [x] Ray class
+- [x] Camera and HitRec class
 - [ ] Materials and Object class
 - [ ] Main Rendering class (Raytracing.cpp)

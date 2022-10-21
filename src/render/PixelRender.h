@@ -9,6 +9,7 @@
 
 #include "../utility/BlueNoise.h"
 #include "../utility/Color.h"
+#include "raytracing/Camera.h"
 #include "Settings.h"
 
 class PixelRender {
@@ -36,6 +37,10 @@ private:
 	sf::Image m_renderImage;
 	sf::Texture m_renderTexture;
 	sf::Sprite m_renderSprite;
+
+	Camera m_camera;
+	float m_clipEnd;
+	float m_clipStart;
 
 	Settings m_settings;
 	BlueNoise m_blueNoise;
