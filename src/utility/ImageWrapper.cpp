@@ -71,30 +71,62 @@ rt::Colour rt::Image::Bicubic(const float& x, const float& y, const sf::Image& i
 	rt::Colour q01 = image.getPixel(static_cast<unsigned int>(x0), static_cast<unsigned int>(y1));
 	rt::Colour q02 = image.getPixel(static_cast<unsigned int>(x0), static_cast<unsigned int>(y2));
 	rt::Colour q03 = image.getPixel(static_cast<unsigned int>(x0), static_cast<unsigned int>(y3));
+	rt::Colour r0 = rt::Colour::Cubic(q00, q01, q02, q03, yFactor);
 
+	rt::Colour q10 = image.getPixel(static_cast<unsigned int>(x1), static_cast<unsigned int>(y0));
+	rt::Colour q11 = image.getPixel(static_cast<unsigned int>(x1), static_cast<unsigned int>(y1));
+	rt::Colour q12 = image.getPixel(static_cast<unsigned int>(x1), static_cast<unsigned int>(y2));
+	rt::Colour q13 = image.getPixel(static_cast<unsigned int>(x1), static_cast<unsigned int>(y3));
+	rt::Colour r1 = rt::Colour::Cubic(q10, q11, q12, q13, yFactor);
 
-	return rt::Colour();
+	rt::Colour q20 = image.getPixel(static_cast<unsigned int>(x2), static_cast<unsigned int>(y0));
+	rt::Colour q21 = image.getPixel(static_cast<unsigned int>(x2), static_cast<unsigned int>(y1));
+	rt::Colour q22 = image.getPixel(static_cast<unsigned int>(x2), static_cast<unsigned int>(y2));
+	rt::Colour q23 = image.getPixel(static_cast<unsigned int>(x2), static_cast<unsigned int>(y3));
+	rt::Colour r2 = rt::Colour::Cubic(q20, q21, q22, q23, yFactor);
+
+	rt::Colour q30 = image.getPixel(static_cast<unsigned int>(x3), static_cast<unsigned int>(y0));
+	rt::Colour q31 = image.getPixel(static_cast<unsigned int>(x3), static_cast<unsigned int>(y1));
+	rt::Colour q32 = image.getPixel(static_cast<unsigned int>(x3), static_cast<unsigned int>(y2));
+	rt::Colour q33 = image.getPixel(static_cast<unsigned int>(x3), static_cast<unsigned int>(y3));
+	rt::Colour r3 = rt::Colour::Cubic(q30, q31, q32, q33, yFactor);
+
+	return rt::Colour::Cubic(r0, r1, r2, r0, xFactor);
 }
 
 rt::Colour rt::Image::Bilinear(const float& x, const float& y, const sf::Image& image, const rt::Image::Extrapolation& extrapolation) {
-	
-	return rt::Colour();
-}
+	int x0 = static_cast<int>(std::floorf(x));
+	int y0 = static_cast<int>(std::floorf(y));
+	int x1 = x0 + 1;
+	int y1 = y0 + 1;
 
-//rt::Colour rt::Image::Bicubic(const float& x, const float& y, const sf::Image& image) {
-//	unsigned int x1 = static_cast<unsigned int>(std::floorf(x));
-//	unsigned int y1 = static_cast<unsigned int>(std::floorf(y));
-//	unsigned int x2 = x1 + 1;
-//	unsigned int y2 = y1 + 1;
-//
-//	unsigned int x0 = ;
-//	unsigned int x3 = x2 + 1;
-//	unsigned int y0 = y1 - 1;
-//	unsigned int y3 = y2 + 1;
-//
-//	return rt::Colour();
-//}
-//
-//rt::Colour rt::Image::Bilinear(const float& x, const float& y, const sf::Image& image) {
-//	return rt::Colour();
-//}
+	// check extrapolation
+	sf::Vector2u size = image.getSize();
+	if (extrapolation == rt::Image::Extrapolation::Repeat) {
+		x0 = x0 % static_cast<int>(size.x);
+		x1 = x1 % static_cast<int>(size.x);
+
+		y0 = y0 % static_cast<int>(size.y);
+		y1 = y1 % static_cast<int>(size.y);
+	}
+	else {
+		x0 = std::clamp(x0, 0, static_cast<int>(size.x));
+		x1 = std::clamp(x1, 0, static_cast<int>(size.x));
+
+		y0 = std::clamp(y0, 0, static_cast<int>(size.y));
+		y1 = std::clamp(y1, 0, static_cast<int>(size.y));
+	}
+
+	float xFactor = x - static_cast<float>(x0);
+	float yFactor = y - static_cast<float>(y0);
+
+	rt::Colour q00 = image.getPixel(static_cast<unsigned int>(x0), static_cast<unsigned int>(y0));
+	rt::Colour q01 = image.getPixel(static_cast<unsigned int>(x0), static_cast<unsigned int>(y1));
+	rt::Colour r0 = rt::Colour::Linear(q00, q01, yFactor);
+
+	rt::Colour q10 = image.getPixel(static_cast<unsigned int>(x1), static_cast<unsigned int>(y0));
+	rt::Colour q11 = image.getPixel(static_cast<unsigned int>(x1), static_cast<unsigned int>(y1));
+	rt::Colour r1 = rt::Colour::Linear(q10, q11, yFactor);
+	
+	return rt::Colour::Linear(r0, r1, xFactor);
+}
