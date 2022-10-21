@@ -11,5 +11,5 @@ Named after Raytracing in "One Weekend" tutorial
 - [x] Blue noise sampling
 - [x] Ray class
 - [x] Camera and HitRec class
-- [ ] Materials and Object class
 - [ ] Main Rendering class (Raytracing.cpp)
+- [ ] Materials and Object class
