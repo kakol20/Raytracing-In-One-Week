@@ -12,18 +12,19 @@ PixelRender::PixelRender(const unsigned int& width, const unsigned int& height, 
 	m_width(width),
 	m_height(height),
 	m_window(sf::VideoMode(width, height), name, sf::Style::Titlebar | sf::Style::Close) {
-
 	m_clipEnd = 1000.f;
 	m_clipStart = 1e-6f;
 
 	m_useThreads = 0;
 	m_xTileCount = 0;
 	m_yTileCount = 0;
-	m_nextAvailable = 0;
 	m_tilesRendered = 0;
 
 	m_renderColSpce = rt::Image::ColorSpace::Non_Color;
 	m_renderScene = false;
+}
+
+PixelRender::~PixelRender() {
 }
 
 bool PixelRender::Init() {
@@ -59,7 +60,7 @@ bool PixelRender::Init() {
 	else {
 		// -- DEBUG SCENE --
 
-		m_fileFolder = "render/debug/";
+		m_fileFolder = "render/debugSc/";
 
 		sf::Vector3f lookFrom = { 0.f, 2.f, 5.f };
 
@@ -132,7 +133,7 @@ bool PixelRender::Init() {
 		countY++;
 	}
 
-	std::reverse(m_tiles.begin(), m_tiles.end());
+	//std::reverse(m_tiles.begin(), m_tiles.end());
 
 	UpdateTexture();
 
@@ -261,7 +262,6 @@ bool PixelRender::RunMode() {
 	}
 
 	m_tilesRendered = 0;
-	m_nextAvailable = 0;
 
 	// ----- MAIN RENDER -----
 
@@ -292,25 +292,30 @@ bool PixelRender::RunMode() {
 
 	if (m_useThreads > 1) {
 		for (size_t i = 0; i < m_useThreads; i++) {
-			sf::Thread thread(&PixelRender::RenderTile, this);
-			m_threads.push_back(thread);
-			////m_threadID[m_threads[i].get_id()] = i;
+			//sf::Thread thread(&PixelRender::RenderTile, this);
+			//m_threads.push_back(thread);
+			//m_threads[i].launch();
 
-			////m_threads[i].sleep
-			m_threads[i].launch();
-
-			m_nextAvailable++;
+			m_threads.push_back(new sf::Thread(&PixelRender::RenderTile, this));
+			m_threads[i]->launch();
 		}
 	}
 	else {
 		RenderTile();
 	}
 
+	/*if (m_useThreads > 1) {
+		for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
+			(*it)->launch();
+		}
+	}*/
+
 	// -- CHECK FOR THREAD FINISH --
 
 	if (m_useThreads > 1) {
 		for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
-			(*it).wait();
+			(*it)->wait();
+			//(*it)->terminate();
 		}
 	}
 
@@ -349,11 +354,22 @@ bool PixelRender::RunMode() {
 }
 
 void PixelRender::RenderTile() {
-	sf::Lock lock1(m_mutex);
+	// check for next available tile
+	sf::Lock lock3(m_mutex);
+	size_t startIndex = m_tiles.size();
+	for (size_t i = 0; i < m_tiles.size(); i++) {
+		if (!m_tiles[i].tileComplete && !m_tiles[i].activeTile) {
+			m_tiles[i].activeTile = true;
+			startIndex = i;
+			break;
+		}
+	}
 
-	size_t startIndex = m_nextAvailable;
-	//m_nextAvailable++;
+	if (startIndex == m_tiles.size()) return;
 
+#ifdef _DEBUG
+	std::cout << "Tile #" << startIndex << '\n';
+#endif // _DEBUG
 	m_mutex.unlock();
 
 	if (startIndex < m_tiles.size()) {
@@ -382,9 +398,6 @@ void PixelRender::RenderTile() {
 
 		m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
 
-		size_t next = m_nextAvailable;
-		m_nextAvailable++;
-
 		UpdateTexture();
 
 		if (!Draw()) {
@@ -393,9 +406,7 @@ void PixelRender::RenderTile() {
 
 		m_mutex.unlock();
 
-		if (next < m_tiles.size()) {
-			RenderTile();
-		}
+		RenderTile();
 	}
 }
 
@@ -410,13 +421,13 @@ void PixelRender::Render(const int& minX, const int& minY, const int& maxX, cons
 	m_mutex.unlock();
 
 	if (minSamples > maxSamples) minSamples = maxSamples;
-	
+
 	for (int x = minX; x < maxX; x++) {
 		for (int y = minY; y < maxY; y++) {
 			int flippedY = (m_height - y) - 1;
 
 			// ----- SEND RAYS -----
-			
+
 			rt::Colour pixelCol;
 			int count = 0;
 			rt::Colour previous(0.f, 0.f, 0.f);

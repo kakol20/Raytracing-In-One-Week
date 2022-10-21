@@ -47,7 +47,7 @@ int WinMain() {
 		mainWindow.Update();
 	}
 
-	mainWindow.SaveRender("render/render.png");
+	//mainWindow.SaveRender("render/render.png");
 
 	return 0;
 }

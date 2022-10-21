@@ -21,7 +21,7 @@ class PixelRender {
 
 public:
 	PixelRender(const unsigned int& width = 1280, const unsigned int& height = 720, const std::string& name = "Pixel Renderer");
-	~PixelRender() {};
+	~PixelRender();
 
 	bool Init();
 	void Update();
@@ -53,7 +53,6 @@ private:
 	std::fstream m_log;
 	std::string m_fileFolder;
 	int m_tilesRendered;
-	size_t m_nextAvailable;
 
 	// ----- TILES -----
 
@@ -73,7 +72,7 @@ private:
 	size_t m_useThreads;
 	//std::map<sf::Thread::id, size_t> m_threadID;
 	sf::Mutex m_mutex;
-	std::vector<sf::Thread> m_threads;
+	std::vector<sf::Thread*> m_threads;
 	std::vector<size_t> m_threadArg;
 
 	// ----- MAIN RENDERING FUNCTIONS -----
