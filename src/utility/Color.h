@@ -88,6 +88,16 @@ namespace rt {
 		/// </summary>
 		void Round();
 
+		/// <summary>
+		/// Convert Linear space to SRGB space
+		/// </summary>
+		void LinearToSRGB();
+
+		/// <summary>
+		/// Convert SRGB space to Linear space
+		/// </summary>
+		void SRGBtoLinear();
+
 	private:
 		Color::FloatValue m_val;
 

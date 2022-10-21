@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <chrono>
 
 #include "../utility/Color.h"
 #include "../utility/Random.h"
@@ -9,10 +10,17 @@ PixelRender::PixelRender(const unsigned int& width, const unsigned int& height, 
 	m_width(width),
 	m_height(height),
 	m_window(sf::VideoMode(width, height), name, sf::Style::Titlebar | sf::Style::Close) {
-	
 
 	m_clipEnd = 1000.f;
 	m_clipStart = 1e-6f;
+
+	m_useThreads = 0;
+	m_xTileCount = 0;
+	m_yTileCount = 0;
+	m_nextAvailable = 0;
+	m_tilesRendered = 0;
+
+	m_renderColSpce = PixelRender::ColorSpace::Non_Color;
 }
 
 bool PixelRender::Init() {
@@ -42,6 +50,8 @@ bool PixelRender::Init() {
 	}
 	else {
 		// -- DEBUG SCENE --
+
+		m_fileFolder = "render/debug/";
 
 		sf::Vector3f lookFrom = { 0.f, 2.f, 5.f };
 
@@ -83,8 +93,8 @@ bool PixelRender::Init() {
 
 	// ----- GENERATE TILES -----
 
-	int maxXTiles = m_width < tileSize ? 1 : m_width / tileSize;
-	int maxYTiles = m_height < tileSize ? 1 : m_height / tileSize;
+	int maxXTiles = static_cast<int>(m_width) < tileSize ? 1 : static_cast<int>(m_width) / tileSize;
+	int maxYTiles = static_cast<int>(m_height) < tileSize ? 1 : static_cast<int>(m_height) / tileSize;
 	int maxTiles = maxXTiles * maxYTiles;
 
 	int xTileSize = static_cast<int>(std::roundf(static_cast<float>(m_width) / maxXTiles));
@@ -95,24 +105,24 @@ bool PixelRender::Init() {
 
 	int y = 0;
 	int countY = 0;
-	while (y < m_height) {
+	while (y < static_cast<int>(m_height)) {
 		m_yTileCount++;
 
 		int addY = heightModulo > 0 ? yTileSize + 1 : yTileSize;
 		int maxY = y + addY;
-		maxY = maxY > m_height ? m_height : maxY;
+		maxY = maxY > static_cast<int>(m_height) ? static_cast<int>(m_height) : maxY;
 
 		int l_widthModulo = widthModulo;
 
 		int x = 0;
 		int xTileCount = 0;
 		int countX = 0;
-		while (x < m_width) {
+		while (x < static_cast<int>(m_width)) {
 			xTileCount++;
 
 			int addX = l_widthModulo > 0 ? xTileSize + 1 : xTileSize;
 			int maxX = x + addX;
-			maxX = maxX > m_width ? m_width : maxX;
+			maxX = maxX > static_cast<int>(m_width) ? static_cast<int>(m_width) : maxX;
 
 			m_tiles.push_back({ x, y, maxX, maxY, false, false, countX, countY, Random::RandomUInt() });
 
@@ -146,30 +156,54 @@ void PixelRender::Update() {
 
 	// ----- MAIN LOOP -----
 
-	// for testing purposes
-	//if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-	//	sf::Vector2i mousePos = sf::Mouse::getPosition(m_window);
-	//	/*mousePos.x = std::clamp(mousePos.x, 0, static_cast<int>(m_width) - 1);
-	//	mousePos.y = std::clamp(mousePos.y, 0, static_cast<int>(m_height) - 1);*/
+	auto start = std::chrono::high_resolution_clock::now();
 
-	//	for (int x = -1; x <= 1; x++) {
-	//		for (int y = -1; y <= 1; y++) {
-	//			int l_x = std::clamp(mousePos.x + x, 0, static_cast<int>(m_width) - 1);
-	//			int l_y = std::clamp(mousePos.y + y, 0, static_cast<int>(m_height) - 1);
+	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "emission" || m_settings["renderMode"] == "normal" || m_settings["renderMode"] == "albedo") {
+		RunMode();
+	}
+	else if (m_settings["renderMode"] == "all") {
+		m_settings["renderMode"] = "normal";
+		RunMode();
 
-	//			SetPixel(l_x, l_y, rt::Color((sf::Uint8)255, 255, 255));
-	//		}
-	//	}
+		m_settings["renderMode"] = "emission";
+		RunMode();
 
-	//	UpdateTexture();
-	//}
+		m_settings["renderMode"] = "albedo";
+		RunMode();
+
+		m_settings["renderMode"] = "color";
+		RunMode();
+	}
+	else {
+		m_settings["renderMode"] = "color";
+		RunMode();
+	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<float> elapsedSec = end - start;
+	std::chrono::duration<float, std::ratio<60, 1>> elapsedMin = end - start;
+
+	std::fstream runTime;
+	std::string fileLocation = m_fileFolder;
+	fileLocation += "runTime.txt";
+	runTime.open(fileLocation.c_str(), std::ios_base::out);
+	if (runTime.is_open()) {
+		runTime << "Elapsed time in seconds: " << elapsedSec << "\n"
+			<< "Elapsed time in minutes: " << elapsedMin << "\n";
+
+		runTime.close();
+	}
 }
 
 bool PixelRender::Draw() {
+	m_mutex.lock();
+
 	sf::Event event;
 	while (m_window.pollEvent(event)) {
 		if (event.type == sf::Event::Closed) {
 			m_window.close();
+
+			m_mutex.unlock();
 			return false;
 		}
 	}
@@ -184,15 +218,149 @@ bool PixelRender::Draw() {
 
 	m_window.display();
 
+	m_mutex.unlock();
+
 	return m_window.isOpen();
 }
 
 void PixelRender::SetPixel(const unsigned int& x, const unsigned int& y, const rt::Color& color) {
 	rt::Color col = color;
 	col.Dither(x, y, 255);
+
+	m_mutex.lock();
 	m_renderImage.setPixel(x, y, col.GetSFColor());
+	m_mutex.unlock();
+}
+
+void PixelRender::UpdateTexture() {
+	m_mutex.lock();
+	m_renderTexture.loadFromImage(m_renderImage);
+	m_renderSprite.setTexture(m_renderTexture, true);
+	m_mutex.unlock();
 }
 
 void PixelRender::SaveRender(const char* fileLocation) {
 	m_renderImage.saveToFile(fileLocation);
+}
+
+bool PixelRender::RunMode() {
+	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "albedo" || m_settings["renderMode"] == "emission") {
+		m_renderColSpce = PixelRender::ColorSpace::sRGB;
+	}
+	else {
+		m_renderColSpce = PixelRender::ColorSpace::Non_Color;
+	}
+
+	for (auto it = m_tiles.begin(); it != m_tiles.end(); it++) {
+		PixelRender::Tile& tile = (*it);
+
+		tile.activeTile = false;
+		tile.tileComplete = false;
+	}
+
+	m_tilesRendered = 0;
+	m_nextAvailable = 0;
+
+	// ----- MAIN RENDER -----
+
+	// -- LOGGING --
+
+	std::string output = m_fileFolder;
+
+	if (m_settings["renderMode"] == "color") {
+		output += "log_color.txt";
+	}
+	else if (m_settings["renderMode"] == "emission") {
+		output += "log_emission.txt";
+	}
+	else if (m_settings["renderMode"] == "normal") {
+		output += "log_normal.txt";
+	}
+	else if (m_settings["renderMode"] == "albedo") {
+		output += "log_albedo.txt";
+	}
+	else {
+		output += "log_color.txt";
+	}
+
+	m_log.open(output.c_str(), std::ios_base::out);
+	m_log << "Threads Used: " << m_useThreads << "\nTotal tiles: " << m_tiles.size() << "\n";
+
+	ShowProgress();
+
+	// ------ MULTI THREADING -----
+
+	if (m_useThreads > 1) {
+		for (size_t i = 0; i < m_useThreads; i++) {
+			m_threads.push_back(std::thread(&PixelRender::RenderTile, this, m_nextAvailable));
+			m_threadID[m_threads[i].get_id()] = i;
+
+			//m_threads[i].sleep
+			m_nextAvailable++;
+		}
+	}
+	else {
+		RenderTile(0);
+	}
+
+	// -- CHECK FOR THREAD FINISH --
+
+	if (m_useThreads > 1) {
+		for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
+			(*it).join();
+		}
+	}
+
+	// ----- SAVE RENDER -----
+
+	output = m_fileFolder;
+	if (m_settings["renderMode"] == "color") {
+		output += "render_c.png";
+	}
+	else if (m_settings["renderMode"] == "emission") {
+		output += "render_e.png";
+	}
+	else if (m_settings["renderMode"] == "normal") {
+		output += "render_n.png";
+	}
+	else if (m_settings["renderMode"] == "albedo") {
+		output += "render_a.png";
+	}
+	else {
+		output += "render_c.png";
+	}
+
+	SaveRender(output.c_str());
+
+	ShowProgress();
+
+	// ----- END -----
+
+	m_log.close();
+	if (m_useThreads > 1) {
+		m_threads.clear();
+		m_threadID.clear();
+	}
+
+	return true;
+}
+
+void PixelRender::RenderTile(const size_t& startIndex) {
+}
+
+void PixelRender::Render(const int& minX, const int& minY, const int& maxX, const int& maxY) {
+	
+}
+
+bool PixelRender::RayHitObject(Ray& ray, const float& t_min, const float& t_max, HitRec& rec) {
+	// -- TEMPORARILY EMPTY --
+	return false;
+}
+
+sf::Vector3f PixelRender::RayColor(Ray& ray, const int& depth, const sf::Vector3f& initialRayCol) {
+	return sf::Vector3f();
+}
+
+void PixelRender::ShowProgress() {
+	Draw();
 }

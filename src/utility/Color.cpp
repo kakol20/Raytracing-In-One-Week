@@ -114,3 +114,65 @@ void rt::Color::Round() {
 	m_val.g = std::roundf(m_val.g / 255.f) * 255.f;
 	m_val.b = std::roundf(m_val.b / 255.f) * 255.f;
 }
+
+void rt::Color::LinearToSRGB() {
+	m_val.r /= 255.f;
+	m_val.g /= 255.f;
+	m_val.b /= 255.f;
+
+	if (m_val.r <= 0.0031308f) {
+		m_val.r *= 12.92f;
+	}
+	else {
+		m_val.r = ((std::powf(m_val.r, 1.f / 2.4f)) * 1.055f) - 0.055f;
+	}
+
+	if (m_val.g <= 0.0031308f) {
+		m_val.g *= 12.92f;
+	}
+	else {
+		m_val.g = ((std::powf(m_val.g, 1.f / 2.4f)) * 1.055f) - 0.055f;
+	}
+
+	if (m_val.b <= 0.0031308f) {
+		m_val.b *= 12.92f;
+	}
+	else {
+		m_val.b = ((std::powf(m_val.b, 1.f / 2.4f)) * 1.055f) - 0.055f;
+	}
+
+	m_val.r *= 255.f;
+	m_val.g *= 255.f;
+	m_val.b *= 255.f;
+}
+
+void rt::Color::SRGBtoLinear() {
+	m_val.r /= 255.f;
+	m_val.g /= 255.f;
+	m_val.b /= 255.f;
+
+	if (m_val.r <= 0.04045f) {
+		m_val.r /= 12.92f;
+	}
+	else {
+		m_val.r = std::powf((m_val.r + 0.055f) / 1.055f, 2.4f);
+	}
+
+	if (m_val.g <= 0.04045f) {
+		m_val.g /= 12.92f;
+	}
+	else {
+		m_val.g = std::powf((m_val.g + 0.055f) / 1.055f, 2.4f);
+	}
+
+	if (m_val.b <= 0.04045f) {
+		m_val.b /= 12.92f;
+	}
+	else {
+		m_val.b = std::powf((m_val.b + 0.055f) / 1.055f, 2.4f);
+	}
+
+	m_val.r *= 255.f;
+	m_val.g *= 255.f;
+	m_val.b *= 255.f;
+}
