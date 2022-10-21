@@ -79,6 +79,13 @@ namespace rt {
 		/// </summary>
 		void Clamp();
 
+
+		inline void Abs() {
+			m_val.r = std::fabsf(m_val.r);
+			m_val.g = std::fabsf(m_val.g);
+			m_val.b = std::fabsf(m_val.b);
+		};
+
 		/// <summary>
 		/// Uses ordered dithering
 		/// </summary>

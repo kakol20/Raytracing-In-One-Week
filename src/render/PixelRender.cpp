@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <chrono>
+#include <iostream>
 
 #include "../utility/Colour.h"
 #include "../utility/Random.h"
@@ -22,9 +23,14 @@ PixelRender::PixelRender(const unsigned int& width, const unsigned int& height, 
 	m_tilesRendered = 0;
 
 	m_renderColSpce = rt::Image::ColorSpace::Non_Color;
+	m_renderScene = false;
 }
 
 bool PixelRender::Init() {
+	m_window.setActive(false);
+
+	m_renderScene = true;
+
 	// ----- SETTINGS -----
 
 	if (!m_settings.Read("settings.cfg")) m_settings.Write("settings.cfg");
@@ -144,54 +150,60 @@ void PixelRender::Update() {
 
 	// ----- MAIN LOOP -----
 
-	auto start = std::chrono::high_resolution_clock::now();
+	if (m_renderScene) {
+		auto start = std::chrono::high_resolution_clock::now();
 
-	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "emission" || m_settings["renderMode"] == "normal" || m_settings["renderMode"] == "albedo") {
-		RunMode();
-	}
-	else if (m_settings["renderMode"] == "all") {
-		m_settings["renderMode"] = "normal";
-		RunMode();
+		if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "emission" || m_settings["renderMode"] == "normal" || m_settings["renderMode"] == "albedo") {
+			RunMode();
+		}
+		else if (m_settings["renderMode"] == "all") {
+			m_settings["renderMode"] = "normal";
+			RunMode();
 
-		m_settings["renderMode"] = "emission";
-		RunMode();
+			m_settings["renderMode"] = "emission";
+			RunMode();
 
-		m_settings["renderMode"] = "albedo";
-		RunMode();
+			m_settings["renderMode"] = "albedo";
+			RunMode();
 
-		m_settings["renderMode"] = "color";
-		RunMode();
-	}
-	else {
-		m_settings["renderMode"] = "color";
-		RunMode();
-	}
+			m_settings["renderMode"] = "color";
+			RunMode();
+		}
+		else {
+			m_settings["renderMode"] = "color";
+			RunMode();
+		}
 
-	auto end = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<float> elapsedSec = end - start;
-	std::chrono::duration<float, std::ratio<60, 1>> elapsedMin = end - start;
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<float> elapsedSec = end - start;
+		std::chrono::duration<float, std::ratio<60, 1>> elapsedMin = end - start;
 
-	std::fstream runTime;
-	std::string fileLocation = m_fileFolder;
-	fileLocation += "runTime.txt";
-	runTime.open(fileLocation.c_str(), std::ios_base::out);
-	if (runTime.is_open()) {
-		runTime << "Elapsed time in seconds: " << elapsedSec << "\n"
-			<< "Elapsed time in minutes: " << elapsedMin << "\n";
+		std::fstream runTime;
+		std::string fileLocation = m_fileFolder;
+		fileLocation += "runTime.txt";
+		runTime.open(fileLocation.c_str(), std::ios_base::out);
+		if (runTime.is_open()) {
+			runTime << "Elapsed time in seconds: " << elapsedSec << "\n"
+				<< "Elapsed time in minutes: " << elapsedMin << "\n";
 
-		runTime.close();
+			runTime.close();
+		}
+
+		m_renderScene = false;
 	}
 }
 
 bool PixelRender::Draw() {
-	m_mutex.lock();
+	sf::Lock lock(m_mutex);
+
+	m_window.setActive(true);
 
 	sf::Event event;
 	while (m_window.pollEvent(event)) {
 		if (event.type == sf::Event::Closed) {
 			m_window.close();
 
-			m_mutex.unlock();
+			//m_mutex.unlock();
 			return false;
 		}
 	}
@@ -206,25 +218,27 @@ bool PixelRender::Draw() {
 
 	m_window.display();
 
-	m_mutex.unlock();
+	bool isOpen = m_window.isOpen();
 
-	return m_window.isOpen();
+	m_window.setActive(false);
+
+	//m_mutex.unlock();
+
+	return isOpen;
 }
 
 void PixelRender::SetPixel(const unsigned int& x, const unsigned int& y, const rt::Colour& color) {
 	rt::Colour col = color;
 	col.Dither(x, y, 255);
 
-	m_mutex.lock();
+	sf::Lock lock(m_mutex);
 	m_renderImage.setPixel(x, y, col.GetSFColour());
-	m_mutex.unlock();
+	//m_mutex.unlock();
 }
 
 void PixelRender::UpdateTexture() {
-	m_mutex.lock();
 	m_renderTexture.loadFromImage(m_renderImage);
 	m_renderSprite.setTexture(m_renderTexture, true);
-	m_mutex.unlock();
 }
 
 void PixelRender::SaveRender(const char* fileLocation) {
@@ -274,28 +288,29 @@ bool PixelRender::RunMode() {
 	m_log.open(output.c_str(), std::ios_base::out);
 	m_log << "Threads Used: " << m_useThreads << "\nTotal tiles: " << m_tiles.size() << "\n";
 
-	ShowProgress();
-
 	// ------ MULTI THREADING -----
 
 	if (m_useThreads > 1) {
 		for (size_t i = 0; i < m_useThreads; i++) {
-			m_threads.push_back(std::thread(&PixelRender::RenderTile, this, m_nextAvailable));
-			m_threadID[m_threads[i].get_id()] = i;
+			sf::Thread thread(&PixelRender::RenderTile, this);
+			m_threads.push_back(thread);
+			////m_threadID[m_threads[i].get_id()] = i;
 
-			//m_threads[i].sleep
+			////m_threads[i].sleep
+			m_threads[i].launch();
+
 			m_nextAvailable++;
 		}
 	}
 	else {
-		RenderTile(0);
+		RenderTile();
 	}
 
 	// -- CHECK FOR THREAD FINISH --
 
 	if (m_useThreads > 1) {
 		for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
-			(*it).join();
+			(*it).wait();
 		}
 	}
 
@@ -320,20 +335,27 @@ bool PixelRender::RunMode() {
 
 	SaveRender(output.c_str());
 
-	ShowProgress();
+	std::cout << "\nDone rendering \n";
 
 	// ----- END -----
 
 	m_log.close();
 	if (m_useThreads > 1) {
 		m_threads.clear();
-		m_threadID.clear();
+		//m_threadID.clear();
 	}
 
 	return true;
 }
 
-void PixelRender::RenderTile(const size_t& startIndex) {
+void PixelRender::RenderTile() {
+	sf::Lock lock1(m_mutex);
+
+	size_t startIndex = m_nextAvailable;
+	//m_nextAvailable++;
+
+	m_mutex.unlock();
+
 	if (startIndex < m_tiles.size()) {
 		m_tiles[startIndex].activeTile = true;
 		Random::Seed = m_tiles[startIndex].seed;
@@ -344,35 +366,121 @@ void PixelRender::RenderTile(const size_t& startIndex) {
 		auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
 		m_tiles[startIndex].activeTile = false;
-		std::thread::id thisId = std::this_thread::get_id();
+		//std::thread::id thisId = std::this_thread::get_id();
 		m_tiles[startIndex].tileComplete = true;
 
-		m_mutex.lock();
+		sf::Lock lock2(m_mutex);
 		m_tilesRendered++;
 
-		ShowProgress();
-
 		// ----- LOGGING -----
-		if (m_useThreads > 1) {
+		/*if (m_useThreads > 1) {
 			m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << '\n';
 		}
 		else {
 			m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
-		}
+		}*/
+
+		m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
 
 		size_t next = m_nextAvailable;
 		m_nextAvailable++;
 
+		UpdateTexture();
+
+		if (!Draw()) {
+			return;
+		}
+
 		m_mutex.unlock();
 
 		if (next < m_tiles.size()) {
-			RenderTile(next);
+			RenderTile();
 		}
 	}
 }
 
 void PixelRender::Render(const int& minX, const int& minY, const int& maxX, const int& maxY) {
+	sf::Lock lock(m_mutex);
+
+	float noiseThreshold = std::stof(m_settings["noiseThreshold"]);
+	int maxDepth = std::stoi(m_settings["rayDepth"]);
+	int maxSamples = std::stoi(m_settings["maxSamples"]);
+	int minSamples = std::stoi(m_settings["minSamples"]);
+
+	m_mutex.unlock();
+
+	if (minSamples > maxSamples) minSamples = maxSamples;
 	
+	for (int x = minX; x < maxX; x++) {
+		for (int y = minY; y < maxY; y++) {
+			int flippedY = (m_height - y) - 1;
+
+			// ----- SEND RAYS -----
+			
+			rt::Colour pixelCol;
+			int count = 0;
+			rt::Colour previous(0.f, 0.f, 0.f);
+			rt::Colour totalDiff(0.f, 0.f, 0.f);
+
+			size_t sampleOffset = static_cast<size_t>(Random::RandomInt(0, static_cast<int>(m_blueNoise.Size())));
+
+			for (int s = 0; s < maxSamples; s++) {
+				sf::Vector2f uv = { static_cast<float>(x), static_cast<float>(y) };
+
+				if (s < static_cast<int>(m_blueNoise.Size())) {
+					size_t index = s + sampleOffset;
+
+					sf::Vector2f sample = m_blueNoise[index];
+
+					uv += sample;
+				}
+				else {
+					uv += { Random::RandomFloat(), Random::RandomFloat() };
+				}
+
+				uv.x /= static_cast<float>(m_width - 1);
+				uv.y /= static_cast<float>(m_height - 1);
+
+				rt::Colour rayColour;
+
+				Ray ray = m_camera.GetRay(uv.x, uv.y);
+
+				rayColour = RayColor(ray, maxDepth);
+
+				if (count > 0) {
+					rt::Colour difference = previous - rayColour;
+					difference.Abs();
+					totalDiff += difference;
+
+					if (count > minSamples) {
+						rt::Colour avgDiff = totalDiff / static_cast<float>(count);
+
+						rt::Colour::FloatValue fValue = avgDiff.GetFloatValue();
+						sf::Vector3f asVec = { fValue.r, fValue.g, fValue.b };
+
+						bool belowThreshold = rt::Vector3::SqrMagnitude(asVec) < (noiseThreshold * noiseThreshold);
+
+						if (belowThreshold) {
+							count++;
+							pixelCol += rayColour;
+							break;
+						}
+					}
+				}
+
+				previous = rayColour;
+				count++;
+				pixelCol += rayColour;
+			}
+
+			if (count <= 0) count = 1;
+
+			pixelCol /= static_cast<float>(count);
+			pixelCol.Clamp();
+
+			SetPixel(x, flippedY, pixelCol);
+		}
+	}
 }
 
 bool PixelRender::RayHitObject(Ray& ray, const float& t_min, const float& t_max, HitRec& rec) {
@@ -380,10 +488,21 @@ bool PixelRender::RayHitObject(Ray& ray, const float& t_min, const float& t_max,
 	return false;
 }
 
-sf::Vector3f PixelRender::RayColor(Ray& ray, const int& depth, const sf::Vector3f& initialRayCol) {
-	return sf::Vector3f();
-}
+rt::Colour PixelRender::RayColor(Ray& ray, const int& depth) {
+	if (depth <= 0) return rt::Colour();
 
-void PixelRender::ShowProgress() {
-	Draw();
+	// ----- CHECK FOR OBJECT HIT -----
+
+	HitRec rec;
+	if (RayHitObject(ray, m_clipStart, m_clipEnd, rec)) {
+		// nothing for now
+	}
+
+	// ----- DRAW BACKGROUND -----
+
+	sf::Vector3f unitDir = ray.GetDir();
+	unitDir = rt::Vector3::Normalize(unitDir);
+	float t = 0.5f * (unitDir.y + 1.f);
+
+	return (rt::Colour(255.f, 255.f, 255.f) * (1.f - t)) + (rt::Colour(0.5f, 0.7f, 1.f) * 255.f * t);
 }

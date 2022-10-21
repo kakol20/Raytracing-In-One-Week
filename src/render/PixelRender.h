@@ -8,6 +8,7 @@
 
 #include <SFML/Main.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
 
 #include "../utility/BlueNoise.h"
 #include "../utility/Colour.h"
@@ -40,6 +41,7 @@ private:
 	sf::Texture m_renderTexture;
 	sf::Sprite m_renderSprite;
 	rt::Image::ColorSpace m_renderColSpce;
+	bool m_renderScene;
 
 	Camera m_camera;
 	float m_clipEnd;
@@ -69,18 +71,17 @@ private:
 	// ----- MULTI_THREADING -----
 
 	size_t m_useThreads;
-	std::map<std::thread::id, size_t> m_threadID;
-	std::mutex m_mutex;
-	std::vector<std::thread> m_threads;
+	//std::map<sf::Thread::id, size_t> m_threadID;
+	sf::Mutex m_mutex;
+	std::vector<sf::Thread> m_threads;
+	std::vector<size_t> m_threadArg;
 
 	// ----- MAIN RENDERING FUNCTIONS -----
 
 	bool RunMode();
-	void RenderTile(const size_t& startIndex);
+	void RenderTile();
 	void Render(const int& minX, const int& minY, const int& maxX, const int& maxY);
 
 	bool RayHitObject(Ray& ray, const float& t_min, const float& t_max, HitRec& rec);
-	sf::Vector3f RayColor(Ray& ray, const int& depth, const sf::Vector3f& initialRayCol = rt::Vector3::One);
-
-	void ShowProgress();
+	rt::Colour RayColor(Ray& ray, const int& depth);
 };
