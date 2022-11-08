@@ -9,3 +9,11 @@ Named after Raytracing in "One Weekend" tutorial
 
 # TODO (in order)
 - [x] Multi Threading
+- [ ] Extended Pixel class
+- [ ] Random class
+- [ ] Vector (3D) class
+- [ ] Extended Sprite class
+- [ ] Settings Manager class
+- [ ] Blue Noise generation
+- [ ] Ray, Camera & HitRec class
+- [ ] Materials class
