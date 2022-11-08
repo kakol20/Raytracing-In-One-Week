@@ -153,11 +153,12 @@ void Render::RenderTile(const size_t& startIndex, const size_t threadIndex) {
 		auto start = std::chrono::high_resolution_clock::now();
 		RenderPixel(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
 		auto end = std::chrono::high_resolution_clock::now();
-		auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-		auto minDur = std::chrono::microseconds(2);
-		if (dur > minDur) {
-			std::this_thread::sleep_for(minDur);
+		std::chrono::duration<double, std::micro> dur = end - start;
+
+		int minDur = 8333;
+		if (dur.count() < static_cast<double>(minDur)) {
+			std::this_thread::sleep_for(std::chrono::microseconds(minDur));
 		}
 
 		// render next tile
@@ -165,7 +166,7 @@ void Render::RenderTile(const size_t& startIndex, const size_t threadIndex) {
 		m_mutex.lock();
 
 #ifdef _DEBUG
-		std::cout << "Rendered tile #" << startIndex << '\n';
+		std::cout << "Rendered tile #" << startIndex << " for " << dur << '\n';
 #endif // _DEBUG
 
 		size_t nextIndex = m_nextAvailable;
