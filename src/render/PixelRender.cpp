@@ -195,9 +195,9 @@ void PixelRender::Update() {
 }
 
 bool PixelRender::Draw() {
-	sf::Lock lock(m_mutex);
+	//sf::Lock lock(m_mutex);
 
-	m_window.setActive(true);
+	if (!m_window.setActive(true)) return false;
 
 	sf::Event event;
 	while (m_window.pollEvent(event)) {
@@ -213,7 +213,7 @@ bool PixelRender::Draw() {
 
 	// ----- DRAWING -----
 
-	m_window.clear();
+	//m_window.clear();
 
 	m_window.draw(m_renderSprite);
 
@@ -221,9 +221,9 @@ bool PixelRender::Draw() {
 
 	bool isOpen = m_window.isOpen();
 
-	m_window.setActive(false);
+	if (!m_window.setActive(false)) return false;
 
-	//m_mutex.unlock();
+	m_mutex.unlock();
 
 	return isOpen;
 }
@@ -234,7 +234,7 @@ void PixelRender::SetPixel(const unsigned int& x, const unsigned int& y, const r
 
 	sf::Lock lock(m_mutex);
 	m_renderImage.setPixel(x, y, col.GetSFColour());
-	//m_mutex.unlock();
+	m_mutex.unlock();
 }
 
 void PixelRender::UpdateTexture() {
@@ -304,18 +304,51 @@ bool PixelRender::RunMode() {
 		RenderTile();
 	}
 
-	/*if (m_useThreads > 1) {
-		for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
-			(*it)->launch();
-		}
-	}*/
-
-	// -- CHECK FOR THREAD FINISH --
-
 	if (m_useThreads > 1) {
-		for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
+		// ------ DRAW AT MAX 30FPS -----
+
+		const long long minTime = static_cast<long long>(std::ceilf((1.f / 10.f) * 1000.f));
+
+		auto start = std::chrono::high_resolution_clock::now();
+
+		while (true) {
+			auto end = std::chrono::high_resolution_clock::now();
+			auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+			if (dur.count() >= minTime) {
+				bool allComplete = true;
+				sf::Lock lock(m_mutex);
+				for (size_t i = 0; i < m_tiles.size(); i++) {
+					if (!m_tiles[i].tileComplete) {
+						allComplete = false;
+						break;
+					}
+				}
+
+				//if (allComplete) {
+				//	for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
+				//		/*(*it)->wait();*/
+				//		(*it)->terminate();
+				//	}
+				//}
+
+				UpdateTexture();
+				Draw();
+				m_mutex.unlock();
+
+				start = std::chrono::high_resolution_clock::now();
+			}
+		}
+
+		// -- CHECK FOR THREAD FINISH --
+
+		//for (auto it = m_threads.begin(); it != m_threads.end(); it++) {
+		//	(*it)->wait();
+		//	//(*it)->terminate();
+		//}
+
+		for (auto it = m_threads.rbegin(); it != m_threads.rend(); it++) {
 			(*it)->wait();
-			//(*it)->terminate();
 		}
 	}
 
@@ -365,60 +398,66 @@ void PixelRender::RenderTile() {
 		}
 	}
 
-	if (startIndex == m_tiles.size()) return;
+	if (startIndex == m_tiles.size()) {
+#ifdef _DEBUG
+		std::cout << "A thread has finished\n";
+#endif // _DEBUG
+		return;
+	}
 
 #ifdef _DEBUG
-	std::cout << "Tile #" << startIndex << '\n';
+	//std::cout << "Tile #" << startIndex << '\n';
 #endif // _DEBUG
 	m_mutex.unlock();
 
-	if (startIndex < m_tiles.size()) {
-		m_tiles[startIndex].activeTile = true;
-		Random::Seed = m_tiles[startIndex].seed;
+	m_tiles[startIndex].activeTile = true;
+	Random::Seed = m_tiles[startIndex].seed;
 
-		auto start = std::chrono::high_resolution_clock::now();
-		Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
-		auto end = std::chrono::high_resolution_clock::now();
-		auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	auto start = std::chrono::high_resolution_clock::now();
+	Render(m_tiles[startIndex].minX, m_tiles[startIndex].minY, m_tiles[startIndex].maxX, m_tiles[startIndex].maxY);
+	auto end = std::chrono::high_resolution_clock::now();
+	auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-		m_tiles[startIndex].activeTile = false;
-		//std::thread::id thisId = std::this_thread::get_id();
-		m_tiles[startIndex].tileComplete = true;
+	m_tiles[startIndex].activeTile = false;
+	//std::thread::id thisId = std::this_thread::get_id();
+	m_tiles[startIndex].tileComplete = true;
 
-		sf::Lock lock2(m_mutex);
-		m_tilesRendered++;
+	sf::Lock lock2(m_mutex);
+	m_tilesRendered++;
 
-		// ----- LOGGING -----
-		/*if (m_useThreads > 1) {
-			m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << '\n';
-		}
-		else {
-			m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
-		}*/
-
-		m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
-
-		UpdateTexture();
-
-		if (!Draw()) {
-			return;
-		}
-
-		m_mutex.unlock();
-
-		RenderTile();
+	// ----- LOGGING -----
+	/*if (m_useThreads > 1) {
+		m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << '\n';
 	}
+	else {
+		m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
+	}*/
+
+	m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
+
+#ifdef _DEBUG
+	std::cout << "Rendered tile #" << startIndex << " for " << dur << '\n';
+#endif // _DEBUG
+
+	if (m_useThreads == 1) {
+		UpdateTexture();
+		Draw();
+	}
+
+	m_mutex.unlock();
+
+	RenderTile();
 }
 
 void PixelRender::Render(const int& minX, const int& minY, const int& maxX, const int& maxY) {
-	sf::Lock lock(m_mutex);
+	//sf::Lock lock(m_mutex);
 
 	float noiseThreshold = std::stof(m_settings["noiseThreshold"]);
 	int maxDepth = std::stoi(m_settings["rayDepth"]);
 	int maxSamples = std::stoi(m_settings["maxSamples"]);
 	int minSamples = std::stoi(m_settings["minSamples"]);
 
-	m_mutex.unlock();
+	//m_mutex.unlock();
 
 	if (minSamples > maxSamples) minSamples = maxSamples;
 
@@ -488,6 +527,7 @@ void PixelRender::Render(const int& minX, const int& minY, const int& maxX, cons
 
 			pixelCol /= static_cast<float>(count);
 			pixelCol.Clamp();
+			pixelCol.LinearToSRGB();
 
 			SetPixel(x, flippedY, pixelCol);
 		}
