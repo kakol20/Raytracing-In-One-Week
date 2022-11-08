@@ -287,7 +287,7 @@
 	2.18: +Option to not "dirty" layers with SetDrawTarget() - Thanks TerasKasi!
 		  =Detection for Mac M1, fix for scroll wheel interrogation - Thanks ruarq!
 	2.19: Textual Input(of)course Edition!
-	      =Built in font is now olc::Renderable
+		  =Built in font is now olc::Renderable
 		  +EnablePixelTransfer() - Gate if layer content transfers occur (speedup in decal only apps)
 		  +TextEntryEnable() - Enables/Disables text entry mode
 		  +TextEntryGetString() - Gets the current accumulated string in text entry mode
@@ -301,10 +301,10 @@
 		  +ConsoleCaptureStdOut() - Capture std::cout by redirecting to built-in console
 		  +OnConsoleCommand() - Override is called when command is entered into built in console
 	2.20: +DrawRectDecal() - Keeps OneSketchyGuy quiet
-	      +GetScreenSize()
+		  +GetScreenSize()
 		  +olc::Sprite::Size() - returns size of sprite in vector format
 		  
-    !! Apple Platforms will not see these updates immediately - Sorry, I dont have a mac to test... !!
+	!! Apple Platforms will not see these updates immediately - Sorry, I dont have a mac to test... !!
 	!!   Volunteers willing to help appreciated, though PRs are manually integrated with credit     !!
 */
 #pragma endregion

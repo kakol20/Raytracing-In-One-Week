@@ -8,4 +8,4 @@ Named after Raytracing in "One Weekend" tutorial
 [Pixel Game Engine](https://github.com/OneLoneCoder/olcPixelGameEngine) by One Lone Coder
 
 # TODO (in order)
-- [ ] Multi Threading
+- [x] Multi Threading

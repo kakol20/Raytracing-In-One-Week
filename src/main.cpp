@@ -2,31 +2,11 @@
 
 #include "../ext/olcPixelGameEngine.h"
 
-class Example : public olc::PixelGameEngine {
-public:
-	Example() {
-		sAppName = "Example";
-	}
-
-public:
-	bool OnUserCreate() override {
-		// Called once at the start, so create things here
-		return true;
-	}
-
-	bool OnUserUpdate(float fElapsedTime) override {
-		// called once per frame
-		for (int x = 0; x < ScreenWidth(); x++)
-			for (int y = 0; y < ScreenHeight(); y++)
-				Draw(x, y, olc::Pixel(rand() % 256, rand() % 256, rand() % 256));
-		return true;
-	}
-};
+#include "render/Render.h"
 
 int main() {
-	Example demo;
-	if (demo.Construct(256, 240, 4, 4, false, true))
-		demo.Start();
+	Render render;
+	if (render.Construct(256, 256, 3, 3, false, true)) render.Start();
 
 	return 0;
 }
