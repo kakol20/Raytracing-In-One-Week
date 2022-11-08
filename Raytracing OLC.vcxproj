@@ -161,9 +161,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ext\olcPixelGameEngine.h" />
+    <ClInclude Include="src\extended\E_Pixel.h" />
     <ClInclude Include="src\render\Render.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\extended\E_Pixel.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\render\Render.cpp" />
   </ItemGroup>
