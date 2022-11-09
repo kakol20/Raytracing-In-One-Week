@@ -14,6 +14,6 @@ Named after Raytracing in "One Weekend" tutorial
 - [ ] Vector (3D) class
 - [ ] Extended Sprite class
 - [ ] Settings Manager class
-- [ ] Blue Noise generation
 - [ ] Ray, Camera & HitRec class
+- [ ] Blue Noise generation
 - [ ] Materials class
