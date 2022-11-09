@@ -9,11 +9,13 @@
 class E_Pixel {
 public:
 	E_Pixel();
+	E_Pixel(const float& r, const float& g, const float& b);
 	E_Pixel(const olc::Pixel& pixel);
+	E_Pixel(const uint8_t& r, const uint8_t& g, const uint8_t& b);
 	~E_Pixel() {};
 
-private:
-	struct FloatVal { float r; float g; float b; };
+	olc::Pixel GetOLC() const;
 
-	FloatVal m_val;
+private:
+	float m_r, m_g, m_b;
 };
