@@ -6,6 +6,8 @@
 
 #include "../../ext/olcPixelGameEngine.h"
 
+#include "../extended/E_Pixel.h"
+
 class Render : public olc::PixelGameEngine {
 public:
 	enum Mode {
