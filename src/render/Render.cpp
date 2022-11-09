@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "../maths/Maths.h"
 #include "../utility/Random.h"
 
 #include "Render.h"
@@ -197,12 +198,20 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 		for (int y = minY; y < maxY; y++) {
 			m_mutex.lock();
 
-			E_Pixel col((static_cast<float>(x) / static_cast<float>(ScreenWidth())) * 255.f, (static_cast<float>(y) / static_cast<float>(ScreenHeight())) * 255.f, 0.f);
+			E_Pixel col;
 
 			//col.LinearToSRGB();
 
-			// dither factor set to 7 to exaggerate dither effect
-			col.Dither(x, y, 7);
+			float grad = Maths::Map(static_cast<float>(y), 0.f, static_cast<float>(ScreenHeight()), 0.f, 255.f);
+
+			if (x < (ScreenWidth() / 2)) {
+				col = E_Pixel(Maths::Map(static_cast<float>(x), 0.f, static_cast<float>(ScreenWidth() / 2), 0.f, 255.f), grad, 0.f);
+			}
+			else {
+				col = E_Pixel(grad, grad, grad);
+			}
+
+			col.Dither(x, y, 31);
 
 			m_render.SetPixel(olc::vi2d(x, y), col.GetOLC());
 

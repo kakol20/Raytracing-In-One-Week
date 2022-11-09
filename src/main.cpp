@@ -30,7 +30,11 @@ thread_local uint64_t Random::Seed = 0xACE1u;
 
 int main() {
 	Render render;
-	if (render.Construct(1280, 720, 1, 1, false, true)) render.Start();
+	int32_t pixelSize = 4;
+	int32_t screenW = 240;
+	int32_t screenH = 160;
+
+	if (render.Construct(screenW, screenH, pixelSize, pixelSize, false, true)) render.Start();
 
 	return 0;
 }
