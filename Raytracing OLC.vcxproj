@@ -164,12 +164,14 @@
     <ClInclude Include="src\extended\E_Pixel.h" />
     <ClInclude Include="src\maths\Maths.h" />
     <ClInclude Include="src\render\Render.h" />
+    <ClInclude Include="src\utility\Random.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\extended\E_Pixel.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\maths\Maths.cpp" />
     <ClCompile Include="src\render\Render.cpp" />
+    <ClCompile Include="src\utility\Random.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,6 +3,7 @@
 #include "../ext/olcPixelGameEngine.h"
 
 #include "extended/E_Pixel.h"
+#include "utility/Random.h"
 
 #include "render/Render.h"
 
@@ -24,6 +25,8 @@ const uint8_t E_Pixel::Threshold[] = {
 	 42, 234,  26, 218,  38, 230,  22, 214,  41, 233,  25, 217,  37, 229,  21, 213,
 	170, 106, 154,  90, 166, 102, 150,  86, 169, 105, 153,  89, 165, 101, 149,  85
 };
+
+thread_local uint64_t Random::Seed = 0xACE1u;
 
 int main() {
 	Render render;

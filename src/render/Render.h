@@ -58,5 +58,7 @@ private:
 	int m_xTileCount, m_yTileCount;
 	std::vector<Tile> m_tiles;
 
+	void ShuffleTiles();
+
 	// ----- WINDOW -----
 };

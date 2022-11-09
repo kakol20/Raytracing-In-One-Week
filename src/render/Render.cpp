@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "../utility/Random.h"
+
 #include "Render.h"
 
 Render::Render() {
@@ -75,6 +77,7 @@ bool Render::OnUserCreate() {
 	}
 
 	//std::reverse(m_tiles.begin(), m_tiles.end());
+	ShuffleTiles();
 
 	m_mode = Render::START;
 
@@ -124,8 +127,8 @@ bool Render::OnUserUpdate(float fElapsedTime) {
 		m_mutex.unlock();
 	}
 	else {
-		Clear(olc::BLACK);
-		DrawSprite(olc::vi2d(0, 0), &m_render);
+		/*Clear(olc::BLACK);
+		DrawSprite(olc::vi2d(0, 0), &m_render);*/
 	}
 	return true;
 }
@@ -205,5 +208,21 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 
 			m_mutex.unlock();
 		}
+	}
+}
+
+void Render::ShuffleTiles() {
+	size_t i = m_tiles.size() - 1;
+	while (i >= 0) {
+		//size_t swap = (size_t)round(Random::RandomFloat(0.f, (float)i));
+		size_t swap = (size_t)Random::RandomUInt() % (i + 1);
+
+		if (swap < i) {
+			std::swap(m_tiles[i], m_tiles[swap]);
+		}
+
+		if (i == 0) break;
+
+		i--;
 	}
 }

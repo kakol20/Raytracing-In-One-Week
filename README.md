@@ -10,7 +10,7 @@ Named after Raytracing in "One Weekend" tutorial
 # TODO (in order)
 - [x] Multi Threading
 - [x] Extended Pixel class
-- [ ] Random class
+- [x] Random class
 - [ ] Vector (3D) class
 - [ ] Extended Sprite class
 - [ ] Settings Manager class
