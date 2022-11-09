@@ -5,7 +5,7 @@
 Render::Render() {
 	sAppName = "Raytracing with olc::PixelGameEngine";
 
-	m_useThreads = 6;
+	m_useThreads = 12;
 	m_tileSize = 32;
 
 	m_mode = Render::INIT;
@@ -74,7 +74,7 @@ bool Render::OnUserCreate() {
 		countY++;
 	}
 
-	std::reverse(m_tiles.begin(), m_tiles.end());
+	//std::reverse(m_tiles.begin(), m_tiles.end());
 
 	m_mode = Render::START;
 
@@ -112,6 +112,9 @@ bool Render::OnUserUpdate(float fElapsedTime) {
 
 				l_thread.thread.join();
 			}
+
+			Clear(olc::BLACK);
+			DrawSprite(olc::vi2d(0, 0), &m_render);
 		}
 		else {
 			Clear(olc::BLACK);
@@ -120,7 +123,10 @@ bool Render::OnUserUpdate(float fElapsedTime) {
 
 		m_mutex.unlock();
 	}
-	// else do nothing
+	else {
+		Clear(olc::BLACK);
+		DrawSprite(olc::vi2d(0, 0), &m_render);
+	}
 	return true;
 }
 
@@ -156,10 +162,10 @@ void Render::RenderTile(const size_t& startIndex, const size_t threadIndex) {
 
 		std::chrono::duration<double, std::micro> dur = end - start;
 
-		int minDur = 8333;
+		/*int minDur = 8333;
 		if (dur.count() < static_cast<double>(minDur)) {
 			std::this_thread::sleep_for(std::chrono::microseconds(minDur));
-		}
+		}*/
 
 		// render next tile
 
@@ -189,6 +195,11 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 			m_mutex.lock();
 
 			E_Pixel col((static_cast<float>(x) / static_cast<float>(ScreenWidth())) * 255.f, (static_cast<float>(y) / static_cast<float>(ScreenHeight())) * 255.f, 0.f);
+
+			//col.LinearToSRGB();
+
+			// dither factor set to 7 to exaggerate dither effect
+			col.Dither(x, y, 7);
 
 			m_render.SetPixel(olc::vi2d(x, y), col.GetOLC());
 
