@@ -29,6 +29,17 @@ public:
 	E_Pixel& operator/=(const float& scalar);
 	E_Pixel& operator*=(const float& scalar);
 
+
+	// ----- ARITHMETIC OPERATOR -----
+
+	inline E_Pixel operator/(const E_Pixel& other) const { E_Pixel out(m_r, m_g, m_b); out /= other; return out; };
+	inline E_Pixel operator*(const E_Pixel& other) const { E_Pixel out(m_r, m_g, m_b); out *= other; return out; };
+	inline E_Pixel operator-(const E_Pixel& other) const { E_Pixel out(m_r, m_g, m_b); out -= other; return out; };
+	inline E_Pixel operator+(const E_Pixel& other) const { E_Pixel out(m_r, m_g, m_b); out += other; return out; };
+
+	inline E_Pixel operator/(const float& scalar) const { E_Pixel out(m_r, m_g, m_b); out /= scalar; return out; };
+	inline E_Pixel operator*(const float& scalar) const { E_Pixel out(m_r, m_g, m_b); out *= scalar; return out; };
+
 private:
 	float m_r, m_g, m_b;
 };
