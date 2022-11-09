@@ -1,3 +1,5 @@
+#include "../maths/Maths.h"
+
 #include "E_Pixel.h"
 
 E_Pixel::E_Pixel() {
@@ -179,4 +181,19 @@ void E_Pixel::SRGBtoLinear() {
 	m_r *= 255.f;
 	m_g *= 255.f;
 	m_b *= 255.f;
+}
+
+E_Pixel E_Pixel::Cubic(const E_Pixel& a, const E_Pixel& b, const E_Pixel& c, const E_Pixel& d, const float& factor) {
+	float r = Maths::Cubic(a.m_r, b.m_r, c.m_r, d.m_r, factor);
+	float g = Maths::Cubic(a.m_g, b.m_g, c.m_g, d.m_g, factor);
+	float c_b = Maths::Cubic(a.m_b, b.m_b, c.m_b, d.m_b, factor);
+
+	return E_Pixel(r, g, c_b);
+}
+
+E_Pixel E_Pixel::Linear(const E_Pixel& a, const E_Pixel& b, const float& factor) {
+	float r = Maths::Map(factor, 0.f, 1.f, a.m_r, b.m_r);
+	float g = Maths::Map(factor, 0.f, 1.f, a.m_g, b.m_g);
+	float c_b = Maths::Map(factor, 0.f, 1.f, a.m_b, b.m_b);
+	return E_Pixel(r, g, c_b);
 }

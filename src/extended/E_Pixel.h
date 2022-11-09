@@ -77,6 +77,11 @@ public:
 	/// </summary>
 	void SRGBtoLinear();
 
+	// ----- INTERPOLATION -----
+
+	static E_Pixel Cubic(const E_Pixel& a, const E_Pixel& b, const E_Pixel& c, const E_Pixel& d, const float& factor);
+	static E_Pixel Linear(const E_Pixel& a, const E_Pixel& b, const float& factor);
+
 private:
 	float m_r, m_g, m_b;
 
