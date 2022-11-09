@@ -188,7 +188,9 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 		for (int y = minY; y < maxY; y++) {
 			m_mutex.lock();
 
-			m_render.SetPixel(olc::vi2d(x, y), olc::Pixel(x, y, 0, 255));
+			E_Pixel col((static_cast<float>(x) / static_cast<float>(ScreenWidth())) * 255.f, (static_cast<float>(y) / static_cast<float>(ScreenHeight())) * 255.f, 0.f);
+
+			m_render.SetPixel(olc::vi2d(x, y), col.GetOLC());
 
 			m_mutex.unlock();
 		}

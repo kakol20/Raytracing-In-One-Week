@@ -6,7 +6,7 @@
 
 int main() {
 	Render render;
-	if (render.Construct(256, 256, 3, 3, false, true)) render.Start();
+	if (render.Construct(1280, 720, 1, 1, false, true)) render.Start();
 
 	return 0;
 }
