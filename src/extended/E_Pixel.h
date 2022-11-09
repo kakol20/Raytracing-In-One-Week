@@ -16,6 +16,19 @@ public:
 
 	olc::Pixel GetOLC() const;
 
+	// ----- ASSIGNMENT OPERATORS -----
+
+	E_Pixel& operator=(const olc::Pixel& other);
+
+	E_Pixel& operator=(const E_Pixel& other);
+	E_Pixel& operator/=(const E_Pixel& other);
+	E_Pixel& operator*=(const E_Pixel& other);
+	E_Pixel& operator-=(const E_Pixel& other);
+	E_Pixel& operator+=(const E_Pixel& other);
+
+	E_Pixel& operator/=(const float& scalar);
+	E_Pixel& operator*=(const float& scalar);
+
 private:
 	float m_r, m_g, m_b;
 };
