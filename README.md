@@ -12,8 +12,10 @@ Named after Raytracing in "One Weekend" tutorial
 - [x] Extended Pixel class
 - [x] Random class
 - [ ] Vector (3D) class
+- [ ] Quaternion class
 - [ ] Extended Sprite class
 - [ ] Settings Manager class
 - [ ] Ray, Camera & HitRec class
+- [ ] Object class (sphere, plane, box, spot light)
 - [ ] Blue Noise generation
 - [ ] Materials class
