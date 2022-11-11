@@ -60,5 +60,7 @@ private:
 
 	void ShuffleTiles();
 
-	// ----- WINDOW -----
+	// ----- SCENE -----
+
+	olc::Sprite m_background;
 };

@@ -4,6 +4,7 @@
 
 #include "extended/E_Pixel.h"
 #include "utility/Random.h"
+#include "maths/Vector3D.h"
 
 #include "render/Render.h"
 
@@ -27,6 +28,12 @@ const uint8_t E_Pixel::Threshold[] = {
 };
 
 thread_local uint64_t Random::Seed = 0xACE1u;
+
+const Vector3D Vector3D::Forward = Vector3D(0.f, 0.f, -1.f);
+const Vector3D Vector3D::Up = Vector3D(0.f, 1.f, 0.f);
+const Vector3D Vector3D::Right = Vector3D(1.f, 0.f, 0.f);
+const Vector3D Vector3D::Zero = Vector3D(0.f, 0.f, 0.f);
+const Vector3D Vector3D::One = Vector3D(1.f, 1.f, 1.f);
 
 int main() {
 	Render render;

@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "../maths/Maths.h"
+#include "../maths/Vector3D.h"
 #include "../utility/Random.h"
 
 #include "Render.h"
@@ -18,6 +19,10 @@ bool Render::OnUserCreate() {
 	m_threads.reserve(m_useThreads);
 
 	m_render = olc::Sprite(ScreenWidth(), ScreenHeight());
+
+	// ----- GENERETE SCENE -----
+
+	m_background.LoadFromFile("images/UV_checker.jpg");
 
 	// ----- GENERATE TILES -----
 
@@ -90,8 +95,7 @@ bool Render::OnUserUpdate(float fElapsedTime) {
 		if (!RunMode()) {
 			m_mode = Render::END;
 		}
-	}
-	else if (m_mode == Render::RENDERING) {
+	} else if (m_mode == Render::RENDERING) {
 		// draw and wait for threads to finish
 		bool allFinished = true;
 
@@ -119,15 +123,13 @@ bool Render::OnUserUpdate(float fElapsedTime) {
 
 			Clear(olc::BLACK);
 			DrawSprite(olc::vi2d(0, 0), &m_render);
-		}
-		else {
+		} else {
 			Clear(olc::BLACK);
 			DrawSprite(olc::vi2d(0, 0), &m_render);
 		}
 
 		m_mutex.unlock();
-	}
-	else {
+	} else {
 		/*Clear(olc::BLACK);
 		DrawSprite(olc::vi2d(0, 0), &m_render);*/
 	}
@@ -185,8 +187,7 @@ void Render::RenderTile(const size_t& startIndex, const size_t threadIndex) {
 		m_mutex.unlock();
 
 		RenderTile(nextIndex, threadIndex);
-	}
-	else {
+	} else {
 		m_mutex.lock();
 		m_threads[threadIndex].finished = true;
 		m_mutex.unlock();
@@ -202,14 +203,37 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 
 			//col.LinearToSRGB();
 
-			float grad = Maths::Map(static_cast<float>(y), 0.f, static_cast<float>(ScreenHeight()), 0.f, 255.f);
+			// ----- RENDER START -----
 
-			if (x < (ScreenWidth() / 2)) {
-				col = E_Pixel(Maths::Map(static_cast<float>(x), 0.f, static_cast<float>(ScreenWidth() / 2), 0.f, 255.f), grad, 0.f);
-			}
-			else {
-				col = E_Pixel(grad, grad, grad);
-			}
+			// temp render to test classes
+
+			//const Vector3D point(static_cast<float>(x), static_cast<float>(y));
+
+			Vector3D point, pov;
+
+			point += Vector3D::Right * static_cast<float>(x);
+			point += Vector3D::Up * static_cast<float>(y);
+
+			float dist = -std::fmaxf(static_cast<float>(ScreenWidth()), static_cast<float>(ScreenHeight()));
+			dist /= 1.f;
+			//Vector3D pov(0.f, 0.f, );
+
+			pov -= Vector3D::Forward * dist;
+
+			Vector3D delta = point - pov;
+			delta.Normalize();
+			delta = Vector3D::UVSphere(delta);
+			//delta += Vector3D::One;
+			//delta /= 2.f;
+			//delta *= 255.f;
+
+			delta *= Vector3D(static_cast<float>(ScreenWidth()), static_cast<float>(ScreenHeight()));
+
+			olc::vi2d pos(static_cast<int32_t>(delta.GetX()), static_cast<int32_t>(delta.GetY()));
+
+			col = m_background.GetPixel(pos);
+
+			// ----- RENDER END -----
 
 			col.Dither(x, y, 31);
 

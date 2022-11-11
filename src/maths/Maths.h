@@ -6,7 +6,7 @@
 namespace Maths {
 	// ----- CONSTANTS -----
 
-	const float PI = 3.14159265f;
+	const float PI = 3.1415926535897932384626433832795f;
 	const float TAU = Maths::PI * 2.f;
 
 	const float ToRadians = Maths::PI / 180.f;
