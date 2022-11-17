@@ -199,6 +199,8 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 		for (int y = minY; y < maxY; y++) {
 			m_mutex.lock();
 
+			int invY = ScreenHeight() - y - 1;
+
 			E_Pixel col;
 
 			//col.LinearToSRGB();
@@ -212,10 +214,10 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 			Vector3D point, pov;
 
 			point += Vector3D::Right * static_cast<float>(x);
-			point += Vector3D::Up * static_cast<float>(y);
+			point += Vector3D::Up * static_cast<float>(invY);
 
 			float dist = -std::fmaxf(static_cast<float>(ScreenWidth()), static_cast<float>(ScreenHeight()));
-			dist /= 1.f;
+			dist /= 3.f;
 			//Vector3D pov(0.f, 0.f, );
 
 			pov -= Vector3D::Forward * dist;
@@ -227,7 +229,7 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 			//delta /= 2.f;
 			//delta *= 255.f;
 
-			delta *= Vector3D(static_cast<float>(ScreenWidth()), static_cast<float>(ScreenHeight()));
+			delta *= Vector3D(static_cast<float>(m_background.width), static_cast<float>(m_background.height));
 
 			olc::vi2d pos(static_cast<int32_t>(delta.GetX()), static_cast<int32_t>(delta.GetY()));
 
