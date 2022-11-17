@@ -11,7 +11,7 @@ Named after Raytracing in "One Weekend" tutorial
 - [x] Multi Threading
 - [x] Extended Pixel class
 - [x] Random class
-- [ ] Vector (3D) class
+- [x] Vector (3D) class
 - [ ] Quaternion class
 - [ ] Extended Sprite class
 - [ ] Settings Manager class
