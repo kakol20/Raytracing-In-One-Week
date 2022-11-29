@@ -9,7 +9,7 @@
 class E_Pixel {
 public:
 	E_Pixel();
-	E_Pixel(const float& r, const float& g, const float& b);
+	E_Pixel(const double& r, const double& g, const double& b);
 	E_Pixel(const olc::Pixel& pixel);
 	E_Pixel(const uint8_t& r, const uint8_t& g, const uint8_t& b);
 	~E_Pixel() {};
@@ -26,8 +26,8 @@ public:
 	E_Pixel& operator-=(const E_Pixel& other);
 	E_Pixel& operator+=(const E_Pixel& other);
 
-	E_Pixel& operator/=(const float& scalar);
-	E_Pixel& operator*=(const float& scalar);
+	E_Pixel& operator/=(const double& scalar);
+	E_Pixel& operator*=(const double& scalar);
 
 
 	// ----- ARITHMETIC OPERATOR -----
@@ -37,8 +37,8 @@ public:
 	inline E_Pixel operator-(const E_Pixel& other) const { E_Pixel out(m_r, m_g, m_b); out -= other; return out; };
 	inline E_Pixel operator+(const E_Pixel& other) const { E_Pixel out(m_r, m_g, m_b); out += other; return out; };
 
-	inline E_Pixel operator/(const float& scalar) const { E_Pixel out(m_r, m_g, m_b); out /= scalar; return out; };
-	inline E_Pixel operator*(const float& scalar) const { E_Pixel out(m_r, m_g, m_b); out *= scalar; return out; };
+	inline E_Pixel operator/(const double& scalar) const { E_Pixel out(m_r, m_g, m_b); out /= scalar; return out; };
+	inline E_Pixel operator*(const double& scalar) const { E_Pixel out(m_r, m_g, m_b); out *= scalar; return out; };
 
 	// ----- OTHER -----
 
@@ -49,9 +49,9 @@ public:
 
 
 	inline void Abs() {
-		m_r = std::fabsf(m_r);
-		m_g = std::fabsf(m_g);
-		m_b = std::fabsf(m_b);
+		m_r = std::fabs(m_r);
+		m_g = std::fabs(m_g);
+		m_b = std::fabs(m_b);
 	};
 
 	/// <summary>
@@ -79,11 +79,11 @@ public:
 
 	// ----- INTERPOLATION -----
 
-	static E_Pixel Cubic(const E_Pixel& a, const E_Pixel& b, const E_Pixel& c, const E_Pixel& d, const float& factor);
-	static E_Pixel Linear(const E_Pixel& a, const E_Pixel& b, const float& factor);
+	static E_Pixel Cubic(const E_Pixel& a, const E_Pixel& b, const E_Pixel& c, const E_Pixel& d, const double& factor);
+	static E_Pixel Linear(const E_Pixel& a, const E_Pixel& b, const double& factor);
 
 private:
-	float m_r, m_g, m_b;
+	double m_r, m_g, m_b;
 
 	static const uint8_t Threshold[];
 };

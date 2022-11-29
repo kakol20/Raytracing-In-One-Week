@@ -1,11 +1,11 @@
 #include "Maths.h"
 
-float Maths::Cubic(const float& a, const float& b, const float& c, const float& d, const float& factor) {
-	return b + 0.5f * factor * (c - a + factor * (2.f * a - 5.f * b + 4.f * c - d + factor * (3.f * (b - c) + d - a)));
+double Maths::Cubic(const double& a, const double& b, const double& c, const double& d, const double& factor) {
+	return b + 0.5 * factor * (c - a + factor * (2. * a - 5. * b + 4. * c - d + factor * (3. * (b - c) + d - a)));
 }
 
-float Maths::Map(const float& v, const float& fromMin, const float& fromMax, const float& toMin, const float& toMax, const bool& clamp) {
-	float factor = (v - fromMin) / (fromMax - fromMin);
+double Maths::Map(const double& v, const double& fromMin, const double& fromMax, const double& toMin, const double& toMax, const bool& clamp) {
+	double factor = (v - fromMin) / (fromMax - fromMin);
 	if (clamp) return std::clamp(std::lerp(toMin, toMax, factor), toMin, toMax);
 	return std::lerp(toMin, toMax, factor);
 }

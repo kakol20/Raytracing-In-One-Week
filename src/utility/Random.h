@@ -19,5 +19,6 @@ public:
 	static unsigned int RandomUInt(const unsigned int& bitCount = 32);
 
 	static float RandomFloat(const float& min = 0.f, const float& max = 1.f);
+	static double RandomDouble(const double& min = 0., const double& max = 1.);
 	static int RandomInt(const int& min, const int& max);
 };

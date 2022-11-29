@@ -33,8 +33,8 @@ bool Render::OnUserCreate() {
 	//int xTileSize = Float::Round(Float(ScreenWidth()) / maxXTiles).ToInt();
 	//int yTileSize = Float::Round(Float(ScreenHeight()) / maxYTiles).ToInt();
 
-	int xTileSize = static_cast<int>(std::roundf(static_cast<float>(ScreenWidth())) / static_cast<float>(maxXTiles));
-	int yTileSize = static_cast<int>(std::roundf(static_cast<float>(ScreenHeight())) / static_cast<float>(maxYTiles));
+	int xTileSize = static_cast<int>(std::round(static_cast<double>(ScreenWidth())) / static_cast<double>(maxXTiles));
+	int yTileSize = static_cast<int>(std::round(static_cast<double>(ScreenHeight())) / static_cast<double>(maxYTiles));
 
 	int widthModulo = ScreenWidth() % maxXTiles;
 	int heightModulo = ScreenHeight() % maxYTiles;
@@ -209,14 +209,14 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 
 			// temp render to test classes
 
-			//const Vector3D point(static_cast<float>(x), static_cast<float>(y));
+			//const Vector3D point(static_cast<double>(x), static_cast<double>(y));
 
 			Vector3D point, pov;
 
-			point += Vector3D::Right * static_cast<float>(x);
-			point += Vector3D::Up * static_cast<float>(invY);
+			point += Vector3D::Right * static_cast<double>(x);
+			point += Vector3D::Up * static_cast<double>(invY);
 
-			float dist = -std::fmaxf(static_cast<float>(ScreenWidth()), static_cast<float>(ScreenHeight()));
+			double dist = -std::fmaxf(static_cast<double>(ScreenWidth()), static_cast<double>(ScreenHeight()));
 			dist /= 3.f;
 			//Vector3D pov(0.f, 0.f, );
 
@@ -229,7 +229,7 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 			//delta /= 2.f;
 			//delta *= 255.f;
 
-			delta *= Vector3D(static_cast<float>(m_background.width), static_cast<float>(m_background.height));
+			delta *= Vector3D(static_cast<double>(m_background.width), static_cast<double>(m_background.height));
 
 			olc::vi2d pos(static_cast<int32_t>(delta.GetX()), static_cast<int32_t>(delta.GetY()));
 
@@ -249,7 +249,7 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 void Render::ShuffleTiles() {
 	size_t i = m_tiles.size() - 1;
 	while (i >= 0) {
-		//size_t swap = (size_t)round(Random::RandomFloat(0.f, (float)i));
+		//size_t swap = (size_t)round(Random::RandomFloat(0.f, (double)i));
 		size_t swap = (size_t)Random::RandomUInt() % (i + 1);
 
 		if (swap < i) {
