@@ -340,8 +340,8 @@ int Image::GetIndex(const int& x, const int& y) {
 		newX = x % m_w;
 		newY = y % m_h;
 
-		if (newX < 0) newX = newX + m_w;
-		if (newY < 0) newY = newY + m_h;
+		newX = newX < 0 ? newX + m_w : newX;
+		newY = newY < 0 ? newY + m_h : newY;
 	}
 
 	newX = std::clamp(newX, 0, m_w - 1);

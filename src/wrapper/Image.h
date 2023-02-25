@@ -31,6 +31,10 @@ public:
 	int GetHeight() const { return m_h; };
 	int GetWidth() const { return m_w; };
 
+	/*size_t GetSize() const { return m_size; };
+
+	inline float& operator[](size_t i) { return m_dataF[i].GetValue(); };*/
+
 	void SetColorSpace(const ColorSpace& colorSpace) { m_colorSpace = colorSpace; };
 
 	void Dither(const int& factor = 255);

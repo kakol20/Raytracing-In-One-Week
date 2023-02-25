@@ -836,42 +836,6 @@ void Raytracing::DebugScene() {
 #else
 	m_background = Image("images/hdr/lebombo_2k.hdr", Image::Interpolation::Cubic, Image::Extrapolation::Repeat, Image::ColorSpace::sRGB);
 #endif // HDR_BACKGROUND
-	//m_background = HDR("images/hdr/studio_small_03_2k.hdr", HDR::Interpolation::Cubic, HDR::Extrapolation::Repeat, HDR::ColorSpace::Non_Color);
-
-#ifdef _DEBUG
-	{
-		std::vector<float> data;
-		data.reserve(m_background.GetSize());
-		float max = 0;
-		float min = 0;
-		size_t maxIndex = 0;
-		size_t minIndex = 0;
-
-		for (size_t i = 0; i < m_background.GetSize(); i++) {
-			data.push_back(m_background[i]);
-
-			if (i == 0) {
-				max = data[i];
-				max = data[i];
-			}
-			else {
-				if (data[i] > max) {
-					max = data[i];
-					maxIndex = i;
-				}
-				if (data[i] < min) {
-					min = data[i];
-					minIndex = i;
-				}
-			}
-		}
-
-		Float r, g, b;
-		m_background.GetColor(0.5, 0.5, r, g, b);
-
-		int tmp = 1;
-}
-#endif // _DEBUG
 
 	m_bgStrength = 1;
 
