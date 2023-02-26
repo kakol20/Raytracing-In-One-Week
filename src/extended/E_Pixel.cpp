@@ -15,28 +15,28 @@ E_Pixel::E_Pixel(const double& r, const double& g, const double& b) {
 }
 
 E_Pixel::E_Pixel(const olc::Pixel& pixel) {
-	m_r = static_cast<double>(pixel.r);
-	m_g = static_cast<double>(pixel.g);
-	m_b = static_cast<double>(pixel.b);
+	m_r = (double)(pixel.r);
+	m_g = (double)(pixel.g);
+	m_b = (double)(pixel.b);
 }
 
 E_Pixel::E_Pixel(const uint8_t& r, const uint8_t& g, const uint8_t& b) {
-	m_r = static_cast<double>(r);
-	m_g = static_cast<double>(g);
-	m_b = static_cast<double>(b);
+	m_r = (double)(r);
+	m_g = (double)(g);
+	m_b = (double)(b);
 }
 
 olc::Pixel E_Pixel::GetOLC() const {
 	double r = std::clamp(m_r, 0., 255.);
 	double g = std::clamp(m_g, 0., 255.);
 	double b = std::clamp(m_b, 0., 255.);
-	return olc::Pixel(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b));
+	return olc::Pixel((uint8_t)(r), (uint8_t)(g), (uint8_t)(b));
 }
 
 E_Pixel& E_Pixel::operator=(const olc::Pixel& other) {
-	m_r = static_cast<double>(other.r);
-	m_g = static_cast<double>(other.g);
-	m_b = static_cast<double>(other.b);
+	m_r = (double)(other.r);
+	m_g = (double)(other.g);
+	m_b = (double)(other.b);
 	return *this;
 }
 
@@ -98,9 +98,9 @@ void E_Pixel::Clamp() {
 }
 
 void E_Pixel::Dither(const int& x, const int& y, const int& factor) {
-	const double f_factor = static_cast<double>(factor);
+	const double f_factor = (double)(factor);
 
-	double threshold = static_cast<double>(E_Pixel::Threshold[(x % 16) + (y % 16) * 16]) / 256.;
+	double threshold = (double)(E_Pixel::Threshold[(x % 16) + (y % 16) * 16]) / 256.;
 	E_Pixel octet(1. / f_factor, 1. / f_factor, 1. / f_factor);
 
 	octet *= 255.;

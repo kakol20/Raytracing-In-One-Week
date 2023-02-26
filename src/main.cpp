@@ -41,7 +41,7 @@ int main() {
 	int32_t screenW = 240;
 	int32_t screenH = 160;
 
-	if (render.Construct(screenW, screenH, pixelSize, pixelSize, false, true)) render.Start();
+	if (render.Construct(screenW, screenH, pixelSize, pixelSize)) render.Start();
 
 	return 0;
 }

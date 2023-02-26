@@ -33,8 +33,8 @@ bool Render::OnUserCreate() {
 	//int xTileSize = Float::Round(Float(ScreenWidth()) / maxXTiles).ToInt();
 	//int yTileSize = Float::Round(Float(ScreenHeight()) / maxYTiles).ToInt();
 
-	int xTileSize = static_cast<int>(std::round(static_cast<double>(ScreenWidth())) / static_cast<double>(maxXTiles));
-	int yTileSize = static_cast<int>(std::round(static_cast<double>(ScreenHeight())) / static_cast<double>(maxYTiles));
+	int xTileSize = static_cast<int>(std::round((double)(ScreenWidth())) / (double)(maxXTiles));
+	int yTileSize = static_cast<int>(std::round((double)(ScreenHeight())) / (double)(maxYTiles));
 
 	int widthModulo = ScreenWidth() % maxXTiles;
 	int heightModulo = ScreenHeight() % maxYTiles;
@@ -169,7 +169,7 @@ void Render::RenderTile(const size_t& startIndex, const size_t threadIndex) {
 		std::chrono::duration<double, std::micro> dur = end - start;
 
 		/*int minDur = 8333;
-		if (dur.count() < static_cast<double>(minDur)) {
+		if (dur.count() < (double)(minDur)) {
 			std::this_thread::sleep_for(std::chrono::microseconds(minDur));
 		}*/
 
@@ -209,14 +209,14 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 
 			// temp render to test classes
 
-			//const Vector3D point(static_cast<double>(x), static_cast<double>(y));
+			//const Vector3D point((double)(x), (double)(y));
 
 			Vector3D point, pov;
 
-			point += Vector3D::Right * static_cast<double>(x);
-			point += Vector3D::Up * static_cast<double>(invY);
+			point += Vector3D::Right * (double)(x);
+			point += Vector3D::Up * (double)(invY);
 
-			double dist = -std::fmaxf(static_cast<double>(ScreenWidth()), static_cast<double>(ScreenHeight()));
+			double dist = -std::fmax((double)(ScreenWidth()), (double)(ScreenHeight()));
 			dist /= 3.f;
 			//Vector3D pov(0.f, 0.f, );
 
@@ -229,9 +229,9 @@ void Render::RenderPixel(const int& minX, const int& minY, const int& maxX, cons
 			//delta /= 2.f;
 			//delta *= 255.f;
 
-			delta *= Vector3D(static_cast<double>(m_background.width), static_cast<double>(m_background.height));
+			delta *= Vector3D((double)(m_background.width), (double)(m_background.height));
 
-			olc::vi2d pos(static_cast<int32_t>(delta.GetX()), static_cast<int32_t>(delta.GetY()));
+			olc::vi2d pos((int32_t)(delta.GetX()), (int32_t)(delta.GetY()));
 
 			col = m_background.GetPixel(pos);
 
