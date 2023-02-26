@@ -1,4 +1,5 @@
 #define ENABLE_LOGGING
+//#define HDR_BACKGROUND
 
 #include <chrono>
 
@@ -542,67 +543,38 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 				//Float u = x / Float(imageWidth - 1);
 				//Float v = y / Float(imageHeight - 1);
 
-				Float redU = x - 1;
-				Float redV = y;
-				Float greenU = x;
-				Float greenV = y;
-				Float blueU = x + 1;
-				Float blueV = y;
+				Float u = x;
+				Float v = y;
 
 				if (s < (int)m_blueNoise.Size()) {
 					size_t index = s + sampleOffset;
 					Vector3D sample = m_blueNoise[index];
-					redU += sample.GetX();
-					redV += sample.GetY();
 
-					greenU += sample.GetX();
-					greenV += sample.GetY();
-
-					blueU += sample.GetX();
-					blueV += sample.GetY();
+					u += sample.GetX();
+					v += sample.GetY();
 				}
 				else {
-					redU += Random::RandomFloat();
-					redV += Random::RandomFloat();
-
-					greenU = redU + 1;
-					greenV = redV;
-
-					blueU = greenU + 1;
-					blueV = greenV;
+					u += Random::RandomFloat();
+					v += Random::RandomFloat();
 				}
 
-				redU /= Float(imageWidth - 1);
-				redV /= Float(imageHeight - 1);
+				u /= Float(imageWidth - 1);
+				v /= Float(imageHeight - 1);
 
-				greenU /= Float(imageWidth - 1);
-				greenV /= Float(imageHeight - 1);
-
-				blueU /= Float(imageWidth - 1);
-				blueV /= Float(imageHeight - 1);
-
-				Vector3D redRayColor;
+				Vector3D rayColor;
 
 				if (m_settings["renderMode"] != "normal") {
-					Ray ray = m_camera.GetRay(redU, redV);
-					redRayColor = RayColor(ray, maxDepth, Vector3D(1, 0, 0));
-
-					ray = m_camera.GetRay(greenU, greenV);
-					Vector3D greenRayColor = RayColor(ray, maxDepth, Vector3D(0, 1, 0));
-
-					ray = m_camera.GetRay(blueU, blueV);
-					Vector3D blueRayColor = RayColor(ray, maxDepth, Vector3D(0, 0, 1));
-
-					redRayColor += greenRayColor + blueRayColor;
+					Ray ray = m_camera.GetRay(u, v);
+					rayColor = RayColor(ray, maxDepth);
 				}
 				else {
-					Ray ray = m_camera.GetRay(greenU, greenV);
-					redRayColor = RayColor(ray, maxDepth, Vector3D(1, 1, 1));
+					Ray ray = m_camera.GetRay(u, v);
+					rayColor = RayColor(ray, maxDepth);
 				}
 
 				if (count > 0) {
 					Vector3D difference;
-					difference = previous - (redRayColor * 255);
+					difference = previous - (rayColor * 255);
 					difference = Vector3D::Abs(difference);
 					totalDiff += difference;
 
@@ -615,16 +587,16 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 
 						if (belowThreshold) {
 							count++;
-							pixelCol += redRayColor;
+							pixelCol += rayColor;
 
 							break;
 						}
 					}
 				}
 
-				previous = redRayColor * 255;
+				previous = rayColor * 255;
 				count++;
-				pixelCol += redRayColor;
+				pixelCol += rayColor;
 			}
 
 			if (count <= 0) count = 1;
@@ -700,7 +672,10 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth, const Vector3D& initia
 		}
 		else {
 			Vector3D uv = unitDir.UVSphere();
-			uv *= Vector3D(-1, 0, 0);
+			uv *= Vector3D(-1, 1, 1);
+
+			// for debugging purposes
+			//uv *= 10;
 
 			Float u = uv.GetX() * m_background.GetWidth();
 			Float v = uv.GetY() * m_background.GetHeight();
@@ -746,9 +721,9 @@ void Raytracing::OriginalScene() {
 
 	//m_background;
 	/*m_background.SetColor(0, 0, 128, Float(0.7) * 255, 255);
-	m_background.SetColor(0, 1, 255, 255, 255);*/
+	m_background.SetColor(0, 1, 255, 255, 255);
 
-	/*Float bottomY = m_background.GetHeight() / 2;
+	Float bottomY = m_background.GetHeight() / 2;
 	Float topY = m_background.GetHeight();
 
 	Vector3D bottom = Vector3D(127.5, Float(0.7) * 255, 255);
@@ -834,7 +809,8 @@ void Raytracing::DebugScene() {
 #ifdef HDR_BACKGROUND
 	m_background = HDR("images/hdr/lebombo_2k.hdr", HDR::Interpolation::Closest, HDR::Extrapolation::Repeat, HDR::ColorSpace::sRGB);
 #else
-	m_background = Image("images/hdr/lebombo_2k.hdr", Image::Interpolation::Cubic, Image::Extrapolation::Repeat, Image::ColorSpace::sRGB);
+	m_background = Image("images/hdr/lebombo_2k.png", Image::Interpolation::Cubic, Image::Extrapolation::Repeat, Image::ColorSpace::sRGB);
+	//m_background = Image("images/hdr/uv_check.jpg", Image::Interpolation::Linear, Image::Extrapolation::Repeat, Image::ColorSpace::sRGB);
 #endif // HDR_BACKGROUND
 
 	m_bgStrength = 1;

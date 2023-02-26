@@ -101,7 +101,7 @@ Image& Image::operator=(const Image& copyImage) {
 }
 
 bool Image::Read(const char* file) {
-	m_data = stbi_load(file, &m_w, &m_h, &m_channels, 0);
+	m_data = stbi_load(file, &m_w, &m_h, &m_channels, 3);
 
 	if (m_data == NULL) return false;
 
@@ -189,14 +189,25 @@ bool Image::Write(const char* file) {
 }
 
 void Image::GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& b) {
+	/*r = x / m_w;
+	g = y / m_h;
+
+	r = Float::Clamp(r, 0, 1) * 255;
+	g = Float::Clamp(g, 0, 1) * 255;*/
+	/*r = 1;
+	g = 1;
+	b = 1;
+
+	return;*/
+
 	if (m_extrapolation == Extrapolation::Clip && (x < 0 || y < 0 || x >= m_w || y >= m_h)) {
 		r = 0;
 		g = 0;
 		b = 0;
 	}
 	else {
-		Float l_x = m_extrapolation == Extrapolation::Extend ? Float::Clamp(x, 0, m_w) : x;
-		Float l_y = m_extrapolation == Extrapolation::Extend ? Float::Clamp(y, 0, m_h) : y;
+		Float l_x = m_extrapolation == Extrapolation::Extend ? Float::Clamp(x, 0, m_w - 1) : x;
+		Float l_y = m_extrapolation == Extrapolation::Extend ? Float::Clamp(y, 0, m_h - 1) : y;
 
 		if (m_interpolation == Interpolation::Linear) {
 			// bilinear interpolation
