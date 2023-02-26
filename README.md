@@ -12,6 +12,7 @@ Named after Raytracing in "One Weekend" tutorial
 - [x] Extended Pixel class
 - [x] Random class
 - [x] Vector (3D) class
+- [ ] Save render result 
 - [ ] Quaternion class
 - [ ] Extended Sprite class
 - [ ] Settings Manager class
