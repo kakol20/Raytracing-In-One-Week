@@ -625,7 +625,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth, const Vector3D& initia
 				Ray continueRay(rec.GetPoint(), ray.GetDir());
 				return RayColor(continueRay, depth - 1, initialRayCol);
 			} else {
-				return ((normal + Vector3D::One) / 2) * initialRayCol;
+				return ((m_camera.OutputVector(normal) + Vector3D::One) / 2) * initialRayCol;
 			}
 		} else if (m_settings["renderMode"] == "albedo") {
 			return attentuation;
@@ -666,7 +666,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth, const Vector3D& initia
 			return rgb * m_bgStrength;
 		}
 	} else if (m_settings["renderMode"] == "normal") {
-		return (((unitDir * -1) + Vector3D::One) / 2) * initialRayCol;
+		return ((m_camera.OutputVector(unitDir * -1) + Vector3D::One) / 2) * initialRayCol;
 	} else if (m_settings["renderMode"] == "emission") {
 		return Vector3D::Zero;
 	}

@@ -35,6 +35,13 @@ Camera::Camera(const Float& aspectRatio, const Float& blurStrength, const Float&
 	m_lowerLeftCorner = m_origin - (m_horizontal / 2) - (m_vertical / 2) - (m_w * focusDist);
 
 	m_lensRadius = blurStrength / 2;
+
+	Vector3D cameraVector = lookAt - lookFrom;
+	cameraVector *= Vector3D(1, 0, 1);
+	cameraVector.Normalize();
+	//cameraVector = cameraVector * Float(-1);
+
+	m_shortestArc = Quaternion::ShortestArc(cameraVector, Vector3D::Forward);
 }
 
 Camera& Camera::operator=(const Camera& copyCamera) {
@@ -48,6 +55,8 @@ Camera& Camera::operator=(const Camera& copyCamera) {
 	m_v = copyCamera.m_v;
 	m_vertical = copyCamera.m_vertical;
 	m_w = copyCamera.m_w;
+
+	m_shortestArc = copyCamera.m_shortestArc;
 
 	/*
 		Float m_lensRadius;
@@ -70,4 +79,8 @@ Ray Camera::GetRay(const Float& s, const Float& t) const {
 	Vector3D dir = m_lowerLeftCorner + (m_horizontal * s) + (m_vertical * t) - m_origin - offset;
 	dir.Normalize();
 	return Ray(m_origin + offset, dir);
+}
+
+Vector3D Camera::OutputVector(const Vector3D& v) const {
+	return m_shortestArc.RotateVector(v, true);
 }

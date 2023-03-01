@@ -61,12 +61,12 @@ public:
 	// ----- ROTATION -----
 
 	void AxisRotation(const Vector3D& axis, const Float& radians);
-	void ShortestArc(const Vector3D& v1, const Vector3D& v2);
+	static Quaternion ShortestArc(const Vector3D& v1, const Vector3D& v2);
 
 	void XYZRotation(const Vector3D& radians);
 	void ZYXRotation(const Vector3D& radians);
 
-	Vector3D RotateVector(const Vector3D& vec, const bool& normalize = false);
+	Vector3D RotateVector(const Vector3D& vec, const bool& normalize = false) const;
 
 	// ----- STATIC VARIABLES -----
 

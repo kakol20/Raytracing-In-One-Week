@@ -43,6 +43,7 @@ private:
 	Settings m_settings;
 
 	Camera m_camera;
+
 	Image m_render;
 
 #ifdef HDR_BACKGROUND

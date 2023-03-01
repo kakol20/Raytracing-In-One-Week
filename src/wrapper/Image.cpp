@@ -147,7 +147,7 @@ bool Image::Write(const char* file) {
 		//m_data[i] = Float::Round(Float::Clamp(m_dataF[i], 0, 255)).ToUInt();
 	}
 
-	//Dither(255);
+	Dither(255);
 
 	switch (type) {
 	case Image::FileType::BMP:
@@ -261,6 +261,7 @@ void Image::Dither(const int& factor) {
 		Float octet = 1 / Float(factor);
 
 		Float v = m_dataF[i] / 255;
+		v = Float::Clamp(v, 0, 1);
 		v = v + octet * (threshold - 0.5);
 		v = Float::Round(v * factor) / factor;
 		v = Float::Clamp(v, 0, 1);
