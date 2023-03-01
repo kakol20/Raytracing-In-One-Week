@@ -142,6 +142,7 @@ bool Image::Write(const char* file) {
 			val = Image::LinearToSRGB(val);
 		}
 
+		m_dataF[i] = val;
 		m_data[i] = (uint8_t)Float::Clamp(val, 0, 255).ToUInt();
 
 		//m_data[i] = Float::Round(Float::Clamp(m_dataF[i], 0, 255)).ToUInt();
@@ -257,7 +258,7 @@ void Image::Dither(const int& factor) {
 		int x, y;
 		IndexToXY(i, x, y);
 
-		Float threshold = (int)Image::Threshold[(x % 16) + (y % 16) * 16] / Float(256);
+		/*Float threshold = (int)Image::Threshold[(x % 16) + (y % 16) * 16] / Float(256);
 		Float octet = 1 / Float(factor);
 
 		Float v = m_dataF[i] / 255;
@@ -265,10 +266,20 @@ void Image::Dither(const int& factor) {
 		v = v + octet * (threshold - 0.5);
 		v = Float::Round(v * factor) / factor;
 		v = Float::Clamp(v, 0, 1);
-		v *= 255;
+		v *= 255;*/
 
-		m_dataF[i] = v;
-		m_data[i] = (uint8_t)Float::Round(v).ToUInt();
+		Float r = 255 / Float(factor);
+		Float M = (int)Image::Threshold[(x % 16) + (y % 16) * 16] / Float(256);
+		M -= 0.5;
+
+		Float c = m_dataF[i] + (r * M);
+		c = Float::Clamp(c, 0, 255);
+		c = Float::Round((c / 255) * factor) / factor;
+		c *= 255;
+		c = Float::Clamp(c, 0, 255);
+
+		m_dataF[i] = c;
+		m_data[i] = (uint8_t)Float::Round(c).ToUInt();
 	}
 }
 
