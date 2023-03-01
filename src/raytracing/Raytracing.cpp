@@ -104,12 +104,10 @@ bool Raytracing::Init() {
 	if (m_settings["scene"] == "original") {
 		m_fileFolder = "renders/original/";
 		OriginalScene();
-	}
-	else if (m_settings["scene"] == "debug") {
+	} else if (m_settings["scene"] == "debug") {
 		m_fileFolder = "renders/debugScene/";
 		DebugScene();
-	}
-	else {
+	} else {
 		m_fileFolder = "renders/original/";
 		OriginalScene();
 	}
@@ -194,8 +192,7 @@ bool Raytracing::Run() {
 
 	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "emission" || m_settings["renderMode"] == "normal" || m_settings["renderMode"] == "albedo") {
 		RunMode();
-	}
-	else if (m_settings["renderMode"] == "all") {
+	} else if (m_settings["renderMode"] == "all") {
 		m_settings["renderMode"] = "normal";
 		RunMode();
 
@@ -207,8 +204,7 @@ bool Raytracing::Run() {
 
 		m_settings["renderMode"] = "color";
 		RunMode();
-	}
-	else {
+	} else {
 		m_settings["renderMode"] = "color";
 		RunMode();
 	}
@@ -242,8 +238,7 @@ bool Raytracing::RunMode() {
 
 	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "albedo" || m_settings["renderMode"] == "emission") {
 		m_render.SetColorSpace(Image::ColorSpace::sRGB);
-	}
-	else {
+	} else {
 		m_render.SetColorSpace(Image::ColorSpace::Non_Color);
 	}
 
@@ -267,17 +262,13 @@ bool Raytracing::RunMode() {
 
 	if (m_settings["renderMode"] == "color") {
 		output += "log_color.txt";
-	}
-	else if (m_settings["renderMode"] == "emission") {
+	} else if (m_settings["renderMode"] == "emission") {
 		output += "log_emission.txt";
-	}
-	else if (m_settings["renderMode"] == "normal") {
+	} else if (m_settings["renderMode"] == "normal") {
 		output += "log_normal.txt";
-	}
-	else if (m_settings["renderMode"] == "albedo") {
+	} else if (m_settings["renderMode"] == "albedo") {
 		output += "log_albedo.txt";
-	}
-	else {
+	} else {
 		output += "log_color.txt";
 	}
 
@@ -289,6 +280,9 @@ bool Raytracing::RunMode() {
 	ShowProgress();
 
 	// ----- MULTI THREADING -----
+
+	m_lastUpdate = std::chrono::high_resolution_clock::now();
+
 	if (m_useThreads > 1) {
 		for (size_t i = 0; i < m_useThreads; i++) {
 			m_threads.push_back(std::thread(&Raytracing::RenderTile, this, m_nextAvailable));
@@ -297,8 +291,7 @@ bool Raytracing::RunMode() {
 			//m_threads[i].sleep
 			m_nextAvailable++;
 		}
-	}
-	else {
+	} else {
 		RenderTile(0);
 	}
 
@@ -316,17 +309,13 @@ bool Raytracing::RunMode() {
 	output = m_fileFolder;
 	if (m_settings["renderMode"] == "color") {
 		output += "render_c.png";
-	}
-	else if (m_settings["renderMode"] == "emission") {
+	} else if (m_settings["renderMode"] == "emission") {
 		output += "render_e.png";
-	}
-	else if (m_settings["renderMode"] == "normal") {
+	} else if (m_settings["renderMode"] == "normal") {
 		output += "render_n.png";
-	}
-	else if (m_settings["renderMode"] == "albedo") {
+	} else if (m_settings["renderMode"] == "albedo") {
 		output += "render_a.png";
-	}
-	else {
+	} else {
 		output += "render_c.png";
 	}
 
@@ -350,8 +339,7 @@ bool Raytracing::RunMode() {
 
 			return false;
 		}
-	}
-	else {
+	} else {
 		for (int x = 0; x < imageWidth; x++) {
 			Float x_f = Float(x * renderWidth) / imageWidth;
 
@@ -485,13 +473,16 @@ void Raytracing::RenderTile(const size_t& startIndex) {
 		m_mutex.lock();
 		m_tilesRendered++;
 
-		ShowProgress();
+		auto sinceLastUpdate = std::chrono::duration_cast<std::chrono::microseconds>(end - m_lastUpdate);
+		if (sinceLastUpdate >= std::chrono::milliseconds(Float(1000. / 12.).ToInt())) {
+			m_lastUpdate = end;
+			ShowProgress();
+		}
 
 		// ----- LOGGING -----
 		if (m_useThreads > 1) {
 			m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << '\n';
-		}
-		else {
+		} else {
 			m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
 		}
 
@@ -552,8 +543,7 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 
 					u += sample.GetX();
 					v += sample.GetY();
-				}
-				else {
+				} else {
 					u += Random::RandomFloat();
 					v += Random::RandomFloat();
 				}
@@ -563,14 +553,8 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 
 				Vector3D rayColor;
 
-				if (m_settings["renderMode"] != "normal") {
-					Ray ray = m_camera.GetRay(u, v);
-					rayColor = RayColor(ray, maxDepth);
-				}
-				else {
-					Ray ray = m_camera.GetRay(u, v);
-					rayColor = RayColor(ray, maxDepth);
-				}
+				Ray ray = m_camera.GetRay(u, v);
+				rayColor = RayColor(ray, maxDepth);
 
 				if (count > 0) {
 					Vector3D difference;
@@ -583,7 +567,7 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 						//Vector3D avgDiff = totalDiff;
 
 						//bool belowThreshold = avgDiff.Threshold(m_noiseThreshold);
-						bool belowThreshold = avgDiff.Magnitude() < noiseThreshold;
+						bool belowThreshold = avgDiff.SqrMagnitude() < noiseThreshold;
 
 						if (belowThreshold) {
 							count++;
@@ -628,34 +612,27 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth, const Vector3D& initia
 		if (m_settings["renderMode"] == "color") {
 			if (absorb || emission) {
 				return attentuation;
-			}
-			else if (transparent) {
+			} else if (transparent) {
 				Ray continueRay(rec.GetPoint(), ray.GetDir());
 				return RayColor(continueRay, depth - 1, initialRayCol);
-			}
-			else {
+			} else {
 				//return attentuation * RayColor(scattered, depth - 1);
-				if (attentuation.NearZero()) return attentuation;
+				//if (attentuation.NearZero()) return attentuation;
 				return attentuation * RayColor(scattered, depth - 1, initialRayCol);
 			}
-		}
-		else if (m_settings["renderMode"] == "normal") {
+		} else if (m_settings["renderMode"] == "normal") {
 			if (transparent) {
 				Ray continueRay(rec.GetPoint(), ray.GetDir());
 				return RayColor(continueRay, depth - 1, initialRayCol);
-			}
-			else {
+			} else {
 				return ((normal + Vector3D::One) / 2) * initialRayCol;
 			}
-		}
-		else if (m_settings["renderMode"] == "albedo") {
+		} else if (m_settings["renderMode"] == "albedo") {
 			return attentuation;
-		}
-		else if (m_settings["renderMode"] == "emission") {
+		} else if (m_settings["renderMode"] == "emission") {
 			if (emission) {
 				return attentuation;
-			}
-			else {
+			} else {
 				return Vector3D::Zero;
 			}
 		}
@@ -669,8 +646,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth, const Vector3D& initia
 		if (m_settings["scene"] == "original") {
 			Float t = 0.5 * (unitDir.GetY() + 1);
 			return ((Vector3D::One * (1 - t)) + (Vector3D(0.5, 0.7, 1) * t)) * initialRayCol;
-		}
-		else {
+		} else {
 			Vector3D uv = unitDir.UVSphere();
 			uv *= Vector3D(-1, 1, 1);
 
@@ -689,11 +665,9 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth, const Vector3D& initia
 
 			return rgb * m_bgStrength;
 		}
-	}
-	else if (m_settings["renderMode"] == "normal") {
+	} else if (m_settings["renderMode"] == "normal") {
 		return (((unitDir * -1) + Vector3D::One) / 2) * initialRayCol;
-	}
-	else if (m_settings["renderMode"] == "emission") {
+	} else if (m_settings["renderMode"] == "emission") {
 		return Vector3D::Zero;
 	}
 
@@ -788,11 +762,9 @@ void Raytracing::OriginalScene() {
 
 				if (chooseMat < 0.9) {
 					m_matMap[matID] = new Diffuse(Vector3D::RandomVector() * Vector3D::RandomVector());
-				}
-				else if (chooseMat < 0.95) {
+				} else if (chooseMat < 0.95) {
 					m_matMap[matID] = new Metal(Vector3D::RandomVector(0.5, 1), Random::RandomFloat(0, 0.5), 1.45);
-				}
-				else {
+				} else {
 					m_matMap[matID] = new Glass(Vector3D::One, 0, 1.5);
 				}
 
@@ -885,14 +857,12 @@ void Raytracing::ShowProgress() {
 		if (x < progressI) {
 			//std::cout << oof::fg_color({ 255, 255, 255 });
 			output += oof::reset_formatting();
-		}
-		else if (Float(x) < between && between < Float(x + 1)) {
+		} else if (Float(x) < between && between < Float(x + 1)) {
 			between = between - x;
 			between = Float::Lerp(12, 204, between);
 			between = Float::Floor(between);
 			output += oof::fg_color({ between.ToInt(), between.ToInt(), between.ToInt() });
-		}
-		else {
+		} else {
 			//std::cout << oof::fg_color({ 0, 0, 0 });
 			output += oof::fg_color({ 12, 12, 12 });
 		}
@@ -918,8 +888,7 @@ void Raytracing::ShowProgress() {
 				Vector3D col;
 				if (i == 0) {
 					col = (*it).leftXTileColor;
-				}
-				else {
+				} else {
 					col = (*it).rightXTileColor;
 				}
 
@@ -937,14 +906,12 @@ void Raytracing::ShowProgress() {
 				output += oof::fg_color({ r, g, b });
 				//output += (char)219u;
 				output += (char)178u;
-			}
-			else {
+			} else {
 				if ((*it).activeTile) {
 					//output += oof::reset_formatting();
 					output += oof::fg_color({ 204, 12, 12 });
 					output += (char)177u;
-				}
-				else {
+				} else {
 					output += oof::reset_formatting();
 					output += (char)176u;
 				}
@@ -964,7 +931,7 @@ void Raytracing::ShowProgress() {
 		"\nProgress: " + std::to_string(m_tilesRendered));
 
 #endif // ENABLE_LOGGING
-		}
+}
 
 void Raytracing::ShuffleTiles() {
 	size_t i = m_tiles.size() - 1;

@@ -66,6 +66,7 @@ private:
 	std::map<std::thread::id, size_t> m_threadID;
 	std::mutex m_mutex;
 	std::vector<std::thread> m_threads;
+	std::chrono::steady_clock::time_point m_lastUpdate;
 
 	// ----- OBJECTS -----
 
