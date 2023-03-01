@@ -29,14 +29,13 @@ void Quaternion::AxisRotation(const Vector3D& axis, const Float& radians) {
 	Normalize();
 }
 
-void Quaternion::ShortestArc(const Vector3D& v1, const Vector3D& v2) {
-	Vector3D a = Vector3D::CrossProduct(v1, v2);
+Quaternion Quaternion::ShortestArc(const Vector3D& v1, const Vector3D& v2) {
+	Quaternion q = Vector3D::CrossProduct(v1, v2);
+	q.m_w = Float::Sqrt(Float::Pow(v1.Magnitude(), 2) * Float::Pow(v2.Magnitude(), 2)) + Vector3D::DotProduct(v1, v2);
 
-	m_w = Float::Sqrt(v1.SqrMagnitude() * v2.SqrMagnitude()) + Vector3D::DotProduct(v1, v2);
-	m_i = a.GetX();
-	m_j = a.GetY();
-	m_k = a.GetZ();
-	Normalize();
+	q.Normalize();
+
+	return q;
 }
 
 void Quaternion::XYZRotation(const Vector3D& radians) {
@@ -81,7 +80,7 @@ void Quaternion::ZYXRotation(const Vector3D& radians) {
 	Normalize();
 }
 
-Vector3D Quaternion::RotateVector(const Vector3D& vec, const bool& normalize) {
+Vector3D Quaternion::RotateVector(const Vector3D& vec, const bool& normalize) const{
 	Quaternion quat(m_w, m_i, m_j, m_k);
 	Quaternion pureQuat = vec;
 	Quaternion quatInv(m_w, m_i, m_j, m_k);
@@ -105,24 +104,21 @@ std::ostream& operator<<(std::ostream& os, const Quaternion& num) {
 
 	if (num.m_i < 0) {
 		os << " - ";
-	}
-	else {
+	} else {
 		os << " + ";
 	}
 	os << l_i << "i";
 
 	if (num.m_j < 0) {
 		os << " - ";
-	}
-	else {
+	} else {
 		os << " + ";
 	}
 	os << l_j << "j";
 
 	if (num.m_k < 0) {
 		os << " - ";
-	}
-	else {
+	} else {
 		os << " + ";
 	}
 	os << l_k << "k";

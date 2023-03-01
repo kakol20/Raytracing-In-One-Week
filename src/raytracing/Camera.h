@@ -1,6 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include "../maths/Quaternion.h"
 #include "../raytracing/Camera.h"
 #include "Ray.h"
 
@@ -15,6 +16,8 @@ public:
 
 	Ray GetRay(const Float& s, const Float& t) const;
 
+	Vector3D OutputVector(const Vector3D& v) const;
+
 private:
 	Float m_lensRadius;
 	Vector3D m_horizontal;
@@ -24,5 +27,7 @@ private:
 	Vector3D m_v;
 	Vector3D m_vertical;
 	Vector3D m_w;
+
+	Quaternion m_shortestArc;
 };
 #endif // !CAMERA_H
