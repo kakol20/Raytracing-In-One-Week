@@ -258,16 +258,6 @@ void Image::Dither(const int& factor) {
 		int x, y;
 		IndexToXY(i, x, y);
 
-		/*Float threshold = (int)Image::Threshold[(x % 16) + (y % 16) * 16] / Float(256);
-		Float octet = 1 / Float(factor);
-
-		Float v = m_dataF[i] / 255;
-		v = Float::Clamp(v, 0, 1);
-		v = v + octet * (threshold - 0.5);
-		v = Float::Round(v * factor) / factor;
-		v = Float::Clamp(v, 0, 1);
-		v *= 255;*/
-
 		Float r = 255 / Float(factor);
 		Float M = (int)Image::Threshold[(x % 16) + (y % 16) * 16] / Float(256);
 		M -= 0.5;
