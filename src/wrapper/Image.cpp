@@ -189,7 +189,7 @@ bool Image::Write(const char* file) {
 	return success != 0;
 }
 
-void Image::GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& b) {
+void Image::GetColor(const Float x, const Float y, Float& r, Float& g, Float& b) {
 	/*r = x / m_w;
 	g = y / m_h;
 
@@ -225,7 +225,7 @@ void Image::GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& 
 	}
 }
 
-void Image::SetColor(const int& x, const int& y, const Float& r, const Float& g, const Float& b) {
+void Image::SetColor(const int x, const int y, const Float r, const Float g, const Float b) {
 	int index = GetIndex(x, y);
 
 	if (m_channels >= 3) {
@@ -273,7 +273,7 @@ void Image::Dither(const int& factor) {
 	}
 }
 
-Float Image::LinearToSRGB(const Float& color) {
+Float Image::LinearToSRGB(const Float color) {
 #define METHOD1
 
 	Float l_color = color / 255;
@@ -297,7 +297,7 @@ Float Image::LinearToSRGB(const Float& color) {
 	}
 }
 
-Float Image::sRGBToLinear(const Float& color) {
+Float Image::sRGBToLinear(const Float color) {
 	Float l_color = color / 255;
 	Float out = 0;
 
@@ -345,7 +345,7 @@ Image::FileType Image::GetFileType(const char* file) {
 	return Image::FileType::NONE;
 }
 
-int Image::GetIndex(const int& x, const int& y) {
+int Image::GetIndex(const int x, const int y) {
 	int newX = x;
 	int newY = y;
 
@@ -447,7 +447,7 @@ void Image::ToColorSpace() {
 	}
 }
 
-void Image::Bicubic(const Float& x, const Float& y, Float& r, Float& g, Float& b) {
+void Image::Bicubic(const Float x, const Float y, Float& r, Float& g, Float& b) {
 	int count = 0;
 	if (m_channels >= 3) {
 		// image is RGB
@@ -538,7 +538,7 @@ void Image::Bicubic(const Float& x, const Float& y, Float& r, Float& g, Float& b
 	}
 }
 
-void Image::Bilinear(const Float& x, const Float& y, Float& r, Float& g, Float& b) {
+void Image::Bilinear(const Float x, const Float y, Float& r, Float& g, Float& b) {
 	int count = 0;
 	if (m_channels >= 3) {
 		// image is RGB
@@ -591,7 +591,7 @@ void Image::Bilinear(const Float& x, const Float& y, Float& r, Float& g, Float& 
 	}
 }
 
-void Image::NearestNeighbour(const Float& x, const Float& y, Float& r, Float& g, Float& b) {
+void Image::NearestNeighbour(const Float x, const Float y, Float& r, Float& g, Float& b) {
 	int l_x = Float::Round(x).ToInt();
 	int l_y = Float::Round(y).ToInt();
 
@@ -609,7 +609,7 @@ void Image::NearestNeighbour(const Float& x, const Float& y, Float& r, Float& g,
 	}
 }
 
-void Image::IndexToXY(const size_t& index, int& x, int& y) {
+void Image::IndexToXY(const size_t index, int& x, int& y) {
 	int pixelIndex = (int)index / m_channels;
 	x = pixelIndex % m_w;
 	y = pixelIndex / m_w;

@@ -56,7 +56,7 @@ HDR& HDR::operator=(const HDR& copyHDR) {
 	return *this;
 }
 
-void HDR::GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& b) {
+void HDR::GetColor(const Float x, const Float y, Float& r, Float& g, Float& b) {
 	if (m_extrapolation == Extrapolation::Clip && (x < 0 || y < 0 || x >= m_w || y >= m_h)) {
 		r = 0;
 		g = 0;
@@ -121,7 +121,7 @@ bool HDR::Read(const char* file) {
 	return true;
 }
 
-void HDR::SetColor(const int& x, const int& y, const Float& r, const Float& g, const Float& b) {
+void HDR::SetColor(const int x, const int y, const Float r, const Float g, const Float b) {
 	int index = GetIndex(x, y);
 
 	if (m_channels >= 3) {
@@ -140,7 +140,7 @@ void HDR::SetColor(const int& x, const int& y, const Float& r, const Float& g, c
 	}
 }
 
-int HDR::GetIndex(const int& x, const int& y) {
+int HDR::GetIndex(const int x, const int y) {
 	int newX = x;
 	int newY = y;
 
@@ -192,7 +192,7 @@ void HDR::MissingTexture() {
 	}
 }
 
-void HDR::Bicubic(const Float& x, const Float& y, Float& r, Float& g, Float& b) {
+void HDR::Bicubic(const Float x, const Float y, Float& r, Float& g, Float& b) {
 	int count = 0;
 	if (m_channels >= 3) {
 		// image is RGB
@@ -283,7 +283,7 @@ void HDR::Bicubic(const Float& x, const Float& y, Float& r, Float& g, Float& b) 
 	}
 }
 
-void HDR::Bilinear(const Float& x, const Float& y, Float& r, Float& g, Float& b) {
+void HDR::Bilinear(const Float x, const Float y, Float& r, Float& g, Float& b) {
 	int count = 0;
 	if (m_channels >= 3) {
 		// image is RGB
@@ -334,7 +334,7 @@ void HDR::Bilinear(const Float& x, const Float& y, Float& r, Float& g, Float& b)
 	}
 }
 
-void HDR::NearestNeighbour(const Float& x, const Float& y, Float& r, Float& g, Float& b) {
+void HDR::NearestNeighbour(const Float x, const Float y, Float& r, Float& g, Float& b) {
 	int l_x = Float::Round(x).ToInt();
 	int l_y = Float::Round(y).ToInt();
 

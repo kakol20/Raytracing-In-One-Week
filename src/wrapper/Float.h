@@ -18,20 +18,20 @@ public:
 	typedef double ForD;
 #endif // WIN32
 
-	inline Float(const double& num) { m_num = (ForD)num; };
-	inline Float(const float& num) { m_num = (ForD)num; };
+	inline Float(const double num) { m_num = (ForD)num; };
+	inline Float(const float num) { m_num = (ForD)num; };
 	inline Float(const Float& num) { m_num = num.m_num; };
-	inline Float(const int& num = 0) { m_num = (ForD)num; };
-	inline Float(const unsigned int& num) { m_num = (ForD)num; };
+	inline Float(const int num = 0) { m_num = (ForD)num; };
+	inline Float(const unsigned int num) { m_num = (ForD)num; };
 	~Float() {};
 
 	// ----- ASSIGNMENT -----
 
-	inline Float& operator=(const double& num) {
+	inline Float& operator=(const double num) {
 		m_num = (Float::ForD)num;
 		return *this;
 	};
-	inline Float& operator=(const float& num) {
+	inline Float& operator=(const float num) {
 		m_num = (Float::ForD)num;
 		return *this;
 	};
@@ -40,11 +40,11 @@ public:
 		m_num = num.m_num;
 		return *this;
 	};
-	inline Float& operator=(const int& num) {
+	inline Float& operator=(const int num) {
 		m_num = (Float::ForD)num;
 		return *this;
 	};
-	inline Float& operator=(const unsigned int& num) {
+	inline Float& operator=(const unsigned int num) {
 		m_num = (Float::ForD)num;
 		return *this;
 	};
@@ -88,40 +88,40 @@ public:
 		return Float(m_num + n.m_num);
 	};
 
-	inline friend Float operator-(const double& left, const Float& right) {
+	inline friend Float operator-(const double left, const Float& right) {
 		return Float((Float::ForD)left - right.m_num);
 	};
-	inline friend Float operator-(const float& left, const Float& right) {
+	inline friend Float operator-(const float left, const Float& right) {
 		return Float((Float::ForD)left - right.m_num);
 	};
-	inline friend Float operator-(const int& left, const Float& right) {
+	inline friend Float operator-(const int left, const Float& right) {
 		return Float((Float::ForD)left - right.m_num);
 	};
-	inline friend Float operator*(const double& left, const Float& right) {
+	inline friend Float operator*(const double left, const Float& right) {
 		return Float((Float::ForD)left * right.m_num);
 	};
-	inline friend Float operator*(const float& left, const Float& right) {
+	inline friend Float operator*(const float left, const Float& right) {
 		return Float((Float::ForD)left * right.m_num);
 	};
-	inline friend Float operator*(const int& left, const Float& right) {
+	inline friend Float operator*(const int left, const Float& right) {
 		return Float((Float::ForD)left * right.m_num);
 	};
-	inline friend Float operator/(const double& left, const Float& right) {
+	inline friend Float operator/(const double left, const Float& right) {
 		return Float((Float::ForD)left / right.m_num);
 	};
-	inline friend Float operator/(const float& left, const Float& right) {
+	inline friend Float operator/(const float left, const Float& right) {
 		return Float((Float::ForD)left / right.m_num);
 	};
-	inline friend Float operator/(const int& left, const Float& right) {
+	inline friend Float operator/(const int left, const Float& right) {
 		return Float((Float::ForD)left / right.m_num);
 	};
-	inline friend Float operator+(const double& left, const Float& right) {
+	inline friend Float operator+(const double left, const Float& right) {
 		return Float((Float::ForD)left + right.m_num);
 	};
-	inline friend Float operator+(const float& left, const Float& right) {
+	inline friend Float operator+(const float left, const Float& right) {
 		return Float((Float::ForD)left + right.m_num);
 	};
-	inline friend Float operator+(const int& left, const Float& right) {
+	inline friend Float operator+(const int left, const Float& right) {
 		return Float((Float::ForD)left + right.m_num);
 	};
 
@@ -183,33 +183,33 @@ public:
 	};
 
 	static Float FromString(const std::string& value);
-	static std::string ToString(const Float& num);
+	static std::string ToString(const Float num);
 
 	// -- Trigonometry --
 
-	static Float Asin(const Float& x);
-	static Float Atan2(const Float& y, const Float& x);
-	static Float Cos(const Float& x);
-	static Float Sin(const Float& x);
-	static Float Tan(const Float& v);
+	static Float Asin(const Float x);
+	static Float Atan2(const Float y, const Float x);
+	static Float Cos(const Float x);
+	static Float Sin(const Float x);
+	static Float Tan(const Float v);
 
 	// -- Modify --
 
-	static Float Abs(const Float& v);
-	static Float Ceil(const Float& v);
-	static Float Clamp(const Float& v, const Float& lo, const Float& hi);
-	static Float Floor(const Float& v);
-	static Float Pow(const Float& base, const Float& exponent);
-	static Float Round(const Float& v);
-	static Float Sqrt(const Float& v);
+	static Float Abs(const Float v);
+	static Float Ceil(const Float v);
+	static Float Clamp(const Float v, const Float lo, const Float hi);
+	static Float Floor(const Float v);
+	static Float Pow(const Float base, const Float exponent);
+	static Float Round(const Float v);
+	static Float Sqrt(const Float v);
 
-	static Float Max(const Float& a, const Float& b);
-	static Float Min(const Float& a, const Float& b);
+	static Float Max(const Float a, const Float b);
+	static Float Min(const Float a, const Float b);
 
 	// -- Interpolation --
 
-	static Float Lerp(const Float& from, const Float& to, const Float& factor, bool clamp = false);
-	static Float Map(const Float& v, const Float& fromMin, const Float& fromMax, const Float& toMin, const Float& toMax, const bool& clamp = false);
+	static Float Lerp(const Float from, const Float to, const Float factor, const bool clamp = false);
+	static Float Map(const Float v, const Float fromMin, const Float fromMax, const Float toMin, const Float toMax, const bool clamp = false);
 
 	// https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
 
@@ -222,7 +222,7 @@ public:
 	/// <param name="d"></param>
 	/// <param name="factor">value between 0 &amp; 1</param>
 	/// <returns></returns>
-	static Float Cubic(const Float& a, const Float& b, const Float& c, const Float& d, const Float& factor);
+	static Float Cubic(const Float a, const Float b, const Float c, const Float d, const Float factor);
 
 private:
 	ForD m_num;

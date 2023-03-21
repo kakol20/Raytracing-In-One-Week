@@ -2,21 +2,21 @@
 
 #include "Vector3D.h"
 
-Vector3D::Vector3D(const Float& scalar, const bool& includeZAxis) {
+Vector3D::Vector3D(const Float scalar, const bool includeZAxis) {
 	m_x = scalar;
 	m_y = scalar;
 	m_z = includeZAxis ? scalar : 0;
 	m_includeZAxis = includeZAxis;
 }
 
-Vector3D::Vector3D(const Float& x, const Float& y) {
+Vector3D::Vector3D(const Float x, const Float y) {
 	m_x = x;
 	m_y = y;
 	m_z = 0;
 	m_includeZAxis = false;
 }
 
-Vector3D::Vector3D(const Float& x, const Float& y, const Float& z) {
+Vector3D::Vector3D(const Float x, const Float y, const Float z) {
 	m_x = x;
 	m_y = y;
 	m_z = z;
@@ -63,7 +63,7 @@ Vector3D Vector3D::CrossProduct(const Vector3D& v1, const Vector3D& v2) {
 		v1.m_x * v2.m_y - v1.m_y * v2.m_x);
 }
 
-Vector3D Vector3D::Lerp(const Vector3D& min, const Vector3D& max, const Float& factor, const bool& clamp) {
+Vector3D Vector3D::Lerp(const Vector3D& min, const Vector3D& max, const Float factor, const bool clamp) {
 	Float x = Float::Lerp(min.m_x, max.m_x, factor, clamp);
 	Float y = Float::Lerp(min.m_y, max.m_y, factor, clamp);
 	Float z = Float::Lerp(min.m_z, max.m_z, factor, clamp);
@@ -86,7 +86,7 @@ Vector3D Vector3D::Reflect(const Vector3D& vector, const Vector3D& normal) {
 	return t;
 }
 
-Vector3D Vector3D::Refract(const Vector3D& vector, const Vector3D& normal, const Float& refractionRatio) {
+Vector3D Vector3D::Refract(const Vector3D& vector, const Vector3D& normal, const Float refractionRatio) {
 	Vector3D vectorInv = -vector;
 
 	Float cosTheta = Float::Min(Vector3D::DotProduct(vectorInv, normal), 1);
@@ -133,7 +133,7 @@ Vector3D Vector3D::RandomUnitVector() {
 	return o;
 }
 
-Vector3D Vector3D::RandomVector(const Float& min, const Float& max, bool includeZAxis) {
+Vector3D Vector3D::RandomVector(const Float min, const Float max, bool includeZAxis) {
 	return includeZAxis ?
 		Vector3D(Random::RandomFloat(min, max), Random::RandomFloat(min, max), Random::RandomFloat(min, max)) :
 		Vector3D(Random::RandomFloat(min, max), Random::RandomFloat(min, max));

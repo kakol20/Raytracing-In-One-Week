@@ -9,12 +9,12 @@ class Camera {
 public:
 	Camera() : Camera(1, 0, 10, 90, Vector3D(0), Vector3D::Forward, Vector3D::Up) {};
 	Camera(const Camera& copyCamera);
-	Camera(const Float& aspectRatio, const Float& blurStrength, const Float& focusDist, const Float& vFOV, const Vector3D& lookFrom, const Vector3D& lookAt, const Vector3D& up);
+	Camera(const Float aspectRatio, const Float blurStrength, const Float focusDist, const Float vFOV, const Vector3D& lookFrom, const Vector3D& lookAt, const Vector3D& up);
 	~Camera() {};
 
 	Camera& operator=(const Camera& copyCamera);
 
-	Ray GetRay(const Float& s, const Float& t) const;
+	Ray GetRay(const Float s, const Float t) const;
 
 	Vector3D OutputVector(const Vector3D& v) const;
 

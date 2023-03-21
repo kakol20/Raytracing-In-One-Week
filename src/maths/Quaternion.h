@@ -6,7 +6,8 @@
 
 class Quaternion {
 public:
-	Quaternion(const Float& w = 0, const Float& i = 0, const Float& j = 0, const Float& k = 0);
+	Quaternion(const Float w = 0, const Float i = 0, const Float j = 0, const Float k = 0);
+	Quaternion(const Quaternion& other);
 	Quaternion(const Vector3D& vec);
 	~Quaternion() {};
 
@@ -60,13 +61,13 @@ public:
 
 	// ----- ROTATION -----
 
-	void AxisRotation(const Vector3D& axis, const Float& radians);
+	void AxisRotation(const Vector3D& axis, const Float radians);
 	static Quaternion ShortestArc(const Vector3D& v1, const Vector3D& v2);
 
 	void XYZRotation(const Vector3D& radians);
 	void ZYXRotation(const Vector3D& radians);
 
-	Vector3D RotateVector(const Vector3D& vec, const bool& normalize = false) const;
+	Vector3D RotateVector(const Vector3D& vec, const bool normalize = false) const;
 
 	// ----- STATIC VARIABLES -----
 

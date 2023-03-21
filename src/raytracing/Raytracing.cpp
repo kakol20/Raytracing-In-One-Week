@@ -388,7 +388,7 @@ bool Raytracing::RunMode() {
 	return true;
 }
 
-void Raytracing::RenderTile(const size_t& startIndex) {
+void Raytracing::RenderTile(const size_t startIndex) {
 	// set seed
 	// start time
 	//     Render();
@@ -497,7 +497,7 @@ void Raytracing::RenderTile(const size_t& startIndex) {
 	}
 }
 
-void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const int& maxY) {
+void Raytracing::Render(const int minX, const int minY, const int maxX, const int maxY) {
 	// go through x & y
 	// go through samples
 	//     adaptive sampling
@@ -594,7 +594,7 @@ void Raytracing::Render(const int& minX, const int& minY, const int& maxX, const
 	}
 }
 
-Vector3D Raytracing::RayColor(Ray& ray, const int& depth, const Vector3D& initialRayCol) {
+Vector3D Raytracing::RayColor(Ray& ray, const int depth, const Vector3D& initialRayCol) {
 	if (depth <= 0) return Vector3D(Float::NearZero);
 
 	// check for object hit
@@ -674,7 +674,7 @@ Vector3D Raytracing::RayColor(Ray& ray, const int& depth, const Vector3D& initia
 	return Vector3D::Zero;
 }
 
-bool Raytracing::RayHitObject(Ray& ray, const Float& t_min, const Float& t_max, HitRec& rec) {
+bool Raytracing::RayHitObject(Ray& ray, const Float t_min, const Float t_max, HitRec& rec) {
 	HitRec tempRec;
 	bool hit = false;
 	Float closest = t_max;

@@ -2,7 +2,7 @@
 
 #include "Random.h"
 
-unsigned int Random::RandomUInt(const unsigned int& bitCount) {
+unsigned int Random::RandomUInt(const unsigned int bitCount) {
 	unsigned int count = bitCount > 32 ? 32 : bitCount;
 	unsigned int out = 0;
 
@@ -27,13 +27,13 @@ unsigned int Random::RandomUInt(const unsigned int& bitCount) {
 	return out;
 }
 
-Float Random::RandomFloat(const Float& min, const Float& max) {
+Float Random::RandomFloat(const Float min, const Float max) {
 	Float random = Float(Random::RandomUInt());
 	random /= std::numeric_limits<unsigned int>::max();
 	return (random * (max - min)) + min;
 }
 
-int Random::RandomInt(const int& min, const int& max) {
+int Random::RandomInt(const int min, const int max) {
 	int distance = (max - min) + 1;
 	return (Random::RandomUInt() % distance) + min;
 }

@@ -1,10 +1,17 @@
 #include "Quaternion.h"
 
-Quaternion::Quaternion(const Float& w, const Float& i, const Float& j, const Float& k) {
+Quaternion::Quaternion(const Float w, const Float i, const Float j, const Float k) {
 	m_w = w;
 	m_i = i;
 	m_j = j;
 	m_k = k;
+}
+
+Quaternion::Quaternion(const Quaternion& other) {
+	m_i = other.m_i;
+	m_j = other.m_j;
+	m_k = other.m_k;
+	m_w = other.m_w;
 }
 
 Quaternion::Quaternion(const Vector3D& vec) {
@@ -14,7 +21,7 @@ Quaternion::Quaternion(const Vector3D& vec) {
 	m_k = vec.GetZ();
 }
 
-void Quaternion::AxisRotation(const Vector3D& axis, const Float& radians) {
+void Quaternion::AxisRotation(const Vector3D& axis, const Float radians) {
 	Float sinTheta = Float::Sin(radians / 2);
 	Float cosTheta = Float::Cos(radians / 2);
 
@@ -80,7 +87,7 @@ void Quaternion::ZYXRotation(const Vector3D& radians) {
 	Normalize();
 }
 
-Vector3D Quaternion::RotateVector(const Vector3D& vec, const bool& normalize) const{
+Vector3D Quaternion::RotateVector(const Vector3D& vec, const bool normalize) const{
 	Quaternion quat(m_w, m_i, m_j, m_k);
 	Quaternion pureQuat = vec;
 	Quaternion quatInv(m_w, m_i, m_j, m_k);

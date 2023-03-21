@@ -11,7 +11,7 @@ Camera::Camera(const Camera& copyCamera) {
 	m_w = copyCamera.m_w;
 }
 
-Camera::Camera(const Float& aspectRatio, const Float& blurStrength, const Float& focusDist, const Float& vFOV, const Vector3D& lookFrom, const Vector3D& lookAt, const Vector3D& up) {
+Camera::Camera(const Float aspectRatio, const Float blurStrength, const Float focusDist, const Float vFOV, const Vector3D& lookFrom, const Vector3D& lookAt, const Vector3D& up) {
 	const Float theta = vFOV * Float::ToRadians;
 	const Float h = Float::Tan(theta / 2);
 	const Float vHeight = 2 * h;
@@ -72,7 +72,7 @@ Camera& Camera::operator=(const Camera& copyCamera) {
 	return *this;
 }
 
-Ray Camera::GetRay(const Float& s, const Float& t) const {
+Ray Camera::GetRay(const Float s, const Float t) const {
 	Vector3D rd = Vector3D::RandomInUnitDisk() * m_lensRadius;
 	Vector3D offset = (m_u * rd.GetX()) + (m_v * rd.GetY());
 

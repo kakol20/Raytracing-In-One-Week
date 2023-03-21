@@ -9,7 +9,7 @@ public:
 	BlueNoise() {};
 	~BlueNoise() {};
 
-	void Generate(const int& sampleCount, const int& m);
+	void Generate(const int sampleCount, const int m);
 
 	size_t Size() const { return m_samples.size(); };
 	Vector3D& operator[](size_t index);
