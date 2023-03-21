@@ -8,7 +8,7 @@ bool Sphere::Hit(Ray& ray, const Float t_min, const Float t_max, HitRec& rec) {
 	return TranslationHit(ray, t_min, t_max, rec);
 }
 
-Sphere::Sphere(const Float& radius, Material* mat, const Vector3D& rotation, const Vector3D& translation, bool flipNormals, const Vector3D& uvScale) {
+Sphere::Sphere(const Float radius, Material* mat, const Vector3D& rotation, const Vector3D& translation, bool flipNormals, const Vector3D& uvScale) {
 	m_rotation.XYZRotation(rotation * Float::ToRadians);
 	m_rotationInv = m_rotation;
 	m_rotationInv.Conjugate();

@@ -8,7 +8,7 @@
 class Sphere : public Object {
 public:
 	Sphere() : Sphere(1, nullptr, Vector3D::Zero, Vector3D::Zero) {};
-	Sphere(const Float& radius, Material* mat, const Vector3D& rotation, const Vector3D& translation, bool flipNormals = false, const Vector3D& uvScale = Vector3D::One);
+	Sphere(const Float radius, Material* mat, const Vector3D& rotation, const Vector3D& translation, bool flipNormals = false, const Vector3D& uvScale = Vector3D::One);
 	virtual ~Sphere();
 
 	virtual bool Hit(Ray& ray, const Float t_min, const Float t_max, HitRec& rec);
