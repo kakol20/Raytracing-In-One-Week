@@ -4,11 +4,11 @@ Sphere::~Sphere() {
 	m_mat = nullptr;
 }
 
-bool Sphere::Hit(Ray& ray, const Float& t_min, const Float& t_max, HitRec& rec) {
+bool Sphere::Hit(Ray& ray, const Float t_min, const Float t_max, HitRec& rec) {
 	return TranslationHit(ray, t_min, t_max, rec);
 }
 
-Sphere::Sphere(const Float& radius, Material* mat, const Vector3D& rotation, const Vector3D& translation, bool flipNormals, const Vector3D uvScale) {
+Sphere::Sphere(const Float& radius, Material* mat, const Vector3D& rotation, const Vector3D& translation, bool flipNormals, const Vector3D& uvScale) {
 	m_rotation.XYZRotation(rotation * Float::ToRadians);
 	m_rotationInv = m_rotation;
 	m_rotationInv.Conjugate();
@@ -19,7 +19,7 @@ Sphere::Sphere(const Float& radius, Material* mat, const Vector3D& rotation, con
 	m_pos = translation;
 }
 
-bool Sphere::SphereIntersectSphere(const Vector3D& pos, const Float& radius) {
+bool Sphere::SphereIntersectSphere(const Vector3D& pos, const Float radius) {
 	Vector3D newPos = pos - m_pos;
 	//newPos = m_rotationInv.RotateVector(newPos);
 
@@ -32,7 +32,7 @@ bool Sphere::SphereIntersectSphere(const Vector3D& pos, const Float& radius) {
 	return false;
 }
 
-bool Sphere::TranslationHit(Ray& ray, const Float& t_min, const Float& t_max, HitRec& rec) {
+bool Sphere::TranslationHit(Ray& ray, const Float t_min, const Float t_max, HitRec& rec) {
 	Ray localRay(ray.GetOrig() - m_pos, ray.GetDir());
 	if (!RotationHit(localRay, t_min, t_max, rec)) return false;
 
@@ -45,7 +45,7 @@ bool Sphere::TranslationHit(Ray& ray, const Float& t_min, const Float& t_max, Hi
 	return true;
 }
 
-bool Sphere::RotationHit(Ray& ray, const Float& t_min, const Float& t_max, HitRec& rec) {
+bool Sphere::RotationHit(Ray& ray, const Float t_min, const Float t_max, HitRec& rec) {
 	Vector3D rayOrig = m_rotationInv.RotateVector(ray.GetOrig());
 	Vector3D rayDir = m_rotationInv.RotateVector(ray.GetDir());
 
@@ -68,7 +68,7 @@ bool Sphere::RotationHit(Ray& ray, const Float& t_min, const Float& t_max, HitRe
 	return true;
 }
 
-bool Sphere::LocalHit(Ray& ray, const Float& t_min, const Float& t_max, HitRec& rec) {
+bool Sphere::LocalHit(Ray& ray, const Float t_min, const Float t_max, HitRec& rec) {
 	Vector3D oc = ray.GetOrig();
 	Float a = ray.GetDir().SqrMagnitude();
 	Float half_b = Vector3D::DotProduct(oc, ray.GetDir());

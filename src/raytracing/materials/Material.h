@@ -20,7 +20,7 @@ public:
 	virtual void Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) = 0;
 
 protected:
-	Float Fresnel(const Vector3D& dir, const Vector3D& normal, const Float& refIndex) const {
+	Float Fresnel(const Vector3D& dir, const Vector3D& normal, const Float refIndex) const {
 		Float cosTheta = Vector3D::DotProduct(dir, normal);
 		cosTheta = Float::Clamp(cosTheta, 0, 1);
 

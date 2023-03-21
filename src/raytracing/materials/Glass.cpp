@@ -2,7 +2,7 @@
 
 #include "Glass.h"
 
-Glass::Glass(const Vector3D& albedo, const Float& roughness, const Float& ior) {
+Glass::Glass(const Vector3D& albedo, const Float roughness, const Float ior) {
 	m_albedo = albedo;
 	m_roughness = roughness;
 	m_ior = ior;

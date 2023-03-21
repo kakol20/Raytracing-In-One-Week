@@ -5,9 +5,10 @@
 
 class Vector3D {
 public:
-	Vector3D(const Float& scalar = 0, const bool& includeZAxis = true);
-	Vector3D(const Float& x, const Float& y);
-	Vector3D(const Float& x, const Float& y, const Float& z);
+	Vector3D(const Float scalar = 0, const bool includeZAxis = true);
+	//Vector3D(const Float scalar, const bool includeZAxis);
+	Vector3D(const Float x, const Float y);
+	Vector3D(const Float x, const Float y, const Float z);
 	~Vector3D() {};
 
 	// ----- ASSIGNMENT OPERATORS -----
@@ -48,19 +49,19 @@ public:
 		m_z = m_includeZAxis ? m_z - otherVector.m_z : 0;
 		return *this;
 	};
-	inline Vector3D& operator*=(const Float& scalar) {
+	inline Vector3D& operator*=(const Float scalar) {
 		m_x *= scalar;
 		m_y *= scalar;
 		m_z = m_includeZAxis ? m_z * scalar : 0;
 		return *this;
 	};
-	inline Vector3D& operator/=(const Float& scalar) {
+	inline Vector3D& operator/=(const Float scalar) {
 		m_x /= scalar;
 		m_y /= scalar;
 		m_z = m_includeZAxis ? m_z / scalar : 0;
 		return *this;
 	};
-	inline Vector3D& operator=(const Float& scalar) {
+	inline Vector3D& operator=(const Float scalar) {
 		m_x = scalar;
 		m_y = scalar;
 		m_z = m_includeZAxis ? scalar : 0;
@@ -90,12 +91,12 @@ public:
 			Vector3D(m_x + otherVector.m_x, m_y + otherVector.m_y);
 	};
 
-	inline Vector3D operator*(const Float& scalar) const {
+	inline Vector3D operator*(const Float scalar) const {
 		return m_includeZAxis ?
 			Vector3D(m_x * scalar, m_y * scalar, m_z * scalar) :
 			Vector3D(m_x * scalar, m_y * scalar);
 	};
-	inline Vector3D operator/(const Float& scalar) const {
+	inline Vector3D operator/(const Float scalar) const {
 		return m_includeZAxis ?
 			Vector3D(m_x / scalar, m_y / scalar, m_z / scalar) :
 			Vector3D(m_x / scalar, m_y / scalar);
@@ -124,10 +125,10 @@ public:
 	static Vector3D Abs(const Vector3D& v);
 	static Vector3D Clamp(const Vector3D& val, const Vector3D& min, const Vector3D& max);
 	static Vector3D CrossProduct(const Vector3D& v1, const Vector3D& v2);
-	static Vector3D Lerp(const Vector3D& min, const Vector3D& max, const Float& factor, const bool& clamp = false);
+	static Vector3D Lerp(const Vector3D& min, const Vector3D& max, const Float factor, const bool clamp = false);
 
 	static Vector3D Reflect(const Vector3D& vector, const Vector3D& normal);
-	static Vector3D Refract(const Vector3D& vector, const Vector3D& normal, const Float& refractionRatio);
+	static Vector3D Refract(const Vector3D& vector, const Vector3D& normal, const Float refractionRatio);
 
 	// -- Random --
 
@@ -135,7 +136,7 @@ public:
 	static Vector3D RandomInUnitDisk();
 	static Vector3D RandomInUnitSphere();
 	static Vector3D RandomUnitVector();
-	static Vector3D RandomVector(const Float& min = 0, const Float& max = 1, bool includeZAxis = true);
+	static Vector3D RandomVector(const Float min = 0, const Float max = 1, bool includeZAxis = true);
 
 	inline bool NearZero() const {
 		bool xNearZero = Float::Abs(m_x) < Float::NearZero;

@@ -5,7 +5,7 @@
 
 class Unshaded : public Material {
 public:
-	Unshaded() : Unshaded(Vector3D(1)) {};
+	Unshaded() : Unshaded(Vector3D::One) {};
 	Unshaded(const Vector3D& albedo);
 	virtual ~Unshaded();
 

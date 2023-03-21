@@ -2,7 +2,7 @@
 
 #include "Metal.h"
 
-Metal::Metal(const Vector3D& albedo, const Float& roughness, const Float& ior) {
+Metal::Metal(const Vector3D& albedo, const Float roughness, const Float ior) {
 	m_albedo = albedo;
 	m_ior = ior;
 	m_roughness = roughness;

@@ -12,10 +12,10 @@ public:
 		m_mat = nullptr;
 	}
 
-	virtual bool Hit(Ray& ray, const Float& t_min, const Float& t_max, HitRec& rec) = 0;
+	virtual bool Hit(Ray& ray, const Float t_min, const Float t_max, HitRec& rec) = 0;
 
-	virtual bool SphereIntersectGround(const Vector3D& pos, const Float& radius) { return false; };
-	virtual bool SphereIntersectSphere(const Vector3D& pos, const Float& radius) { return false; };
+	virtual bool SphereIntersectGround(const Vector3D& pos, const Float radius) { return false; };
+	virtual bool SphereIntersectSphere(const Vector3D& pos, const Float radius) { return false; };
 
 	const Vector3D GetPos() const { return m_pos; };
 

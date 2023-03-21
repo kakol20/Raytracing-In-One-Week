@@ -25,8 +25,8 @@ public:
 
 	bool Write(const char* file);
 
-	void GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& b);
-	void SetColor(const int& x, const int& y, const Float& r, const Float& g, const Float& b);
+	void GetColor(const Float x, const Float y, Float& r, Float& g, Float& b);
+	void SetColor(const int x, const int y, const Float r, const Float g, const Float b);
 
 	int GetHeight() const { return m_h; };
 	int GetWidth() const { return m_w; };
@@ -35,12 +35,12 @@ public:
 
 	inline float& operator[](size_t i) { return m_dataF[i].GetValue(); };*/
 
-	void SetColorSpace(const ColorSpace& colorSpace) { m_colorSpace = colorSpace; };
+	void SetColorSpace(const ColorSpace colorSpace) { m_colorSpace = colorSpace; };
 
 	void Dither(const int& factor = 255);
 
-	static Float LinearToSRGB(const Float& color);
-	static Float sRGBToLinear(const Float& color);
+	static Float LinearToSRGB(const Float color);
+	static Float sRGBToLinear(const Float color);
 
 private:
 	size_t m_size;
@@ -62,18 +62,18 @@ private:
 	bool Read(const char* file);
 
 	FileType GetFileType(const char* file);
-	int GetIndex(const int& x, const int& y);
+	int GetIndex(const int x, const int y);
 	void MissingTexture();
 
 	void FromColorSpace();
-	void IndexToXY(const size_t& index, int& x, int& y);
+	void IndexToXY(const size_t index, int& x, int& y);
 	void ToColorSpace();
 
 	// ----- INTERPOLATION FUNCTIONS -----
 
-	void Bicubic(const Float& x, const Float& y, Float& r, Float& g, Float& b);
-	void Bilinear(const Float& x, const Float& y, Float& r, Float& g, Float& b);
-	void NearestNeighbour(const Float& x, const Float& y, Float& r, Float& g, Float& b);
+	void Bicubic(const Float x, const Float y, Float& r, Float& g, Float& b);
+	void Bilinear(const Float x, const Float y, Float& r, Float& g, Float& b);
+	void NearestNeighbour(const Float x, const Float y, Float& r, Float& g, Float& b);
 
 	// ----- PRIVATE STATIC -----
 

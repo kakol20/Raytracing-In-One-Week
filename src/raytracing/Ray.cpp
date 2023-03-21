@@ -12,6 +12,6 @@ Ray& Ray::operator=(const Ray& copyRay) {
 	return *this;
 }
 
-Vector3D Ray::At(const Float& t) const {
+Vector3D Ray::At(const Float t) const {
 	return m_orig + (m_dir * t);
 }

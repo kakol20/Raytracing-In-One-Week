@@ -23,7 +23,7 @@ public:
 	/// <returns></returns>
 	inline float& operator[](size_t i) { return m_data[i]; };
 
-	void GetColor(const Float& x, const Float& y, Float& r, Float& g, Float& b);
+	void GetColor(const Float x, const Float y, Float& r, Float& g, Float& b);
 
 	inline int GetHeight() const { return m_h; };
 	inline int GetWidth() const { return m_w; };
@@ -44,15 +44,15 @@ private:
 
 	bool Read(const char* file);
 
-	void SetColor(const int& x, const int& y, const Float& r, const Float& g, const Float& b);
+	void SetColor(const int x, const int y, const Float r, const Float g, const Float b);
 
-	int GetIndex(const int& x, const int& y);
+	int GetIndex(const int x, const int y);
 	void MissingTexture();
 
 	// ----- INTERPOLATION FUNCTIONS -----
 
-	void Bicubic(const Float& x, const Float& y, Float& r, Float& g, Float& b);
-	void Bilinear(const Float& x, const Float& y, Float& r, Float& g, Float& b);
-	void NearestNeighbour(const Float& x, const Float& y, Float& r, Float& g, Float& b);
+	void Bicubic(const Float x, const Float y, Float& r, Float& g, Float& b);
+	void Bilinear(const Float x, const Float y, Float& r, Float& g, Float& b);
+	void NearestNeighbour(const Float x, const Float y, Float& r, Float& g, Float& b);
 };
 #endif // !HDR_H
