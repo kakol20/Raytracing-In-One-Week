@@ -142,13 +142,14 @@ bool Image::Write(const char* file) {
 			val = Image::LinearToSRGB(val);
 		}
 
-		m_dataF[i] = val;
+		m_dataF[i] = Float::Clamp(val, 0, 255);
 		m_data[i] = (uint8_t)Float::Clamp(val, 0, 255).ToUInt();
 
 		//m_data[i] = Float::Round(Float::Clamp(m_dataF[i], 0, 255)).ToUInt();
 	}
 
-	Dither(255);
+	//OrderedDither(255);
+	FloydSteinbergDither(255);
 
 	switch (type) {
 	case Image::FileType::BMP:
@@ -253,7 +254,42 @@ void Image::SetColor(const int x, const int y, const Float r, const Float g, con
 	}
 }
 
-void Image::Dither(const int& factor) {
+void Image::FloydSteinbergDither(const int factor) {
+	for (size_t i = 0; i < m_size; i++) {
+		int x, y;
+		IndexToXY(i, x, y);
+		//size_t index = (size_t)GetIndex(x, y) + (size_t)i;
+
+		size_t bias = i % (size_t)m_channels;
+
+		Float oldPixel = m_dataF[i];
+		Float newPixel = (Float::Round((oldPixel / 255) * factor) / factor) * 255;
+
+		m_dataF[i] = newPixel;
+		m_data[i] = (uint8_t)Float::Clamp(newPixel, 0, 255).ToUInt();
+
+		Float quant_error = oldPixel - newPixel;
+
+		size_t neighbour = (size_t)GetIndex(x + 1, y) + bias;
+
+		m_dataF[neighbour] += quant_error * Float(7) / Float(16);
+		m_data[neighbour] = (uint8_t)Float::Clamp(m_dataF[neighbour], 0, 255).ToUInt();
+
+		neighbour = (size_t)GetIndex(x - 1, y + 1) + bias;
+		m_dataF[neighbour] += quant_error * Float(3) / Float(16);
+		m_data[neighbour] = (uint8_t)Float::Clamp(m_dataF[neighbour], 0, 255).ToUInt();
+
+		neighbour = (size_t)GetIndex(x, y + 1) + bias;
+		m_dataF[neighbour] += quant_error * Float(5) / Float(16);
+		m_data[neighbour] = (uint8_t)Float::Clamp(m_dataF[neighbour], 0, 255).ToUInt();
+
+		neighbour = (size_t)GetIndex(x + 1, y + 1) + bias;
+		m_dataF[neighbour] += quant_error * Float(1) / Float(16);
+		m_data[neighbour] = (uint8_t)Float::Clamp(m_dataF[neighbour], 0, 255).ToUInt();
+	}
+}
+
+void Image::OrderedDither(const int factor) {
 	for (size_t i = 0; i < m_size; i++) {
 		int x, y;
 		IndexToXY(i, x, y);
