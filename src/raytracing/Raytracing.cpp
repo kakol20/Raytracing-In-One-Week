@@ -9,6 +9,7 @@
 #include "materials/Glass.h"
 #include "materials/Metal.h"
 #include "materials/Unshaded.h"
+#include "objects/PointLight.h"
 #include "objects/Sphere.h"
 
 #include "Raytracing.h"
@@ -794,7 +795,7 @@ void Raytracing::DebugScene() {
 
 	m_clipEnd = 1000;
 
-	Vector3D lookFrom(0, 2, 15);
+	Vector3D lookFrom(0, 2, 20);
 	Vector3D lookAt(0, 1, 0);
 
 	Vector3D dist = lookAt - lookFrom;
@@ -815,10 +816,11 @@ void Raytracing::DebugScene() {
 
 	// objects
 
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["diffuse"], Vector3D::Zero, Vector3D(-3.15, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["unshaded"], Vector3D::Zero, Vector3D(-1.05, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["glass"], Vector3D::Zero, Vector3D(1.05, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["metallic"], Vector3D::Zero, Vector3D(3.15, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["diffuse"], Vector3D::Zero, Vector3D(-4.2, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["unshaded"], Vector3D::Zero, Vector3D(-2.1, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["glass"], Vector3D::Zero, Vector3D(0, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["metallic"], Vector3D::Zero, Vector3D(2.1, 1, 0)));
+	m_renderedObjects.push_back(new PointLight(Unshaded(Vector3D::One), 1, Vector3D(4.2, 1, 0)));
 
 	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
 }

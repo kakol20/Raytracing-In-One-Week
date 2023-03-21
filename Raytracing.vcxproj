@@ -173,6 +173,7 @@
     <ClCompile Include="src\raytracing\materials\Glass.cpp" />
     <ClCompile Include="src\raytracing\materials\Metal.cpp" />
     <ClCompile Include="src\raytracing\materials\Unshaded.cpp" />
+    <ClCompile Include="src\raytracing\objects\PointLight.cpp" />
     <ClCompile Include="src\raytracing\objects\Sphere.cpp" />
     <ClCompile Include="src\raytracing\Ray.cpp" />
     <ClCompile Include="src\raytracing\Raytracing.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="src\raytracing\materials\Metal.h" />
     <ClInclude Include="src\raytracing\materials\Unshaded.h" />
     <ClInclude Include="src\raytracing\objects\Object.h" />
+    <ClInclude Include="src\raytracing\objects\PointLight.h" />
     <ClInclude Include="src\raytracing\objects\Sphere.h" />
     <ClInclude Include="src\raytracing\Ray.h" />
     <ClInclude Include="src\raytracing\Raytracing.h" />

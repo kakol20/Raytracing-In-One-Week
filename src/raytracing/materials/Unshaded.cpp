@@ -1,5 +1,9 @@
 #include "Unshaded.h"
 
+Unshaded::Unshaded(const Unshaded& other) {
+	m_albedo = other.m_albedo;
+}
+
 Unshaded::Unshaded(const Vector3D& albedo) {
 	m_albedo = albedo;
 }
@@ -14,4 +18,11 @@ void Unshaded::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& sca
 	normal = rec.GetNormal();
 
 	attentuation = m_albedo;
+}
+
+Unshaded& Unshaded::operator=(const Unshaded& other) {
+	// TODO: insert return statement here
+	if (this == &other) return *this;
+	m_albedo = other.m_albedo;
+	return *this;
 }
