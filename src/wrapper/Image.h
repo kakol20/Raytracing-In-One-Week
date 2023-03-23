@@ -37,7 +37,8 @@ public:
 
 	void SetColorSpace(const ColorSpace colorSpace) { m_colorSpace = colorSpace; };
 
-	void Dither(const int& factor = 255);
+	void FloydSteinbergDither(const int factor = 255);
+	void OrderedDither(const int factor = 255);
 
 	static Float LinearToSRGB(const Float color);
 	static Float sRGBToLinear(const Float color);
