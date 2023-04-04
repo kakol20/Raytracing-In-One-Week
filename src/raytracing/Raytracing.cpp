@@ -11,6 +11,8 @@
 #include "materials/Unshaded.h"
 #include "objects/PointLight.h"
 #include "objects/Sphere.h"
+#include "scenes/DebugScene.h"
+#include "scenes/OriginalScene.h"
 
 #include "Raytracing.h"
 
@@ -20,48 +22,12 @@ Raytracing::Raytracing() {
 	m_useThreads = 1;
 	m_xTileCount = 1;
 	m_yTileCount = 1;
+	m_scene = nullptr;
 }
 
 Raytracing::~Raytracing() {
-	if (!m_renderedObjects.empty()) {
-		for (auto it = m_renderedObjects.begin(); it != m_renderedObjects.end(); it++) {
-			delete (*it);
-			(*it) = nullptr;
-		}
-		m_renderedObjects.clear();
-	}
-
-	//if (!m_unrenderedObjects.empty()) {
-	//	for (auto it = m_unrenderedObjects.begin(); it != m_unrenderedObjects.end(); it++) {
-	//		delete (*it).second;
-	//		(*it).second = nullptr;
-	//	}
-	//	m_unrenderedObjects.clear();
-	//}
-
-	if (!m_matMap.empty()) {
-		for (auto it = m_matMap.begin(); it != m_matMap.end(); it++) {
-			delete (*it).second;
-			(*it).second = nullptr;
-		}
-		m_matMap.clear();
-	}
-
-	//if (!m_matVec.empty()) {
-	//	for (auto it = m_matVec.begin(); it != m_matVec.end(); it++) {
-	//		delete (*it);
-	//		(*it) = nullptr;
-	//	}
-	//	m_matVec.clear();
-	//}
-
-	//if (!m_textures.empty()) {
-	//	for (auto it = m_textures.begin(); it != m_textures.end(); it++) {
-	//		delete (*it).second;
-	//		(*it).second = nullptr;
-	//	}
-	//	m_textures.clear();
-	//}
+	delete m_scene;
+	m_scene = nullptr;
 }
 
 bool Raytracing::Init() {
@@ -98,19 +64,20 @@ bool Raytracing::Init() {
 
 	// ----- INITIALISE SCENE -----
 
-	m_clipStart = Float::NearZero;
-
 	FastWrite::Write("Creating Scene \n");
 
-	if (m_settings["scene"] == "original") {
-		m_fileFolder = "renders/original/";
-		OriginalScene();
-	} else if (m_settings["scene"] == "debug") {
+	if (m_settings["scene"] == "debug") {
 		m_fileFolder = "renders/debugScene/";
-		DebugScene();
-	} else {
+		m_scene = new DebugScene();
+		m_scene->Create(m_settings);
+	} else if (m_settings["scene"] == "original") {
 		m_fileFolder = "renders/original/";
-		OriginalScene();
+		m_scene = new OriginalScene();
+		m_scene->Create(m_settings);
+	} else {
+		m_fileFolder = "renders/debugScene/";
+		m_scene = new DebugScene();
+		m_scene->Create(m_settings);
 	}
 
 	// ----- GENERATE BLUE NOISE -----
@@ -554,8 +521,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 				Vector3D rayColor;
 
-				Ray ray = m_camera.GetRay(u, v);
-				rayColor = RayColor(ray, maxDepth);
+				Ray ray = m_scene->GetCamera().GetRay(u, v);
+				rayColor = m_scene->RayColor(ray, maxDepth);
 
 				if (count > 0) {
 					Vector3D difference;
@@ -595,249 +562,6 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 	}
 }
 
-Vector3D Raytracing::RayColor(Ray& ray, const int depth, const Vector3D& initialRayCol) {
-	if (depth <= 0) return Vector3D(Float::NearZero);
-
-	// check for object hit
-	HitRec rec;
-	if (RayHitObject(ray, m_clipStart, m_clipEnd, rec)) {
-		Ray scattered;
-		Vector3D attentuation;
-		Vector3D normal;
-		bool absorb, transparent, emission;
-
-		rec.GetMat()->Scatter(ray, rec, attentuation, scattered, normal, absorb, transparent, emission);
-
-		attentuation *= initialRayCol;
-
-		if (m_settings["renderMode"] == "color") {
-			if (absorb || emission) {
-				return attentuation;
-			} else if (transparent) {
-				Ray continueRay(rec.GetPoint(), ray.GetDir());
-				return RayColor(continueRay, depth - 1, initialRayCol);
-			} else {
-				//return attentuation * RayColor(scattered, depth - 1);
-				//if (attentuation.NearZero()) return attentuation;
-				return attentuation * RayColor(scattered, depth - 1, initialRayCol);
-			}
-		} else if (m_settings["renderMode"] == "normal") {
-			if (transparent) {
-				Ray continueRay(rec.GetPoint(), ray.GetDir());
-				return RayColor(continueRay, depth - 1, initialRayCol);
-			} else {
-				return ((m_camera.OutputVector(normal) + Vector3D::One) / 2) * initialRayCol;
-			}
-		} else if (m_settings["renderMode"] == "albedo") {
-			return attentuation;
-		} else if (m_settings["renderMode"] == "emission") {
-			if (emission) {
-				return attentuation;
-			} else {
-				return Vector3D::Zero;
-			}
-		}
-	}
-
-	// draw background instead if no hit
-
-	Vector3D unitDir = ray.GetDir();
-	unitDir.Normalize();
-	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "albedo") {
-		if (m_settings["scene"] == "original") {
-			Float t = 0.5 * (unitDir.GetY() + 1);
-			return ((Vector3D::One * (1 - t)) + (Vector3D(0.5, 0.7, 1) * t)) * initialRayCol;
-		} else {
-			Vector3D uv = unitDir.UVSphere();
-			uv *= Vector3D(-1, 1, 1);
-
-			// for debugging purposes
-			//uv *= 10;
-
-			Float u = uv.GetX() * m_background.GetWidth();
-			Float v = uv.GetY() * m_background.GetHeight();
-
-			Float r, g, b;
-			m_background.GetColor(u, v, r, g, b);
-
-			Vector3D rgb(r, g, b);
-			rgb /= 255;
-			rgb *= initialRayCol;
-
-			return rgb * m_bgStrength;
-		}
-	} else if (m_settings["renderMode"] == "normal") {
-		return ((m_camera.OutputVector(unitDir * -1) + Vector3D::One) / 2) * initialRayCol;
-	} else if (m_settings["renderMode"] == "emission") {
-		return Vector3D::Zero;
-	}
-
-	return Vector3D::Zero;
-}
-
-bool Raytracing::RayHitObject(Ray& ray, const Float t_min, const Float t_max, HitRec& rec) {
-	HitRec tempRec;
-	bool hit = false;
-	Float closest = t_max;
-
-	for (auto it = m_renderedObjects.begin(); it != m_renderedObjects.end(); it++) {
-		if ((*it)->Hit(ray, t_min, closest, tempRec)) {
-			hit = true;
-			closest = tempRec.GetT();
-			rec = tempRec;
-		}
-	}
-
-	return hit;
-}
-
-void Raytracing::OriginalScene() {
-	// ----- BACKGROUND -----
-
-	//m_background;
-	/*m_background.SetColor(0, 0, 128, Float(0.7) * 255, 255);
-	m_background.SetColor(0, 1, 255, 255, 255);
-
-	Float bottomY = m_background.GetHeight() / 2;
-	Float topY = m_background.GetHeight();
-
-	Vector3D bottom = Vector3D(127.5, Float(0.7) * 255, 255);
-	Vector3D top = Vector3D(255);
-
-	for (int x = 0; x < m_background.GetWidth(); x++) {
-		for (int y = 0; y < m_background.GetHeight(); y++) {
-			Float r = Float::Map(y, bottomY, topY, bottom.GetX(), top.GetX(), true);
-			Float g = Float::Map(y, bottomY, topY, bottom.GetY(), top.GetY(), true);
-			Float b = Float::Map(y, bottomY, topY, bottom.GetZ(), top.GetZ(), true);
-			m_background.SetColor(x, y, r, g, b);
-		}
-	}*/
-
-	m_bgStrength = 1;
-
-	// ----- CAMERA -----
-
-	int imageWidth = m_render.GetWidth();;
-	int imageHeight = m_render.GetHeight();
-
-	Vector3D lookFrom(13, 2, 3);
-
-	const Float aspectRatio = Float(imageWidth) / imageHeight;
-	m_camera = Camera(aspectRatio, Float::FromString(m_settings["blurStrength"]), 10, Float::FromString(m_settings["verticalFOV"]), lookFrom, Vector3D::Zero, Vector3D::Up);
-
-	m_clipEnd = Float::MaxVal;
-
-	// ----- OBJECTS -----
-
-	// materials
-
-	m_matMap["frontSphere"] = new Metal(Vector3D(0.7, 0.6, 0.5), 0, 1.45);
-	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
-	m_matMap["middleSphere"] = new Glass(Vector3D::One, 0, 1.5);
-	m_matMap["rearSphere"] = new Diffuse(Vector3D(0.4, 0.2, 0.1));
-
-	// objects
-
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["frontSphere"], Vector3D::Zero, Vector3D(4, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["middleSphere"], Vector3D::Zero, Vector3D(0, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["rearSphere"], Vector3D::Zero, Vector3D(-4, 1, 0)));
-
-	for (int a = -10; a < 10; a++) {
-		for (int b = -10; b < 10; b++) {
-			std::string fastWriteOut = FastWrite::ResetString() + "Creating Scene:\na: " + std::to_string(a) + "\nb: " + std::to_string(b) + '\n';
-			FastWrite::Write(fastWriteOut);
-
-			Float chooseMat = Random::RandomFloat();
-			Vector3D center(Random::RandomFloat(0, 0.9) + a, 0.2, Random::RandomFloat(0, 0.9) + b);
-
-			bool intersect = false;
-			for (auto it = m_renderedObjects.begin(); it != m_renderedObjects.end(); it++) {
-				if ((*it)->SphereIntersectSphere(center, 0.2)) {
-					intersect = true;
-					break;
-				}
-			}
-
-			if (!intersect) {
-				std::string matID = "randomMat_" + std::to_string(m_renderedObjects.size());
-
-				if (chooseMat < 0.9) {
-					m_matMap[matID] = new Diffuse(Vector3D::RandomVector() * Vector3D::RandomVector());
-				} else if (chooseMat < 0.95) {
-					m_matMap[matID] = new Metal(Vector3D::RandomVector(0.5, 1), Random::RandomFloat(0, 0.5), 1.45);
-				} else {
-					m_matMap[matID] = new Glass(Vector3D::One, 0, 1.5);
-				}
-
-				m_renderedObjects.push_back(new Sphere(0.2, m_matMap[matID], Vector3D::One, center));
-			}
-		}
-	}
-
-	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
-}
-
-void Raytracing::DebugScene() {
-	// ----- BACKGROUND -----
-#ifdef HDR_BACKGROUND
-	m_background = HDR("images/hdr/lebombo_2k.hdr", HDR::Interpolation::Closest, HDR::Extrapolation::Repeat, HDR::ColorSpace::sRGB);
-#else
-	m_background = Image("images/hdr/lebombo_2k.png", Image::Interpolation::Cubic, Image::Extrapolation::Repeat, Image::ColorSpace::sRGB);
-	//m_background = Image("images/hdr/uv_check.jpg", Image::Interpolation::Linear, Image::Extrapolation::Repeat, Image::ColorSpace::sRGB);
-#endif // HDR_BACKGROUND
-
-	m_bgStrength = 1;
-
-	// ----- CAMERA -----
-
-	int imageWidth = m_render.GetWidth();;
-	int imageHeight = m_render.GetHeight();
-
-	m_clipEnd = 1000;
-
-	Vector3D lookFrom(0, 2, 20);
-	Vector3D lookAt(0, 1, 0);
-
-	m_bgStrength = 0.1;
-
-	Vector3D dist = lookAt - lookFrom;
-
-	m_settings["blurStrength"] = "0";
-
-	const Float aspectRatio = Float(imageWidth) / imageHeight;
-	m_camera = Camera(aspectRatio, 0, dist.Magnitude(), Float::FromString(m_settings["verticalFOV"]), lookFrom, lookAt, Vector3D::Up);
-
-	// ----- OBJECTS -----
-	std::vector<Vector3D> colors;
-	colors.push_back(Vector3D(255, 1, 1));
-	colors.push_back(Vector3D(204, 255, 1));
-	colors.push_back(Vector3D(1, 255, 102));
-	colors.push_back(Vector3D(1, 102, 255));
-	colors.push_back(Vector3D(204, 1, 255));
-
-	for (auto it = colors.begin(); it != colors.end(); it++) {
-		Vector3D& i = (*it);
-		i /= 255;
-	}
-
-	m_matMap["diffuse"] = new Diffuse(colors[0]);
-	m_matMap["unshaded"] = new Unshaded(colors[1] * 2);
-	m_matMap["metallic"] = new Metal(colors[2], 0.1, 1.45);
-	m_matMap["glass"] = new Glass(colors[3], 0.1, 1.45);
-
-	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
-
-	// objects
-
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["diffuse"], Vector3D::Zero, Vector3D(-4.2, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["unshaded"], Vector3D::Zero, Vector3D(-2.1, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["glass"], Vector3D::Zero, Vector3D(0, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["metallic"], Vector3D::Zero, Vector3D(2.1, 1, 0)));
-	m_renderedObjects.push_back(new PointLight(Unshaded(colors[4] * 3), 1, Vector3D(4.2, 1, 0)));
-
-	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
-}
-
 void Raytracing::ShowProgress() {
 	//FastWrite::Reset();
 
@@ -847,7 +571,7 @@ void Raytracing::ShowProgress() {
 	output += "Render Mode: ";
 	output += m_settings["renderMode"];
 	output += "\nTotal Objects: ";
-	output += std::to_string(m_renderedObjects.size());
+	output += std::to_string(m_scene->ObjectCount());
 	output += "\nThreads Used: ";
 	output += std::to_string(m_useThreads);
 	output += "\nTotal Tiles: ";

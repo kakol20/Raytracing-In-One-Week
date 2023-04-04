@@ -8,7 +8,17 @@
 class Settings {
 public:
 	Settings();
+	Settings(const Settings& other) {
+		m_settings = m_settings;
+	};
 	~Settings();
+
+	inline Settings& operator=(const Settings& other) {
+		if (this == &other) return *this;
+
+		m_settings = m_settings;
+		return *this;
+	};
 
 	bool Read(const std::string& fileLocation);
 

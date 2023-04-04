@@ -4,7 +4,7 @@
 #include "BlueNoise.h"
 
 void BlueNoise::Generate(const int sampleCount, const int m) {
-	FastWrite::Reset();
+	//FastWrite::Reset();
 	FastWrite::Write("\a");
 
 	m_samples.clear();
