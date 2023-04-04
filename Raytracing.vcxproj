@@ -177,6 +177,8 @@
     <ClCompile Include="src\raytracing\objects\Sphere.cpp" />
     <ClCompile Include="src\raytracing\Ray.cpp" />
     <ClCompile Include="src\raytracing\Raytracing.cpp" />
+    <ClCompile Include="src\raytracing\scenes\DebugScene.cpp" />
+    <ClCompile Include="src\raytracing\scenes\Scene.cpp" />
     <ClCompile Include="src\raytracing\Settings.cpp" />
     <ClCompile Include="src\wrapper\Fastwrite.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -204,6 +206,8 @@
     <ClInclude Include="src\raytracing\objects\Sphere.h" />
     <ClInclude Include="src\raytracing\Ray.h" />
     <ClInclude Include="src\raytracing\Raytracing.h" />
+    <ClInclude Include="src\raytracing\scenes\DebugScene.h" />
+    <ClInclude Include="src\raytracing\scenes\Scene.h" />
     <ClInclude Include="src\raytracing\Settings.h" />
     <ClInclude Include="src\wrapper\Fastwrite.h" />
     <ClInclude Include="src\maths\Quaternion.h" />
