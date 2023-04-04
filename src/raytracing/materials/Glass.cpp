@@ -28,7 +28,7 @@ void Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	Vector3D refract = Vector3D::Refract(rayIn.GetDir(), normal, refractionRatio);
 
-	Vector3D refractRough = refract + (Vector3D::RandomInUnitSphere() * m_roughness);
+	Vector3D refractRough = refract + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
 	if (refractRough.NearZero()) refractRough = refract;
 	refractRough.Normalize();
 
