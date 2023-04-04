@@ -36,6 +36,8 @@ FullScene::~FullScene() {
 void FullScene::Create(Settings& settings) {
 	//settings["blurStrength"] = "0";
 
+	m_renderedObjects.reserve(600);
+
 	m_settings = &settings;
 
 	// ----- BACKGROUND -----
@@ -76,8 +78,10 @@ void FullScene::Create(Settings& settings) {
 	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
 
 	// lights
-	m_renderedObjects.push_back(new PointLight(Unshaded(ColorTools::KelvinToRGB(5778) * 3.3), 4, Vector3D(20, 15, -10)));
-	m_renderedObjects.push_back(new PointLight(Unshaded(ColorTools::KelvinToRGB(5778) * 1.7), 8, Vector3D(20, 15, 10)));
+	m_renderedObjects.push_back(new PointLight(Unshaded(ColorTools::KelvinToRGB(5778) * 4), 8, Vector3D(20, 15, -10)));
+	m_renderedObjects.push_back(new PointLight(Unshaded(ColorTools::KelvinToRGB(5778) * 2), 16, Vector3D(20, 15, 10)));
+
+	m_renderedObjects.shrink_to_fit();
 }
 
 Vector3D FullScene::BackgroundRay(const Vector3D& unitDir) {
