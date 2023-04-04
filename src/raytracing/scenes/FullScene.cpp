@@ -1,4 +1,5 @@
 #include "../../misc/ColorTools.h"
+#include "../../misc/Random.h"
 
 #include "FullScene.h"
 
@@ -73,6 +74,46 @@ void FullScene::Create(Settings& settings) {
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["back"], Vector3D::Zero, Vector3D(-4, 1, 0)));
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["middle"], Vector3D::Zero, Vector3D(0, 1, 0)));
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["front"], Vector3D::Zero, Vector3D(4, 1, 0)));
+
+	// random objects
+
+	unsigned int count = 0;
+	for (int x = -10; x <= 10; x++) {
+		for (int y = -10; y <= 10; y++) {
+			Vector3D pos(x, 0.2, y);
+			Vector3D randPos(Random::RandomFloatND() * 0.507107, 0, Random::RandomFloatND() * 0.507107);
+
+			pos += randPos;
+
+			bool intersect = false;
+
+			for (auto it = m_renderedObjects.begin(); it != m_renderedObjects.end(); it++) {
+				if ((*it)->SphereIntersectSphere(pos, 0.2)) {
+					intersect = true;
+					break;
+				}
+			}
+
+			if (!intersect) {
+				unsigned int objectType = (unsigned int)Random::RandomInt(0, 10);
+				count++;
+
+				if (objectType < 1) {
+					// point light
+					Float strength = Random::RandomFloat(1, 2);
+					//m_renderedObjects.push_back(new PointLight(Unshaded(Vector3D::One * strength), 0.2, pos));
+
+					// currently not working properly - using ushaded sphere as alternative
+					std::string key = "randMat_" + std::to_string(count);
+					m_matMap[key] = new Unshaded(Vector3D::RandomVector(0.5, 1) * strength);
+
+					m_renderedObjects.push_back(new Sphere(0.2, m_matMap[key], Vector3D::Zero, pos));
+				}
+				else {
+				}
+			}
+		}
+	}
 
 	//ground
 	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
