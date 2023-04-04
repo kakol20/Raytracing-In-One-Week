@@ -61,7 +61,7 @@ Float Float::Log(const Float v) {
 }
 
 Float Float::ModCycled(const Float v, const Float m) {
-	return (v % m) + m;
+	return (v % m) + (v < 0 ? m : 0);
 }
 
 Float Float::Pow(const Float base, const Float exponent) {

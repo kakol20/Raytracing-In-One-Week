@@ -101,15 +101,18 @@ void FullScene::Create(Settings& settings) {
 				if (objectType < 1) {
 					// point light
 					Float strength = Random::RandomFloat(1, 2);
+					Float hue = Random::RandomFloat(0, 360);
+					Float saturation = Random::RandomFloat(0, 0.5);
 					//m_renderedObjects.push_back(new PointLight(Unshaded(Vector3D::One * strength), 0.2, pos));
 
 					// currently not working properly - using ushaded sphere as alternative
 					std::string key = "randMat_" + std::to_string(count);
-					m_matMap[key] = new Unshaded(Vector3D::RandomVector(0.5, 1) * strength);
+					m_matMap[key] = new Unshaded(ColorTools::HSVToRGB(hue, saturation, 1) * strength);
 
 					m_renderedObjects.push_back(new Sphere(0.2, m_matMap[key], Vector3D::Zero, pos));
 				}
 				else {
+					
 				}
 			}
 		}

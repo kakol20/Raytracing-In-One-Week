@@ -37,3 +37,44 @@ Vector3D ColorTools::KelvinToRGB(const Float k) {
 
 	return Vector3D(r, g, b);
 }
+
+Vector3D ColorTools::HSVToRGB(Float H, const Float S, const Float V) {
+	H = Float::ModCycled(H, 360);
+
+	const Float C = V * S;
+	const Float X = C * (1. - (((H / 60) % 2) - 1));
+	const Float m = V - C;
+
+	Float R, G, B;
+
+	if (H < 60) {
+		R = C;
+		G = X;
+	}
+	else if (H < 120) {
+		R = X;
+		G = C;
+	}
+	else if (H < 180) {
+		G = C;
+		B = X;
+	}
+	else if (H < 240) {
+		G = X;
+		B = C;
+	}
+	else if (H < 300) {
+		R = X;
+		B = C;
+	}
+	else {
+		R = C;
+		B = X;
+	}
+
+	R += m;
+	G += m;
+	B += m;
+
+	return Vector3D(R, G, B);
+}
