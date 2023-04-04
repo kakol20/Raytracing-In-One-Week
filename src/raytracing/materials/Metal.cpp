@@ -29,7 +29,7 @@ void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	Vector3D reflect = Vector3D::Reflect(rayIn.GetDir(), normal);
 
-	Vector3D glossy = reflect + (Vector3D::RandomInUnitSphere() * m_roughness);
+	Vector3D glossy = reflect + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
 	if (glossy.NearZero()) glossy = reflect;
 	glossy.Normalize();
 

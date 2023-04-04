@@ -11,7 +11,9 @@ void Diffuse::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scat
 
 	normal = rec.GetNormal();
 
-	Vector3D scatterDir = Vector3D::RandomInHemisphere(rec.GetNormal());
+	//Vector3D scatterDir = Vector3D::RandomInHemisphere(normal);
+	Vector3D scatterDir = Vector3D::RandomInUnitSphere();
+	scatterDir += normal;
 	scatterDir.Normalize();
 
 	Float dotProduct = Vector3D::DotProduct(normal, scatterDir);
