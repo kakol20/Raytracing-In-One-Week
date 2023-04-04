@@ -76,7 +76,7 @@ bool Sphere::LocalHit(Ray& ray, const Float t_min, const Float t_max, HitRec& re
 
 	Float discriminant = half_b * half_b - a * c;
 
-	if (discriminant < 0) return false;
+	if (discriminant < Float::NearZero) return false;
 
 	Float sqrtd = Float::Sqrt(discriminant);
 
