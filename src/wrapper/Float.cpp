@@ -56,6 +56,10 @@ Float Float::Floor(const Float v) {
 	return Float(std::floor(v.m_num));
 }
 
+Float Float::Log(const Float v) {
+	return Float(std::log(v.m_num));
+}
+
 Float Float::Pow(const Float base, const Float exponent) {
 	return Float(std::pow(base.m_num, exponent.m_num));
 }

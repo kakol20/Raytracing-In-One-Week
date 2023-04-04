@@ -31,7 +31,9 @@ bool PointLight::Hit(Ray& ray, const Float t_min, const Float t_max, HitRec& rec
 	if (len < t_min || t_max < len) return false;
 
 	// randomly decide if point light was hit
-	Float rand = Random::RandomFloat(0, m_radius);
+	Float rand = Random::RandomFloat(0, 1);
+	rand *= rand;
+	rand *= m_radius;
 
 	delta = Pr - P2;
 	Float root = delta.SqrMagnitude();

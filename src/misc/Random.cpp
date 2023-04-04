@@ -37,3 +37,11 @@ int Random::RandomInt(const int min, const int max) {
 	int distance = (max - min) + 1;
 	return (Random::RandomUInt() % distance) + min;
 }
+
+Float Random::RandomFloatND() {
+	Float theta = Float::TAU * Random::RandomFloat(0, 1);
+	Float rho = Float::Sqrt(Float::Log(Random::RandomFloat(0, 1)) * -2);
+	return Float::Clamp(rho * Float::Cos(theta), -1, 1);
+
+	//return Random::RandomFloat(-1, 1);
+}

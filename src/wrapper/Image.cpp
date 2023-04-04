@@ -148,8 +148,8 @@ bool Image::Write(const char* file) {
 		//m_data[i] = Float::Round(Float::Clamp(m_dataF[i], 0, 255)).ToUInt();
 	}
 
-	//OrderedDither(255);
-	FloydSteinbergDither(255);
+	OrderedDither(255);
+	//FloydSteinbergDither(255);
 
 	switch (type) {
 	case Image::FileType::BMP:

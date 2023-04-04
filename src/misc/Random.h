@@ -32,6 +32,12 @@ public:
 
 	static Float RandomFloat(const Float min = 0, const Float max = 1);
 	static int RandomInt(const int min, const int max);
+
+	/// <summary>
+	/// Random value in normal distribution with mean=0 and sd=1
+	/// </summary>
+	/// <returns>A value between -1 and 1</returns>
+	static Float RandomFloatND();
 };
 
 #endif // !RANDOM_H

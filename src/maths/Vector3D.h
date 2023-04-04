@@ -138,6 +138,12 @@ public:
 	static Vector3D RandomUnitVector();
 	static Vector3D RandomVector(const Float min = 0, const Float max = 1, bool includeZAxis = true);
 
+	/// <summary>
+	/// Random vector using Random::RandomFloatND()
+	/// </summary>
+	/// <returns>A 3D vector with all axis between -1 and 1</returns>
+	static Vector3D RandomVectorND(bool includeZAxis = true);
+
 	inline bool NearZero() const {
 		bool xNearZero = Float::Abs(m_x) < Float::NearZero;
 		bool yNearZero = Float::Abs(m_y) < Float::NearZero;

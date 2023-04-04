@@ -112,7 +112,7 @@ Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
 }
 
 Vector3D Vector3D::RandomInUnitDisk() {
-	Vector3D o = Vector3D::RandomVector(-1, 1, false);
+	Vector3D o = Vector3D::RandomVectorND(false);
 	//Vector3D o = Vector3D::RandomVector(-1, 1, true);
 	//o *= Vector3D(1, 1, 0);
 
@@ -121,14 +121,14 @@ Vector3D Vector3D::RandomInUnitDisk() {
 }
 
 Vector3D Vector3D::RandomInUnitSphere() {
-	Vector3D o = RandomVector(-1, 1);
+	Vector3D o = Vector3D::RandomVectorND();
 
 	if (o.SqrMagnitude() > 1) o.Normalize();
 	return o;
 }
 
 Vector3D Vector3D::RandomUnitVector() {
-	Vector3D o = Vector3D::RandomVector(-1, 1);
+	Vector3D o = Vector3D::RandomVectorND();
 	o.Normalize();
 	return o;
 }
@@ -137,4 +137,10 @@ Vector3D Vector3D::RandomVector(const Float min, const Float max, bool includeZA
 	return includeZAxis ?
 		Vector3D(Random::RandomFloat(min, max), Random::RandomFloat(min, max), Random::RandomFloat(min, max)) :
 		Vector3D(Random::RandomFloat(min, max), Random::RandomFloat(min, max));
+}
+
+Vector3D Vector3D::RandomVectorND(bool includeZAxis) {
+	return includeZAxis ?
+		Vector3D(Random::RandomFloatND(), Random::RandomFloatND(), Random::RandomFloatND()) :
+		Vector3D(Random::RandomFloatND(), Random::RandomFloatND());
 }
