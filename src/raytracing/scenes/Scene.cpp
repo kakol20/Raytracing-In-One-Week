@@ -66,6 +66,8 @@ bool Scene::RayHitObject(Ray& ray, const Float t_min, const Float t_max, HitRec&
 	bool hit = false;
 	Float closest = t_max;
 
+	if (m_renderedObjects.empty()) return false;
+
 	for (auto it = m_renderedObjects.begin(); it != m_renderedObjects.end(); it++) {
 		if ((*it)->Hit(ray, t_min, closest, tempRec)) {
 			hit = true;

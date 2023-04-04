@@ -76,7 +76,7 @@ void Settings::Write(const std::string& fileLocation) {
 	m_file << "# color, normal, albedo, emission or all\n";
 	m_file << "renderMode=" << m_settings["renderMode"] << '\n';
 
-	m_file << "# original or debug\n";
+	m_file << "# original, debug or full\n";
 	m_file << "scene=" << m_settings["scene"] << '\n';
 
 	m_file << "\n# ----- CAMERA SETTINGS -----\n";
