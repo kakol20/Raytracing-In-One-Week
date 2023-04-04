@@ -20,6 +20,9 @@ class Scene {
 public:
 	Scene() {
 		m_settings = nullptr;
+
+		m_clipStart = Float::NearZero;
+		m_clipEnd = 1000;
 	};
 	virtual ~Scene() {};
 

@@ -51,29 +51,6 @@ Vector3D Scene::RayColor(Ray& ray, const int depth, const Vector3D& initialRayCo
 	Vector3D unitDir = ray.GetDir();
 	unitDir.Normalize();
 	if ((*m_settings)["renderMode"] == "color" || (*m_settings)["renderMode"] == "albedo") {
-		//if ((*m_settings)["scene"] == "original") {
-		//	Float t = 0.5 * (unitDir.GetY() + 1);
-		//	return ((Vector3D::One * (1 - t)) + (Vector3D(0.5, 0.7, 1) * t)) * initialRayCol;
-		//} else {
-		//	Vector3D uv = unitDir.UVSphere();
-		//	uv *= Vector3D(-1, 1, 1);
-
-		//	// for debugging purposes
-		//	//uv *= 10;
-
-		//	Float u = uv.GetX() * m_background.GetWidth();
-		//	Float v = uv.GetY() * m_background.GetHeight();
-
-		//	Float r, g, b;
-		//	m_background.GetColor(u, v, r, g, b);
-
-		//	Vector3D rgb(r, g, b);
-		//	rgb /= 255;
-		//	rgb *= initialRayCol;
-
-		//	return rgb * m_bgStrength;
-		//}
-
 		return BackgroundRay(unitDir);
 	} else if ((*m_settings)["renderMode"] == "normal") {
 		return ((m_camera.OutputVector(unitDir * -1) + Vector3D::One) / 2) * initialRayCol;

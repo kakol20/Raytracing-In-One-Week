@@ -12,6 +12,7 @@
 #include "objects/PointLight.h"
 #include "objects/Sphere.h"
 #include "scenes/DebugScene.h"
+#include "scenes/OriginalScene.h"
 
 #include "Raytracing.h"
 
@@ -21,6 +22,7 @@ Raytracing::Raytracing() {
 	m_useThreads = 1;
 	m_xTileCount = 1;
 	m_yTileCount = 1;
+	m_scene = nullptr;
 }
 
 Raytracing::~Raytracing() {
@@ -64,20 +66,13 @@ bool Raytracing::Init() {
 
 	FastWrite::Write("Creating Scene \n");
 
-	/*if (m_settings["scene"] == "original") {
-		m_fileFolder = "renders/original/";
-		OriginalScene();
-	} else if (m_settings["scene"] == "debug") {
-		m_fileFolder = "renders/debugScene/";
-		m_scene =
-	} else {
-		m_fileFolder = "renders/original/";
-		OriginalScene();
-	}*/
-
 	if (m_settings["scene"] == "debug") {
 		m_fileFolder = "renders/debugScene/";
 		m_scene = new DebugScene();
+		m_scene->Create(m_settings);
+	} else if (m_settings["scene"] == "original") {
+		m_fileFolder = "renders/original/";
+		m_scene = new OriginalScene();
 		m_scene->Create(m_settings);
 	} else {
 		m_fileFolder = "renders/debugScene/";
@@ -566,92 +561,6 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 		}
 	}
 }
-
-//void Raytracing::OriginalScene() {
-//	// ----- BACKGROUND -----
-//
-//	//m_background;
-//	/*m_background.SetColor(0, 0, 128, Float(0.7) * 255, 255);
-//	m_background.SetColor(0, 1, 255, 255, 255);
-//
-//	Float bottomY = m_background.GetHeight() / 2;
-//	Float topY = m_background.GetHeight();
-//
-//	Vector3D bottom = Vector3D(127.5, Float(0.7) * 255, 255);
-//	Vector3D top = Vector3D(255);
-//
-//	for (int x = 0; x < m_background.GetWidth(); x++) {
-//		for (int y = 0; y < m_background.GetHeight(); y++) {
-//			Float r = Float::Map(y, bottomY, topY, bottom.GetX(), top.GetX(), true);
-//			Float g = Float::Map(y, bottomY, topY, bottom.GetY(), top.GetY(), true);
-//			Float b = Float::Map(y, bottomY, topY, bottom.GetZ(), top.GetZ(), true);
-//			m_background.SetColor(x, y, r, g, b);
-//		}
-//	}*/
-//
-//	m_bgStrength = 1;
-//
-//	// ----- CAMERA -----
-//
-//	int imageWidth = m_render.GetWidth();;
-//	int imageHeight = m_render.GetHeight();
-//
-//	Vector3D lookFrom(13, 2, 3);
-//
-//	const Float aspectRatio = Float(imageWidth) / imageHeight;
-//	m_camera = Camera(aspectRatio, Float::FromString(m_settings["blurStrength"]), 10, Float::FromString(m_settings["verticalFOV"]), lookFrom, Vector3D::Zero, Vector3D::Up);
-//
-//	m_clipEnd = Float::MaxVal;
-//
-//	// ----- OBJECTS -----
-//
-//	// materials
-//
-//	m_matMap["frontSphere"] = new Metal(Vector3D(0.7, 0.6, 0.5), 0, 1.45);
-//	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
-//	m_matMap["middleSphere"] = new Glass(Vector3D::One, 0, 1.5);
-//	m_matMap["rearSphere"] = new Diffuse(Vector3D(0.4, 0.2, 0.1));
-//
-//	// objects
-//
-//	m_renderedObjects.push_back(new Sphere(1, m_matMap["frontSphere"], Vector3D::Zero, Vector3D(4, 1, 0)));
-//	m_renderedObjects.push_back(new Sphere(1, m_matMap["middleSphere"], Vector3D::Zero, Vector3D(0, 1, 0)));
-//	m_renderedObjects.push_back(new Sphere(1, m_matMap["rearSphere"], Vector3D::Zero, Vector3D(-4, 1, 0)));
-//
-//	for (int a = -10; a < 10; a++) {
-//		for (int b = -10; b < 10; b++) {
-//			std::string fastWriteOut = FastWrite::ResetString() + "Creating Scene:\na: " + std::to_string(a) + "\nb: " + std::to_string(b) + '\n';
-//			FastWrite::Write(fastWriteOut);
-//
-//			Float chooseMat = Random::RandomFloat();
-//			Vector3D center(Random::RandomFloat(0, 0.9) + a, 0.2, Random::RandomFloat(0, 0.9) + b);
-//
-//			bool intersect = false;
-//			for (auto it = m_renderedObjects.begin(); it != m_renderedObjects.end(); it++) {
-//				if ((*it)->SphereIntersectSphere(center, 0.2)) {
-//					intersect = true;
-//					break;
-//				}
-//			}
-//
-//			if (!intersect) {
-//				std::string matID = "randomMat_" + std::to_string(m_renderedObjects.size());
-//
-//				if (chooseMat < 0.9) {
-//					m_matMap[matID] = new Diffuse(Vector3D::RandomVector() * Vector3D::RandomVector());
-//				} else if (chooseMat < 0.95) {
-//					m_matMap[matID] = new Metal(Vector3D::RandomVector(0.5, 1), Random::RandomFloat(0, 0.5), 1.45);
-//				} else {
-//					m_matMap[matID] = new Glass(Vector3D::One, 0, 1.5);
-//				}
-//
-//				m_renderedObjects.push_back(new Sphere(0.2, m_matMap[matID], Vector3D::One, center));
-//			}
-//		}
-//	}
-//
-//	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
-//}
 
 void Raytracing::ShowProgress() {
 	//FastWrite::Reset();
