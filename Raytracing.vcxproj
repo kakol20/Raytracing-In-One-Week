@@ -167,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\misc\BlueNoise.cpp" />
+    <ClCompile Include="src\misc\ColorTools.cpp" />
     <ClCompile Include="src\raytracing\Camera.cpp" />
     <ClCompile Include="src\raytracing\HitRec.cpp" />
     <ClCompile Include="src\raytracing\materials\Diffuse.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="src\raytracing\Ray.cpp" />
     <ClCompile Include="src\raytracing\Raytracing.cpp" />
     <ClCompile Include="src\raytracing\scenes\DebugScene.cpp" />
+    <ClCompile Include="src\raytracing\scenes\FullScene.cpp" />
     <ClCompile Include="src\raytracing\scenes\OriginalScene.cpp" />
     <ClCompile Include="src\raytracing\scenes\Scene.cpp" />
     <ClCompile Include="src\raytracing\Settings.cpp" />
@@ -192,6 +194,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\misc\BlueNoise.h" />
+    <ClInclude Include="src\misc\ColorTools.h" />
     <ClInclude Include="src\raytracing\Camera.h" />
     <ClInclude Include="ext\oof\oof.h" />
     <ClInclude Include="ext\stb\stb_image.h" />
@@ -208,6 +211,7 @@
     <ClInclude Include="src\raytracing\Ray.h" />
     <ClInclude Include="src\raytracing\Raytracing.h" />
     <ClInclude Include="src\raytracing\scenes\DebugScene.h" />
+    <ClInclude Include="src\raytracing\scenes\FullScene.h" />
     <ClInclude Include="src\raytracing\scenes\OriginalScene.h" />
     <ClInclude Include="src\raytracing\scenes\Scene.h" />
     <ClInclude Include="src\raytracing\Settings.h" />

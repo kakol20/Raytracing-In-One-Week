@@ -17,8 +17,8 @@ bool PointLight::Hit(Ray& ray, const Float t_min, const Float t_max, HitRec& rec
 	v.Normalize();
 
 	Vector3D diff = P2 - P1;
-	Float len = Vector3D::DotProduct(diff, v);
-	Vector3D Pr = P1 + (v * len);
+	Float rayToPointLenght = Vector3D::DotProduct(diff, v);
+	Vector3D Pr = P1 + (v * rayToPointLenght);
 
 	// check if point is behind ray origin
 
@@ -28,19 +28,21 @@ bool PointLight::Hit(Ray& ray, const Float t_min, const Float t_max, HitRec& rec
 	if (Vector3D::DotProduct(v, delta) < Float::NearZero) return false;
 
 	// check if point lies within t_min and t_max
-	if (len < t_min || t_max < len) return false;
+	if (rayToPointLenght < t_min || t_max < rayToPointLenght) return false;
 
 	// randomly decide if point light was hit
-	Float rand = Random::RandomFloat(0, 1);
+	/*Float rand = Random::RandomFloat(0, 1);
 	rand *= rand;
-	rand *= m_radius;
+	rand *= m_radius;*/
+	//Float rand = Float::Abs(Random::RandomFloatND()) * m_radius;]
+	Float rand = Random::RandomFloat(0, m_radius);
 
 	delta = Pr - P2;
-	Float root = delta.SqrMagnitude();
+	Float intersectionToPointLength = delta.SqrMagnitude();
 
-	if (root > rand) return false;
+	if (intersectionToPointLength > rand) return false;
 
-	rec.SetT(len);
+	rec.SetT(rayToPointLenght);
 	rec.SetMat(&m_light_mat);
 	rec.SetPoint(Pr);
 

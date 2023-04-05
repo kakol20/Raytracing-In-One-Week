@@ -12,14 +12,6 @@ DebugScene::~DebugScene() {
 		m_renderedObjects.clear();
 	}
 
-	//if (!m_unrenderedObjects.empty()) {
-	//	for (auto it = m_unrenderedObjects.begin(); it != m_unrenderedObjects.end(); it++) {
-	//		delete (*it).second;
-	//		(*it).second = nullptr;
-	//	}
-	//	m_unrenderedObjects.clear();
-	//}
-
 	if (!m_matMap.empty()) {
 		for (auto it = m_matMap.begin(); it != m_matMap.end(); it++) {
 			delete (*it).second;
@@ -27,14 +19,6 @@ DebugScene::~DebugScene() {
 		}
 		m_matMap.clear();
 	}
-
-	//if (!m_matVec.empty()) {
-	//	for (auto it = m_matVec.begin(); it != m_matVec.end(); it++) {
-	//		delete (*it);
-	//		(*it) = nullptr;
-	//	}
-	//	m_matVec.clear();
-	//}
 
 	//if (!m_textures.empty()) {
 	//	for (auto it = m_textures.begin(); it != m_textures.end(); it++) {

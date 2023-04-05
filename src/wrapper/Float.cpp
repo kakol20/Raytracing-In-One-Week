@@ -60,6 +60,10 @@ Float Float::Log(const Float v) {
 	return Float(std::log(v.m_num));
 }
 
+Float Float::ModCycled(const Float v, const Float m) {
+	return (v % m) + (v < 0 ? m : 0);
+}
+
 Float Float::Pow(const Float base, const Float exponent) {
 	return Float(std::pow(base.m_num, exponent.m_num));
 }

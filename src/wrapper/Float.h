@@ -200,6 +200,7 @@ public:
 	static Float Clamp(const Float v, const Float lo, const Float hi);
 	static Float Floor(const Float v);
 	static Float Log(const Float v);
+	static Float ModCycled(const Float v, const Float m);
 	static Float Pow(const Float base, const Float exponent);
 	static Float Round(const Float v);
 	static Float Sqrt(const Float v);

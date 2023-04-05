@@ -2,6 +2,7 @@
 //#define HDR_BACKGROUND
 
 #include <chrono>
+#include <filesystem>
 
 #include "../misc/Random.h"
 #include "../wrapper/Fastwrite.h"
@@ -13,6 +14,7 @@
 #include "objects/Sphere.h"
 #include "scenes/DebugScene.h"
 #include "scenes/OriginalScene.h"
+#include "scenes/FullScene.h"
 
 #include "Raytracing.h"
 
@@ -74,11 +76,22 @@ bool Raytracing::Init() {
 		m_fileFolder = "renders/original/";
 		m_scene = new OriginalScene();
 		m_scene->Create(m_settings);
+	} else if (m_settings["scene"] == "full") {
+		m_fileFolder = "renders/full/";
+		m_scene = new FullScene();
+		m_scene->Create(m_settings);
 	} else {
 		m_fileFolder = "renders/debugScene/";
 		m_scene = new DebugScene();
 		m_scene->Create(m_settings);
 	}
+
+	// checks if folder exists
+	const std::filesystem::path p{ m_fileFolder };
+	std::filesystem::file_status s = std::filesystem::file_status{};
+
+	const bool pathExists = std::filesystem::status_known(s) ? std::filesystem::exists(s) : std::filesystem::exists(p);
+	if (!pathExists) std::filesystem::create_directory(p);
 
 	// ----- GENERATE BLUE NOISE -----
 
@@ -523,6 +536,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 				Ray ray = m_scene->GetCamera().GetRay(u, v);
 				rayColor = m_scene->RayColor(ray, maxDepth);
+				rayColor = Vector3D::Clamp(rayColor, Vector3D::Zero, Vector3D(Float::MaxVal, Float::MaxVal, Float::MaxVal));
 
 				if (count > 0) {
 					Vector3D difference;
