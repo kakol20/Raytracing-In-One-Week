@@ -118,7 +118,11 @@ void FullScene::Create(Settings& settings) {
 					std::string key = "randMat_" + std::to_string(count);
 
 					if (materialType < 1) {
-						m_matMap[key] = new Diffuse(ColorTools::HSVToRGB(hue, (Float(240) - 12) / 204, 0.8));
+						Float s = (Float(240) - 12) / 204;
+						Float v = 0.8;
+						Float roughness = Random::RandomFloat();
+						//m_matMap[key] = new Diffuse(ColorTools::HSVToRGB(hue, , 0.8));
+						m_matMap[key] = new Dielectric(ColorTools::HSVToRGB(hue, s, v), roughness, 1.46);
 					}
 					else if (materialType < 2) {
 						Float roughness = Random::RandomFloat(0, 1);

@@ -144,7 +144,7 @@ Vector3D Vector3D::RandomMix(const Vector3D& a, const Vector3D& b, const Float f
 }
 
 Vector3D Vector3D::RandomMix(const Vector3D& a, const Vector3D& b, const Float factor, const Float outsideRand) {
-	return outsideRand > factor ? a : b;
+	return outsideRand >= factor ? a : b;
 }
 
 Vector3D Vector3D::RandomVectorND(bool includeZAxis) {
