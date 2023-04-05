@@ -18,7 +18,7 @@ void Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	Vector3D fresnelNormal = Vector3D::RandomMix(normal, incoming, m_roughness, roughnessRand);
 
-	const Float fresnel = Fresnel(incoming, fresnelNormal, m_ior);
+	const Float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
 	const Float fresnelRand = Random::RandomFloat();
 
 	// refraction part

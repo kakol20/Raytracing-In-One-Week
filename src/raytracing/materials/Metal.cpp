@@ -12,11 +12,13 @@ void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	normal = rec.GetNormal();
 	const Vector3D incoming = -rayIn.GetDir();
 	const Vector3D dir = rayIn.GetDir();
+	const Float refractionRatio = rec.GetFrontFace() ? 1 / m_ior : m_ior;
 
 	Float roughnessRand = Random::RandomFloat();
 	Vector3D fresnelNormal = Vector3D::RandomMix(normal, incoming, m_roughness, roughnessRand);
 
-	Float fresnel = Fresnel(incoming, fresnelNormal, m_ior) - Fresnel(incoming, incoming, m_ior);
+	Float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio) - Fresnel(incoming, incoming, refractionRatio);
+	fresnel = Float::Clamp(fresnel, 0, 1);
 	Float fresnelRand = Random::RandomFloat();
 
 	// metallic part

@@ -1,2 +1,2 @@
-Elapsed time in seconds: 107.854s
-Elapsed time in minutes: 1.79757min
+Elapsed time in seconds: 119.669s
+Elapsed time in minutes: 1.99448min
