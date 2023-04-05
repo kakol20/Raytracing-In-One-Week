@@ -145,8 +145,12 @@ void FullScene::Create(Settings& settings) {
 	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
 
 	// lights
-	m_renderedObjects.push_back(new PointLight(Unshaded(ColorTools::KelvinToRGB(5778) * 4), 8, Vector3D(20, 15, -10)));
-	m_renderedObjects.push_back(new PointLight(Unshaded(ColorTools::KelvinToRGB(5778) * 2), 16, Vector3D(20, 15, 10)));
+	//m_renderedObjects.push_back(new PointLight(Unshaded(ColorTools::KelvinToRGB(5778) * 4), 8, Vector3D(20, 15, -10)));
+	//m_renderedObjects.push_back(new PointLight(Unshaded(ColorTools::KelvinToRGB(5778) * 2), 16, Vector3D(20, 15, 10)));
+	m_matMap["light1"] = new Unshaded(Unshaded(ColorTools::KelvinToRGB(5778) * 4));
+	m_matMap["light2"] = new Unshaded(Unshaded(ColorTools::KelvinToRGB(5778) * 2));
+	m_renderedObjects.push_back(new Sphere(4, m_matMap["light1"], Vector3D::Zero, Vector3D(20, 15, -10)));
+	m_renderedObjects.push_back(new Sphere(8, m_matMap["light2"], Vector3D::Zero, Vector3D(20, 15, 10)));
 
 	m_renderedObjects.shrink_to_fit();
 }

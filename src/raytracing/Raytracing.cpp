@@ -72,15 +72,18 @@ bool Raytracing::Init() {
 		m_fileFolder = "renders/debugScene/";
 		m_scene = new DebugScene();
 		m_scene->Create(m_settings);
-	} else if (m_settings["scene"] == "original") {
+	}
+	else if (m_settings["scene"] == "original") {
 		m_fileFolder = "renders/original/";
 		m_scene = new OriginalScene();
 		m_scene->Create(m_settings);
-	} else if (m_settings["scene"] == "full") {
+	}
+	else if (m_settings["scene"] == "full") {
 		m_fileFolder = "renders/full/";
 		m_scene = new FullScene();
 		m_scene->Create(m_settings);
-	} else {
+	}
+	else {
 		m_fileFolder = "renders/debugScene/";
 		m_scene = new DebugScene();
 		m_scene->Create(m_settings);
@@ -173,7 +176,8 @@ bool Raytracing::Run() {
 
 	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "emission" || m_settings["renderMode"] == "normal" || m_settings["renderMode"] == "albedo") {
 		RunMode();
-	} else if (m_settings["renderMode"] == "all") {
+	}
+	else if (m_settings["renderMode"] == "all") {
 		m_settings["renderMode"] = "normal";
 		RunMode();
 
@@ -185,7 +189,8 @@ bool Raytracing::Run() {
 
 		m_settings["renderMode"] = "color";
 		RunMode();
-	} else {
+	}
+	else {
 		m_settings["renderMode"] = "color";
 		RunMode();
 	}
@@ -219,7 +224,8 @@ bool Raytracing::RunMode() {
 
 	if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "albedo" || m_settings["renderMode"] == "emission") {
 		m_render.SetColorSpace(Image::ColorSpace::sRGB);
-	} else {
+	}
+	else {
 		m_render.SetColorSpace(Image::ColorSpace::Non_Color);
 	}
 
@@ -243,13 +249,17 @@ bool Raytracing::RunMode() {
 
 	if (m_settings["renderMode"] == "color") {
 		output += "log_color.txt";
-	} else if (m_settings["renderMode"] == "emission") {
+	}
+	else if (m_settings["renderMode"] == "emission") {
 		output += "log_emission.txt";
-	} else if (m_settings["renderMode"] == "normal") {
+	}
+	else if (m_settings["renderMode"] == "normal") {
 		output += "log_normal.txt";
-	} else if (m_settings["renderMode"] == "albedo") {
+	}
+	else if (m_settings["renderMode"] == "albedo") {
 		output += "log_albedo.txt";
-	} else {
+	}
+	else {
 		output += "log_color.txt";
 	}
 
@@ -272,7 +282,8 @@ bool Raytracing::RunMode() {
 			//m_threads[i].sleep
 			m_nextAvailable++;
 		}
-	} else {
+	}
+	else {
 		RenderTile(0);
 	}
 
@@ -290,13 +301,17 @@ bool Raytracing::RunMode() {
 	output = m_fileFolder;
 	if (m_settings["renderMode"] == "color") {
 		output += "render_c.png";
-	} else if (m_settings["renderMode"] == "emission") {
+	}
+	else if (m_settings["renderMode"] == "emission") {
 		output += "render_e.png";
-	} else if (m_settings["renderMode"] == "normal") {
+	}
+	else if (m_settings["renderMode"] == "normal") {
 		output += "render_n.png";
-	} else if (m_settings["renderMode"] == "albedo") {
+	}
+	else if (m_settings["renderMode"] == "albedo") {
 		output += "render_a.png";
-	} else {
+	}
+	else {
 		output += "render_c.png";
 	}
 
@@ -320,7 +335,8 @@ bool Raytracing::RunMode() {
 
 			return false;
 		}
-	} else {
+	}
+	else {
 		for (int x = 0; x < imageWidth; x++) {
 			Float x_f = Float(x * renderWidth) / imageWidth;
 
@@ -463,7 +479,8 @@ void Raytracing::RenderTile(const size_t startIndex) {
 		// ----- LOGGING -----
 		if (m_useThreads > 1) {
 			m_log << "Rendered tile #" << startIndex << " in thread #" << m_threadID[thisId] << " for " << dur << '\n';
-		} else {
+		}
+		else {
 			m_log << "Rendered tile #" << startIndex << " for " << dur << '\n';
 		}
 
@@ -524,7 +541,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 					u += sample.GetX();
 					v += sample.GetY();
-				} else {
+				}
+				else {
 					u += Random::RandomFloat();
 					v += Random::RandomFloat();
 				}
@@ -610,12 +628,14 @@ void Raytracing::ShowProgress() {
 		if (x < progressI) {
 			//std::cout << oof::fg_color({ 255, 255, 255 });
 			output += oof::reset_formatting();
-		} else if (Float(x) < between && between < Float(x + 1)) {
+		}
+		else if (Float(x) < between && between < Float(x + 1)) {
 			between = between - x;
 			between = Float::Lerp(12, 204, between);
 			between = Float::Floor(between);
 			output += oof::fg_color({ between.ToInt(), between.ToInt(), between.ToInt() });
-		} else {
+		}
+		else {
 			//std::cout << oof::fg_color({ 0, 0, 0 });
 			output += oof::fg_color({ 12, 12, 12 });
 		}
@@ -641,7 +661,8 @@ void Raytracing::ShowProgress() {
 				Vector3D col;
 				if (i == 0) {
 					col = (*it).leftXTileColor;
-				} else {
+				}
+				else {
 					col = (*it).rightXTileColor;
 				}
 
@@ -659,12 +680,14 @@ void Raytracing::ShowProgress() {
 				output += oof::fg_color({ r, g, b });
 				//output += (char)219u;
 				output += (char)178u;
-			} else {
+			}
+			else {
 				if ((*it).activeTile) {
 					//output += oof::reset_formatting();
 					output += oof::fg_color({ 204, 12, 12 });
 					output += (char)177u;
-				} else {
+				}
+				else {
 					output += oof::reset_formatting();
 					output += (char)176u;
 				}
