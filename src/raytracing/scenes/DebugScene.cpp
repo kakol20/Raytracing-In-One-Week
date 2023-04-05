@@ -66,7 +66,7 @@ void DebugScene::Create(Settings& settings) {
 	colors.push_back(ColorTools::HSVToRGB(240, 1, 1));
 	colors.push_back(ColorTools::HSVToRGB(300, 1, 1));
 
-	m_matMap["dielectric"] = new Dielectric(colors[0], 0, 1.45);
+	m_matMap["dielectric"] = new Dielectric(colors[0], 0.1, 1.45);
 	m_matMap["diffuse"] = new Diffuse(colors[1]);
 	m_matMap["glass"] = new Glass(colors[2], 0.1, 1.45);
 	m_matMap["metallic"] = new Metal(colors[3], 0.1, 1.45);
