@@ -8,7 +8,8 @@ Dielectric::Dielectric(const Vector3D& albedo, const Float roughness, const Floa
 
 void Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) {
 	normal = rec.GetNormal();
-	const Vector3D incoming = rayIn.GetDir() * -1;
+	const Vector3D incoming = -rayIn.GetDir();
+	const Vector3D dir = rayIn.GetDir();
 
 	Float roughnessRand = Random::RandomFloat();
 
@@ -26,7 +27,7 @@ void Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	// white glossy part
 	
 	Vector3D whiteGlossCol = Vector3D::One;
-	Vector3D whiteGlossScatter = Vector3D::Reflect(rayIn.GetDir(), normal) + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
+	Vector3D whiteGlossScatter = Vector3D::Reflect(dir, normal) + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
 
 	// mix them together
 	

@@ -9,49 +9,33 @@ Metal::Metal(const Vector3D& albedo, const Float roughness, const Float ior) {
 }
 
 void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) {
-	// ----- NORMAL -----
 	normal = rec.GetNormal();
-
-	Vector3D incoming = -rayIn.GetDir();
-
-	// ----- FRESNEL -----
+	const Vector3D incoming = -rayIn.GetDir();
+	const Vector3D dir = rayIn.GetDir();
 
 	Float roughnessRand = Random::RandomFloat();
-
-	//Vector3D fresnelNormal = roughnessRand ? incoming : normal;
 	Vector3D fresnelNormal = Vector3D::RandomMix(normal, incoming, m_roughness, roughnessRand);
 
-	Float refractionRatio = rec.GetFrontFace() ? 1 / m_ior : m_ior;
-	Float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
-
-	// ----- MAIN VECTORS -----
-
-	Vector3D reflect = Vector3D::Reflect(rayIn.GetDir(), normal);
-
-	Vector3D glossy = reflect + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
-	if (glossy.NearZero()) glossy = reflect;
-	glossy.Normalize();
-
-	// ----- APPLY MATERIAL -----
-
+	Float fresnel = Fresnel(dir, fresnelNormal, m_ior) - Fresnel(dir, incoming, m_ior);
 	Float fresnelRand = Random::RandomFloat();
 
-	//Vector3D scatterDir = fresnelRand ? reflect : glossy;
-	Vector3D scatterDir = Vector3D::RandomMix(glossy, reflect, fresnel, fresnelRand);
+	// metallic part
+	Vector3D metalCol = m_albedo;
+	Vector3D metalScatter = Vector3D::Reflect(dir, normal) + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
 
-	//attentuation = Vector3D::Lerp(m_albedo, Vector3D::One, incomingFresnel);
-	attentuation = Vector3D::RandomMix(m_albedo, Vector3D::One, fresnel, fresnelRand);
+	// glossy part
+	Vector3D glossyCol = Vector3D::One * fresnel;
+	Vector3D glossyScatter = Vector3D::Reflect(dir, normal);
 
-	scatterDir.Normalize();
+	// mix them together
 
-	scattered = Ray(rec.GetPoint(), scatterDir);
+	Vector3D totalColor = Vector3D::RandomMix(metalCol, glossyCol, fresnel, fresnelRand);
+	Vector3D totalScatter = Vector3D::RandomMix(metalScatter, glossyScatter, fresnel, fresnelRand);
+	totalScatter.Normalize();
 
-	if (Vector3D::DotProduct(normal, scatterDir) < Float::NearZero) {
-		absorb = true;
-	}
-	else {
-		absorb = false;
-	}
+	scattered = Ray(rec.GetPoint(), totalScatter);
+	attentuation = totalColor;
+	absorb = false;
 	transparent = false;
 	emission = false;
 }
