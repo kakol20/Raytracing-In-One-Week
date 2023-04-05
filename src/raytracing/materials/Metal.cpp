@@ -16,14 +16,13 @@ void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	// ----- FRESNEL -----
 
-	bool roughnessRand = Random::RandomFloat() < m_roughness;
+	Float roughnessRand = Random::RandomFloat();
 
-	Vector3D fresnelNormal = roughnessRand ? incoming : normal;
+	//Vector3D fresnelNormal = roughnessRand ? incoming : normal;
+	Vector3D fresnelNormal = Vector3D::RandomMix(normal, incoming, m_roughness, roughnessRand);
 
 	Float refractionRatio = rec.GetFrontFace() ? 1 / m_ior : m_ior;
 	Float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
-	Float incomingFresnel = fresnel - Fresnel(incoming, incoming, refractionRatio);
-	incomingFresnel = Float::Clamp(incomingFresnel, 0, 1);
 
 	// ----- MAIN VECTORS -----
 
@@ -35,11 +34,13 @@ void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	// ----- APPLY MATERIAL -----
 
-	bool fresnelRand = Random::RandomFloat() < incomingFresnel;
+	Float fresnelRand = Random::RandomFloat();
 
-	Vector3D scatterDir = fresnelRand ? reflect : glossy;
+	//Vector3D scatterDir = fresnelRand ? reflect : glossy;
+	Vector3D scatterDir = Vector3D::RandomMix(glossy, reflect, fresnel, fresnelRand);
 
-	attentuation = Vector3D::Lerp(m_albedo, Vector3D::One, incomingFresnel);
+	//attentuation = Vector3D::Lerp(m_albedo, Vector3D::One, incomingFresnel);
+	attentuation = Vector3D::RandomMix(m_albedo, Vector3D::One, fresnel, fresnelRand);
 
 	scatterDir.Normalize();
 

@@ -47,7 +47,7 @@ void DebugScene::Create(Settings& settings) {
 	m_clipStart = Float::NearZero;
 	m_clipEnd = 1000;
 
-	Vector3D lookFrom(0, 2, 25);
+	Vector3D lookFrom(0, 2, 21);
 	Vector3D lookAt(0, 1, 0);
 
 	Vector3D dist = lookAt - lookFrom;
@@ -66,22 +66,22 @@ void DebugScene::Create(Settings& settings) {
 	colors.push_back(ColorTools::HSVToRGB(240, 1, 1));
 	colors.push_back(ColorTools::HSVToRGB(300, 1, 1));
 
-	m_matMap["diffuse"] = new Diffuse(colors[0]);
-	m_matMap["unshaded"] = new Unshaded(colors[1] * 2);
-	m_matMap["metallic"] = new Metal(colors[2], 0.1, 1.45);
-	m_matMap["glass"] = new Glass(colors[3], 0.1, 1.45);
-	m_matMap["dielectric"] = new Dielectric(colors[5], 0.1, 1.45);
+	m_matMap["dielectric"] = new Dielectric(colors[0], 0, 1.45);
+	m_matMap["diffuse"] = new Diffuse(colors[1]);
+	m_matMap["glass"] = new Glass(colors[2], 0.1, 1.45);
+	m_matMap["metallic"] = new Metal(colors[3], 0.1, 1.45);
+	m_matMap["unshaded"] = new Unshaded(colors[4] * 2);
 
 	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
 
 	// objects
 
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["diffuse"], Vector3D::Zero, Vector3D(-5.25, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["unshaded"], Vector3D::Zero, Vector3D(-3.15, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["dielectric"], Vector3D::Zero, Vector3D(-5.25, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["diffuse"], Vector3D::Zero, Vector3D(-3.15, 1, 0)));
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["glass"], Vector3D::Zero, Vector3D(-1.05, 1, 0)));
 	m_renderedObjects.push_back(new Sphere(1, m_matMap["metallic"], Vector3D::Zero, Vector3D(1.05, 1, 0)));
-	m_renderedObjects.push_back(new PointLight(Unshaded(colors[4] * 3), 1, Vector3D(3.15, 1, 0)));
-	m_renderedObjects.push_back(new Sphere(1, m_matMap["dielectric"], Vector3D::Zero, Vector3D(5.25, 1, 0)));
+	m_renderedObjects.push_back(new Sphere(1, m_matMap["unshaded"], Vector3D::Zero, Vector3D(3.15, 1, 0)));
+	m_renderedObjects.push_back(new PointLight(Unshaded(colors[5] * 3), 1, Vector3D(5.25, 1, 0)));
 
 	m_renderedObjects.push_back(new Sphere(1000, m_matMap["ground"], Vector3D::Zero, Vector3D(0, -1000, 0)));
 

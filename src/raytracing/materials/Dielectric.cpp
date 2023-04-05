@@ -11,6 +11,7 @@ void Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	const Vector3D incoming = rayIn.GetDir() * -1;
 
 	Float fresnel = Fresnel(incoming, normal, m_ior);
+	Float fresnelRand = Random::RandomFloat();
 
 	// diffuse part
 
@@ -18,8 +19,15 @@ void Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	Vector3D diffuseScatter = Vector3D::RandomInUnitSphere() + normal;
 	diffuseScatter.Normalize();
 
-	Vector3D totalScatter = diffuseScatter;
-	Vector3D totalColor = diffuseCol;
+	// white glossy part
+	
+	Vector3D whiteGlossCol = Vector3D::One;
+	Vector3D whiteGlossScatter = Vector3D::Reflect(rayIn.GetDir(), normal);
+
+	// mix them together
+	
+	Vector3D totalColor = Vector3D::RandomMix(diffuseCol, whiteGlossCol, fresnel, fresnelRand);
+	Vector3D totalScatter = Vector3D::RandomMix(diffuseScatter, whiteGlossScatter, fresnel, fresnelRand);
 
 	scattered = Ray(rec.GetPoint(), totalScatter);
 	attentuation = totalColor;
