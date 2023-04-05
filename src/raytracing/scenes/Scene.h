@@ -6,6 +6,7 @@
 #include "../../wrapper/HDR.h"
 #include "../../wrapper/Image.h"
 #include "../Camera.h"
+#include "../materials/Dielectric.h"
 #include "../materials/Diffuse.h"
 #include "../materials/Glass.h"
 #include "../materials/Material.h"

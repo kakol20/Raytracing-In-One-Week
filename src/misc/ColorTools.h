@@ -10,5 +10,12 @@ namespace ColorTools {
 	/// <returns></returns>
 	Vector3D KelvinToRGB(const Float k);
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="H">0 to 360</param>
+	/// <param name="S">0 to 1</param>
+	/// <param name="V">0 to 1</param>
+	/// <returns></returns>
 	Vector3D HSVToRGB(Float H, const Float S, const Float V);
 }

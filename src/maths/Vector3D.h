@@ -139,6 +139,17 @@ public:
 	static Vector3D RandomVector(const Float min = 0, const Float max = 1, bool includeZAxis = true);
 
 	/// <summary>
+	/// Mixes two vectors using randomisation
+	/// </summary>
+	/// <param name="a"></param>
+	/// <param name="b"></param>
+	/// <param name="factor">0 to 1</param>
+	/// <returns></returns>
+	static Vector3D RandomMix(const Vector3D& a, const Vector3D& b, const Float factor);
+
+	static Vector3D RandomMix(const Vector3D& a, const Vector3D& b, const Float factor, const Float outsideRand);
+
+	/// <summary>
 	/// Random vector using Random::RandomFloatND()
 	/// </summary>
 	/// <returns>A 3D vector with all axis between -1 and 1</returns>
