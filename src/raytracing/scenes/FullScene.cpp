@@ -101,18 +101,37 @@ void FullScene::Create(Settings& settings) {
 				if (objectType < 1) {
 					// point light
 					Float strength = Random::RandomFloat(1, 2);
-					Float hue = Random::RandomFloat(0, 360);
-					Float saturation = Random::RandomFloat(0, 0.5);
 					//m_renderedObjects.push_back(new PointLight(Unshaded(Vector3D::One * strength), 0.2, pos));
 
 					// currently not working properly - using ushaded sphere as alternative
 					std::string key = "randMat_" + std::to_string(count);
-					m_matMap[key] = new Unshaded(ColorTools::HSVToRGB(hue, saturation, 1) * strength);
+					m_matMap[key] = new Unshaded(ColorTools::KelvinToRGB(Random::RandomFloat(1000, 12200)) * strength);
 
 					m_renderedObjects.push_back(new Sphere(0.2, m_matMap[key], Vector3D::Zero, pos));
 				}
 				else {
-					
+					// spheres
+					unsigned int materialType = (unsigned int)Random::RandomInt(0, 10);
+
+					Float hue = Random::RandomFloat(0, 360);
+
+					std::string key = "randMat_" + std::to_string(count);
+
+					if (materialType < 1) {
+						m_matMap[key] = new Diffuse(ColorTools::HSVToRGB(hue, (Float(240) - 12) / 204, 0.8));
+					}
+					else if (materialType < 2) {
+						Float roughness = Random::RandomFloat(0, 1);
+						Float s = Random::RandomFloat(0, 0.25);
+						m_matMap[key] = new Glass(ColorTools::HSVToRGB(hue, s, 1), roughness, 1.5);
+					}
+					else {
+						Float roughness = Random::RandomFloat(0, 1);
+						Float s = Random::RandomFloat(0.25, 0.5);
+						m_matMap[key] = new Metal(ColorTools::HSVToRGB(hue, s, 1), roughness, 1.45);
+					}
+
+					m_renderedObjects.push_back(new Sphere(0.2, m_matMap[key], Vector3D::Zero, pos));
 				}
 			}
 		}
