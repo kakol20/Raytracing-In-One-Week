@@ -139,6 +139,14 @@ Vector3D Vector3D::RandomVector(const Float min, const Float max, bool includeZA
 		Vector3D(Random::RandomFloat(min, max), Random::RandomFloat(min, max));
 }
 
+Vector3D Vector3D::RandomMix(const Vector3D& a, const Vector3D& b, const Float factor) {
+	return RandomMix(a, b, factor, Random::RandomFloat());
+}
+
+Vector3D Vector3D::RandomMix(const Vector3D& a, const Vector3D& b, const Float factor, const Float outsideRand) {
+	return outsideRand >= factor ? a : b;
+}
+
 Vector3D Vector3D::RandomVectorND(bool includeZAxis) {
 	return includeZAxis ?
 		Vector3D(Random::RandomFloatND(), Random::RandomFloatND(), Random::RandomFloatND()) :

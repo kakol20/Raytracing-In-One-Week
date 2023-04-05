@@ -42,7 +42,7 @@ Vector3D ColorTools::HSVToRGB(Float H, const Float S, const Float V) {
 	H = Float::ModCycled(H, 360);
 
 	const Float C = V * S;
-	const Float X = C * (1. - (((H / 60) % 2) - 1));
+	const Float X = C * (1. - Float::Abs(((H / 60) % 2) - 1));
 	const Float m = V - C;
 
 	Float R, G, B;

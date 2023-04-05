@@ -9,41 +9,36 @@ Glass::Glass(const Vector3D& albedo, const Float roughness, const Float ior) {
 }
 
 void Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) {
-	// ----- NORMAL -----
-
-	Vector3D incoming = -rayIn.GetDir();
-
 	normal = rec.GetNormal();
+	const Vector3D incoming = -rayIn.GetDir();
+	const Vector3D dir = rayIn.GetDir();
+	const Float refractionRatio = rec.GetFrontFace() ? 1 / m_ior : m_ior;
 
-	// ----- FRESNEL -----
+	Float roughnessRand = Random::RandomFloat();
 
-	bool roughnessRand = Random::RandomFloat() < m_roughness;
+	Vector3D fresnelNormal = Vector3D::RandomMix(normal, incoming, m_roughness, roughnessRand);
 
-	Vector3D fresnelNormal = roughnessRand ? incoming : normal;
+	const Float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
+	const Float fresnelRand = Random::RandomFloat();
 
-	Float refractionRatio = rec.GetFrontFace() ? 1 / m_ior : m_ior;
-	Float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio);
+	// refraction part
 
-	// ----- MAIN VECTORS -----
+	Vector3D refractCol = m_albedo;
+	Vector3D refractScatter = Vector3D::Refract(dir, normal, refractionRatio) + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
 
-	Vector3D refract = Vector3D::Refract(rayIn.GetDir(), normal, refractionRatio);
+	// glossy part
 
-	Vector3D refractRough = refract + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
-	if (refractRough.NearZero()) refractRough = refract;
-	refractRough.Normalize();
+	Vector3D glossyCol = Vector3D::One;
+	Vector3D glossyScatter = Vector3D::Reflect(dir, normal) + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
 
-	Vector3D reflect = Vector3D::Reflect(rayIn.GetDir(), normal);
+	// mix them together
 
-	// ----- APPLY MATERIAL -----
+	Vector3D totalColor = Vector3D::RandomMix(refractCol, glossyCol, fresnel, fresnelRand);
+	Vector3D totalScatter = Vector3D::RandomMix(refractScatter, glossyScatter, fresnel, fresnelRand);
+	totalScatter.Normalize();
 
-	bool fresnelRand = Random::RandomFloat() < fresnel;
-
-	Vector3D scatterDir = fresnelRand ? reflect : refractRough;
-
-	attentuation = Vector3D::Lerp(m_albedo, Vector3D::One, fresnel);
-
-	scattered = Ray(rec.GetPoint(), scatterDir);
-
+	scattered = Ray(rec.GetPoint(), totalScatter);
+	attentuation = totalColor;
 	absorb = false;
 	transparent = false;
 	emission = false;

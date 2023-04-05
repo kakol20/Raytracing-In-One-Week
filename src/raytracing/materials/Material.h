@@ -2,6 +2,7 @@
 #define MATERIAL_HPP
 
 #include "../../maths/Vector3D.h"
+#include "../../misc/Random.h"
 #include "../HitRec.h"
 #include "../Ray.h"
 
