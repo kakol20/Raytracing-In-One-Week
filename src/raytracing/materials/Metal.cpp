@@ -16,15 +16,17 @@ void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	Float roughnessRand = Random::RandomFloat();
 	Vector3D fresnelNormal = Vector3D::RandomMix(normal, incoming, m_roughness, roughnessRand);
 
-	Float fresnel = Fresnel(dir, fresnelNormal, m_ior) - Fresnel(dir, incoming, m_ior);
+	Float fresnel = Fresnel(incoming, fresnelNormal, m_ior) - Fresnel(dir, incoming, m_ior);
 	Float fresnelRand = Random::RandomFloat();
 
 	// metallic part
+
 	Vector3D metalCol = m_albedo;
 	Vector3D metalScatter = Vector3D::Reflect(dir, normal) + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
 
 	// glossy part
-	Vector3D glossyCol = Vector3D::One * fresnel;
+
+	Vector3D glossyCol = Vector3D::One;
 	Vector3D glossyScatter = Vector3D::Reflect(dir, normal);
 
 	// mix them together

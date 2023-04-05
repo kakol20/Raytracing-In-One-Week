@@ -37,7 +37,7 @@ void DebugScene::Create(Settings& settings) {
 	// ----- BACKGROUND -----
 	m_background = Image("images/hdr/lebombo_2k.png", Image::Interpolation::Cubic, Image::Extrapolation::Repeat, Image::ColorSpace::sRGB);
 
-	m_bgStrength = 1;
+	m_bgStrength = 0.1;
 
 	// ----- CAMERA -----
 
