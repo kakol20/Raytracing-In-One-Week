@@ -111,7 +111,7 @@ void FullScene::Create(Settings& settings) {
 				}
 				else {
 					// spheres
-					unsigned int materialType = (unsigned int)Random::RandomInt(0, 10);
+					unsigned int materialType = (unsigned int)Random::RandomInt(0, 3);
 
 					Float hue = Random::RandomFloat(0, 360);
 
