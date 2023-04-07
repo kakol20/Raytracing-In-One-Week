@@ -77,6 +77,9 @@ void FullScene::Create(Settings& settings) {
 
 	// random objects
 
+	std::vector<Vector3D> generatedPos;
+	generatedPos.reserve((size_t)25 * 25);
+
 	unsigned int count = 0;
 	for (int x = -10; x <= 10; x++) {
 		for (int y = -10; y <= 10; y++) {
@@ -85,58 +88,75 @@ void FullScene::Create(Settings& settings) {
 
 			pos += randPos;
 
-			bool intersect = false;
+			generatedPos.push_back(pos);
+		}
+	}
+	generatedPos.shrink_to_fit();
 
-			for (auto it = m_renderedObjects.begin(); it != m_renderedObjects.end(); it++) {
-				if ((*it)->SphereIntersectSphere(pos, 0.2)) {
-					intersect = true;
-					break;
-				}
+	// shuffle positions
+
+	size_t i = generatedPos.size() - 1;
+	while (i >= 0) {
+		size_t swap = (size_t)Random::RandomUInt() % (i + 1);
+		if (swap < i) std::swap(generatedPos[i], generatedPos[swap]);
+		if (i == 0) break;
+		i--;
+	}
+
+	for (auto it = generatedPos.begin(); it != generatedPos.end(); it++) {
+		Vector3D& pos = (*it);
+
+		bool intersect = false;
+
+		for (auto jt = m_renderedObjects.begin(); jt != m_renderedObjects.end(); jt++) {
+			if ((*jt)->SphereIntersectSphere(pos, 0.2)) {
+				intersect = true;
+				break;
 			}
+		}
 
-			if (!intersect) {
-				unsigned int objectType = (unsigned int)Random::RandomInt(0, 10);
-				count++;
+		if (!intersect) {
+			unsigned int objectType = (unsigned int)Random::RandomInt(0, 10);
+			count++;
 
-				if (objectType < 1) {
-					// point light
-					Float strength = Random::RandomFloat(1, 2);
-					//m_renderedObjects.push_back(new PointLight(Unshaded(Vector3D::One * strength), 0.2, pos));
+			if (objectType < 1) {
+				// point light
+				Float strength = Random::RandomFloat(1, 2);
+				//m_renderedObjects.push_back(new PointLight(Unshaded(Vector3D::One * strength), 0.2, pos));
 
-					// currently not working properly - using ushaded sphere as alternative
-					std::string key = "randMat_" + std::to_string(count);
-					m_matMap[key] = new Unshaded(ColorTools::KelvinToRGB(Random::RandomFloat(1000, 12200)) * strength);
+				// currently not working properly - using ushaded sphere as alternative
+				std::string key = "randMat_" + std::to_string(count);
+				m_matMap[key] = new Unshaded(ColorTools::KelvinToRGB(Random::RandomFloat(1000, 12200)) * strength);
 
-					m_renderedObjects.push_back(new Sphere(0.2, m_matMap[key], Vector3D::Zero, pos));
+				m_renderedObjects.push_back(new Sphere(0.2, m_matMap[key], Vector3D::Zero, pos));
+			}
+			else {
+				// spheres
+				unsigned int materialType = (unsigned int)Random::RandomInt(0, 3);
+
+				Float hue = Random::RandomFloat(0, 360);
+
+				std::string key = "randMat_" + std::to_string(count);
+
+				if (materialType < 1) {
+					Float s = (Float(240) - 12) / 204;
+					Float v = 0.8;
+					Float roughness = Random::RandomFloat();
+					//m_matMap[key] = new Diffuse(ColorTools::HSVToRGB(hue, , 0.8));
+					m_matMap[key] = new Dielectric(ColorTools::HSVToRGB(hue, s, v), roughness, 1.46);
+				}
+				else if (materialType < 2) {
+					Float roughness = Random::RandomFloat(0, 1);
+					Float s = Random::RandomFloat(0, 0.25);
+					m_matMap[key] = new Glass(ColorTools::HSVToRGB(hue, s, 1), roughness, 1.5);
 				}
 				else {
-					// spheres
-					unsigned int materialType = (unsigned int)Random::RandomInt(0, 3);
-
-					Float hue = Random::RandomFloat(0, 360);
-
-					std::string key = "randMat_" + std::to_string(count);
-
-					if (materialType < 1) {
-						Float s = (Float(240) - 12) / 204;
-						Float v = 0.8;
-						Float roughness = Random::RandomFloat();
-						//m_matMap[key] = new Diffuse(ColorTools::HSVToRGB(hue, , 0.8));
-						m_matMap[key] = new Dielectric(ColorTools::HSVToRGB(hue, s, v), roughness, 1.46);
-					}
-					else if (materialType < 2) {
-						Float roughness = Random::RandomFloat(0, 1);
-						Float s = Random::RandomFloat(0, 0.25);
-						m_matMap[key] = new Glass(ColorTools::HSVToRGB(hue, s, 1), roughness, 1.5);
-					}
-					else {
-						Float roughness = Random::RandomFloat(0, 1);
-						Float s = Random::RandomFloat(0.25, 0.5);
-						m_matMap[key] = new Metal(ColorTools::HSVToRGB(hue, s, 1), roughness, 1.45);
-					}
-
-					m_renderedObjects.push_back(new Sphere(0.2, m_matMap[key], Vector3D::Zero, pos));
+					Float roughness = Random::RandomFloat(0, 1);
+					Float s = Random::RandomFloat(0.25, 0.5);
+					m_matMap[key] = new Metal(ColorTools::HSVToRGB(hue, s, 1), roughness, 1.45);
 				}
+
+				m_renderedObjects.push_back(new Sphere(0.2, m_matMap[key], Vector3D::Zero, pos));
 			}
 		}
 	}
