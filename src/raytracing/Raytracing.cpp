@@ -89,12 +89,18 @@ bool Raytracing::Init() {
 		m_scene->Create(m_settings);
 	}
 
-	// checks if folder exists
-	const std::filesystem::path p{ m_fileFolder };
-	std::filesystem::file_status s = std::filesystem::file_status{};
+	// check if main renders folder exists
+	const std::filesystem::path p1{ "renders/" };
+	std::filesystem::file_status s1 = std::filesystem::file_status{};
+	bool pathExists = std::filesystem::status_known(s1) ? std::filesystem::exists(s1) : std::filesystem::exists(p1);
+	if (!pathExists) std::filesystem::create_directory(p1);
 
-	const bool pathExists = std::filesystem::status_known(s) ? std::filesystem::exists(s) : std::filesystem::exists(p);
-	if (!pathExists) std::filesystem::create_directory(p);
+	// checks if folder exists
+	const std::filesystem::path p2{ m_fileFolder };
+	std::filesystem::file_status s2 = std::filesystem::file_status{};
+
+	pathExists = std::filesystem::status_known(s2) ? std::filesystem::exists(s2) : std::filesystem::exists(p2);
+	if (!pathExists) std::filesystem::create_directory(p2);
 
 	// ----- GENERATE BLUE NOISE -----
 
