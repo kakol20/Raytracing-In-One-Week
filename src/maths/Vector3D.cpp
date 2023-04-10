@@ -76,6 +76,10 @@ Vector3D Vector3D::Lerp(const Vector3D& min, const Vector3D& max, const Float fa
 	}
 }
 
+Vector3D Vector3D::Sqrt(const Vector3D& v) {
+	return Vector3D(Float::Sqrt(v.m_x), Float::Sqrt(v.m_y), Float::Sqrt(v.m_z));
+}
+
 Vector3D Vector3D::Reflect(const Vector3D& vector, const Vector3D& normal) {
 	Vector3D t = Vector3D::DotProduct(normal, vector);
 	t *= normal * 2;

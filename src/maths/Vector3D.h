@@ -126,6 +126,7 @@ public:
 	static Vector3D Clamp(const Vector3D& val, const Vector3D& min, const Vector3D& max);
 	static Vector3D CrossProduct(const Vector3D& v1, const Vector3D& v2);
 	static Vector3D Lerp(const Vector3D& min, const Vector3D& max, const Float factor, const bool clamp = false);
+	static Vector3D Sqrt(const Vector3D& v);
 
 	static Vector3D Reflect(const Vector3D& vector, const Vector3D& normal);
 	static Vector3D Refract(const Vector3D& vector, const Vector3D& normal, const Float refractionRatio);
@@ -176,6 +177,20 @@ public:
 		m_y /= magnitude;
 		m_z = m_includeZAxis ? m_z / magnitude : 0;
 	};
+	inline void Normalize(const Vector3D& fallBack) {
+		Float magnitude = Magnitude();
+
+		if (magnitude < Float::NearZero) {
+			m_x = fallBack.m_x;
+			m_y = fallBack.m_y;
+			m_z = m_includeZAxis ? fallBack.m_z : 0;
+			return;
+		};
+
+		m_x /= magnitude;
+		m_y /= magnitude;
+		m_z = m_includeZAxis ? m_z / magnitude : 0;
+	}
 
 	// ----- STATIC VARIABLES -----
 
