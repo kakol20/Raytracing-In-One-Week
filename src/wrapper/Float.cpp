@@ -73,7 +73,18 @@ Float Float::Round(const Float v) {
 }
 
 Float Float::Sqrt(const Float v) {
-	return v == 1 ? Float(1) : Float(std::sqrt(v.m_num));
+	if (v < 0) {
+		return Float(NAN);
+	}
+	else if (v == 1) {
+		return 1;
+	}
+	else if (v <= Float::NearZero) {
+		return 0;
+	}
+	else {
+		return std::sqrt(v.m_num);
+	}
 }
 
 Float Float::Max(const Float a, const Float b) {
@@ -85,7 +96,7 @@ Float Float::Min(const Float a, const Float b) {
 }
 
 Float Float::Lerp(const Float from, const Float to, const Float factor, const bool clamp) {
-	Float out = ((to - from) * factor) + from;
+	Float out = (from * (1 - factor)) + (to * factor);
 
 	if (clamp) out = Float::Clamp(out, from, to);
 	return out;

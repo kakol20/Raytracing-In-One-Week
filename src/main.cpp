@@ -32,7 +32,7 @@ const Float Float::MinVal = std::numeric_limits<Float::ForD>::min();
 #ifdef WIN32
 const Float::ForD Float::NearZero = 1e-4f;
 #else
-const Float::ForD Float::NearZero = 1e-4;
+const Float::ForD Float::NearZero = 1e-6;
 //const Float::ForD Float::NearZero = 1e-10;
 #endif // WIN32
 

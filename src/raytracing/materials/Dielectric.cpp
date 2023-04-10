@@ -2,7 +2,7 @@
 
 Dielectric::Dielectric(const Vector3D& albedo, const Float roughness, const Float ior) {
 	m_albedo = albedo;
-	m_roughness = roughness;
+	m_roughness = roughness * roughness;
 	m_ior = ior;
 }
 

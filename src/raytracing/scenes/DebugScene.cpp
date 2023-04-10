@@ -37,7 +37,7 @@ void DebugScene::Create(Settings& settings) {
 	// ----- BACKGROUND -----
 	m_background = Image("images/hdr/lebombo_2k.png", Image::Interpolation::Cubic, Image::Extrapolation::Repeat, Image::ColorSpace::sRGB);
 
-	m_bgStrength = 0.1;
+	m_bgStrength = 1;
 
 	// ----- CAMERA -----
 
@@ -66,11 +66,12 @@ void DebugScene::Create(Settings& settings) {
 	colors.push_back(ColorTools::HSVToRGB(240, 1, 1));
 	colors.push_back(ColorTools::HSVToRGB(300, 1, 1));
 
+	const Float collectiveRoughness = 0.1;
 	m_matMap["unshaded"] = new Unshaded(colors[0] * 2);
-	m_matMap["dielectric"] = new Dielectric(colors[1], 0.1, 1.45);
+	m_matMap["dielectric"] = new Dielectric(colors[1], collectiveRoughness, 1.45);
 	m_matMap["diffuse"] = new Diffuse(colors[2]);
-	m_matMap["glass"] = new Glass(colors[3], 0.1, 1.45);
-	m_matMap["metallic"] = new Metal(colors[4], 0.1, 1.45);
+	m_matMap["glass"] = new Glass(colors[3], collectiveRoughness, 1.45);
+	m_matMap["metallic"] = new Metal(colors[4], collectiveRoughness, 1.45);
 
 	m_matMap["ground"] = new Diffuse(Vector3D(0.5, 0.5, 0.5));
 

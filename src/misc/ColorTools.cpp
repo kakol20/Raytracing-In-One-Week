@@ -78,3 +78,32 @@ Vector3D ColorTools::HSVToRGB(Float H, const Float S, const Float V) {
 
 	return Vector3D(R, G, B);
 }
+
+void ColorTools::RGBtoHSV(const Vector3D& col, Float& H, Float& S, Float& V) {
+	const Float cMax = Float::Max(col.GetX(), Float::Max(col.GetY(), col.GetZ()));
+	const Float cMin = Float::Min(col.GetX(), Float::Min(col.GetY(), col.GetZ()));
+	const Float delta = cMax - cMin;
+
+	V = cMax;
+
+	if (delta == 0) {
+		H = 0;
+	}
+	else if (cMax == col.GetX()) {
+		H = 60 * (((col.GetY() - col.GetZ()) / delta) % 6);
+	}
+	else if (cMax == col.GetY()) {
+		H = 60 * (((col.GetZ() - col.GetX()) / delta) + 2);
+	}
+	else {
+		H = 60 * (((col.GetX() - col.GetY()) / delta) + 4);
+	}
+	H = Float::ModCycled(H, 360);
+
+	if (cMax == 0) {
+		S = 0;
+	}
+	else {
+		S = delta / cMax;
+	}
+}

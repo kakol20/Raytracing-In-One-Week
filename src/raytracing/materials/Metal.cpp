@@ -1,11 +1,14 @@
 #include "../../misc/Random.h"
+#include "../../misc/ColorTools.h"
 
 #include "Metal.h"
 
 Metal::Metal(const Vector3D& albedo, const Float roughness, const Float ior) {
 	m_albedo = albedo;
 	m_ior = ior;
-	m_roughness = roughness;
+	m_roughness = roughness * roughness;
+
+	m_albedo = Vector3D::Clamp(m_albedo, Vector3D::Zero, Vector3D::One);
 }
 
 void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) {
@@ -28,7 +31,11 @@ void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	// glossy part
 
-	Vector3D glossyCol = Vector3D::One;
+	Float H, S, V;
+	ColorTools::RGBtoHSV(m_albedo, H, S, V);
+	S = Float::Clamp(S - 0.25, 0, 1);
+
+	Vector3D glossyCol = ColorTools::HSVToRGB(H, S, V);
 	Vector3D glossyScatter = Vector3D::Reflect(dir, normal);
 
 	// mix them together
