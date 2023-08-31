@@ -2,6 +2,12 @@
 
 #include "Vector3D.h"
 
+const Vector3D Vector3D::Forward = Vector3D(0, 0, -1);
+const Vector3D Vector3D::One = Vector3D(1, true);
+const Vector3D Vector3D::Right = Vector3D(1, 0, 0);
+const Vector3D Vector3D::Up = Vector3D(0, 1, 0);
+const Vector3D Vector3D::Zero = Vector3D(0, true);
+
 Vector3D::Vector3D(const Float scalar, const bool includeZAxis) {
 	m_x = scalar;
 	m_y = scalar;
