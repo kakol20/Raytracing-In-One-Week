@@ -187,6 +187,7 @@ public:
 
 	// -- Trigonometry --
 
+	static Float Acos(const Float x);
 	static Float Asin(const Float x);
 	static Float Atan2(const Float y, const Float x);
 	static Float Cos(const Float x);
