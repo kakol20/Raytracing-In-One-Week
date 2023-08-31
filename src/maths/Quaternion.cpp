@@ -37,15 +37,43 @@ void Quaternion::AxisRotation(const Vector3D& axis, const Float radians) {
 }
 
 Quaternion Quaternion::ShortestArc(const Vector3D& v1, const Vector3D& v2) {
+#define S_ARC_OLD
+
+#ifdef S_ARC_OLD
 	Quaternion q = Vector3D::CrossProduct(v1, v2);
 	q.m_w = Float::Sqrt(Float::Pow(v1.Magnitude(), 2) * Float::Pow(v2.Magnitude(), 2)) + Vector3D::DotProduct(v1, v2);
+	q.Normalize();
+	return q;
+#else
+	Vector3D v1N = v1;
+	v1N.Normalize();
 
+	Vector3D v2N = v2;
+	v2N.Normalize();
+
+	Float dotProduct = Vector3D::DotProduct(v1N, v2N);
+	Vector3D axis = Vector3D::CrossProduct(v1N, v2N);
+	axis.Normalize();
+
+	Float angle = Float::Acos(dotProduct);
+	Float halfAngle = angle / 2;
+
+	axis *= Float::Sin(halfAngle);
+
+	Quaternion q = Quaternion(Float::Cos(halfAngle),
+		axis.GetX(),
+		axis.GetY(),
+		axis.GetZ());
 	q.Normalize();
 
 	return q;
+#endif // S_ARC_OLD
 }
 
 void Quaternion::XYZRotation(const Vector3D& radians) {
+//#define XYZ_OLD
+
+#ifdef XYZ_OLD
 	Quaternion xRotation;
 	Quaternion yRotation;
 	Quaternion zRotation;
@@ -62,27 +90,45 @@ void Quaternion::XYZRotation(const Vector3D& radians) {
 	m_i = rotation.m_i;
 	m_j = rotation.m_j;
 	m_k = rotation.m_k;
+#else
+	const Float roll = radians.GetX();
+	const Float rollSin = Float::Sin(roll / 2);
+	const Float rollCos = Float::Cos(roll / 2);
 
+	const Float pitch = radians.GetY();
+	const Float pitchSin = Float::Sin(pitch / 2);
+	const Float pitchCos = Float::Cos(pitch / 2);
+
+	const Float yaw = radians.GetZ();
+	const Float yawSin = Float::Sin(yaw / 2);
+	const Float yawCos = Float::Cos(yaw / 2);
+
+	m_w = (rollCos * pitchCos * yawCos) + (rollSin * pitchSin * yawSin);
+	m_i = (rollSin * pitchCos * yawCos) - (rollCos * pitchSin * yawSin);
+	m_j = (rollCos * pitchSin * yawCos) + (rollSin * pitchCos * yawSin);
+	m_k = (rollCos * pitchCos * yawSin) - (rollSin * pitchSin * yawCos);
+
+#endif // XYZ_OLD
 	Normalize();
 }
 
 void Quaternion::ZYXRotation(const Vector3D& radians) {
-	Quaternion xRotation;
-	Quaternion yRotation;
-	Quaternion zRotation;
+	const Float roll = radians.GetX();
+	const Float rollSin = Float::Sin(roll / 2);
+	const Float rollCos = Float::Cos(roll / 2);
 
-	xRotation.AxisRotation(Vector3D::Right, radians.GetX());
-	yRotation.AxisRotation(Vector3D::Up, radians.GetY());
-	zRotation.AxisRotation(Vector3D::Forward, radians.GetZ());
+	const Float pitch = radians.GetY();
+	const Float pitchSin = Float::Sin(pitch / 2);
+	const Float pitchCos = Float::Cos(pitch / 2);
 
-	Quaternion rotation = xRotation;
-	rotation *= yRotation;
-	rotation *= zRotation;
+	const Float yaw = radians.GetZ();
+	const Float yawSin = Float::Sin(yaw / 2);
+	const Float yawCos = Float::Cos(yaw / 2);
 
-	m_w = rotation.m_w;
-	m_i = rotation.m_i;
-	m_j = rotation.m_j;
-	m_k = rotation.m_k;
+	m_w = rollCos * pitchCos * yawCos + rollSin * pitchSin * yawSin;
+	m_i = rollSin * pitchCos * yawCos - rollCos * pitchSin * yawSin;
+	m_j = rollCos * pitchSin * yawCos + rollSin * pitchCos * yawSin;
+	m_k = rollCos * pitchCos * yawSin - rollSin * pitchSin * yawCos;
 
 	Normalize();
 }

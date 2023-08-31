@@ -2,6 +2,13 @@
 
 #include "Random.h"
 
+//thread_local Random::SeedType Seed = 0xACE1u;
+#ifdef WIN32
+thread_local uint32_t Random::Seed = 0xACE1u;
+#else
+thread_local uint64_t Random::Seed = 0xACE1u;
+#endif // WIN32
+
 unsigned int Random::RandomUInt(const unsigned int bitCount) {
 	unsigned int count = bitCount > 32 ? 32 : bitCount;
 	unsigned int out = 0;

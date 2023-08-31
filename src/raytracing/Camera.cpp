@@ -42,6 +42,7 @@ Camera::Camera(const Float aspectRatio, const Float blurStrength, const Float fo
 	//cameraVector = cameraVector * Float(-1);
 
 	m_shortestArc = Quaternion::ShortestArc(cameraVector, Vector3D::Forward);
+	m_shortestArc.Normalize();
 }
 
 Camera& Camera::operator=(const Camera& copyCamera) {

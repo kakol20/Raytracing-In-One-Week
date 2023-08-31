@@ -3,6 +3,20 @@
 
 #include "Float.h"
 
+const Float Float::PI = 3.1415926535897932384626433832795;
+const Float Float::TAU = Float::PI * 2;
+const Float Float::ToRadians = Float::PI / 180;
+
+const Float Float::MaxVal = std::numeric_limits<Float::ForD>::max();
+const Float Float::MinVal = std::numeric_limits<Float::ForD>::min();
+
+#ifdef WIN32
+const Float::ForD Float::NearZero = 1e-4f;
+#else
+const Float::ForD Float::NearZero = 1e-6;
+//const Float::ForD Float::NearZero = 1e-10;
+#endif // WIN32
+
 Float Float::FromString(const std::string& value) {
 	std::stringstream ss(value);
 	Float out = 0;
@@ -18,6 +32,10 @@ std::string Float::ToString(const Float num) {
 	std::string out = "";
 	ss >> out;
 	return out;
+}
+
+Float Float::Acos(const Float x) {
+	return Float(std::acos(x.m_num));
 }
 
 Float Float::Asin(const Float x) {
