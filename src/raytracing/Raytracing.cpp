@@ -615,6 +615,8 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 				pixelCol *= 255;
 			}
 
+			pixelCol = Vector3D::Clamp(pixelCol, Vector3D::Zero, Vector3D::One * 255);
+
 			if (m_settings["renderMode"] != "normal") {
 				pixelCol = Vector3D(Image::LinearToSRGB(pixelCol.GetX()), Image::LinearToSRGB(pixelCol.GetY()), Image::LinearToSRGB(pixelCol.GetZ()));
 			}
