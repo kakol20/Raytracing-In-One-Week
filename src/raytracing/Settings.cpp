@@ -21,6 +21,7 @@ Settings::Settings() {
 	m_settings["verticalFOV"] = "20";
 
 	m_settings["randomSeed"] = "28042022";
+	m_settings["clamp"] = "10";
 }
 
 Settings::~Settings() {
@@ -72,6 +73,7 @@ void Settings::Write(const std::string& fileLocation) {
 	m_file << "minSamples=" << m_settings["minSamples"] << '\n';
 	m_file << "noiseThreshold=" << m_settings["noiseThreshold"] << '\n';
 	m_file << "tileSize=" << m_settings["tileSize"] << '\n';
+	m_file << "clamp=" << m_settings["clamp"] << '\n';
 
 	m_file << "# color, normal, albedo, emission or all\n";
 	m_file << "renderMode=" << m_settings["renderMode"] << '\n';
