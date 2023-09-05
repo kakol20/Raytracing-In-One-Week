@@ -4,6 +4,7 @@ Vector3D Scene::RayColor(Ray& ray, const int depth, const Vector3D& initialRayCo
 	if (depth <= 0) return Vector3D(Float::NearZero);
 
 	std::string test = (*m_settings)["renderMode"];
+	Float clamp = Float::FromString((*m_settings)["clamp"]);
 
 	// check for object hit
 	HitRec rec;
@@ -16,6 +17,7 @@ Vector3D Scene::RayColor(Ray& ray, const int depth, const Vector3D& initialRayCo
 		rec.GetMat()->Scatter(ray, rec, attentuation, scattered, normal, absorb, transparent, emission);
 
 		attentuation *= initialRayCol;
+		attentuation = Vector3D::Clamp(attentuation, Vector3D::Zero, Vector3D::One * clamp);
 
 		if ((*m_settings)["renderMode"] == "color") {
 			if (absorb || emission) {
@@ -38,11 +40,7 @@ Vector3D Scene::RayColor(Ray& ray, const int depth, const Vector3D& initialRayCo
 		} else if ((*m_settings)["renderMode"] == "albedo") {
 			return attentuation;
 		} else if ((*m_settings)["renderMode"] == "emission") {
-			if (emission) {
-				return attentuation;
-			} else {
-				return Vector3D::Zero;
-			}
+			return emission ? attentuation : Vector3D::Zero;
 		}
 	}
 
