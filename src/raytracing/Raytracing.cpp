@@ -560,7 +560,7 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 
 				Ray ray = m_scene->GetCamera().GetRay(u, v);
 				rayColor = m_scene->RayColor(ray, maxDepth);
-				rayColor = Vector3D::Clamp(rayColor, Vector3D::Zero, Vector3D(Float::MaxVal, Float::MaxVal, Float::MaxVal));
+				//rayColor = Vector3D::Clamp(rayColor, Vector3D::Zero, Vector3D(Float::MaxVal, Float::MaxVal, Float::MaxVal));
 
 				if (count > 0) {
 					Vector3D difference;
