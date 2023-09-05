@@ -155,18 +155,18 @@ bool Image::Write(const char* file) {
 
 	int success = 0;
 
-	for (size_t i = 0; i < m_size; i++) {
-		Float val = m_dataF[i];
+	//for (size_t i = 0; i < m_size; i++) {
+	//	Float val = m_dataF[i];
 
-		if (m_colorSpace == ColorSpace::sRGB) {
-			val = Image::LinearToSRGB(val);
-		}
+	//	if (m_colorSpace == ColorSpace::sRGB) {
+	//		val = Image::LinearToSRGB(val);
+	//	}
 
-		m_dataF[i] = Float::Clamp(val, 0, 255);
-		m_data[i] = (uint8_t)Float::Clamp(val, 0, 255).ToUInt();
+	//	m_dataF[i] = Float::Clamp(val, 0, 255);
+	//	m_data[i] = (uint8_t)Float::Clamp(val, 0, 255).ToUInt();
 
-		//m_data[i] = Float::Round(Float::Clamp(m_dataF[i], 0, 255)).ToUInt();
-	}
+	//	//m_data[i] = Float::Round(Float::Clamp(m_dataF[i], 0, 255)).ToUInt();
+	//}
 
 	OrderedDither(255);
 	//FloydSteinbergDither(255);
@@ -330,14 +330,11 @@ void Image::OrderedDither(const int factor) {
 }
 
 Float Image::LinearToSRGB(const Float color) {
-#define METHOD1
-
-	Float l_color = color / 255;
+	/*Float l_color = color / 255;
 	if (color <= 0.0031308) {
 		return (color * 12.92) * 255;
 	}
 	else {
-#ifdef METHOD1
 		Float out = Float(1) / 2.4;
 
 		out = Float::Pow(l_color, out);
@@ -346,23 +343,23 @@ Float Image::LinearToSRGB(const Float color) {
 		out *= 255;
 
 		return out;
-#else
-		return ((Float::Pow(color, Float(1) / 2.4) * 1.055) - 0.055) * 255;
+	}*/
 
-#endif // _DEBUG
-	}
+	return Float::Pow(color / 255, Float(1) / 2.2) * 255;
 }
 
 Float Image::sRGBToLinear(const Float color) {
 	Float l_color = color / 255;
-	Float out = 0;
+	/*Float out = 0;
 
 	if (l_color <= 0.04045) {
 		out = l_color / 12.92;
 	}
 	else {
 		out = Float::Pow((l_color + 0.055) / 1.055, 2.4);
-	}
+	}*/
+
+	Float out = Float::Pow(l_color, 2.2);
 
 	return out * 255;
 }

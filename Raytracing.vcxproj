@@ -166,6 +166,7 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\misc\ACES.cpp" />
     <ClCompile Include="src\misc\BlueNoise.cpp" />
     <ClCompile Include="src\misc\ColorTools.cpp" />
     <ClCompile Include="src\raytracing\Camera.cpp" />
@@ -194,6 +195,7 @@
     <ClCompile Include="src\wrapper\Image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\misc\ACES.h" />
     <ClInclude Include="src\misc\BlueNoise.h" />
     <ClInclude Include="src\misc\ColorTools.h" />
     <ClInclude Include="src\raytracing\Camera.h" />

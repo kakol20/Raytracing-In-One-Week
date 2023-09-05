@@ -4,6 +4,7 @@
 #include <chrono>
 #include <filesystem>
 
+#include "../misc/ACES.h"
 #include "../misc/Random.h"
 #include "../wrapper/Fastwrite.h"
 #include "materials/Diffuse.h"
@@ -13,8 +14,8 @@
 #include "objects/PointLight.h"
 #include "objects/Sphere.h"
 #include "scenes/DebugScene.h"
-#include "scenes/OriginalScene.h"
 #include "scenes/FullScene.h"
+#include "scenes/OriginalScene.h"
 
 #include "Raytracing.h"
 
@@ -430,11 +431,11 @@ void Raytracing::RenderTile(const size_t startIndex) {
 				Float r, g, b;
 				m_render.GetColor(xImg, flippedY, r, g, b);
 
-				if (m_settings["renderMode"] != "normal") {
+				/*if (m_settings["renderMode"] != "normal") {
 					r = Image::LinearToSRGB(r);
 					g = Image::LinearToSRGB(g);
 					b = Image::LinearToSRGB(b);
-				}
+				}*/
 
 				/*r = std::lerp(12.f, 204.f, r / 255.f);
 				g = std::lerp(12.f, 204.f, g / 255.f);
@@ -461,11 +462,11 @@ void Raytracing::RenderTile(const size_t startIndex) {
 				g = std::lerp(12.f, 204.f, g / 255.f);
 				b = std::lerp(12.f, 204.f, b / 255.f);*/
 
-				if (m_settings["renderMode"] != "normal") {
+				/*if (m_settings["renderMode"] != "normal") {
 					r = Image::LinearToSRGB(r);
 					g = Image::LinearToSRGB(g);
 					b = Image::LinearToSRGB(b);
-				}
+				}*/
 
 				getColor += Vector3D(r, g, b);
 			}
@@ -592,10 +593,35 @@ void Raytracing::Render(const int minX, const int minY, const int maxX, const in
 			if (count <= 0) count = 1;
 
 			pixelCol /= count;
-			pixelCol = Vector3D::Clamp(pixelCol, Vector3D::Zero, Vector3D(1));
+			//pixelCol = Vector3D::Clamp(pixelCol, Vector3D::Zero, Vector3D(1));
+			//pixelCol = ACES::ToneMap(pixelCol);
+			//Float r = pix
+
+			/*if (m_settings["renderMode"] != "normal") {
+				r = Image::LinearToSRGB(r);
+				g = Image::LinearToSRGB(g);
+				b = Image::LinearToSRGB(b);
+			}*/
+			
 			pixelCol *= 255;
 
+			//m_render.SetColor(x, flippedY, pixelCol.GetX(), pixelCol.GetY(), pixelCol.GetZ());
+
+			if (m_settings["renderMode"] == "color" || m_settings["renderMode"] == "emission") {
+				pixelCol /= 255;
+
+				pixelCol = ACES::ToneMap(pixelCol);
+
+				pixelCol *= 255;
+			}
+
+			if (m_settings["renderMode"] != "normal") {
+				pixelCol = Vector3D(Image::LinearToSRGB(pixelCol.GetX()), Image::LinearToSRGB(pixelCol.GetY()), Image::LinearToSRGB(pixelCol.GetZ()));
+			}
+
 			m_render.SetColor(x, flippedY, pixelCol.GetX(), pixelCol.GetY(), pixelCol.GetZ());
+
+			// c
 		}
 	}
 }
