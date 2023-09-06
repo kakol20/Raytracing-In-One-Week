@@ -47,11 +47,9 @@ void Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	normal = rec.GetNormal();
 	attentuation = m_albedo;
 
-	Vector3D scatterDir = Vector3D::RandomInHemisphere(normal);
-	scatterDir.Normalize();
-	scattered = Ray(rec.GetPoint(), scatterDir);
+	scattered = Ray(rec.GetPoint(), normal);
 
-	absorb = false;
+	absorb = true;
 	emission = false;
 	transparent = false;
 }
