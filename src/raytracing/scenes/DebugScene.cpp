@@ -66,7 +66,7 @@ void DebugScene::Create(Settings& settings) {
 	colors.push_back(ColorTools::HSVToRGB(240, 1, 1));
 	colors.push_back(ColorTools::HSVToRGB(300, 1, 1));
 
-	const Float collectiveRoughness = 0.01;
+	const Float collectiveRoughness = 0.1;
 	m_matMap["unshaded"] = new Unshaded(colors[0] * 2);
 	m_matMap["dielectric"] = new Dielectric(colors[1], collectiveRoughness, 1.45);
 	m_matMap["diffuse"] = new Diffuse(colors[2]);

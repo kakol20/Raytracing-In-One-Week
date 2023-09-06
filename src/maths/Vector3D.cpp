@@ -30,7 +30,7 @@ Vector3D::Vector3D(const Float x, const Float y, const Float z) {
 }
 
 Float Vector3D::DotProduct(const Vector3D& v1, const Vector3D& v2) {
-	return (v1.m_x * v2.m_x) + (v1.m_y * v2.m_y) + (v1.m_z * v2.m_z);
+	return Float::Clamp((v1.m_x * v2.m_x) + (v1.m_y * v2.m_y) + (v1.m_z * v2.m_z), -1, 1);
 }
 
 Float Vector3D::ToroidalDistance(const Vector3D& a, const Vector3D& b, const Vector3D& min, const Vector3D& max) {
@@ -80,6 +80,17 @@ Vector3D Vector3D::Lerp(const Vector3D& min, const Vector3D& max, const Float fa
 	else {
 		return Vector3D(x, y);
 	}
+}
+
+Vector3D Vector3D::Slerp(Vector3D min, Vector3D max, const Float factor) {
+	min.Normalize();
+	max.Normalize();
+
+	Float dot = Float::Clamp(Vector3D::DotProduct(min, max), -1, 1);
+	Float theta = Float::Acos(dot);
+	Float sinTheta = Float::Sin(theta);
+	
+	return min * (Float::Sin((factor - 1) * theta) / sinTheta) + max * ((Float::Sin(factor * theta) / sinTheta));
 }
 
 Vector3D Vector3D::Sqrt(const Vector3D& v) {

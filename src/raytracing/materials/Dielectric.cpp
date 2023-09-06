@@ -2,7 +2,7 @@
 
 Dielectric::Dielectric(const Vector3D& albedo, const Float roughness, const Float ior) {
 	m_albedo = albedo;
-	m_roughness = roughness * roughness;
+	m_roughness = roughness;
 	m_ior = ior;
 }
 
@@ -43,11 +43,32 @@ void Dielectric::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& s
 	//emission = false;
 
 	//Vector3D unitDir = rayIn.GetDir();
+
 	normal = rec.GetNormal();
 
+	// ----- FRESNEL -----
+	
+	Float fresnel = Fresnel(rayIn.GetDir(), normal, rec.GetFrontFace() ? 1 / m_ior : m_ior);
+
+	// ----- DIFFUSE PART -----
+
+	Vector3D diffuseScatter = Vector3D::RandomInHemisphere(normal);
+	Vector3D diffuseCol = m_albedo;
+
+	// ----- GLOSSY PART -----
+
+	Vector3D glossyScatter = Vector3D::Reflect(rayIn.GetDir(), normal) + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
+	Vector3D glossyCol = Vector3D::One;
+
+	// ----- MIX -----
+
+	Vector3D totalScatter = Vector3D::Slerp(diffuseScatter, glossyScatter, fresnel);
+	Vector3D totalCol = Vector3D::Lerp(diffuseCol, glossyCol, fresnel);
+
+	scattered = Ray(rec.GetPoint(), totalScatter);
 	attentuation = m_albedo;
 
-	absorb = true;
+	absorb = false;
 	emission = false;
 	transparent = false;
 }
