@@ -17,7 +17,7 @@ namespace ColorTools {
 	/// <param name="S">0 to 1</param>
 	/// <param name="V">0 to 1</param>
 	/// <returns></returns>
-	Vector3D HSVToRGB(Float H, const Float S, const Float V);
+	Vector3D HSVToRGB(Float H, Float S, Float V);
 
 	/// <summary>
 	/// 

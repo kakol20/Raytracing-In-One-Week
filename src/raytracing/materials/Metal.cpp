@@ -35,7 +35,7 @@ void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	Float H, S, V;
 	ColorTools::RGBtoHSV(m_albedo, H, S, V);
-	H -= 0.3333;
+	S -= 0.3333;
 	Vector3D glossyCol = ColorTools::HSVToRGB(H, S, V);
 
 	// ----- MIX -----
