@@ -6,7 +6,7 @@
 Metal::Metal(const Vector3D& albedo, const Float roughness, const Float ior) {
 	m_albedo = albedo;
 	m_ior = ior;
-	m_roughness = roughness;
+	m_roughness = Float::Pow(roughness, 2.2);
 
 	m_albedo = Vector3D::Clamp(m_albedo, Vector3D::Zero, Vector3D::One);
 }

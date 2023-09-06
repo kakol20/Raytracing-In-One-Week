@@ -30,7 +30,7 @@ Vector3D::Vector3D(const Float x, const Float y, const Float z) {
 }
 
 Float Vector3D::DotProduct(const Vector3D& v1, const Vector3D& v2) {
-	return Float::Clamp((v1.m_x * v2.m_x) + (v1.m_y * v2.m_y) + (v1.m_z * v2.m_z), -1, 1);
+	return (v1.m_x * v2.m_x) + (v1.m_y * v2.m_y) + (v1.m_z * v2.m_z);
 }
 
 Float Vector3D::ToroidalDistance(const Vector3D& a, const Vector3D& b, const Vector3D& min, const Vector3D& max) {
@@ -165,6 +165,13 @@ Vector3D Vector3D::RandomMix(const Vector3D& a, const Vector3D& b, const Float f
 }
 
 Vector3D Vector3D::RandomMix(const Vector3D& a, const Vector3D& b, const Float factor, const Float outsideRand) {
+	/*if (outsideRand == 0) {
+		return a;
+	}
+	else if (outsideRand == 1) {
+		return b;
+	}*/
+
 	return outsideRand >= factor ? a : b;
 }
 

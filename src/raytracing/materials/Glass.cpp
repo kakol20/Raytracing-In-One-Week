@@ -4,7 +4,7 @@
 
 Glass::Glass(const Vector3D& albedo, const Float roughness, const Float ior) {
 	m_albedo = albedo;
-	m_roughness = roughness;
+	m_roughness = Float::Pow(roughness, 2.2);;
 	m_ior = ior;
 }
 
