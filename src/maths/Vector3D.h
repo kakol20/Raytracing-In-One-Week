@@ -154,7 +154,7 @@ public:
 	/// Random vector using Random::RandomFloatND()
 	/// </summary>
 	/// <returns>A 3D vector with all axis between -1 and 1</returns>
-	static Vector3D RandomVectorND(bool includeZAxis = true);
+	//static Vector3D RandomVectorND(bool includeZAxis = true);
 
 	inline bool NearZero() const {
 		bool xNearZero = Float::Abs(m_x) < Float::NearZero;
