@@ -9,7 +9,7 @@
 class Material {
 public:
 	Material() {
-		m_ior = 1.5;
+		m_ior = 1.45;
 		m_roughness = 0.5;
 	}
 	virtual ~Material() {};

@@ -6,7 +6,7 @@
 Metal::Metal(const Vector3D& albedo, const Float roughness, const Float ior) {
 	m_albedo = albedo;
 	m_ior = ior;
-	m_roughness = roughness * roughness;
+	m_roughness = Float::Pow(roughness, 2.2);
 
 	m_albedo = Vector3D::Clamp(m_albedo, Vector3D::Zero, Vector3D::One);
 }
@@ -51,11 +51,15 @@ void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 	//emission = false;
 
 	//Vector3D unitDir = rayIn.GetDir();
-	normal = rec.GetNormal();
 
+	normal = rec.GetNormal();
 	attentuation = m_albedo;
 
-	absorb = true;
+	Vector3D scatterDir = Vector3D::RandomInHemisphere(normal);
+	scatterDir.Normalize();
+	scattered = Ray(rec.GetPoint(), scatterDir);
+
+	absorb = false;
 	emission = false;
 	transparent = false;
 }

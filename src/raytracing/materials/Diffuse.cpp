@@ -34,11 +34,11 @@ void Diffuse::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scat
 	//emission = false;
 	//transparent = false;
 
-	//Vector3D unitDir = rayIn.GetDir();
 	normal = rec.GetNormal();
 	attentuation = m_albedo;
 
 	Vector3D scatterDir = Vector3D::RandomInHemisphere(normal);
+	scatterDir.Normalize();
 	scattered = Ray(rec.GetPoint(), scatterDir);
 
 	absorb = false;

@@ -4,7 +4,7 @@
 
 Glass::Glass(const Vector3D& albedo, const Float roughness, const Float ior) {
 	m_albedo = albedo;
-	m_roughness = roughness * roughness;
+	m_roughness = Float::Pow(roughness, 2.2);;
 	m_ior = ior;
 }
 
@@ -45,10 +45,13 @@ void Glass::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scatte
 
 	//Vector3D unitDir = rayIn.GetDir();
 	normal = rec.GetNormal();
-
 	attentuation = m_albedo;
 
-	absorb = true;
+	Vector3D scatterDir = Vector3D::RandomInHemisphere(normal);
+	scatterDir.Normalize();
+	scattered = Ray(rec.GetPoint(), scatterDir);
+
+	absorb = false;
 	emission = false;
 	transparent = false;
 }

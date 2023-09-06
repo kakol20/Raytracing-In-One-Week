@@ -17,7 +17,7 @@ Vector3D Scene::RayColor(Ray& ray, const int depth, const Vector3D& initialRayCo
 		rec.GetMat()->Scatter(ray, rec, attentuation, scattered, normal, absorb, transparent, emission);
 
 		attentuation *= initialRayCol;
-		attentuation = Vector3D::Clamp(attentuation, Vector3D::Zero, Vector3D::One * clamp);
+		//attentuation = Vector3D::Clamp(attentuation, Vector3D::Zero, Vector3D::One * clamp);
 
 		if ((*m_settings)["renderMode"] == "color") {
 			if (absorb || emission) {
