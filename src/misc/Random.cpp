@@ -1,17 +1,9 @@
 #include <limits>
+//#include <cstdlib>
 
 #include "Random.h"
 
-#ifdef RAND_USE_LFSR
-//thread_local Random::SeedType Seed = 0xACE1u;
-#ifdef WIN32
-thread_local uint32_t Random::Seed = 0xACE1u;
-#else
-thread_local uint64_t Random::Seed = 0xACE1u;
-#endif // WIN32
-#else
-thread_local uint32_t Random::Seed = 0xACE1u;
-#endif // RAND_USE_LFSR
+thread_local Random::SeedType Random::Seed = 0xACE1u;
 
 unsigned int Random::RandomUInt(const unsigned int bitCount) {
 	unsigned int count = bitCount > 32 ? 32 : bitCount;
@@ -36,22 +28,9 @@ unsigned int Random::RandomUInt(const unsigned int bitCount) {
 #endif // WIN32
 	}
 #else
-	unsigned int next = Random::Seed;
-	next *= 1103515245;
-	next += 12345;
-	out = (unsigned int)(next / 65536) % 2048;
-
-	next *= 1103515245;
-	next += 12345;
-	out <<= 10;
-	out ^= (unsigned int)(next / 65536) % 1024;
-
-	next *= 1103515245;
-	next += 12345;
-	out <<= 10;
-	out ^= (unsigned int)(next / 65536) % 1024;
-
-	Random::Seed = next;
+	//out = rand();
+	Random::Seed = Random::Seed * 1103515245 + 12345;
+	out = (unsigned int)(Random::Seed / 65536) % 32768;
 #endif // RAND_USE_LFSR
 
 	return out;
@@ -59,7 +38,13 @@ unsigned int Random::RandomUInt(const unsigned int bitCount) {
 
 Float Random::RandomFloat(const Float min, const Float max) {
 	Float random = Float(Random::RandomUInt());
+
+#ifdef RAND_USE_LFSR
 	random /= std::numeric_limits<unsigned int>::max();
+#else
+	random /= 32767;
+#endif // RAND_USE_LFSR
+
 	return (random * (max - min)) + min;
 }
 
