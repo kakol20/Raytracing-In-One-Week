@@ -2,12 +2,16 @@
 
 #include "Random.h"
 
+#ifdef RAND_USE_LFSR
 //thread_local Random::SeedType Seed = 0xACE1u;
 #ifdef WIN32
 thread_local uint32_t Random::Seed = 0xACE1u;
 #else
 thread_local uint64_t Random::Seed = 0xACE1u;
 #endif // WIN32
+#else
+thread_local uint32_t Random::Seed = 0xACE1u;
+#endif // RAND_USE_LFSR
 
 unsigned int Random::RandomUInt(const unsigned int bitCount) {
 	unsigned int count = bitCount > 32 ? 32 : bitCount;
@@ -15,6 +19,7 @@ unsigned int Random::RandomUInt(const unsigned int bitCount) {
 
 	if (Random::Seed == 0) Random::Seed = 0b1;
 
+#ifdef RAND_USE_LFSR
 	for (int i = (int)count - 1; i >= 0; i--) {
 		out = out | ((Random::Seed & 0b1) << i);
 
@@ -30,6 +35,24 @@ unsigned int Random::RandomUInt(const unsigned int bitCount) {
 		Random::Seed = (Random::Seed >> 1) | (newBit << 63);
 #endif // WIN32
 	}
+#else
+	unsigned int next = Random::Seed;
+	next *= 1103515245;
+	next += 12345;
+	out = (unsigned int)(next / 65536) % 2048;
+
+	next *= 1103515245;
+	next += 12345;
+	out <<= 10;
+	out ^= (unsigned int)(next / 65536) % 1024;
+
+	next *= 1103515245;
+	next += 12345;
+	out <<= 10;
+	out ^= (unsigned int)(next / 65536) % 1024;
+
+	Random::Seed = next;
+#endif // RAND_USE_LFSR
 
 	return out;
 }
