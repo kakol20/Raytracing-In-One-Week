@@ -14,7 +14,7 @@ public:
 	using SeedType = uint64_t;
 #endif // WIN32
 #else
-	using SeedType = uint32_t;
+	using SeedType = uint64_t;
 #endif // RAND_USE_LFSR
 
 public:
@@ -29,7 +29,7 @@ public:
 	static thread_local uint64_t Seed;
 #endif // WIN32
 #else
-	static thread_local uint32_t Seed;
+	static thread_local Random::SeedType Seed;
 #endif // RAND_USE_OLD
 
 	/// <summary>
