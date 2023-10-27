@@ -42,7 +42,7 @@ Float Random::RandomFloat(const Float min, const Float max) {
 #ifdef RAND_USE_LFSR
 	random /= std::numeric_limits<unsigned int>::max();
 #else
-	random /= RAND_MAX;
+	random /= 32767;
 #endif // RAND_USE_LFSR
 
 	return (random * (max - min)) + min;
