@@ -82,6 +82,17 @@ Vector3D Vector3D::Lerp(const Vector3D& min, const Vector3D& max, const Float fa
 	}
 }
 
+Vector3D Vector3D::Slerp(Vector3D min, Vector3D max, const Float factor) {
+	min.Normalize();
+	max.Normalize();
+
+	Float dot = Float::Clamp(Vector3D::DotProduct(min, max), -1, 1);
+	Float theta = Float::Acos(dot);
+	Float sinTheta = Float::Sin(theta);
+	
+	return min * (Float::Sin((factor - 1) * theta) / sinTheta) + max * ((Float::Sin(factor * theta) / sinTheta));
+}
+
 Vector3D Vector3D::Sqrt(const Vector3D& v) {
 	return Vector3D(Float::Sqrt(v.m_x), Float::Sqrt(v.m_y), Float::Sqrt(v.m_z));
 }
@@ -154,6 +165,13 @@ Vector3D Vector3D::RandomMix(const Vector3D& a, const Vector3D& b, const Float f
 }
 
 Vector3D Vector3D::RandomMix(const Vector3D& a, const Vector3D& b, const Float factor, const Float outsideRand) {
+	/*if (outsideRand == 0) {
+		return a;
+	}
+	else if (outsideRand == 1) {
+		return b;
+	}*/
+
 	return outsideRand >= factor ? a : b;
 }
 
