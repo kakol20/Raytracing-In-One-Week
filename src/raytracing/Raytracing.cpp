@@ -357,8 +357,6 @@ bool Raytracing::RunMode() {
 			}
 		}
 
-		//rescaled.Dither();
-
 		if (!rescaled.Write(output.c_str())) {
 			FastWrite::Reset();
 			FastWrite::Write("Error saving : " + output + "\n");
