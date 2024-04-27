@@ -29,6 +29,7 @@ unsigned int Random::RandomUInt(const unsigned int bitCount) {
 	}
 #else
 	//out = rand();
+// TODO: Chnage random algorithm https://gist.github.com/kakol20/8a95db78e2fa32ede6021e60db107a4e
 	Random::Seed = Random::Seed * 1103515245 + 12345;
 	out = (unsigned int)(Random::Seed / 65536) % 32768;
 #endif // RAND_USE_LFSR
