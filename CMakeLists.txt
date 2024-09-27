@@ -15,7 +15,19 @@ project ("Raytracing")
 
 # Add source to this project's executable.
 add_executable (Raytracing  
-	"src/main.cpp")
+	"src/main.cpp" "src/managers/MainManager.cpp")
+
+find_package(glad CONFIG REQUIRED)
+target_link_libraries(Raytracing PRIVATE glad::glad)
+
+find_package(glfw3 CONFIG REQUIRED)
+target_link_libraries(Raytracing PRIVATE glfw)
+
+find_package(imgui CONFIG REQUIRED)
+target_link_libraries(Raytracing PRIVATE imgui::imgui)
+
+find_package(Stb REQUIRED)
+target_include_directories(Raytracing PRIVATE ${Stb_INCLUDE_DIR})
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Raytracing PROPERTY CXX_STANDARD 20)
