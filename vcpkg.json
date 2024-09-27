@@ -1,0 +1,7 @@
+{
+  "name": "raytracing",
+  "version": "5.0",
+  "dependencies": [
+    "imgui", "glfw3", "glad"
+  ]
+}
