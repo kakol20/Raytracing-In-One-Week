@@ -38,8 +38,10 @@ Vector3D ColorTools::KelvinToRGB(const Float k) {
 	return Vector3D(r, g, b);
 }
 
-Vector3D ColorTools::HSVToRGB(Float H, const Float S, const Float V) {
+Vector3D ColorTools::HSVToRGB(Float H, Float S, Float V) {
 	H = Float::ModCycled(H, 360);
+	S = Float::Clamp(S, 0, 1);
+	V = Float::Clamp(V, 0, 1);
 
 	const Float C = V * S;
 	const Float X = C * (1. - Float::Abs(((H / 60) % 2) - 1));

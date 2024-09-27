@@ -283,7 +283,7 @@ void Image::FloydSteinbergDither(const int factor) {
 		size_t bias = i % (size_t)m_channels;
 
 		Float oldPixel = m_dataF[i];
-		Float newPixel = (Float::Round((oldPixel / 255) * factor) / factor) * 255;
+		Float newPixel = (Float::Floor((oldPixel / 255) * (factor + 1)) / factor) * 255;
 
 		m_dataF[i] = newPixel;
 		m_data[i] = (uint8_t)Float::Clamp(newPixel, 0, 255).ToUInt();
@@ -319,8 +319,8 @@ void Image::OrderedDither(const int factor) {
 		M -= 0.5;
 
 		Float c = m_dataF[i] + (r * M);
-		c = Float::Clamp(c, 0, 255);
-		c = Float::Round((c / 255) * factor) / factor;
+		c = Float::Clamp(c, 0, 255) / 255;
+		c = Float::Floor(c * (factor + 1)) / factor;
 		c *= 255;
 		c = Float::Clamp(c, 0, 255);
 

@@ -13,40 +13,41 @@ Metal::Metal(const Vector3D& albedo, const Float roughness, const Float ior) {
 
 void Metal::Scatter(Ray& rayIn, HitRec& rec, Vector3D& attentuation, Ray& scattered, Vector3D& normal, bool& absorb, bool& transparent, bool& emission) {
 	normal = rec.GetNormal();
-	const Vector3D incoming = -rayIn.GetDir();
-	const Vector3D dir = rayIn.GetDir();
-	const Float refractionRatio = rec.GetFrontFace() ? 1 / m_ior : m_ior;
+	Vector3D incoming = -rayIn.GetDir();
+
+	// ----- FRESNEL -----
 
 	Float roughnessRand = Random::RandomFloat();
 	Vector3D fresnelNormal = Vector3D::RandomMix(normal, incoming, m_roughness, roughnessRand);
 
-	Float fresnel = Fresnel(incoming, fresnelNormal, refractionRatio) - Fresnel(incoming, incoming, refractionRatio);
-	fresnel = Float::Clamp(fresnel, 0, 1);
+	Float fresnel = Fresnel(incoming, fresnelNormal, rec.GetFrontFace() ? 1 / m_ior : m_ior);
+	fresnel *= fresnel;
 	Float fresnelRand = Random::RandomFloat();
 
-	// metallic part
+	// ----- METAL PART -----
 
+	Vector3D metalScatter = Vector3D::Reflect(rayIn.GetDir(), normal) + (Vector3D::RandomInUnitSphere() * m_roughness);
 	Vector3D metalCol = m_albedo;
-	Vector3D metalScatter = Vector3D::Reflect(dir, normal) + ((Vector3D::RandomInUnitSphere() + normal) * m_roughness);
 
-	// glossy part
+	// ----- GLOSSY PART -----
+
+	Vector3D glossyScatter = Vector3D::Reflect(rayIn.GetDir(), normal);
 
 	Float H, S, V;
 	ColorTools::RGBtoHSV(m_albedo, H, S, V);
-	S = Float::Clamp(S - 0.25, 0, 1);
-
+	S -= 0.3333;
 	Vector3D glossyCol = ColorTools::HSVToRGB(H, S, V);
-	Vector3D glossyScatter = Vector3D::Reflect(dir, normal);
 
-	// mix them together
+	// ----- MIX -----
 
-	Vector3D totalColor = Vector3D::RandomMix(metalCol, glossyCol, fresnel, fresnelRand);
 	Vector3D totalScatter = Vector3D::RandomMix(metalScatter, glossyScatter, fresnel, fresnelRand);
 	totalScatter.Normalize();
-
 	scattered = Ray(rec.GetPoint(), totalScatter);
-	attentuation = totalColor;
+
+	Vector3D totalCol = Vector3D::RandomMix(metalCol, glossyCol, fresnel, fresnelRand);
+	attentuation = totalCol;
+
 	absorb = false;
-	transparent = false;
 	emission = false;
+	transparent = false;
 }

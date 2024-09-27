@@ -126,6 +126,7 @@ public:
 	static Vector3D Clamp(const Vector3D& val, const Vector3D& min, const Vector3D& max);
 	static Vector3D CrossProduct(const Vector3D& v1, const Vector3D& v2);
 	static Vector3D Lerp(const Vector3D& min, const Vector3D& max, const Float factor, const bool clamp = false);
+	static Vector3D Slerp(Vector3D min, Vector3D max, const Float factor);
 	static Vector3D Sqrt(const Vector3D& v);
 
 	static Vector3D Reflect(const Vector3D& vector, const Vector3D& normal);
@@ -154,7 +155,7 @@ public:
 	/// Random vector using Random::RandomFloatND()
 	/// </summary>
 	/// <returns>A 3D vector with all axis between -1 and 1</returns>
-	static Vector3D RandomVectorND(bool includeZAxis = true);
+	//static Vector3D RandomVectorND(bool includeZAxis = true);
 
 	inline bool NearZero() const {
 		bool xNearZero = Float::Abs(m_x) < Float::NearZero;

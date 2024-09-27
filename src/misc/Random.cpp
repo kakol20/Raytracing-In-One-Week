@@ -1,13 +1,9 @@
 #include <limits>
+//#include <cstdlib>
 
 #include "Random.h"
 
-//thread_local Random::SeedType Seed = 0xACE1u;
-#ifdef WIN32
-thread_local uint32_t Random::Seed = 0xACE1u;
-#else
-thread_local uint64_t Random::Seed = 0xACE1u;
-#endif // WIN32
+thread_local Random::SeedType Random::Seed = 0xACE1u;
 
 unsigned int Random::RandomUInt(const unsigned int bitCount) {
 	unsigned int count = bitCount > 32 ? 32 : bitCount;
@@ -15,6 +11,7 @@ unsigned int Random::RandomUInt(const unsigned int bitCount) {
 
 	if (Random::Seed == 0) Random::Seed = 0b1;
 
+#ifdef RAND_USE_LFSR
 	for (int i = (int)count - 1; i >= 0; i--) {
 		out = out | ((Random::Seed & 0b1) << i);
 
@@ -30,13 +27,25 @@ unsigned int Random::RandomUInt(const unsigned int bitCount) {
 		Random::Seed = (Random::Seed >> 1) | (newBit << 63);
 #endif // WIN32
 	}
+#else
+	//out = rand();
+// TODO: Chnage random algorithm https://gist.github.com/kakol20/8a95db78e2fa32ede6021e60db107a4e
+	Random::Seed = Random::Seed * 1103515245 + 12345;
+	out = (unsigned int)(Random::Seed / 65536) % 32768;
+#endif // RAND_USE_LFSR
 
 	return out;
 }
 
 Float Random::RandomFloat(const Float min, const Float max) {
 	Float random = Float(Random::RandomUInt());
+
+#ifdef RAND_USE_LFSR
 	random /= std::numeric_limits<unsigned int>::max();
+#else
+	random /= 32767;
+#endif // RAND_USE_LFSR
+
 	return (random * (max - min)) + min;
 }
 

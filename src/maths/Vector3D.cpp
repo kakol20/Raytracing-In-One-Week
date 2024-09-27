@@ -82,6 +82,17 @@ Vector3D Vector3D::Lerp(const Vector3D& min, const Vector3D& max, const Float fa
 	}
 }
 
+Vector3D Vector3D::Slerp(Vector3D min, Vector3D max, const Float factor) {
+	min.Normalize();
+	max.Normalize();
+
+	Float dot = Float::Clamp(Vector3D::DotProduct(min, max), -1, 1);
+	Float theta = Float::Acos(dot);
+	Float sinTheta = Float::Sin(theta);
+	
+	return min * (Float::Sin((factor - 1) * theta) / sinTheta) + max * ((Float::Sin(factor * theta) / sinTheta));
+}
+
 Vector3D Vector3D::Sqrt(const Vector3D& v) {
 	return Vector3D(Float::Sqrt(v.m_x), Float::Sqrt(v.m_y), Float::Sqrt(v.m_z));
 }
@@ -122,7 +133,7 @@ Vector3D Vector3D::RandomInHemisphere(const Vector3D& normal) {
 }
 
 Vector3D Vector3D::RandomInUnitDisk() {
-	Vector3D o = Vector3D::RandomVectorND(false);
+	Vector3D o = Vector3D::RandomVector(-1, 1, false);
 	//Vector3D o = Vector3D::RandomVector(-1, 1, true);
 	//o *= Vector3D(1, 1, 0);
 
@@ -131,14 +142,14 @@ Vector3D Vector3D::RandomInUnitDisk() {
 }
 
 Vector3D Vector3D::RandomInUnitSphere() {
-	Vector3D o = Vector3D::RandomVectorND();
+	Vector3D o = Vector3D::RandomVector(-1, 1);
 
 	if (o.SqrMagnitude() > 1) o.Normalize();
 	return o;
 }
 
 Vector3D Vector3D::RandomUnitVector() {
-	Vector3D o = Vector3D::RandomVectorND();
+	Vector3D o = Vector3D::RandomVector(-1, 1);
 	o.Normalize();
 	return o;
 }
@@ -154,11 +165,18 @@ Vector3D Vector3D::RandomMix(const Vector3D& a, const Vector3D& b, const Float f
 }
 
 Vector3D Vector3D::RandomMix(const Vector3D& a, const Vector3D& b, const Float factor, const Float outsideRand) {
+	/*if (outsideRand == 0) {
+		return a;
+	}
+	else if (outsideRand == 1) {
+		return b;
+	}*/
+
 	return outsideRand >= factor ? a : b;
 }
 
-Vector3D Vector3D::RandomVectorND(bool includeZAxis) {
-	return includeZAxis ?
-		Vector3D(Random::RandomFloatND(), Random::RandomFloatND(), Random::RandomFloatND()) :
-		Vector3D(Random::RandomFloatND(), Random::RandomFloatND());
-}
+//Vector3D Vector3D::RandomVectorND(bool includeZAxis) {
+//	return includeZAxis ?
+//		Vector3D(Random::RandomFloatND(), Random::RandomFloatND(), Random::RandomFloatND()) :
+//		Vector3D(Random::RandomFloatND(), Random::RandomFloatND());
+//}

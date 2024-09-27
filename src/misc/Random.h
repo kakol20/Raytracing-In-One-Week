@@ -3,25 +3,34 @@
 
 #include "../wrapper/Float.h"
 
+//#define RAND_USE_LFSR
+
 class Random {
 public:
+#ifdef RAND_USE_OLD
 #ifdef WIN32
 	using SeedType = uint32_t;
 #else
 	using SeedType = uint64_t;
 #endif // WIN32
+#else
+	using SeedType = uint64_t;
+#endif // RAND_USE_LFSR
 
 public:
 	Random() {};
 	~Random() {};
 
+#ifdef RAND_USE_OLD
 	//static thread_local Random::SeedType Seed;
 #ifdef WIN32
 	static thread_local uint32_t Seed;
 #else
 	static thread_local uint64_t Seed;
 #endif // WIN32
-
+#else
+	static thread_local Random::SeedType Seed;
+#endif // RAND_USE_OLD
 
 	/// <summary>
 	/// Returns a 32 bit unsigned int - a 64 bit one is unnecessary
