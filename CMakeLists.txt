@@ -15,8 +15,9 @@ project ("Raytracing")
 
 # Add source to this project's executable.
 add_executable (Raytracing "src/main.cpp"
-	"src/managers/MainManager.h"
 	"src/managers/MainManager.cpp"
+	"src/image/Image.cpp"
+	"src/other/Log.cpp"
 
 	"ext/imgui/imgui.h"
 	"ext/imgui/imgui.cpp"
@@ -45,8 +46,8 @@ target_link_libraries(Raytracing PRIVATE glfw)
 #find_package(imgui CONFIG REQUIRED)
 #target_link_libraries(Raytracing PRIVATE imgui::imgui)
 
-#find_package(Stb REQUIRED)
-#target_include_directories(Raytracing PRIVATE ${Stb_INCLUDE_DIR})
+find_package(Stb REQUIRED)
+target_include_directories(Raytracing PRIVATE ${Stb_INCLUDE_DIR})
 
 find_path(EGL_REGISTRY_INCLUDE_DIRS "EGL/egl.h")
 target_include_directories(Raytracing PRIVATE ${EGL_REGISTRY_INCLUDE_DIRS})

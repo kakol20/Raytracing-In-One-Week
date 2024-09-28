@@ -4,6 +4,8 @@
 #include "../../ext/imgui/imgui_impl_glfw.h"
 #include "../../ext/imgui/imgui_impl_opengl3.h"
 
+#include "../image/Image.h"
+
 #include <GLFW/glfw3.h>
 
 class MainManager {
@@ -25,4 +27,6 @@ public:
 private:
 	static GLFWwindow* m_window;
 	static unsigned int m_width, m_height;
+
+	static Image m_image;
 };
