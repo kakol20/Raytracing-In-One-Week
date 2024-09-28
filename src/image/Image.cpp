@@ -6,8 +6,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
-//#include "../../ext/stb/stb_image.h"
-//#include "../../ext/stb/stb_image_write.h"
 #include <stb_image.h>
 #include <stb_image_write.h>
 
@@ -36,8 +34,12 @@ Image::Image(const Image& other) {
 	m_size = other.m_size;
 
 	m_data = new uint8_t[m_size];
+	for (size_t i = 0; i < m_size; i++) {
+		m_data[i] = 0;
+	}
 
 	memcpy(m_data, other.m_data, m_size);
+	m_texture = other.m_texture;
 }
 
 Image::Image(const int w, const int h, const int channels) {
@@ -47,6 +49,10 @@ Image::Image(const int w, const int h, const int channels) {
 	m_size = (size_t)(m_w * m_h * m_channels);
 
 	m_data = new uint8_t[m_size];
+	for (size_t i = 0; i < m_size; i++) {
+		m_data[i] = 0;
+	}
+	m_texture = 0;
 }
 
 Image::~Image() {
@@ -67,6 +73,7 @@ Image& Image::operator=(const Image& other) {
 
 	memcpy(m_data, other.m_data, m_size);
 
+	m_texture = other.m_texture;
 	return *this;
 }
 
@@ -172,6 +179,12 @@ void Image::CreateTexture() {
 	m_texture = image_texture;
 }
 
+void Image::UpdateTexture() const {
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_w, m_h, GL_RGB, GL_UNSIGNED_BYTE, (unsigned char*)m_data);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void Image::RenderImage() const {
 	ImGui::Text("pointer: %x", m_texture);
 	ImGui::Text("size: %d x %d", m_w, m_h);
@@ -184,11 +197,14 @@ Image::ImageType Image::GetFileType(const char* file) {
 	if (ext != nullptr) {
 		if (strcmp(ext, ".png") == 0) {
 			return ImageType::PNG;
-		} else if (strcmp(ext, ".jpg") == 0) {
+		} else if (strcmp(ext, ".jpg") == 0 || strcmp(ext, ".jpeg") == 0 ||
+				strcmp(ext, ".jpe") == 0 || strcmp(ext, ".jif") == 0 || 
+				strcmp(ext, ".jfif") == 0 || strcmp(ext, ".jfi") == 0) {
 			return ImageType::JPG;
-		} else if (strcmp(ext, ".bmp") == 0) {
+		} else if (strcmp(ext, ".bmp") == 0 || strcmp(ext, ".dib") == 0) {
 			return ImageType::BMP;
-		} else if (strcmp(ext, ".tga") == 0) {
+		} else if (strcmp(ext, ".tga") == 0 || strcmp(ext, ".icb") == 0 ||
+				strcmp(ext, ".vda") == 0 || strcmp(ext, ".vst") == 0) {
 			return ImageType::TGA;
 		}
 	}
