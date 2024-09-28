@@ -6,6 +6,7 @@ GLFWwindow* MainManager::m_window = nullptr;
 
 unsigned int MainManager::m_width = 800;
 unsigned int MainManager::m_height = 800;
+Image MainManager::m_image = Image();
 
 int MainManager::Init() {
 	glfwSetErrorCallback(MainManager::ErrorCallback);
@@ -32,6 +33,12 @@ int MainManager::Init() {
 	ImGui_ImplGlfw_InitForOpenGL(m_window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
+	glfwMaximizeWindow(m_window);
+
+	// ----- OTHER -----
+
+	if (!m_image.Read("data/suzanne.png", 3)) return EXIT_FAILURE;
+
 	return EXIT_SUCCESS;
 }
 
@@ -52,9 +59,21 @@ void MainManager::Render() {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	// temp - https://github.com/ocornut/imgui/blob/master/examples/example_glfw_opengl3/main.cpp
+	// ----- SHOW IMAGE -----
 
-	ImGui::ShowDemoWindow();
+	// https://cplusplus.com/reference/cstdio/printf/
+	//ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Appearing);
+
+	int imageWidth, imageHeight;
+	GLuint imageTexture;
+	m_image.ToImGui(imageTexture, imageWidth, imageHeight);
+
+	ImGui::Begin("Image", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::Text("pointer: %x", imageTexture);
+	ImGui::Text("size: %d x %d", imageWidth, imageHeight);
+	ImGui::Image((void*)(intptr_t)imageTexture, ImVec2(imageWidth, imageHeight));
+	ImGui::End();
 
 	ImGui::Render();
 	int display_w, display_h;

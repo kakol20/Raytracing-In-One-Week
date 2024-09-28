@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 
 #include "managers/MainManager.h"
+#include "other/Log.h"
 
 int main(int argc, char* argv[]) {
 	/*std::cout << "Hello World\n";
@@ -11,6 +12,7 @@ int main(int argc, char* argv[]) {
 	const int initInt = MainManager::Init();
 	if (initInt != EXIT_SUCCESS) {
 		MainManager::Shutdown();
+		Log::Save();
 		return initInt;
 	}
 	while (true) {
@@ -21,5 +23,6 @@ int main(int argc, char* argv[]) {
 	}
 	MainManager::Shutdown();
 
+	Log::Save();
 	return EXIT_SUCCESS;
 }
