@@ -12,6 +12,7 @@
 #include <stb_image_write.h>
 
 #include "../other/Log.h"
+#include "../../ext/imgui/imgui.h"
 
 Image::Image() {
 	m_h = 0;
@@ -19,6 +20,7 @@ Image::Image() {
 	m_channels = 0;
 	m_size = 0;
 	m_data = nullptr;
+	m_texture = 0;
 }
 
 Image::Image(const char* file, const int forceChannels) {
@@ -152,7 +154,7 @@ void Image::Clear() {
 	}
 }
 
-void Image::ToImGui(GLuint& out_texture, int& out_width, int& out_height) const {
+void Image::CreateTexture() {
 	// Create a OpenGL texture identifier
 	GLuint image_texture;
 	glGenTextures(1, &image_texture);
@@ -166,10 +168,14 @@ void Image::ToImGui(GLuint& out_texture, int& out_width, int& out_height) const 
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_w, m_h, 0, GL_RGB, GL_UNSIGNED_BYTE, (unsigned char*)m_data);
 	//stbi_image_free(m_data);
-	
-	out_texture = image_texture;
-	out_width = m_w;
-	out_height = m_h;
+
+	m_texture = image_texture;
+}
+
+void Image::RenderImage() const {
+	ImGui::Text("pointer: %x", m_texture);
+	ImGui::Text("size: %d x %d", m_w, m_h);
+	ImGui::Image((void*)(intptr_t)m_texture, ImVec2(m_w, m_h));
 }
 
 Image::ImageType Image::GetFileType(const char* file) {

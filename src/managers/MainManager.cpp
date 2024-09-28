@@ -38,6 +38,7 @@ int MainManager::Init() {
 	// ----- OTHER -----
 
 	if (!m_image.Read("data/suzanne.png", 3)) return EXIT_FAILURE;
+	m_image.CreateTexture();
 
 	return EXIT_SUCCESS;
 }
@@ -65,14 +66,12 @@ void MainManager::Render() {
 	//ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Appearing);
 
-	int imageWidth, imageHeight;
+	/*int imageWidth, imageHeight;
 	GLuint imageTexture;
-	m_image.ToImGui(imageTexture, imageWidth, imageHeight);
+	m_image.ToImGui(imageTexture, imageWidth, imageHeight);*/
 
 	ImGui::Begin("Image", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::Text("pointer: %x", imageTexture);
-	ImGui::Text("size: %d x %d", imageWidth, imageHeight);
-	ImGui::Image((void*)(intptr_t)imageTexture, ImVec2(imageWidth, imageHeight));
+	m_image.RenderImage();
 	ImGui::End();
 
 	ImGui::Render();

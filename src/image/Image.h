@@ -34,7 +34,8 @@ public:
 
 	void Clear();
 
-	void ToImGui(GLuint& out_texture, int& out_width, int& out_height) const;
+	void CreateTexture();
+	void RenderImage() const;
 
 public:
 	enum class ImageType {
@@ -47,4 +48,6 @@ private:
 	int m_w, m_h, m_channels;
 
 	ImageType GetFileType(const char* file);
+
+	GLuint m_texture;
 };
