@@ -9,12 +9,17 @@ int main(int argc, char* argv[]) {
 	std::cin.ignore();*/
 
 	const int initInt = MainManager::Init();
-	if (initInt != EXIT_SUCCESS) return initInt;
+	if (initInt != EXIT_SUCCESS) {
+		MainManager::Shutdown();
+		return initInt;
+	}
 	while (true) {
-		if (!MainManager::Update()) break;
+		const MainManager::UpdateType updateType = MainManager::Update();
+		if (updateType == MainManager::UpdateType::BREAK) break;
+		if (updateType == MainManager::UpdateType::CONTINUE) continue;
 		MainManager::Render();
 	}
 	MainManager::Shutdown();
 
-	return 0;
+	return EXIT_SUCCESS;
 }
