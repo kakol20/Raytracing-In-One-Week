@@ -6,8 +6,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
-//#include "../../ext/stb/stb_image.h"
-//#include "../../ext/stb/stb_image_write.h"
 #include <stb_image.h>
 #include <stb_image_write.h>
 
@@ -199,11 +197,14 @@ Image::ImageType Image::GetFileType(const char* file) {
 	if (ext != nullptr) {
 		if (strcmp(ext, ".png") == 0) {
 			return ImageType::PNG;
-		} else if (strcmp(ext, ".jpg") == 0) {
+		} else if (strcmp(ext, ".jpg") == 0 || strcmp(ext, ".jpeg") == 0 ||
+				strcmp(ext, ".jpe") == 0 || strcmp(ext, ".jif") == 0 || 
+				strcmp(ext, ".jfif") == 0 || strcmp(ext, ".jfi") == 0) {
 			return ImageType::JPG;
-		} else if (strcmp(ext, ".bmp") == 0) {
+		} else if (strcmp(ext, ".bmp") == 0 || strcmp(ext, ".dib") == 0) {
 			return ImageType::BMP;
-		} else if (strcmp(ext, ".tga") == 0) {
+		} else if (strcmp(ext, ".tga") == 0 || strcmp(ext, ".icb") == 0 ||
+				strcmp(ext, ".vda") == 0 || strcmp(ext, ".vst") == 0) {
 			return ImageType::TGA;
 		}
 	}
