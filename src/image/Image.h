@@ -35,6 +35,7 @@ public:
 	void Clear();
 
 	void CreateTexture();
+	void UpdateTexture() const;
 	void RenderImage() const;
 
 public:

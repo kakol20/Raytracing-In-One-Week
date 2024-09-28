@@ -36,8 +36,12 @@ Image::Image(const Image& other) {
 	m_size = other.m_size;
 
 	m_data = new uint8_t[m_size];
+	for (size_t i = 0; i < m_size; i++) {
+		m_data[i] = 0;
+	}
 
 	memcpy(m_data, other.m_data, m_size);
+	m_texture = other.m_texture;
 }
 
 Image::Image(const int w, const int h, const int channels) {
@@ -47,6 +51,10 @@ Image::Image(const int w, const int h, const int channels) {
 	m_size = (size_t)(m_w * m_h * m_channels);
 
 	m_data = new uint8_t[m_size];
+	for (size_t i = 0; i < m_size; i++) {
+		m_data[i] = 0;
+	}
+	m_texture = 0;
 }
 
 Image::~Image() {
@@ -67,6 +75,7 @@ Image& Image::operator=(const Image& other) {
 
 	memcpy(m_data, other.m_data, m_size);
 
+	m_texture = other.m_texture;
 	return *this;
 }
 
@@ -170,6 +179,12 @@ void Image::CreateTexture() {
 	//stbi_image_free(m_data);
 
 	m_texture = image_texture;
+}
+
+void Image::UpdateTexture() const {
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_w, m_h, GL_RGB, GL_UNSIGNED_BYTE, (unsigned char*)m_data);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Image::RenderImage() const {
